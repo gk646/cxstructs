@@ -3,3 +3,4 @@ build.sh
 cmake-build-debug
 CmakeLists.txt
 main.cpp
+cmake-build-release
