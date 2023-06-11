@@ -27,9 +27,12 @@
 #include <stdexcept>
 
 template <typename T> struct ListNode {
-  explicit ListNode(T val) : val_(val), next_(nullptr){};
   T val_;
   ListNode *next_;
+
+  ListNode(const ListNode<T> &o)
+      : val_(o.val_), next_(o.next_ ? new ListNode(*o.next_) : nullptr) {}
+  explicit ListNode(T val) : val_(val), next_(nullptr){};
 };
 
 template <typename T> class LinkedList {
@@ -40,7 +43,48 @@ template <typename T> class LinkedList {
 public:
   LinkedList() : head_(nullptr), end_(nullptr), size_(0){};
   ~LinkedList() { clear(); }
+  LinkedList(const LinkedList<T> &o) : size_(o.size_) {
+    if (o.head_) {
+      head_ = new ListNode<T>(*o.head_);
 
+      ListNode<T> *current_new = head_;
+      ListNode<T> *current_old = o.head_->next_;
+
+      while (current_old != nullptr) {
+        current_new->next_ = new ListNode<T>(*current_old);
+
+        current_new = current_new->next_;
+        current_old = current_old->next_;
+      }
+      end_ = current_new;
+    } else {
+      head_ = end_ = nullptr;
+    }
+  }
+  LinkedList &operator=(const LinkedList<T> &o) {
+    if (this == &o)
+      return *this;
+
+    clear();
+
+    size_ = o.size_;
+    if (o.head_) {
+      head_ = new ListNode<T>(*o.head_);
+
+      ListNode<T> *current_new = head_;
+      ListNode<T> *current_old = o.head_->next_;
+
+      while (current_old != nullptr) {
+        current_new->next_ = new ListNode<T>(*current_old);
+        current_new = current_new->next_;
+        current_old = current_old->next_;
+      }
+
+      end_ = current_new;
+    } else {
+      head_ = end_ = nullptr;
+    }
+  }
   /**
    * Adds a new element to the end of the list
    * @param val - the element to be added
@@ -205,9 +249,24 @@ public:
   Iterator end() { return Iterator(nullptr); }
 
   static void TEST() {
+    LinkedList<int> list1;
+    list1.add(5);
+    list1.add(10);
+    list1.add(15);
+
+    // Test Copy Constructor
+    LinkedList<int> list5(list1);
+
+    assert(list1.size() == list5.size());
+
+    // Test Assignment Operator
+    LinkedList<int> list6;
+    list6 = list1;
+
+    assert(list1.size() == list6.size());
+    std::cout<< "ASSIGN TESTS PASSED" << std::endl;
 
     LinkedList<int> list;
-
     list.add(1);
     assert(list.size() == 1);
 

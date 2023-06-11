@@ -28,9 +28,9 @@
 
 // HashMap implementation using a linked lists as bucket structure
 // Optimized towards large additions and deletions
-//  Can perform up to 13% faster than the std::unordered_map
-//  but can be up to 3 times slower on frequent additions and deletions
-
+// Can perform up to 20% faster than the std::unordered_map
+// but can be up to 3 times on small numbers of additions or deletion
+// See Comparison.h
 /**
  * HashListNode used in the HashLinkedList
  * @tparam K - key type
@@ -141,7 +141,7 @@ template <> struct KeyHash<std::string> {
  *
  */
 template <typename K, typename V> class HashMap {
-  const uint_fast32_t initialCapacity_;
+  uint_fast32_t initialCapacity_;
   uint_fast32_t size_;
   uint_fast32_t buckets_;
   HashLinkedList<K, V> *arr_;
@@ -195,6 +195,36 @@ public:
     minSize = 0;
   }
   ~HashMap() { delete[] arr_; };
+  HashMap(const HashMap<K, V> &o)
+      : initialCapacity_(o.initialCapacity_), size_(o.size_),
+        buckets_(o.buckets_), hash_(o.hash_), maxSize(o.maxSize),
+        minSize(o.minSize) {
+    arr_ = new HashLinkedList<K, V>[buckets_];
+    for (uint_fast32_t i = 0; i < buckets_; ++i) {
+      arr_[i] = o.arr_[i];
+    }
+  }
+  HashMap &operator=(const HashMap<K, V> &o) {
+    if (this == &o)
+      return *this;
+
+    delete[] arr_;
+
+    initialCapacity_ = o.initialCapacity_;
+    size_ = o.size_;
+    buckets_ = o.buckets_;
+    hash_ = o.hash_;
+    maxSize = o.maxSize;
+    minSize = o.minSize;
+
+    arr_ = new HashLinkedList<K, V>[buckets_];
+    for (uint_fast32_t i = 0; i < buckets_; ++i) {
+      arr_[i] = o.arr_[i];
+    }
+
+    return *this;
+  }
+
   /**
    * Retrieves the value for the given key
    * @param key - the key to the value
@@ -266,6 +296,9 @@ public:
     minSize = buckets_ * 0.1 <= initialCapacity_ ? 0 : buckets_ * 0.1;
   }
   static void TEST() {
+    HashMap<int, int> intmap;
+    auto intmap2 = intmap;
+    intmap = intmap2;
     // Testing Insertion and Retrieval
     HashMap<int, std::string> map1;
     map1.insert(1, "One");
