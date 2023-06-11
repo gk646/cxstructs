@@ -1,30 +1,33 @@
 name: Build include dir on commit
 
-on: [push]
+on: [ push ]
 
 jobs:
   copy_files:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
 
-    - name: Copy Files
-      run: |
-        for file in src/datastructures; do
-          if sed -n '20p' $file | grep -q "#define FINISHED"; then
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Copy Files
+        run: |
+          for file in $(find src/datastructures -name '*.h' -or -name '*.cpp'); do
+            if sed -n '20p' $file | grep -q "#define FINISHED"; then
               cp --parents $file ./include/cxstructs
-          fi
-        for file in src/algorithms; do
-          if sed -n '20p' $file | grep -q "#define FINISHED"; then
+            fi
+          done
+          
+          for file in $(find src/algorithms -name '*.h' -or -name '*.cpp'); do
+            if sed -n '20p' $file | grep -q "#define FINISHED"; then
               cp --parents $file ./include/cxalgo
-          fi
-        done
-        
-    - name: Commit and push on change
-      run: |
-        git diff
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-        git commit -am "Auto commit copied files" || exit 0
-        git push
+            fi
+          done
+
+      - name: Commit and push on change
+        run: |
+          git diff
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git commit -am "Auto commit copied files" || exit 0
+          git push
