@@ -14,16 +14,18 @@ jobs:
         run: |
           mkdir -p include/cxstructs
           mkdir -p include/cxalgo
-          
+        
           for file in $(find src/datastructures -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
-              cp --parents $file ./include/cxstructs
+              filename=$(basename $file)
+              cp $file ./include/cxstructs/$filename
             fi
           done
-          
+      
           for file in $(find src/algorithms -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
-              cp --parents $file ./include/cxalgo
+              filename=$(basename $file)
+              cp $file ./include/cxalgo/$filename
             fi
           done
 
