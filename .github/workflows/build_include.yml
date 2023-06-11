@@ -30,6 +30,7 @@ jobs:
       - name: Commit and push on change
         run: |
           git diff
+          git add include/*
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git commit -am "Auto commit copied files" || exit 0
