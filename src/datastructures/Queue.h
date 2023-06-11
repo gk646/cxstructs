@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -17,20 +17,14 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-//
-// Created by Lukas on 01.06.2023.
-//
-
+#define FINISHED
 #ifndef CMAKE_TEST_QUEUE_H
 #define CMAKE_TEST_QUEUE_H
 
-#include <algorithm>
-#include <cstdint>
-#include <iostream>
-
 #include <cassert>
+#include <cstdint>
 #include <exception>
+#include <iostream>
 
 template <typename T> class Queue {
 
@@ -194,6 +188,7 @@ public:
       assert(temp == i);
     }
     assert(q1.size() == 0);
+    std::cout << "QUEUE TESTS PASSED" << std::endl;
   }
 };
 #endif // CMAKE_TEST_QUEUE_H

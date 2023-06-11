@@ -36,8 +36,8 @@ void compareHashMaps(){
   std::clock_t start;
   double duration;
 
-  int outerCount = 100;
-  int innerCount = 100000;
+  int outerCount = 1000000;
+  int innerCount = 100;
 
   // Test HashMap implementation
   start = std::clock();
@@ -45,6 +45,9 @@ void compareHashMaps(){
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       myMap.insert(i, i * 2);
+    }
+    for (int i = 0; i < innerCount; i++) {
+      myMap[i];
     }
     for (int i = 0; i < innerCount; i++) {
       myMap.remove(i);
@@ -60,6 +63,9 @@ void compareHashMaps(){
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       stdMap.insert({i, i * 2});
+    }
+    for (int i = 0; i < innerCount; i++) {
+      stdMap[i];
     }
     for (int i = 0; i < innerCount; i++) {
       stdMap.erase(i);
