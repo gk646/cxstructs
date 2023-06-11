@@ -12,6 +12,9 @@ jobs:
 
       - name: Copy Files
         run: |
+          mkdir -p include/cxstructs
+          mkdir -p include/cxalgo
+          
           for file in $(find src/datastructures -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               cp --parents $file ./include/cxstructs
