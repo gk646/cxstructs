@@ -17,12 +17,65 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#define FINISHED
 
-//
-// Created by gk646 on 10.06.2023.
-//
+#include <vector>
+#include "../datastructures/BinaryTree.h"
+#include <cassert>
 
 #ifndef DSA_DFS_H
 #define DSA_DFS_H
+
+
+namespace cxalgo {
+    using namespace cxstruct;
+
+    /**
+ * Treats the vector as an adjacency matrix
+ * @return - the number of reachable nodes from the given start node
+ */
+    template<typename T>
+    int DFS(std::vector<std::vector<T>> &mat, int nodeIndex, std::vector<bool> vis = {}) {
+        int count = 1;
+        if (mat.empty() || nodeIndex >= mat.size()) return 0;
+        if (vis.empty()) {
+            count++;
+            vis = std::vector(mat.size(), false);
+        }
+
+        for (int i = 0; i < mat[nodeIndex].size(); ++i) {
+            if (mat[nodeIndex][i] == 1 && !vis[i]) {
+                vis[i] = true;
+                count += DFS(mat, nodeIndex, vis);
+            }
+        }
+        return count;
+    }
+
+    template<typename T>
+    int DFS(BinaryTree<T> tree, T nodeValue, std::vector<bool> vis = {}) {
+        int nums = 0;
+        if (tree.empty()) return 0;
+        if (vis.empty()) vis = std::vector<bool>(10, false);
+
+
+    }
+
+    static void TEST() {
+        std::vector<std::vector<int>> mat = {
+                {0, 1, 0, 1, 0},
+                {1, 0, 1, 0, 0},
+                {0, 1, 0, 0, 0},
+                {1, 0, 0, 0, 1},
+                {0, 0, 0, 1, 0}
+        };
+
+        // Perform DFS from node 0
+        int reachableNodes = cxalgo::DFS(mat, 0);
+
+        assert(reachableNodes == 5);
+    }
+}
+
 
 #endif // DSA_DFS_H
