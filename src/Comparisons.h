@@ -26,7 +26,7 @@
 
 #include "datastructures/HashMap.h"
 #include <unordered_map>
-
+using namespace cxstructs;
 void compareHashMaps(){
   // Create instances
   HashMap<int, int> myMap;

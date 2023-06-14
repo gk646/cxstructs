@@ -22,264 +22,239 @@
 #define CMAKE_TEST_BINARYTREE_H
 
 #include <algorithm>
-#include <iostream>
-#include <stdexcept>
 #include <cassert>
+#include <iostream>
 #include <stack>
+#include <stdexcept>
 
 /**
  * Simple BinaryTree implementation
- * Only compatible with comparable types "<"
+ * Only compatible with comparable types "\<"
  * @tparam T - type
  */
-namespace cxstruct {
-    template<typename T>
-    class TreeNode {
-        TreeNode *left_ = nullptr;
-        TreeNode *right_ = nullptr;
-        T data_;
-    public:
-        explicit TreeNode(T val) : data_(val), left_(nullptr), right_(nullptr) {}
+namespace cxstructs {
+template <typename T> class TreeNode {
+  TreeNode *left_ = nullptr;
+  TreeNode *right_ = nullptr;
+  T data_;
 
-        TreeNode(const TreeNode<T> &o)
-                : data_(o.data_), left_(o.left_ ? new TreeNode(*o.left_) : nullptr),
-                  right_(o.right_ ? new TreeNode(*o.right_) : nullptr) {}
-    };
+public:
+  explicit TreeNode(T val) : data_(val), left_(nullptr), right_(nullptr) {}
 
-    template<typename T>
-    class BinaryTree {
-        TreeNode<T> *root_;
-        uint_fast32_t size_ = 0;
+  TreeNode(const TreeNode<T> &o)
+      : data_(o.data_), left_(o.left_ ? new TreeNode(*o.left_) : nullptr),
+        right_(o.right_ ? new TreeNode(*o.right_) : nullptr) {}
+};
 
-        bool deleteNode(BinaryTree *parent, T val, bool left) {
-            if (!root_->hasData_)
-                return false;
+template <typename T> class BinaryTree {
+  TreeNode<T> *root_;
+  uint_fast32_t size_ = 0;
 
-            if (val < data_) {
-                if (left_) {
-                    left_->deleteNode(this, val, true);
-                }
-                return false;
-            } else if (val > data_) {
-                if (right_) {
-                    right_->deleteNode(this, val, false);
-                }
-                return false;
-            } else {
-                if (!left_ && !right_) {
-                    if (left) {
-                        parent->left_ = nullptr;
-                    } else {
-                        parent->right_ = nullptr;
-                    }
-                    delete this;
-                } else if (!left_ && !left) {
-                    parent->right_ = this->right_;
-                    delete this;
-                } else if (!right_ && left) {
-                    parent->left_ = this->left_;
-                    delete this;
-                } else {
-                    throw std::logic_error("unsupported deletion");
-                }
-            }
+  int subTreeDepth(BinaryTree *node) {
+    if (node == nullptr) {
+      return 0;
+    } else {
+      int left = subTreeDepth(node->left_);
+      int right = subTreeDepth(node->right_);
+      return std::max(left, right) + 1;
+    }
+  }
+
+  void insert(T val, TreeNode<T> *node) {
+    if (node) {
+      if (val < node->data_) {
+        if (!node->left_) {
+          node->left_ = new BinaryTree(val);
+        } else
+          node->left_->insert(val);
+      } else {
+        if (!node->right_) {
+          node->right_ = new BinaryTree(val);
+        } else
+          node->right_->insert(val);
+      }
+    } else {
+      root_ = new TreeNode<T>(val);
+    }
+  }
+
+  bool contains(T val, TreeNode<T> *node) {
+    if (node) {
+      if (val < node->data_) {
+        if (node->left_) {
+          return node->left_->contains(val);
         }
-
-        int subTreeDepth(BinaryTree *node) {
-            if (node == nullptr) {
-                return 0;
-            } else {
-                int left = subTreeDepth(node->left_);
-                int right = subTreeDepth(node->right_);
-                return std::max(left, right) + 1;
-            }
+        return false;
+      } else if (val > node->data_) {
+        if (node->right_) {
+          return node->right_->contains(val);
         }
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
 
-        void insert(T val, TreeNode<T> *node) {
-            if (node) {
-                if (val < node->data_) {
-                    if (!node->left_) {
-                        node->left_ = new BinaryTree(val);
-                    } else
-                        node->left_->insert(val);
-                } else {
-                    if (!node->right_) {
-                        node->right_ = new BinaryTree(val);
-                    } else
-                        node->right_->insert(val);
-                }
-            } else {
-                root_ = new TreeNode<T>(val);
-            }
-        }
+public:
+  BinaryTree() = default;
 
-        bool contains() {
+  explicit BinaryTree(T data) : root_(new TreeNode<T>(data)){};
 
-        }
+  BinaryTree(const BinaryTree &o) = delete;
 
-    public:
-        BinaryTree() = default;
+  BinaryTree &operator=(const BinaryTree &) = delete;
 
-        explicit BinaryTree(T data) : root_(new TreeNode<T>(data)) {};
+  ~BinaryTree() { delete root_; }
 
-        BinaryTree(const BinaryTree &o) = delete;
+  /**
+   * Inverts this BinaryTree starting from the given node
+   */
+  void invert(TreeNode<T> *node) {
+    if (node == nullptr)
+      return;
+    std::swap(node->left, node->right);
+    invert(node->left);
+    invert(node->right);
+  }
 
-        BinaryTree &operator=(const BinaryTree &) = delete;
+  /**
+   * Inverts this BinaryTree starting from the root
+   */
+  void invert() { invert(root_); }
 
-        ~BinaryTree() {
-            delete root_;
-        }
+  /**
+   * Inserts the given element into the tree at the right position
+   * @param val - the inserted value
+   */
+  void insert(T val) {
+    if (root_) {
+      insert(val, root_);
+      size_++;
+      return;
+    }
+    size_++;
+    root_ = new TreeNode<T>(val);
+  }
 
-        /**
-         * Inverts this BinaryTree starting from the given node
-         */
-        void invert(TreeNode<T> *node) {
-            if (node == nullptr) return;
-            std::swap(node->left, node->right);
-            invert(node->left);
-            invert(node->right);
-        }
+  /**
+   * Recursively searches the tree for the given value
+   * @param val - the value to search for
+   * @return - true if the tree contains the given value, false otherwise
+   */
+  bool contains(T val) { return contains(val, root_); }
 
-        /**
-         * Inverts this BinaryTree starting from the root
-         */
-        void invert() {
-            invert(root_);
-        }
+  /**
+   * Erases the first occurrence of a node with this value
+   * @param val - the node-value to search for
+   * @return true if a deletion happened
+   */
+  bool erase(T val) {
+    throw std::logic_error("missing implementation");
+    /*
+    if (!hasData_)
+      return false;
 
-        /**
-         * Inserts the given element into the tree at the right position
-         * @param val - the inserted value
-         */
-        void insert(T val) {
-            if (root_) {
-                insert(val, root_);
-                size_++;
-                return;
-            }
-            size_++;
-            root_ = new TreeNode<T>(val);
-        }
+    if (data_ == val) {
+      throw std::logic_error("unsupported");
+    } else {
+      if (val < data_ && left_) {
+        left_->deleteNode(this, val, true);
+      } else if (val > data_ && right_) {
+        right_->deleteNode(this, val, false);
+      } else {
+        return false;
+      }
+    }
+     */
+  }
 
-/**
- * Recursively searches the tree for the given value
- * @param val - the value to search for
- * @return - true if the tree contains the given value, false otherwise
- */
-        bool contains(T val) {
-            if (hasData_) {
-                if (val < data_) {
-                    if (left_) {
-                        return left_->contains(val);
-                    }
-                    return false;
-                } else if (val > data_) {
-                    if (right_) {
-                        return right_->contains(val);
-                    }
-                } else {
-                    return true;
-                }
-            }
-            return false;
-        }
+  /**
+   * @return the total amount of nodes in the tree
+   */
+  [[nodiscard]] uint_fast32_t size() const { return size_; }
 
-        /**
-         * Erases the first occurrence of a node with this value
-         * @param val - the node-value to search for
-         * @return true if a deletion happened
-         */
-        bool erase(T val) {
-            if (!hasData_)
-                return false;
+  [[nodiscard]] bool empty() const { return size_ == 0; }
 
-            if (data_ == val) {
-                throw std::logic_error("unsupported");
-            } else {
-                if (val < data_ && left_) {
-                    left_->deleteNode(this, val, true);
-                } else if (val > data_ && right_) {
-                    right_->deleteNode(this, val, false);
-                } else {
-                    return false;
-                }
-            }
-        }
+  /**
+   *
+   * @return the maximum depth of the tree
+   */
+  uint_fast32_t maxDepth() { return subTreeDepth(this); }
 
-        /**
-         * @return the total amount of nodes in the tree
-         */
-        [[nodiscard]] uint_fast32_t size() const { return size_; }
+  class InOrderIterator {
+    std::stack<TreeNode<T> *> nodes;
 
-        [[nodiscard]] bool empty() const {
-            return size_ == 0;
-        }
+  public:
+    InOrderIterator(TreeNode<T> *root) { pushLeft(root); }
 
-        /**
-         *
-         * @return the maximum depth of the tree
-         */
-        uint_fast32_t maxDepth() { return subTreeDepth(this); }
+    void pushLeft(TreeNode<T> *node) {
+      while (node) {
+        nodes.push(node);
+        node = node->left_;
+      }
+    }
 
+    T &operator*() { return nodes.top().data_; }
 
-        class InOrderIterator {
-            std::stack<TreeNode<T> *> nodes;
-        public:
-            InOrderIterator(TreeNode<T> *root) {
-                pushLeft(root);
+    InOrderIterator &operator++() {
+      TreeNode<T> *node = nodes.top();
+      nodes.pop();
+      pushLeft(node->right);
+      return *this;
+    }
 
-            }
+    bool operator!=(const InOrderIterator &other) { return !nodes.empty(); }
+  };
+  /**
+   * In order tree traversal
+   * @return a in order tree traversal begin iterator
+   */
+  InOrderIterator begin() { return InOrderIterator(root_); }
+  /**
+   * In order tree traversal
+* @return a in order tree traversal end iterator
 
-            void pushLeft(TreeNode<T> *node) {
-                while (node) {
-                    nodes.push(node);
-                    node = node->left_;
-                }
-            }
+   */
+  InOrderIterator end() { return InOrderIterator(nullptr); }
+  static void TEST() {
+    BinaryTree<int> tree;
 
-            T &operator*() {
-                return nodes.top().data_;
+    assert(tree.empty()); // Test empty on newly created tree
+    assert(tree.size() == 0); // Test size on newly created tree
 
-            }
+    tree.insert(10);
+    assert(tree.contains(10));
+    assert(tree.maxDepth() == 1); // Test maxDepth after inserting one element
+    assert(!tree.empty()); // Test empty after inserting one element
+    assert(tree.size() == 1); // Test size after inserting one element
 
-            InOrderIterator &operator++() {
-                TreeNode<T> *node = nodes.top();
-                nodes.pop();
-                pushLeft(node->right);
-                return *this;
-            }
+    tree.insert(15);
+    assert(tree.contains(15));
+    assert(tree.maxDepth() == 2); // Test maxDepth after inserting second element
 
-            bool operator!=(const InOrderIterator &other) {
-                return !nodes.empty();
-            }
-        };
+    tree.insert(5);
+    assert(tree.contains(5));
+    assert(!tree.contains(4));
+    assert(tree.maxDepth() == 2); // Test maxDepth after inserting third element
 
-        static void TEST() {
-            BinaryTree<int> tree;
-            tree.insert(10);
-            assert(tree.contains(10));
-            tree.insert(15);
-            assert(tree.contains(15));
-            tree.insert(5);
-            assert(!tree.contains(4));
+    std::vector<int> normalTraversal, invertedTraversal;
 
-            tree.erase(10);
-            assert(!tree.contains(10));
-            tree.erase(5);
-            assert(!tree.contains(5));
+    for(auto it = tree.begin(); it != tree.end(); ++it) {
+      normalTraversal.push_back(*it);
+    }
 
+    tree.invert();
 
-            tree.insert(10);
-            tree.insert(15);
-            tree.insert(5);
+    for(auto it = tree.begin(); it != tree.end(); ++it) {
+      invertedTraversal.push_back(*it);
+    }
 
-            //std::string normalTraversal = tree.inOrderTraversal();
+    assert(normalTraversal != invertedTraversal);  // Assert that normal and inverted traversals are different
 
-            tree.invert();
-            //std::string invertedTraversal = tree.inOrderTraversal();
+    std::cout << "All tests passed!" << std::endl;
+  }
 
-            //assert(normalTraversal != invertedTraversal);
-        }
-    };
-}
+};
+} // namespace cxstructs
 #endif // CMAKE_TEST_BINARYTREE_H
