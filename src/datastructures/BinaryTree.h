@@ -1,4 +1,4 @@
-// Copyright (c) <2023> <gk646>
+// Copyright (c) 2023 gk646
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -220,18 +220,19 @@ public:
   static void TEST() {
     BinaryTree<int> tree;
 
-    assert(tree.empty()); // Test empty on newly created tree
+    assert(tree.empty());     // Test empty on newly created tree
     assert(tree.size() == 0); // Test size on newly created tree
 
     tree.insert(10);
     assert(tree.contains(10));
     assert(tree.maxDepth() == 1); // Test maxDepth after inserting one element
-    assert(!tree.empty()); // Test empty after inserting one element
-    assert(tree.size() == 1); // Test size after inserting one element
+    assert(!tree.empty());        // Test empty after inserting one element
+    assert(tree.size() == 1);     // Test size after inserting one element
 
     tree.insert(15);
     assert(tree.contains(15));
-    assert(tree.maxDepth() == 2); // Test maxDepth after inserting second element
+    assert(tree.maxDepth() ==
+           2); // Test maxDepth after inserting second element
 
     tree.insert(5);
     assert(tree.contains(5));
@@ -240,21 +241,22 @@ public:
 
     std::vector<int> normalTraversal, invertedTraversal;
 
-    for(auto it = tree.begin(); it != tree.end(); ++it) {
+    for (auto it = tree.begin(); it != tree.end(); ++it) {
       normalTraversal.push_back(*it);
     }
 
     tree.invert();
 
-    for(auto it = tree.begin(); it != tree.end(); ++it) {
+    for (auto it = tree.begin(); it != tree.end(); ++it) {
       invertedTraversal.push_back(*it);
     }
 
-    assert(normalTraversal != invertedTraversal);  // Assert that normal and inverted traversals are different
+    assert(normalTraversal !=
+           invertedTraversal); // Assert that normal and inverted traversals are
+                               // different
 
     std::cout << "All tests passed!" << std::endl;
   }
-
 };
 } // namespace cxstructs
 #endif // CMAKE_TEST_BINARYTREE_H
