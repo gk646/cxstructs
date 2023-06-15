@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
+#define FINISHED
 #include <cstdint>
 #include <ostream>
 #include <stdexcept>
@@ -158,5 +158,4 @@ public:
     assert(std::fabs(m8(1, 1) - 50.0f) < 1e-6);
   }
 };
-
 } // namespace cxstructs
