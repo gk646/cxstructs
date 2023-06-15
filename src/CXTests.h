@@ -22,6 +22,7 @@
 #include "datastructures/LinkedList.h"
 #include "datastructures/Queue.h"
 #include "datastructures/Stack.h"
+#include "datastructures/Matrix.h"
 
 namespace cxtests {
 using namespace cxstructs;
@@ -31,6 +32,7 @@ static void test() {
   Queue<int>::TEST();
   HashMap<int, int>::TEST();
   Stack<int>::TEST();
+  mat::TEST();
   std::cout << "\nAll tests passed!" << std::endl;
 }
 

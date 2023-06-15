@@ -26,6 +26,7 @@
 #include <iostream>
 #include <stack>
 #include <stdexcept>
+#include <vector>
 
 /**
  * Simple BinaryTree implementation

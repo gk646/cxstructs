@@ -18,14 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-//
-// Created by gk646 on 11.06.2023.
-//
-
 #include <iostream>
 
 #include "datastructures/HashMap.h"
 #include <unordered_map>
+
+#include <vector>
 using namespace cxstructs;
 void compareHashMaps(){
   // Create instances
