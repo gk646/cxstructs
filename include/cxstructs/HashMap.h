@@ -28,9 +28,11 @@
 
 // HashMap implementation using a linked lists as bucket structure
 // Optimized towards large additions and deletions
-// Can perform up to 20% faster than the std::unordered_map
-// but can be up to 3 times on small numbers of additions or deletion
-// See Comparison.h
+// Can perform up to 20% faster than the std::unordered_map on large additions
+// or deletions but can be up to 3 times on small numbers of additions or
+// deletion See Comparison.h
+
+namespace cxhelper { // namespace to hide the classes
 /**
  * HashListNode used in the HashLinkedList
  * @tparam K - key type
@@ -39,6 +41,9 @@
 template <typename K, typename V> struct HashListNode {
   explicit HashListNode(K key, V value)
       : key_(key), value_(value), next_(nullptr){};
+  HashListNode(const HashListNode<K, V> &o)
+      : key_(o.key_), value_(o.value_),
+        next_(o.next_ ? new HashListNode<K, V>(*o.next_) : nullptr) {}
   K key_;
   V value_;
   HashListNode *next_;
@@ -54,6 +59,49 @@ template <typename K, typename V> struct HashLinkedList {
   uint_fast32_t size_;
   HashLinkedList() : head_(nullptr), end_(nullptr), size_(0){};
   ~HashLinkedList() { clear(); }
+  HashLinkedList(const HashLinkedList<K, V> &o) : size_(o.size_) {
+    if (o.head_) {
+      head_ = new HashListNode<K, V>(*o.head_);
+
+      HashListNode<K, V> *current_new = head_;
+      HashListNode<K, V> *current_old = o.head_->next_;
+
+      while (current_old != nullptr) {
+        current_new->next_ = new HashListNode<K, V>(*current_old);
+
+        current_new = current_new->next_;
+        current_old = current_old->next_;
+      }
+      end_ = current_new;
+    } else {
+      head_ = end_ = nullptr;
+    }
+  }
+  HashLinkedList &operator=(const HashLinkedList<K, V> &o) {
+    if (this == &o)
+      return *this;
+
+    clear();
+    size_ = o.size_;
+
+    if (o.head_) {
+      head_ = new HashListNode<K, V>(*o.head_);
+
+      HashListNode<K, V> *current_new = head_;
+      HashListNode<K, V> *current_old = o.head_->next_;
+
+      while (current_old != nullptr) {
+        current_new->next_ = new HashListNode<K, V>(*current_old);
+
+        current_new = current_new->next_;
+        current_old = current_old->next_;
+      }
+      end_ = current_new;
+    } else {
+      head_ = end_ = nullptr;
+    }
+    return *this;
+  }
   V &operator[](K key) {
     HashListNode<K, V> *current = head_;
     while (current != nullptr) {
@@ -64,16 +112,17 @@ template <typename K, typename V> struct HashLinkedList {
     }
     throw std::out_of_range("no such element");
   }
-  void replaceAdd(K key, V val) {
+  bool replaceAdd(K key, V val) {
     HashListNode<K, V> *current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
         current->value_ = val;
-        return;
+        return false;
       }
       current = current->next_;
     }
     add(key, val);
+    return true;
   }
   void remove(K key) {
     if (!head_)
@@ -135,6 +184,9 @@ template <> struct KeyHash<std::string> {
     return hash_fn(key);
   }
 };
+} // namespace cxhelper
+namespace cxstructs {
+using namespace cxhelper;
 /**
  * Linear probing HashMap. Apart from primitives and strings you should provide
  * your own hashFunction.
@@ -188,7 +240,7 @@ template <typename K, typename V> class HashMap {
   }
 
 public:
-  HashMap(uint_fast32_t initialCapacity = 64)
+  explicit HashMap(uint_fast32_t initialCapacity = 64)
       : buckets_(initialCapacity), initialCapacity_(initialCapacity), size_(0),
         arr_(new HashLinkedList<K, V>[buckets_]) {
     maxSize = buckets_ * 0.75;
@@ -224,7 +276,6 @@ public:
 
     return *this;
   }
-
   /**
    * Retrieves the value for the given key
    * @param key - the key to the value
@@ -241,8 +292,7 @@ public:
    */
   void insert(K key, V val) {
     size_t hash = hash_(key) % buckets_;
-    arr_[hash].replaceAdd(key, val);
-    size_++;
+    size_ += arr_[hash].replaceAdd(key, val);
     if (size_ > maxSize) {
       reHashHigh();
     }
@@ -272,75 +322,81 @@ public:
    *
    * @return the current size of the hashMap
    */
-  [[nodiscard]] size_t size() const { return size_; }
+  [[nodiscard]] uint_fast32_t size() const { return size_; }
 
   /**
    * Clears the hashMap of all its contents
    */
   void clear() {
-    auto oldBuckets = buckets_;
-    buckets_ = buckets_ * 4;
-    auto newArr = new HashLinkedList<K, V>[buckets_];
-
-    for (int i = 0; i < oldBuckets; i++) {
-      HashListNode<K, V> *current = arr_[i].head_;
-      while (current) {
-        size_t hash = hash_(current->key_) % buckets_;
-        newArr[hash].replaceAdd(current->key_, current->value_);
-        current = current->next_;
-      }
-    }
     delete[] arr_;
-    arr_ = newArr;
+    arr_ = new HashLinkedList<K, V>[initialCapacity_];
+    buckets_ = initialCapacity_;
+    size_ = 0;
     maxSize = buckets_ * 0.75;
-    minSize = buckets_ * 0.1 <= initialCapacity_ ? 0 : buckets_ * 0.1;
+    minSize = 0;
   }
+
   static void TEST() {
-    HashMap<int, int> intmap;
-    auto intmap2 = intmap;
-    intmap = intmap2;
-    // Testing Insertion and Retrieval
+    std::cout << "HASHMAP TESTS" << std::endl;
+    // Test insert and operator[key]
+    std::cout << "  Testing insertion and operator[key]..." << std::endl;
     HashMap<int, std::string> map1;
     map1.insert(1, "One");
     map1.insert(2, "Two");
-    assert(map1.get(1) == "One");
-    assert(map1.get(2) == "Two");
+    assert(map1[1] == "One");
+    assert(map1[2] == "Two");
 
-    // Testing Replacement
+    // Test replace value
+    std::cout << "  Testing replacement of values..." << std::endl;
     map1.insert(1, "One_Updated");
-    assert(map1.get(1) == "One_Updated");
+    assert(map1[1] == "One_Updated");
 
-    // Testing Deletion
+    // Test remove
+    std::cout << "  Testing remove method..." << std::endl;
     map1.remove(1);
     try {
-      map1.get(1);
-      assert(
-          false); // We should not reach here, as an exception should be thrown
-    } catch (std::exception &e) {
+      std::string nodiscard = map1.get(1);
+      assert(false); // We should not reach here, as an exception should be thrown
+    } catch (const std::exception &e) {
       assert(true);
     }
 
-    // Testing Edge Cases
-    // Rehashing or expanding the table when load factor exceeds a certain
-    // threshold
-    HashMap<int, int> map2;
+    // Test copy constructor
+    std::cout << "  Testing copy constructor..." << std::endl;
+    HashMap<int, std::string> map2(map1);
+    assert(map2[2] == "Two");
 
-    for (int k = 0; k < 100; k++) {
-      for (int i = 0; i < 100000; i++) {
-        map2.insert(i, i * 2);
-      }
+    // Test assignment operator
+    std::cout << "  Testing assignment operator..." << std::endl;
+    HashMap<int, std::string> map3;
+    map3 = map1;
+    assert(map3[2] == "Two");
 
-      for (int i = 0; i < 100000; i++) {
-        assert(map2.get(i) == i * 2);
-      }
-      for (int i = 0; i < 100000; i++) {
-        map2.remove(i);
-      }
+    // Test size
+    std::cout << "  Testing size method..." << std::endl;
+    assert(map1.size() == 1);
+    assert(map2.size() == 1);
+    assert(map3.size() == 1);
+
+    // Test get
+    std::cout << "  Testing get method..." << std::endl;
+    assert(map1.get(2) == "Two");
+
+    // Test clear
+    std::cout << "  Testing clear method..." << std::endl;
+    map1.clear();
+    assert(map1.size() == 0);
+
+    // Test large additions
+    std::cout << "  Testing large additions..." << std::endl;
+    HashMap<int, double> map4;
+    for (int i = 0; i < 100000; i++) {
+      map4.insert(i, i * 2);
     }
-    assert(map2.size() == 0);
-
-    std::cout << "All tests passed!" << std::endl;
+    for (int i = 0; i < 100000; i++) {
+      assert(map4[i] == i * 2);
+    }
   }
 };
-
+} // namespace cxstructs
 #endif // CMAKE_TEST_HASHMAP_H
