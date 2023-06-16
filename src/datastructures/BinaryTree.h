@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define F
-#ifndef CMAKE_TEST_BINARYTREE_H
-#define CMAKE_TEST_BINARYTREE_H
+#ifndef CXSTRUCTS_BINARYTREE_H
+#define CXSTRUCTS_BINARYTREE_H
 
 #include <algorithm>
 #include <cassert>
@@ -260,4 +260,4 @@ public:
   }
 };
 } // namespace cxstructs
-#endif // CMAKE_TEST_BINARYTREE_H
+#endif // CXSTRUCTS_BINARYTREE_H

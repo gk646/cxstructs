@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#ifndef CMAKE_TEST_HASHMAP_H
-#define CMAKE_TEST_HASHMAP_H
+#ifndef CXSTRUCTS_HASHMAP_H
+#define CXSTRUCTS_HASHMAP_H
 
 #include <cassert>
 #include <cstdint>
@@ -399,4 +399,4 @@ public:
   }
 };
 } // namespace cxstructs
-#endif // CMAKE_TEST_HASHMAP_H
+#endif // CXSTRUCTS_HASHMAP_H

@@ -23,8 +23,8 @@
 #include "../datastructures/BinaryTree.h"
 #include <cassert>
 
-#ifndef DSA_DFS_H
-#define DSA_DFS_H
+#ifndef CXSTRUCTS_DFS_H
+#define CXSTRUCTS_DFS_H
 
 
 namespace cxalgo {
@@ -78,4 +78,4 @@ namespace cxalgo {
 }
 
 
-#endif // DSA_DFS_H
+#endif // CXSTRUCTS_DFS_H

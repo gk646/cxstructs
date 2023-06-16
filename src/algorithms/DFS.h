@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -19,63 +19,50 @@
 // SOFTWARE.
 #define FINISHED
 
-#include <vector>
-#include "../datastructures/BinaryTree.h"
 #include <cassert>
+#include <vector>
 
-#ifndef DSA_DFS_H
-#define DSA_DFS_H
+#ifndef CXSTRUCTS_DFS_H
+#define CXSTRUCTS_DFS_H
 
+namespace cxalgos {
 
-namespace cxalgo {
-    using namespace cxstruct;
-
-    /**
+/**
  * Treats the vector as an adjacency matrix
  * @return - the number of reachable nodes from the given start node
  */
-    template<typename T>
-    int DFS(std::vector<std::vector<T>> &mat, int nodeIndex, std::vector<bool> vis = {}) {
-        int count = 1;
-        if (mat.empty() || nodeIndex >= mat.size()) return 0;
-        if (vis.empty()) {
-            count++;
-            vis = std::vector(mat.size(), false);
-        }
+template <typename T>
+int DFS(std::vector<std::vector<T>> &mat, int nodeIndex,
+        std::vector<bool> vis = {}) {
+  int count = 1;
+  if (mat.empty() || nodeIndex >= mat.size())
+    return 0;
+  if (vis.empty()) {
+    count++;
+    vis = std::vector(mat.size(), false);
+  }
 
-        for (int i = 0; i < mat[nodeIndex].size(); ++i) {
-            if (mat[nodeIndex][i] == 1 && !vis[i]) {
-                vis[i] = true;
-                count += DFS(mat, nodeIndex, vis);
-            }
-        }
-        return count;
+  for (int i = 0; i < mat[nodeIndex].size(); ++i) {
+    if (mat[nodeIndex][i] == 1 && !vis[i]) {
+      vis[i] = true;
+      count += DFS(mat, nodeIndex, vis);
     }
-
-    template<typename T>
-    int DFS(BinaryTree<T> tree, T nodeValue, std::vector<bool> vis = {}) {
-        int nums = 0;
-        if (tree.empty()) return 0;
-        if (vis.empty()) vis = std::vector<bool>(10, false);
-
-
-    }
-
-    static void TEST() {
-        std::vector<std::vector<int>> mat = {
-                {0, 1, 0, 1, 0},
-                {1, 0, 1, 0, 0},
-                {0, 1, 0, 0, 0},
-                {1, 0, 0, 0, 1},
-                {0, 0, 0, 1, 0}
-        };
-
-        // Perform DFS from node 0
-        int reachableNodes = cxalgo::DFS(mat, 0);
-
-        assert(reachableNodes == 5);
-    }
+  }
+  return count;
 }
 
+static void TEST() {
+  std::vector<std::vector<int>> mat = {{0, 1, 0, 1, 0},
+                                       {1, 0, 1, 0, 0},
+                                       {0, 1, 0, 0, 0},
+                                       {1, 0, 0, 0, 1},
+                                       {0, 0, 0, 1, 0}};
 
-#endif // DSA_DFS_H
+  // Perform DFS from node 0
+  int reachableNodes = cxalgos::DFS(mat, 0);
+
+  assert(reachableNodes == 5);
+}
+} // namespace cxalgo
+
+#endif // CXSTRUCTS_DFS_H

@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#ifndef CMAKE_TEST_HASHMAP_H
-#define CMAKE_TEST_HASHMAP_H
+#ifndef CXSTRUCTS_HASHMAP_H
+#define CXSTRUCTS_HASHMAP_H
 
 #include <cassert>
 #include <cstdint>
@@ -29,8 +29,8 @@
 // HashMap implementation using a linked lists as bucket structure
 // Optimized towards large additions and deletions
 // Can perform up to 20% faster than the std::unordered_map on large additions
-// or deletions but can be up to 3 times on small numbers of additions or
-// deletion See Comparison.h
+// or deletions but can be up to 2 times slower on small numbers
+// See Comparison.h
 
 namespace cxhelper { // namespace to hide the classes
 /**
@@ -39,9 +39,9 @@ namespace cxhelper { // namespace to hide the classes
  * @tparam V - value type
  */
 template <typename K, typename V> struct HashListNode {
-  explicit HashListNode(K key, V value)
+  inline explicit HashListNode(K key, V value)
       : key_(key), value_(value), next_(nullptr){};
-  HashListNode(const HashListNode<K, V> &o)
+  inline HashListNode(const HashListNode<K, V> &o)
       : key_(o.key_), value_(o.value_),
         next_(o.next_ ? new HashListNode<K, V>(*o.next_) : nullptr) {}
   K key_;
@@ -102,7 +102,7 @@ template <typename K, typename V> struct HashLinkedList {
     }
     return *this;
   }
-  V &operator[](K key) {
+   V &operator[](K key) {
     HashListNode<K, V> *current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
@@ -112,7 +112,7 @@ template <typename K, typename V> struct HashLinkedList {
     }
     throw std::out_of_range("no such element");
   }
-  bool replaceAdd(K key, V val) {
+   bool replaceAdd(K key, V val) {
     HashListNode<K, V> *current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
@@ -124,7 +124,7 @@ template <typename K, typename V> struct HashLinkedList {
     add(key, val);
     return true;
   }
-  void remove(K key) {
+  inline void remove(K key) {
     if (!head_)
       throw std::out_of_range("list is empty");
 
@@ -151,7 +151,7 @@ template <typename K, typename V> struct HashLinkedList {
       }
     }
   }
-  void add(K key, V val) {
+  inline void add(K key, V val) {
     if (head_ == nullptr) {
       head_ = new HashListNode<K, V>(key, val);
       end_ = head_;
@@ -175,11 +175,13 @@ template <typename K, typename V> struct HashLinkedList {
 };
 
 template <typename K> struct KeyHash {
-  size_t operator()(const K &key) const { return static_cast<size_t>(key); }
+   size_t operator()(const K &key) const {
+    return static_cast<size_t>(key);
+  }
 };
 
 template <> struct KeyHash<std::string> {
-  size_t operator()(const std::string &key) const {
+   size_t operator()(const std::string &key) const {
     std::hash<std::string> hash_fn;
     return hash_fn(key);
   }
@@ -201,7 +203,7 @@ template <typename K, typename V> class HashMap {
   uint_fast32_t maxSize;
   uint_fast32_t minSize;
 
-  void reHashHigh() {
+  inline void reHashHigh() {
     auto oldBuckets = buckets_;
     buckets_ = buckets_ * 4;
     auto newArr = new HashLinkedList<K, V>[buckets_];
@@ -220,7 +222,7 @@ template <typename K, typename V> class HashMap {
     minSize = buckets_ * 0.1 <= initialCapacity_ ? 0 : buckets_ * 0.1;
   }
 
-  void reHashLow() {
+  inline void reHashLow() {
     auto oldBuckets = buckets_;
     buckets_ = buckets_ / 2;
 
@@ -290,7 +292,7 @@ public:
    * @param key - the key to access the stored element
    * @param val - the stored value at the given key
    */
-  void insert(K key, V val) {
+  inline void insert(K key, V val) {
     size_t hash = hash_(key) % buckets_;
     size_ += arr_[hash].replaceAdd(key, val);
     if (size_ > maxSize) {
@@ -356,7 +358,8 @@ public:
     map1.remove(1);
     try {
       std::string nodiscard = map1.get(1);
-      assert(false); // We should not reach here, as an exception should be thrown
+      assert(
+          false); // We should not reach here, as an exception should be thrown
     } catch (const std::exception &e) {
       assert(true);
     }
@@ -399,4 +402,4 @@ public:
   }
 };
 } // namespace cxstructs
-#endif // CMAKE_TEST_HASHMAP_H
+#endif // CXSTRUCTS_HASHMAP_H

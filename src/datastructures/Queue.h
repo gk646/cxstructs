@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#ifndef CMAKE_TEST_QUEUE_H
-#define CMAKE_TEST_QUEUE_H
+#ifndef CXSTRUCTS_QUEUE_H
+#define CXSTRUCTS_QUEUE_H
 
 #include <cassert>
 #include <cstdint>
@@ -43,11 +43,11 @@ template <typename T> class Queue {
   }
 
 public:
-  explicit Queue(uint_fast16_t len = 16) : arr_(new T[len]), len_(len) {
+  explicit Queue(uint_fast32_t len = 16) : arr_(new T[len]), len_(len) {
     begin_ = 0;
     rear_ = 0;
   }
-  Queue(uint_fast16_t len, T val) : arr_(new T[len]), len_(len) {
+  Queue(uint_fast32_t len, T val) : arr_(new T[len]), len_(len) {
     begin_ = len;
     rear_ = 0;
     std::fill(arr_, arr_ + len_, val);
@@ -135,12 +135,20 @@ public:
     arr_ = new T[16];
     len_ = 16;
   }
+  /**
+   * Provides access to the underlying array
+   * @return a pointer to the data array
+   */
+  T* getRaw(){
+    return arr_;
+  }
+
   friend std::ostream &operator<<(std::ostream &os, const Queue &q) {
     if (q.size() == 0) {
       return os << "[]";
     }
     os << "[" << q.arr_[0];
-    for (uint_fast16_t i = q.rear_ + 1; i < q.begin_; i++) {
+    for (uint_fast32_t i = q.rear_ + 1; i < q.begin_; i++) {
       os << "," << q.arr_[i];
     }
     return os << "]";
@@ -247,4 +255,4 @@ public:
     }
   }
 };
-#endif // CMAKE_TEST_QUEUE_H
+#endif // CXSTRUCTS_QUEUE_H

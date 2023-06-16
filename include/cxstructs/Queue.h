@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#ifndef CMAKE_TEST_QUEUE_H
-#define CMAKE_TEST_QUEUE_H
+#ifndef CXSTRUCTS_QUEUE_H
+#define CXSTRUCTS_QUEUE_H
 
 #include <cassert>
 #include <cstdint>
@@ -247,4 +247,4 @@ public:
     }
   }
 };
-#endif // CMAKE_TEST_QUEUE_H
+#endif // CXSTRUCTS_QUEUE_H

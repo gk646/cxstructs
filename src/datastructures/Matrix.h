@@ -31,12 +31,12 @@
 namespace cxstructs {
 class mat {
   float *arr;
-  uint_fast16_t n_rows;
-  uint_fast16_t n_cols;
+  uint_fast32_t n_rows;
+  uint_fast32_t n_cols;
 
 public:
   mat() : n_cols(0), n_rows(0), arr(nullptr){};
-  mat(uint_fast16_t rows, uint_fast16_t cols) : n_rows(rows), n_cols(cols) {
+  mat(uint_fast32_t rows, uint_fast32_t cols) : n_rows(rows), n_cols(cols) {
     arr = new float[n_cols * n_cols];
     for (int i = 0; i < n_cols * n_cols; i++) {
       arr[i] = 0;
@@ -74,10 +74,10 @@ public:
 
     mat result(n_rows, b.n_cols);
 
-    for (uint_fast16_t i = 0; i < n_rows; i++) {
-      for (uint_fast16_t j = 0; j < b.n_cols; j++) {
+    for (uint_fast32_t i = 0; i < n_rows; i++) {
+      for (uint_fast32_t j = 0; j < b.n_cols; j++) {
         float sum = 0.0f;
-        for (uint_fast16_t k = 0; k < n_cols; k++) {
+        for (uint_fast32_t k = 0; k < n_cols; k++) {
           sum += arr[i * n_cols + k] * b.arr[k * b.n_cols + j];
         }
         result.arr[i * result.n_cols + j] = sum;

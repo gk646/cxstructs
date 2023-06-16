@@ -22,8 +22,8 @@
 // Created by Lukas on 01.06.2023.
 //
 
-#ifndef CMAKE_TEST_RBTREE_H
-#define CMAKE_TEST_RBTREE_H
+#ifndef CXSTRUCTS_RBTREE_H
+#define CXSTRUCTS_RBTREE_H
 
 template <typename T> class RBTree {
 
@@ -43,4 +43,4 @@ public:
 
 };
 
-#endif // CMAKE_TEST_RBTREE_H
+#endif // CXSTRUCTS_RBTREE_H

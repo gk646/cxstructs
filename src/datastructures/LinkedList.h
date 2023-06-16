@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#ifndef DSA_LINKEDLIST_H
-#define DSA_LINKEDLIST_H
+#ifndef CXSTRUCTS_LINKEDLIST_H
+#define CXSTRUCTS_LINKEDLIST_H
 
 #include <cassert>
 #include <cstdint>
@@ -356,4 +356,4 @@ public:
   }
 };
 } // namespace cxstructs
-#endif // DSA_LINKEDLIST_H
+#endif // CXSTRUCTS_LINKEDLIST_H

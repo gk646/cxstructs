@@ -17,44 +17,42 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#define F
 
-#include <cassert>
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <vector>
 
-#include "datastructures/BinaryTree.h"
-#include "datastructures/HashMap.h"
-#include "datastructures/LinkedList.h"
-#include "datastructures/Matrix.h"
-#include "datastructures/Queue.h"
-#include "datastructures/Stack.h"
-
-#include "algorithms/DFS.h"
-#include "algorithms/Sorting.h"
-
-namespace cxtests {
-using namespace cxstructs;
-using namespace cxalgos;
-static void test_cxstructs() {
-  LinkedList<int>::TEST();
-  Queue<int>::TEST();
-  HashMap<int, int>::TEST();
-  Stack<int>::TEST();
-  mat::TEST();
-  std::cout << "\nAll tests passed!" << std::endl;
-}
-
-static void test_cxalgos() {
-
-  int arr[] = {3, 1, 2};
-  int sorted[] = {1, 2, 3};
-  bubbleSort(arr, 3, true);
-  for (std::uint_fast32_t i = 0; i < 3; i++) {
-    assert(arr[i] == sorted[i]);
+namespace cxalgos {
+template <typename T> T *bubbleSort(T *arr, uint_fast32_t len, bool ascending) {
+  if (ascending) {
+    for (uint_fast32_t i = 1; i < len; i++) {
+      for (uint_fast32_t j = 1; j < len; j++) {
+        if (arr[i] < arr[i - 1]) {
+          std::swap(arr[i], arr[i - 1]);
+        }
+      }
+    }
+  } else {
+    for (uint_fast32_t i = 1; i < len; i++) {
+      for (uint_fast32_t j = 1; j < len; j++) {
+        if (arr[i] > arr[i - 1]) {
+          std::swap(arr[i], arr[i - 1]);
+        }
+      }
+    }
   }
-
-
-
-
-
+  return arr;
 }
 
-} // namespace cxtests
+template <typename T>
+T *selectionSort(T *arr, uint_fast32_t len, bool ascending) {}
+
+template <typename T> T *quickSort(T *arr, uint_fast32_t len, bool ascending) {}
+template <typename T>
+T *insertionSort(T *arr, uint_fast32_t len, bool ascending) {}
+template <typename T> T *mergeSort(T *arr, uint_fast32_t len, bool ascending) {}
+template <typename T> T *heapSort(T *arr, uint_fast32_t len, bool ascending) {}
+namespace cxhelper {}
+} // namespace cxalgos
