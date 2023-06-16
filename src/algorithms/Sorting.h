@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define F
-
+#ifndef CXSTRUCTS_SORTING_H
+#define CXSTRUCTS_SORTING_H
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -27,18 +28,18 @@
 namespace cxalgos {
 template <typename T> T *bubbleSort(T *arr, uint_fast32_t len, bool ascending) {
   if (ascending) {
-    for (uint_fast32_t i = 1; i < len; i++) {
-      for (uint_fast32_t j = 1; j < len; j++) {
-        if (arr[i] < arr[i - 1]) {
-          std::swap(arr[i], arr[i - 1]);
+    for (uint_fast32_t i = 0; i < len; i++) {
+      for (uint_fast32_t j = 1; j < len ; j++) {
+        if (arr[j] < arr[j - 1]) {
+          std::swap(arr[j], arr[j - 1]);
         }
       }
     }
   } else {
-    for (uint_fast32_t i = 1; i < len; i++) {
+    for (uint_fast32_t i = 0; i < len; i++) {
       for (uint_fast32_t j = 1; j < len; j++) {
-        if (arr[i] > arr[i - 1]) {
-          std::swap(arr[i], arr[i - 1]);
+        if (arr[j] > arr[j - 1]) {
+          std::swap(arr[j], arr[j - 1]);
         }
       }
     }
@@ -54,5 +55,22 @@ template <typename T>
 T *insertionSort(T *arr, uint_fast32_t len, bool ascending) {}
 template <typename T> T *mergeSort(T *arr, uint_fast32_t len, bool ascending) {}
 template <typename T> T *heapSort(T *arr, uint_fast32_t len, bool ascending) {}
-namespace cxhelper {}
+
 } // namespace cxalgos
+
+namespace cxtests {
+using namespace cxalgos;
+
+static void TEST_ALGOS() {
+  std::cout << "TESTING BUBBLESORT" << std::endl;
+  int arr[] = {3, 1, 2, 5, 1, 4, 0, 1001, -10};
+  int sorted[] = {-10, 0, 1, 1, 2, 3, 4, 5, 1001};
+  auto res = bubbleSort(arr, 9, true);
+  for (std::uint_fast32_t i = 0; i < 8; i++) {
+    assert(res[i] == sorted[i]);
+  }
+
+}
+} // namespace cxtests
+
+#endif // CXSTRUCTS_SORTING_H

@@ -143,7 +143,7 @@ public:
     std::vector<std::vector<float>> data = {{1.0f, 2.0f}, {3.0f, 4.0f}};
     mat m5(data);
     assert(m5.n_rows == 2 && m5.n_cols == 2);
-    assert(std::fabs(m5(0, 0) - 1.0f) < 1e-6);  // Comparing floats with a tolerance
+    assert(m5(0, 0) - 1.0f < 1e-6);  // Comparing floats with a tolerance
 
     // Test specific multiplication
     std::cout << "  Testing specific multiplication...\n";
@@ -152,10 +152,10 @@ public:
     mat m6(data1);
     mat m7(data2);
     mat m8 = m6 * m7;
-    assert(std::fabs(m8(0, 0) - 19.0f) < 1e-6);
-    assert(std::fabs(m8(0, 1) - 22.0f) < 1e-6);
-    assert(std::fabs(m8(1, 0) - 43.0f) < 1e-6);
-    assert(std::fabs(m8(1, 1) - 50.0f) < 1e-6);
+    assert(m8(0, 0) - 19.0f < 1e-6);
+    assert(m8(0, 1) - 22.0f < 1e-6);
+    assert(m8(1, 0) - 43.0f < 1e-6);
+    assert(m8(1, 1) - 50.0f < 1e-6);
   }
 };
 } // namespace cxstructs

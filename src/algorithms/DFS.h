@@ -50,8 +50,10 @@ int DFS(std::vector<std::vector<T>> &mat, int nodeIndex,
   }
   return count;
 }
-
-static void TEST() {
+namespace cxtests {} // namespace cxtests
+static void TEST_DFS() {
+  using namespace cxalgos;
+  std::cout << "TESTING DEPTH FIRST SEARCH" << std::endl;
   std::vector<std::vector<int>> mat = {{0, 1, 0, 1, 0},
                                        {1, 0, 1, 0, 0},
                                        {0, 1, 0, 0, 0},
@@ -59,10 +61,9 @@ static void TEST() {
                                        {0, 0, 0, 1, 0}};
 
   // Perform DFS from node 0
-  int reachableNodes = cxalgos::DFS(mat, 0);
+  int reachableNodes = DFS(mat, 0);
 
   assert(reachableNodes == 5);
 }
-} // namespace cxalgo
-
+} // namespace cxalgos
 #endif // CXSTRUCTS_DFS_H

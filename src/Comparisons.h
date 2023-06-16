@@ -22,7 +22,7 @@
 
 #include "datastructures/HashMap.h"
 #include <unordered_map>
-
+#include <ctime>
 #include <vector>
 using namespace cxstructs;
 void compareHashMaps(){

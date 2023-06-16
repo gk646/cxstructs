@@ -28,11 +28,12 @@
 #include "datastructures/Stack.h"
 
 #include "algorithms/DFS.h"
+#include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
-
 namespace cxtests {
 using namespace cxstructs;
 using namespace cxalgos;
+
 static void test_cxstructs() {
   LinkedList<int>::TEST();
   Queue<int>::TEST();
@@ -43,18 +44,9 @@ static void test_cxstructs() {
 }
 
 static void test_cxalgos() {
-
-  int arr[] = {3, 1, 2};
-  int sorted[] = {1, 2, 3};
-  bubbleSort(arr, 3, true);
-  for (std::uint_fast32_t i = 0; i < 3; i++) {
-    assert(arr[i] == sorted[i]);
-  }
-
-
-
-
-
+  TEST_ALGOS();
+  TEST_DFS();
+  TEST_SEARCH();
 }
 
 } // namespace cxtests
