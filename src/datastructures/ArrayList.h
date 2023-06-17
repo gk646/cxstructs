@@ -28,6 +28,8 @@
  */
 class ArrayList{
 
+ public:
+  ArrayList(uint_fast32_t initial_capacity = 16){}
 };
 
 #endif // CXSTRUCTS_ARRAYLIST_H

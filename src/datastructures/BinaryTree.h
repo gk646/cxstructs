@@ -34,24 +34,27 @@
  * @tparam T - type
  */
 namespace cxstructs {
-template <typename T> class TreeNode {
-  TreeNode *left_ = nullptr;
-  TreeNode *right_ = nullptr;
+template <typename T>
+class TreeNode {
+  TreeNode* left_ = nullptr;
+  TreeNode* right_ = nullptr;
   T data_;
 
-public:
+ public:
   explicit TreeNode(T val) : data_(val), left_(nullptr), right_(nullptr) {}
 
-  TreeNode(const TreeNode<T> &o)
-      : data_(o.data_), left_(o.left_ ? new TreeNode(*o.left_) : nullptr),
+  TreeNode(const TreeNode<T>& o)
+      : data_(o.data_),
+        left_(o.left_ ? new TreeNode(*o.left_) : nullptr),
         right_(o.right_ ? new TreeNode(*o.right_) : nullptr) {}
 };
 
-template <typename T> class BinaryTree {
-  TreeNode<T> *root_;
+template <typename T>
+class BinaryTree {
+  TreeNode<T>* root_;
   uint_fast32_t size_ = 0;
 
-  int subTreeDepth(BinaryTree *node) {
+  int subTreeDepth(BinaryTree* node) {
     if (node == nullptr) {
       return 0;
     } else {
@@ -61,7 +64,7 @@ template <typename T> class BinaryTree {
     }
   }
 
-  void insert(T val, TreeNode<T> *node) {
+  void insert(T val, TreeNode<T>* node) {
     if (node) {
       if (val < node->data_) {
         if (!node->left_) {
@@ -79,7 +82,7 @@ template <typename T> class BinaryTree {
     }
   }
 
-  bool contains(T val, TreeNode<T> *node) {
+  bool contains(T val, TreeNode<T>* node) {
     if (node) {
       if (val < node->data_) {
         if (node->left_) {
@@ -97,21 +100,24 @@ template <typename T> class BinaryTree {
     return false;
   }
 
-public:
+ public:
   BinaryTree() = default;
-
   explicit BinaryTree(T data) : root_(new TreeNode<T>(data)){};
-
-  BinaryTree(const BinaryTree &o) = delete;
-
-  BinaryTree &operator=(const BinaryTree &) = delete;
-
+  BinaryTree(const BinaryTree& o) = delete;
+  BinaryTree& operator=(const BinaryTree&) = delete;
   ~BinaryTree() { delete root_; }
+  /**
+   * Gives access to the root node of the tree
+   * @return the root node
+   */
+  TreeNode<T>* get_root(){
+    return root_;
+  }
 
   /**
    * Inverts this BinaryTree starting from the given node
    */
-  void invert(TreeNode<T> *node) {
+  void invert(TreeNode<T>* node) {
     if (node == nullptr)
       return;
     std::swap(node->left, node->right);
@@ -184,28 +190,28 @@ public:
   uint_fast32_t maxDepth() { return subTreeDepth(this); }
 
   class InOrderIterator {
-    std::stack<TreeNode<T> *> nodes;
+    std::stack<TreeNode<T>*> nodes;
 
-  public:
-    InOrderIterator(TreeNode<T> *root) { pushLeft(root); }
+   public:
+    InOrderIterator(TreeNode<T>* root) { pushLeft(root); }
 
-    void pushLeft(TreeNode<T> *node) {
+    void pushLeft(TreeNode<T>* node) {
       while (node) {
         nodes.push(node);
         node = node->left_;
       }
     }
 
-    T &operator*() { return nodes.top().data_; }
+    T& operator*() { return nodes.top().data_; }
 
-    InOrderIterator &operator++() {
-      TreeNode<T> *node = nodes.top();
+    InOrderIterator& operator++() {
+      TreeNode<T>* node = nodes.top();
       nodes.pop();
       pushLeft(node->right);
       return *this;
     }
 
-    bool operator!=(const InOrderIterator &other) { return !nodes.empty(); }
+    bool operator!=(const InOrderIterator& other) { return !nodes.empty(); }
   };
   /**
    * In order tree traversal
@@ -221,24 +227,25 @@ public:
   static void TEST() {
     BinaryTree<int> tree;
 
-    assert(tree.empty());     // Test empty on newly created tree
-    assert(tree.size() == 0); // Test size on newly created tree
+    assert(tree.empty());      // Test empty on newly created tree
+    assert(tree.size() == 0);  // Test size on newly created tree
 
     tree.insert(10);
     assert(tree.contains(10));
-    assert(tree.maxDepth() == 1); // Test maxDepth after inserting one element
-    assert(!tree.empty());        // Test empty after inserting one element
-    assert(tree.size() == 1);     // Test size after inserting one element
+    assert(tree.maxDepth() == 1);  // Test maxDepth after inserting one element
+    assert(!tree.empty());         // Test empty after inserting one element
+    assert(tree.size() == 1);      // Test size after inserting one element
 
     tree.insert(15);
     assert(tree.contains(15));
     assert(tree.maxDepth() ==
-           2); // Test maxDepth after inserting second element
+           2);  // Test maxDepth after inserting second element
 
     tree.insert(5);
     assert(tree.contains(5));
     assert(!tree.contains(4));
-    assert(tree.maxDepth() == 2); // Test maxDepth after inserting third element
+    assert(tree.maxDepth() ==
+           2);  // Test maxDepth after inserting third element
 
     std::vector<int> normalTraversal, invertedTraversal;
 
@@ -252,12 +259,13 @@ public:
       invertedTraversal.push_back(*it);
     }
 
-    assert(normalTraversal !=
-           invertedTraversal); // Assert that normal and inverted traversals are
-                               // different
+    assert(
+        normalTraversal !=
+        invertedTraversal);  // Assert that normal and inverted traversals are
+                             // different
 
     std::cout << "All tests passed!" << std::endl;
   }
 };
-} // namespace cxstructs
-#endif // CXSTRUCTS_BINARYTREE_H
+}  // namespace cxstructs
+#endif  // CXSTRUCTS_BINARYTREE_H

@@ -5,4 +5,3 @@ CmakeLists.txt
 main.cpp
 cmake-build-release
 copy.sh
-.clang-format

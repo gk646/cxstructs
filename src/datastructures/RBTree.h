@@ -18,29 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-//
-// Created by Lukas on 01.06.2023.
-//
-
 #ifndef CXSTRUCTS_RBTREE_H
 #define CXSTRUCTS_RBTREE_H
 
-template <typename T> class RBTree {
+template <typename T>
+class RBTree {
 
   enum class Color { RED, BLACK };
 
   Color color_ = Color::BLACK;
-  RBTree *left_;
-  RBTree *right_;
+  RBTree* left_;
+  RBTree* right_;
   T data;
 
-public:
-  RBTree(T data) : data(data) {};
-  ~RBTree(){
-      delete right_;
-      delete left_;
+ public:
+  RBTree(T data) : data(data){};
+  ~RBTree() {
+    delete right_;
+    delete left_;
   };
-
 };
 
-#endif // CXSTRUCTS_RBTREE_H
+#endif  // CXSTRUCTS_RBTREE_H

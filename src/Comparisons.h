@@ -20,12 +20,12 @@
 
 #include <iostream>
 
-#include "datastructures/HashMap.h"
-#include <unordered_map>
 #include <ctime>
+#include <unordered_map>
 #include <vector>
+#include "datastructures/HashMap.h"
 using namespace cxstructs;
-void compareHashMaps(){
+void compareHashMaps() {
   // Create instances
   HashMap<int, int> myMap;
   std::unordered_map<int, int> stdMap;
@@ -73,5 +73,5 @@ void compareHashMaps(){
   auto duration2 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
   std::cout << "std::unordered_map: " << duration2 << " seconds" << '\n';
 
-  std::cout << duration1/duration2<< std::endl;
+  std::cout << duration1 / duration2 << std::endl;
 }

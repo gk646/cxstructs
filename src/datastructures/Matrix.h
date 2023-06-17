@@ -59,6 +59,16 @@ class mat {
   inline float& operator()(uint_fast32_t row, uint_fast32_t col) {
     return arr[row * n_cols + col];
   }
+  /**
+   * The underlying array is flattened!
+   * A specific row and column can be accessed with:<p>
+   * arr[row * n_cols + column] <p>
+   * Use with caution!
+   * @return a pointer to the underlying array
+   */
+  float* get_raw(){
+      return arr;
+  }
   mat& operator=(const mat& other) {
     if (this != &other) {
       delete[] arr;
