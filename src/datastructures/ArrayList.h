@@ -17,19 +17,155 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
+#define FINISHED
 #ifndef CXSTRUCTS_ARRAYLIST_H
 #define CXSTRUCTS_ARRAYLIST_H
 
+#include <cassert>
 #include <cstdint>
+#include <iostream>
+#include <ostream>
+#include <stdexcept>
+
+namespace cxstructs {
 
 /**
- * Implementation of a dynamic array similar to the java ArrayList of C++ std::vector
+ * Implementation of a dynamic array similar to the java ArrayList or C++ std::vector
  */
-class ArrayList{
+template <typename T>
+class ArrayList {
+  T* arr;
+  uint_fast32_t size_;
+  uint_fast32_t len;
+  uint_fast32_t minlen;
+  void grow() {}
+  void shrink() {}
 
  public:
-  ArrayList(uint_fast32_t initial_capacity = 16){}
-};
+  explicit ArrayList(uint_fast32_t initial_capacity = 16)
+      : len(initial_capacity),
+        size_(0),
+        arr(new T[initial_capacity]),
+        minlen(0) {}
+  /**
+   * Allows direct access at the specified index starting with index 0 <p>
+   * Negative indices can be used to access the list from the last element onwards starting with -1
+   * @param T a reference to the value at the given index
+   */
+  ~ArrayList() { delete[] arr; }
+  T& operator[](int_fast32_t index) {
+    if (index < 0) {
+      int_fast32_t access = size_ + index;
+      if (access >= 0) {
+        return arr[access];
+      }
+      throw std::out_of_range("index out of bounds");
+    } else if (index < size_) {
+      return arr[index];
+    }
+    throw std::out_of_range("index out of bounds");
+  }
+  /**
+   * Adds a element to the list
+   * @param e the element to be added
+   */
+  void add(T e) {
+    if (size_ == len) {
+      grow();
+    }
+    arr[size_++] = e;
+  }
+  /**
+   * Removes the first occurrence of the given element from the list
+   * @param e element to be removed
+   */
+  void remove(T e) {
+    if (size_ < minlen) {
+      shrink();
+    }
+    for (int i = 0; i < len; i++) {
+      if (arr[i] == e) {
+        for (int j = i; j < len - 1; j++) {
+          arr[i] = arr[i + 1];
+        }
+        size_--;
+        return;
+      }
+    }
+  }
+  /**
+ *
+ * @return the current size of the list
+ */
+  [[nodiscard]] inline uint_fast32_t size() const { return size_; }
+  /**
+   * Clears the list of all its elements <br>
+   * Resets the length back to its default value(16)
+   */
+  void clear() {
+    minlen = 0;
+    size_ = 0;
+    len = 16;
+    delete[] arr;
+    arr = new T[len];
+  }
+  class Iterator {
+    T* ptr;
+   public:
+    explicit Iterator(T* p) : ptr(p) {}
+    T& operator*() { return *ptr; }
+    Iterator& operator++() {
+      ++ptr;
+      return *this;
+    }
+    bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+  };
+  Iterator begin() { return Iterator(this->arr); }
+  Iterator end() { return Iterator(arr + size_); }
+  friend std::ostream& operator<<(std::ostream& os, const ArrayList<T>& list) {
+    if (list.size_ == 0) {
+      return os << "[]";
+    }
+    os << "[" << list.arr[0];
 
-#endif // CXSTRUCTS_ARRAYLIST_H
+    for (int i = 1; i < list.size_; i++) {
+      os << "," << list.arr[i];
+    }
+    return os << "]";
+  }
+  static void TEST() {
+    std::cout << "TESTING ARRAY LIST" << std::endl;
+
+    std::cout << "   Testing remove..." << std::endl;
+    ArrayList<int> list1;
+    list1.add(5);
+    list1.add(10);
+    list1.add(15);
+
+    list1.remove(10);
+    assert(list1.size() == 2);
+    assert(list1[1] == 15);
+
+    std::cout << "   Testing List access..." << std::endl;
+    assert(list1[0] == 5);
+    assert(list1[-1] == 15);
+    assert(list1[-2] == 5);
+    assert(list1[1] = 15);
+
+    list1.clear();
+
+    list1.add(5);
+    list1.add(10);
+    list1.add(15);
+
+    std::cout << "   Testing iterator..." << std::endl;
+    int checkNum = 0;
+    for (auto& num : list1) {
+      checkNum += 5;
+      assert(num == checkNum);
+    }
+    assert(checkNum == 15);
+  }
+};
+}  // namespace cxstructs
+#endif  // CXSTRUCTS_ARRAYLIST_H

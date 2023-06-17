@@ -2,14 +2,17 @@
 
 
 A small (but growing) header only collection of selected datastructures and algorithms. 
-This collection is primarily for educational purposes as the implementations are easy to read and understand.
+This collection is primarily built for educational purposes as the implementations are easy to read and well documented.
 
-All implementations in the include folder  are however tested and can be used in projects.
+To use these, simply include the **include directory**, which contains only finalized and tested headers.
 
-**Notes:**
-- Each header is self contained, no cross dependencies.
+**Features**
+
+- Each algorithm comes with a runtime description and a documentation of the underlying principle
+- The data structures have fully documented methods, adhering to a consistent calling syntax for ease of use
+- Each header is self-contained without any cross dependencies.
 - Comparisons with STL counterparts can be run using the Comparison.h header
-- Only use the **include** dir for importing headers (includes only finished and tested ones)
+
 
 ### DataStructures
 

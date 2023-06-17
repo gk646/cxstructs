@@ -80,7 +80,7 @@ class Queue {
    * Adds a element to the end of the queue
    * @param e the element to be added
    */
-  void enqueue(T e) {
+  void add(T e) {
     if (begin_ == len_) {
       resize();
     }
@@ -90,7 +90,7 @@ class Queue {
    * Removes the front element from the queue
    * @return the removed element
    */
-  T dequeue() {
+  T pop() {
     if (rear_ < begin_) {
       return arr_[rear_++];
     }

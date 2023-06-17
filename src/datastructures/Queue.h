@@ -25,36 +25,45 @@
 #include <cstdint>
 #include <exception>
 #include <iostream>
-
+/**
+ * A queue is a datastructure that defaults to appending elements to the end but retrieving them from the beginning.<p>
+ * 1,2,3,4 -> add(5) -> 1,2,3,4,5 <p>
+ * 1,2,3,4,5 -> pop() -> 2,3,4,5 <p>
+ * Useful for when you need to process data in exactly this order.
+ * If you would pop elements from the back it would become a stack.
+ *
+ * The difference to a DeQueue (double ended queue) is the limitation of only being able to add to the end and pop from the start.
+ * @tparam T the datatype
+ */
 template <typename T>
 class Queue {
   T* arr_;
   uint_fast32_t len_;
-  uint_fast32_t begin_;
-  uint_fast32_t rear_;
+  uint_fast32_t back_;
+  uint_fast32_t front_;
 
   void resize() {
     len_ = 2 * len_;
     auto narr = new T[len_];
-    std::copy(arr_ + rear_, arr_ + begin_, narr);
+    std::copy(arr_ + front_, arr_ + back_, narr);
     delete[] arr_;
     arr_ = narr;
-    begin_ -= rear_;
-    rear_ = 0;
+    back_ -= front_;
+    front_ = 0;
   }
 
  public:
   explicit Queue(uint_fast32_t len = 16) : arr_(new T[len]), len_(len) {
-    begin_ = 0;
-    rear_ = 0;
+    back_ = 0;
+    front_ = 0;
   }
   Queue(uint_fast32_t len, T val) : arr_(new T[len]), len_(len) {
-    begin_ = len;
-    rear_ = 0;
+    back_ = len;
+    front_ = 0;
     std::fill(arr_, arr_ + len_, val);
   }
   ~Queue() { delete[] arr_; }
-  Queue(const Queue& o) : begin_(o.begin_), len_(o.len_), rear_(o.rear_) {
+  Queue(const Queue& o) : back_(o.back_), len_(o.len_), front_(o.front_) {
     arr_ = new T[len_];
     std::copy(o.arr_, o.arr_ + len_, arr_);
   }
@@ -62,9 +71,9 @@ class Queue {
     if (this != &o) {
       delete[] arr_;
 
-      rear_ = o.rear_;
+      front_ = o.front_;
       len_ = o.len_;
-      begin_ = o.begin_;
+      back_ = o.back_;
       arr_ = new T[len_];
 
       std::copy(o.arr_, o.arr_ + len_, arr_);
@@ -75,44 +84,46 @@ class Queue {
    *
    * @return the current size of the queue
    */
-  [[nodiscard]] inline uint_fast32_t size() const { return begin_ - rear_; }
+  [[nodiscard]] inline uint_fast32_t size() const { return back_ - front_; }
   /**
-   * Adds a element to the end of the queue
+   * Adds a element to the back of the queue
    * @param e the element to be added
    */
-  void enqueue(T e) {
-    if (begin_ == len_) {
+  void add(T e) {
+    if (back_ == len_) {
       resize();
     }
-    arr_[begin_++] = e;
+    arr_[back_++] = e;
   }
   /**
-   * Removes the front element from the queue
+   * Removes and returns the element at the front of the queue
    * @return the removed element
    */
-  T dequeue() {
-    if (rear_ < begin_) {
-      return arr_[rear_++];
+  T pop() {
+    if (front_ < back_) {
+      return arr_[front_++];
     }
     throw std::out_of_range("no such element");
   }
   /**
-   * Lets you peek at the front most element
+   * Lets you peek at the front most element <p>
+   * The position at which elements get removed
    * @return a reference to the front element
    */
   T& front() {
-    if (begin_ > 0) {
-      return arr_[begin_ - 1];
+    if (back_ > 0) {
+      return arr_[front_];
     }
     throw std::out_of_range("no such element");
   }
   /**
-   * Lets you peek at the last element
+   * Lets you peek at the last element <p>
+   * The position at which elements get added
    * @return a reference to the last element
    */
   T& back() {
-    if (begin_ > 0) {
-      return arr_[rear_];
+    if (back_ > 0) {
+      return arr_[back_ - 1];
     }
     throw std::out_of_range("no such element");
   }
@@ -120,18 +131,18 @@ class Queue {
    *
    * @return true if the queue is empty
    */
-  bool isEmpty() { return begin_ - rear_ == 0; }
+ inline bool isEmpty() { return back_ - front_ == 0; }
   /**
    *
    * @return true if the queue is full
    */
-  bool isFull() { return begin_ == len_; }
+ inline bool isFull() { return back_ == len_; }
   /**
    * Clears the queue of all elements
    */
   void clear() {
-    begin_ = 0;
-    rear_ = 0;
+    back_ = 0;
+    front_ = 0;
     delete[] arr_;
     arr_ = new T[16];
     len_ = 16;
@@ -147,29 +158,29 @@ class Queue {
       return os << "[]";
     }
     os << "[" << q.arr_[0];
-    for (uint_fast32_t i = q.rear_ + 1; i < q.begin_; i++) {
+    for (uint_fast32_t i = q.front_ + 1; i < q.back_; i++) {
       os << "," << q.arr_[i];
     }
     return os << "]";
   }
 
-  class iterator {
+  class Iterator {
     T* ptr;
 
    public:
-    explicit iterator(T* p) : ptr(p) {}
+    explicit Iterator(T* p) : ptr(p) {}
 
     T& operator*() { return *ptr; }
 
-    iterator& operator++() {
+    Iterator& operator++() {
       ++ptr;
       return *this;
     }
 
-    bool operator!=(const iterator& other) const { return ptr != other.ptr; }
+    bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
   };
-  iterator begin() { return iterator(arr_ + rear_); }
-  iterator end() { return iterator(arr_ + begin_); }
+  Iterator begin() { return Iterator(arr_ + front_); }
+  Iterator end() { return Iterator(arr_ + back_); }
 
   static void TEST() {
     std::cout << "QUEUE TESTS" << std::endl;
@@ -180,17 +191,17 @@ class Queue {
     assert(q1.isEmpty());
     assert(q1.isFull() == false);
 
-    // Test enqueue
-    std::cout << "  Testing enqueue..." << std::endl;
-    q1.enqueue(5);
+    // Test add
+    std::cout << "  Testing add..." << std::endl;
+    q1.add(5);
     assert(q1.size() == 1);
     assert(q1.isEmpty() == false);
     assert(q1.front() == 5);
     assert(q1.back() == 5);
 
-    // Test dequeue
-    std::cout << "  Testing dequeue..." << std::endl;
-    int val = q1.dequeue();
+    // Test pop
+    std::cout << "  Testing pop..." << std::endl;
+    int val = q1.pop();
     assert(val == 5);
     assert(q1.size() == 0);
     assert(q1.isEmpty());
@@ -220,14 +231,14 @@ class Queue {
     assert(q4.front() == q2.front());
     assert(q4.back() == q2.back());
 
-    // Test multiple enqueue/dequeue
-    std::cout << "  Testing multiple enqueue/dequeue..." << std::endl;
+    // Test multiple add/pop
+    std::cout << "  Testing multiple add/pop..." << std::endl;
     for (int i = 0; i < 10; i++) {
-      q1.enqueue(i);
+      q1.add(i);
     }
     assert(q1.size() == 10);
     for (int i = 0; i < 10; i++) {
-      int temp = q1.dequeue();
+      int temp = q1.pop();
 
       assert(temp == i);
     }
@@ -239,10 +250,10 @@ class Queue {
     assert(q1.size() == 0);
     assert(q1.isEmpty());
 
-    // Test enqueue after clear
-    std::cout << "  Testing enqueue after clear..." << std::endl;
+    // Test add after clear
+    std::cout << "  Testing add after clear..." << std::endl;
     for (int i = 0; i < 10; i++) {
-      q1.enqueue(i);
+      q1.add(i);
     }
     assert(q1.size() == 10);
 

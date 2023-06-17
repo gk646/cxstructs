@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,38 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <cassert>
+#ifndef CXSTRUCTS_TRIE_H
+#define CXSTRUCTS_TRIE_H
 
-#include "datastructures/BinaryTree.h"
-#include "datastructures/HashMap.h"
-#include "datastructures/LinkedList.h"
-#include "datastructures/Matrix.h"
-#include "datastructures/Queue.h"
-#include "datastructures/Stack.h"
-#include "datastructures/ArrayList.h"
 
-#include "algorithms/GraphTraversal.h"
-#include "algorithms/Search.h"
-#include "algorithms/Sorting.h"
-namespace cxtests {
-using namespace cxstructs;
-using namespace cxalgos;
+class Trie{
 
-static void test_cxstructs() {
-  LinkedList<int>::TEST();
-  Queue<int>::TEST();
-  HashMap<int, int>::TEST();
-  Stack<int>::TEST();
-  mat::TEST();
-  ArrayList<int>::TEST();
-  std::cout << "\nAll tests passed!" << std::endl;
-}
+};
 
-static void test_cxalgos() {
-  using namespace cxalgos;
-  TEST_ALGOS();
-  TEST_DFS();
-  TEST_SEARCH();
-}
-
-}  // namespace cxtests
+#endif  //CXSTRUCTS_TRIE_H

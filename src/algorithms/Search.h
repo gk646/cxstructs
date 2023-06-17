@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
+#define FINISHED
 #ifndef CXSTRUCTS_BINARYSEARCH_H
 #define CXSTRUCTS_BINARYSEARCH_H
 
@@ -46,7 +46,8 @@ bool binarySearch_recursive_internal(T *arr, T target, int_fast32_t low,
 
 namespace cxalgos {
 /**
- * Binary search on the specified ASCENDED SORTED array without recursion
+ * Binary search on the specified ASCENDED SORTED array without recursion <p>
+ * runtime: O(log(n))
  * @tparam T the used datatype
  * @param arr search array
  * @param target target value to search for
@@ -71,7 +72,8 @@ template <typename T> bool binarySearch(T *arr, T target, int_fast32_t len) {
 }
 
 /**
- * Binary search on the specified ASCENDED SORTED array with recursion
+ * Binary search on the specified ASCENDED SORTED array with recursion <p>
+* runtime: O(log(n))
  * @tparam T the used datatype
  * @param arr search array
  * @param target target value to search for
