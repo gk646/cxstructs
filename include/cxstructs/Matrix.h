@@ -28,6 +28,7 @@
 /**
  * The usual normal 2d matrix implementation with a flattened array for more
  * cache efficiency
+ * Datatype is float
  * Access is 0-based
  */
 namespace cxstructs {
@@ -282,6 +283,9 @@ class mat {
       }
     }
   };
+  /**Prints out the matrix
+   * @param header optional header
+   */
   void print(std::string header = "") const {
     if (!header.empty()) {
       std::cout << header << std::endl;
