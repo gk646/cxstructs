@@ -89,10 +89,12 @@ bool binarySearch_recursive(T *arr, T target, int_fast32_t len) {
 } // namespace cxalgos
 
 namespace cxtests {
+
 using namespace cxalgos;
+
 static void TEST_SEARCH() {
   std::cout << "TESTING BINARY SEARCH" << std::endl;
-  int arr[] = {1,2,3,4,5,6,7,8,9};
+  int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   assert(binarySearch(arr, 5, 9) == true);
   assert(binarySearch(arr, -1, 9) == false);
 

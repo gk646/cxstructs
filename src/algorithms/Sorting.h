@@ -26,10 +26,20 @@
 #include <vector>
 
 namespace cxalgos {
-template <typename T> T *bubbleSort(T *arr, uint_fast32_t len, bool ascending) {
+/**
+ * Bubble sort is the one of the simplest sorting algorithms. It works by
+ * checking to adjacent values and swapping them if they are not in the right
+ * order. <p> Best: O(n^2) <p> Average: O(n^2) <p> Worst: O(n^2)
+ * @tparam T type
+ * @param arr array to sort
+ * @param len  length of the array
+ * @param ascending true to sort ascending, false to sort descending
+ */
+template <typename T>
+void bubble_sort(T* arr, uint_fast32_t len, bool ascending) {
   if (ascending) {
     for (uint_fast32_t i = 0; i < len; i++) {
-      for (uint_fast32_t j = 1; j < len ; j++) {
+      for (uint_fast32_t j = 1; j < len; j++) {
         if (arr[j] < arr[j - 1]) {
           std::swap(arr[j], arr[j - 1]);
         }
@@ -44,33 +54,52 @@ template <typename T> T *bubbleSort(T *arr, uint_fast32_t len, bool ascending) {
       }
     }
   }
-  return arr;
 }
 
 template <typename T>
-T *selectionSort(T *arr, uint_fast32_t len, bool ascending) {}
-
-template <typename T> T *quickSort(T *arr, uint_fast32_t len, bool ascending) {}
+T* selectionSort(T* arr, uint_fast32_t len, bool ascending) {}
+/**
+ * Quick sort has the best possible O notation runtime for all cases but in
+ * practice is often slower than for example quicksort. It works by dividing the
+ * array into sub-arrays of decreasing length and sorting and merging them back
+ * together.<p> Best: O(n) <p> Average: O(n*log(n)) <p> Worst: O(n^2)
+ * @tparam T type
+ * @param arr array to sort
+ * @param len  length of the array
+ * @param ascending true to sort ascending, false to sort descending
+ */
 template <typename T>
-T *insertionSort(T *arr, uint_fast32_t len, bool ascending) {}
-template <typename T> T *mergeSort(T *arr, uint_fast32_t len, bool ascending) {}
-template <typename T> T *heapSort(T *arr, uint_fast32_t len, bool ascending) {}
+void quickSort(T* arr, uint_fast32_t len, bool ascending) {}
+template <typename T>
+T* insertionSort(T* arr, uint_fast32_t len, bool ascending) {}
+/**
+ * Merge sort has the best possible O notation runtime for all cases but in
+ * practice is often slower than for example quicksort. It works by dividing the
+ * array into sub-arrays of decreasing length to then sort and merge them back
+ * together. <p> Best: O(n*log(n)) <p> Average: O(n*log(n)) <p> Worst: O(n*log(n))
+ * @tparam T type
+ * @param arr array to sort
+ * @param len  length of the array
+ * @param ascending true to sort ascending, false to sort descending
+ */
+template <typename T>
+void mergeSort(T* arr, uint_fast32_t len, bool ascending) {}
+template <typename T>
+void heapSort(T* arr, uint_fast32_t len, bool ascending) {}
 
-} // namespace cxalgos
+}  // namespace cxalgos
 
 namespace cxtests {
-using namespace cxalgos;
 
 static void TEST_ALGOS() {
   std::cout << "TESTING BUBBLESORT" << std::endl;
   int arr[] = {3, 1, 2, 5, 1, 4, 0, 1001, -10};
   int sorted[] = {-10, 0, 1, 1, 2, 3, 4, 5, 1001};
-  auto res = bubbleSort(arr, 9, true);
+  bubble_sort(arr, 9, true);
   for (std::uint_fast32_t i = 0; i < 8; i++) {
-    assert(res[i] == sorted[i]);
+    assert(arr[i] == sorted[i]);
   }
-
 }
-} // namespace cxtests
+}  // namespace cxtests
 
-#endif // CXSTRUCTS_SORTING_H
+#endif  // CXSTRUCTS_SORTING_H

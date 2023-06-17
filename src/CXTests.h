@@ -27,7 +27,7 @@
 #include "datastructures/Queue.h"
 #include "datastructures/Stack.h"
 
-#include "algorithms/DFS.h"
+#include "algorithms/GraphTraversal.h"
 #include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
 namespace cxtests {
@@ -44,9 +44,10 @@ static void test_cxstructs() {
 }
 
 static void test_cxalgos() {
+  using namespace cxalgos;
   TEST_ALGOS();
   TEST_DFS();
   TEST_SEARCH();
 }
 
-} // namespace cxtests
+}  // namespace cxtests
