@@ -28,8 +28,9 @@
 #include <stdexcept>
 
 namespace cxstructs {
-template <typename T> class Stack {
-  T *arr_;
+template <typename T>
+class Stack {
+  T* arr_;
   uint_fast32_t size_;
   uint_fast32_t arrlen_;
   uint_fast32_t minlen;
@@ -51,25 +52,33 @@ template <typename T> class Stack {
     minlen = size_ / 2 > 16 ? size_ / 2 : 0;
   }
 
-public:
+ public:
   explicit Stack(uint_fast32_t initialCapacity = 16)
-      : arrlen_(initialCapacity), size_(0), arr_(new T[initialCapacity]), minlen(0) {}
+      : arrlen_(initialCapacity),
+        size_(0),
+        arr_(new T[initialCapacity]),
+        minlen(0) {}
 
   explicit Stack(T fillVal, uint_fast32_t initialCapacity = 16)
-      : arrlen_(initialCapacity), size_(0), arr_(new T[initialCapacity]), minlen(0) {
-    std::fill_n(arr_,arrlen_, fillVal);
+      : arrlen_(initialCapacity),
+        size_(0),
+        arr_(new T[initialCapacity]),
+        minlen(0) {
+    std::fill_n(arr_, arrlen_, fillVal);
     size_ = arrlen_;
   }
 
-  Stack(const Stack<T> &o)
-      : arrlen_(o.arrlen_), size_(o.size_), arr_(new T[o.arrlen_]),
+  Stack(const Stack<T>& o)
+      : arrlen_(o.arrlen_),
+        size_(o.size_),
+        arr_(new T[o.arrlen_]),
         minlen(o.minlen) {
     std::copy_n(o.arr_, arrlen_, arr_);
   }
 
   ~Stack() { delete[] arr_; }
 
-  Stack &operator=(const Stack<T> &o) {
+  Stack& operator=(const Stack<T>& o) {
     if (this == &o)
       return *this;
     minlen = o.minlen;
@@ -81,21 +90,33 @@ public:
 
     return *this;
   }
+  /**
+   * Provides access to the underlying array
+* Use with caution!
+* @return a pointer to the data array
 
+   */
+  [[maybe_unused]] T* get_raw() { return arr_; }
   /**
    *
    * @return the current size of the stack
    */
   [[nodiscard]] uint_fast32_t size() { return size_; }
-
+  /**
+ * Adds an element to the top of the stack
+ * @param val element to be added
+ */
   void add(T val) {
     if (size_ == arrlen_) {
       grow();
     }
     arr_[size_++] = val;
   }
-
-  T &pop() {
+  /**
+   * Removes a element from the top of the stack
+   * @return the removed element
+   */
+  T& pop() {
     if (size_ == 0) {
       throw std::logic_error("cant pop from empty stack!");
     }
@@ -105,7 +126,11 @@ public:
     size_--;
     return arr_[size_];
   }
-  T &top() { return arr_[size_ - 1]; }
+  /**
+   * Lets you peek at the top element
+   * @return a reference to the top element
+   */
+  T& top() { return arr_[size_ - 1]; }
 
   static void TEST() {
     std::cout << "STACK TESTS" << std::endl;
@@ -149,6 +174,6 @@ public:
     std::cout << "  All tests passed!" << std::endl;
   }
 };
-} // namespace cxstructs
+}  // namespace cxstructs
 
-#endif // CXSTRUCTURES_STACK_H
+#endif  // CXSTRUCTURES_STACK_H

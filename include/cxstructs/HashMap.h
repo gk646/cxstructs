@@ -32,39 +32,42 @@
 // or deletions but can be up to 2 times slower on small numbers
 // See Comparison.h
 
-namespace cxhelper { // namespace to hide the classes
+namespace cxhelper {  // namespace to hide the classes
 /**
  * HashListNode used in the HashLinkedList
  * @tparam K - key type
  * @tparam V - value type
  */
-template <typename K, typename V> struct HashListNode {
+template <typename K, typename V>
+struct HashListNode {
   inline explicit HashListNode(K key, V value)
       : key_(key), value_(value), next_(nullptr){};
-  inline HashListNode(const HashListNode<K, V> &o)
-      : key_(o.key_), value_(o.value_),
+  inline HashListNode(const HashListNode<K, V>& o)
+      : key_(o.key_),
+        value_(o.value_),
         next_(o.next_ ? new HashListNode<K, V>(*o.next_) : nullptr) {}
   K key_;
   V value_;
-  HashListNode *next_;
+  HashListNode* next_;
 };
 /**
  * HashLinkedList used in the buckets of the HashMap
  *@tparam K - key type
  * @tparam V - value type
  */
-template <typename K, typename V> struct HashLinkedList {
-  HashListNode<K, V> *head_;
-  HashListNode<K, V> *end_;
+template <typename K, typename V>
+struct HashLinkedList {
+  HashListNode<K, V>* head_;
+  HashListNode<K, V>* end_;
   uint_fast32_t size_;
   HashLinkedList() : head_(nullptr), end_(nullptr), size_(0){};
   ~HashLinkedList() { clear(); }
-  HashLinkedList(const HashLinkedList<K, V> &o) : size_(o.size_) {
+  HashLinkedList(const HashLinkedList<K, V>& o) : size_(o.size_) {
     if (o.head_) {
       head_ = new HashListNode<K, V>(*o.head_);
 
-      HashListNode<K, V> *current_new = head_;
-      HashListNode<K, V> *current_old = o.head_->next_;
+      HashListNode<K, V>* current_new = head_;
+      HashListNode<K, V>* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
         current_new->next_ = new HashListNode<K, V>(*current_old);
@@ -77,7 +80,7 @@ template <typename K, typename V> struct HashLinkedList {
       head_ = end_ = nullptr;
     }
   }
-  HashLinkedList &operator=(const HashLinkedList<K, V> &o) {
+  HashLinkedList& operator=(const HashLinkedList<K, V>& o) {
     if (this == &o)
       return *this;
 
@@ -87,8 +90,8 @@ template <typename K, typename V> struct HashLinkedList {
     if (o.head_) {
       head_ = new HashListNode<K, V>(*o.head_);
 
-      HashListNode<K, V> *current_new = head_;
-      HashListNode<K, V> *current_old = o.head_->next_;
+      HashListNode<K, V>* current_new = head_;
+      HashListNode<K, V>* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
         current_new->next_ = new HashListNode<K, V>(*current_old);
@@ -102,8 +105,8 @@ template <typename K, typename V> struct HashLinkedList {
     }
     return *this;
   }
-   V &operator[](K key) {
-    HashListNode<K, V> *current = head_;
+  V& operator[](K key) {
+    HashListNode<K, V>* current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
         return current->value_;
@@ -112,8 +115,8 @@ template <typename K, typename V> struct HashLinkedList {
     }
     throw std::out_of_range("no such element");
   }
-   bool replaceAdd(K key, V val) {
-    HashListNode<K, V> *current = head_;
+  bool replaceAdd(K key, V val) {
+    HashListNode<K, V>* current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
         current->value_ = val;
@@ -129,20 +132,20 @@ template <typename K, typename V> struct HashLinkedList {
       throw std::out_of_range("list is empty");
 
     if (head_->key_ == key) {
-      HashListNode<K, V> *toDelete = head_;
+      HashListNode<K, V>* toDelete = head_;
       head_ = head_->next_;
       if (!head_) {
         end_ = nullptr;
       }
       delete toDelete;
     } else {
-      HashListNode<K, V> *current = head_;
+      HashListNode<K, V>* current = head_;
       while (current->next_ && current->next_->key_ != key) {
         current = current->next_;
       }
 
       if (current->next_) {
-        HashListNode<K, V> *toDelete = current->next_;
+        HashListNode<K, V>* toDelete = current->next_;
         current->next_ = toDelete->next_;
         if (toDelete == end_) {
           end_ = current;
@@ -162,9 +165,9 @@ template <typename K, typename V> struct HashLinkedList {
     size_++;
   }
   void clear() {
-    HashListNode<K, V> *current = head_;
+    HashListNode<K, V>* current = head_;
     while (current != nullptr) {
-      HashListNode<K, V> *next = current->next_;
+      HashListNode<K, V>* next = current->next_;
       delete current;
       current = next;
     }
@@ -174,19 +177,19 @@ template <typename K, typename V> struct HashLinkedList {
   bool isEmpty() { return size_ == 0; }
 };
 
-template <typename K> struct KeyHash {
-   size_t operator()(const K &key) const {
-    return static_cast<size_t>(key);
-  }
+template <typename K>
+struct KeyHash {
+  size_t operator()(const K& key) const { return static_cast<size_t>(key); }
 };
 
-template <> struct KeyHash<std::string> {
-   size_t operator()(const std::string &key) const {
+template <>
+struct KeyHash<std::string> {
+  size_t operator()(const std::string& key) const {
     std::hash<std::string> hash_fn;
     return hash_fn(key);
   }
 };
-} // namespace cxhelper
+}  // namespace cxhelper
 namespace cxstructs {
 using namespace cxhelper;
 /**
@@ -194,11 +197,12 @@ using namespace cxhelper;
  * your own hashFunction.
  *
  */
-template <typename K, typename V> class HashMap {
+template <typename K, typename V>
+class HashMap {
   uint_fast32_t initialCapacity_;
   uint_fast32_t size_;
   uint_fast32_t buckets_;
-  HashLinkedList<K, V> *arr_;
+  HashLinkedList<K, V>* arr_;
   KeyHash<K> hash_;
   uint_fast32_t maxSize;
   uint_fast32_t minSize;
@@ -209,7 +213,7 @@ template <typename K, typename V> class HashMap {
     auto newArr = new HashLinkedList<K, V>[buckets_];
 
     for (int i = 0; i < oldBuckets; i++) {
-      HashListNode<K, V> *current = arr_[i].head_;
+      HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
         size_t hash = hash_(current->key_) % buckets_;
         newArr[hash].replaceAdd(current->key_, current->value_);
@@ -228,7 +232,7 @@ template <typename K, typename V> class HashMap {
 
     auto newArr = new HashLinkedList<K, V>[buckets_];
     for (int i = 0; i < oldBuckets; i++) {
-      HashListNode<K, V> *current = arr_[i].head_;
+      HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
         size_t hash = hash_(current->key_) % buckets_;
         newArr[hash].replaceAdd(current->key_, current->value_);
@@ -241,24 +245,29 @@ template <typename K, typename V> class HashMap {
     minSize = buckets_ * 0.1 <= initialCapacity_ ? 0 : buckets_ * 0.1;
   }
 
-public:
+ public:
   explicit HashMap(uint_fast32_t initialCapacity = 64)
-      : buckets_(initialCapacity), initialCapacity_(initialCapacity), size_(0),
+      : buckets_(initialCapacity),
+        initialCapacity_(initialCapacity),
+        size_(0),
         arr_(new HashLinkedList<K, V>[buckets_]) {
     maxSize = buckets_ * 0.75;
     minSize = 0;
   }
   ~HashMap() { delete[] arr_; };
-  HashMap(const HashMap<K, V> &o)
-      : initialCapacity_(o.initialCapacity_), size_(o.size_),
-        buckets_(o.buckets_), hash_(o.hash_), maxSize(o.maxSize),
+  HashMap(const HashMap<K, V>& o)
+      : initialCapacity_(o.initialCapacity_),
+        size_(o.size_),
+        buckets_(o.buckets_),
+        hash_(o.hash_),
+        maxSize(o.maxSize),
         minSize(o.minSize) {
     arr_ = new HashLinkedList<K, V>[buckets_];
     for (uint_fast32_t i = 0; i < buckets_; ++i) {
       arr_[i] = o.arr_[i];
     }
   }
-  HashMap &operator=(const HashMap<K, V> &o) {
+  HashMap& operator=(const HashMap<K, V>& o) {
     if (this == &o)
       return *this;
 
@@ -283,7 +292,7 @@ public:
    * @param key - the key to the value
    * @return the value at this key
    */
-  V &operator[](const K key) const {
+  V& operator[](const K key) const {
     size_t hash = hash_(key) % buckets_;
     return arr_[hash][key];
   }
@@ -304,7 +313,7 @@ public:
    * @param key - the key to the value
    * @return the value at this key
    */
-  [[nodiscard]] V &get(const K key) const {
+  [[nodiscard]] V& get(const K key) const {
     size_t hash = hash_(key) % buckets_;
     return arr_[hash][key];
   }
@@ -359,8 +368,8 @@ public:
     try {
       std::string nodiscard = map1.get(1);
       assert(
-          false); // We should not reach here, as an exception should be thrown
-    } catch (const std::exception &e) {
+          false);  // We should not reach here, as an exception should be thrown
+    } catch (const std::exception& e) {
       assert(true);
     }
 
@@ -401,5 +410,5 @@ public:
     }
   }
 };
-} // namespace cxstructs
-#endif // CXSTRUCTS_HASHMAP_H
+}  // namespace cxstructs
+#endif  // CXSTRUCTS_HASHMAP_H

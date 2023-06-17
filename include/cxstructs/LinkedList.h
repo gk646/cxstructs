@@ -25,33 +25,35 @@
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
+
 namespace cxhelper {
-template <typename T> struct ListNode {
+template <typename T>
+struct ListNode {
   T val_;
-  ListNode *next_;
-  ListNode(const ListNode<T> &o)
+  ListNode* next_;
+  ListNode(const ListNode<T>& o)
       : val_(o.val_), next_(o.next_ ? new ListNode(*o.next_) : nullptr) {}
   explicit ListNode(T val) : val_(val), next_(nullptr){};
-  T &get() { return val_; }
-
+  T& get() { return val_; }
 };
-} // namespace cxhelper
+}  // namespace cxhelper
 namespace cxstructs {
 using namespace cxhelper;
-template <typename T> class LinkedList {
-  ListNode<T> *head_;
+template <typename T>
+class LinkedList {
+  ListNode<T>* head_;
   uint_fast32_t size_;
-  ListNode<T> *end_;
+  ListNode<T>* end_;
 
-public:
+ public:
   LinkedList() : head_(nullptr), end_(nullptr), size_(0){};
   ~LinkedList() { clear(); }
-  LinkedList(const LinkedList<T> &o) : size_(o.size_) {
+  LinkedList(const LinkedList<T>& o) : size_(o.size_) {
     if (o.head_) {
       head_ = new ListNode<T>(*o.head_);
 
-      ListNode<T> *current_new = head_;
-      ListNode<T> *current_old = o.head_->next_;
+      ListNode<T>* current_new = head_;
+      ListNode<T>* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
         current_new->next_ = new ListNode<T>(*current_old);
@@ -64,7 +66,7 @@ public:
       head_ = end_ = nullptr;
     }
   }
-  LinkedList &operator=(const LinkedList<T> &o) {
+  LinkedList& operator=(const LinkedList<T>& o) {
     if (this == &o)
       return *this;
 
@@ -74,8 +76,8 @@ public:
     if (o.head_) {
       head_ = new ListNode<T>(*o.head_);
 
-      ListNode<T> *current_new = head_;
-      ListNode<T> *current_old = o.head_->next_;
+      ListNode<T>* current_new = head_;
+      ListNode<T>* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
         current_new->next_ = new ListNode<T>(*current_old);
@@ -112,7 +114,7 @@ public:
     if (index >= size_)
       throw std::out_of_range("index too big");
 
-    ListNode<T> *toDelete;
+    ListNode<T>* toDelete;
     T val;
     if (index == 0) {
       toDelete = head_;
@@ -121,7 +123,7 @@ public:
         end_ = nullptr;
       }
     } else {
-      ListNode<T> *previous = head_;
+      ListNode<T>* previous = head_;
       for (uint_fast32_t i = 0; i < index - 1; ++i) {
         previous = previous->next_;
       }
@@ -147,13 +149,13 @@ public:
     if (!end_)
       throw std::out_of_range("list is empty");
 
-    ListNode<T> *toDelete = end_;
+    ListNode<T>* toDelete = end_;
 
     if (end_ == head_) {
       head_ = nullptr;
       end_ = nullptr;
     } else {
-      ListNode<T> *previous = head_;
+      ListNode<T>* previous = head_;
       while (previous->next_ != end_) {
         previous = previous->next_;
       }
@@ -172,7 +174,7 @@ public:
       throw std::out_of_range("list is empty");
 
     if (head_->val_ == val) {
-      ListNode<T> *toDelete = head_;
+      ListNode<T>* toDelete = head_;
       head_ = head_->next_;
       if (!head_) {
         end_ = nullptr;
@@ -180,13 +182,13 @@ public:
       delete toDelete;
       --size_;
     } else {
-      ListNode<T> *current = head_;
+      ListNode<T>* current = head_;
       while (current->next_ && current->next_->val_ != val) {
         current = current->next_;
       }
 
       if (current->next_) {
-        ListNode<T> *toDelete = current->next_;
+        ListNode<T>* toDelete = current->next_;
         current->next_ = toDelete->next_;
         if (toDelete == end_) {
           end_ = current;
@@ -197,8 +199,8 @@ public:
     }
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const LinkedList<T> &q) {
-    ListNode<T> *current = q.head_;
+  friend std::ostream& operator<<(std::ostream& os, const LinkedList<T>& q) {
+    ListNode<T>* current = q.head_;
     while (current != nullptr) {
       os << current->val_ << "->";
       current = current->next_;
@@ -209,9 +211,9 @@ public:
    * Clears the linked list of all elements
    */
   void clear() {
-    ListNode<T> *current = head_;
+    ListNode<T>* current = head_;
     while (current != nullptr) {
-      ListNode<T> *next = current->next_;
+      ListNode<T>* next = current->next_;
       delete current;
       current = next;
     }
@@ -219,7 +221,7 @@ public:
     end_ = nullptr;
     size_ = 0;
   }
-  ListNode<T> &last() { return *end_; }
+  ListNode<T>& last() { return *end_; }
   /**
    *
    * @return the current size of this Linked List
@@ -227,23 +229,23 @@ public:
   [[nodiscard]] uint_fast32_t size() const { return size_; }
 
   class Iterator {
-  public:
-    ListNode<T> *current;
+   public:
+    ListNode<T>* current;
 
-    explicit Iterator(ListNode<T> *start) : current(start){};
+    explicit Iterator(ListNode<T>* start) : current(start){};
 
     T operator*() { return current->val_; }
 
-    Iterator &operator++() {
+    Iterator& operator++() {
       if (current) {
         current = current->next_;
       }
       return *this;
     }
-    bool operator==(const Iterator &other) const {
+    bool operator==(const Iterator& other) const {
       return current == other.current;
     }
-    bool operator!=(const Iterator &other) const {
+    bool operator!=(const Iterator& other) const {
       return current != other.current;
     }
   };
@@ -270,7 +272,6 @@ public:
 
     assert(list1.size() == list6.size());
 
-
     LinkedList<int> list;
     list.add(1);
     assert(list.size() == 1);
@@ -278,7 +279,7 @@ public:
     list.add(2);
     assert(list.size() == 2);
 
-    std::cout << "  Testing addition..."<<std::endl;
+    std::cout << "  Testing addition..." << std::endl;
     // Testing iterator functionality along with add
     auto it = list.begin();
     assert(*it == 1);
@@ -287,8 +288,7 @@ public:
     ++it;
     assert(it == list.end());
 
-
-    std::cout << "  Testing removal..."<<std::endl;
+    std::cout << "  Testing removal..." << std::endl;
     LinkedList<int> list2;
 
     list2.add(1);
@@ -310,7 +310,6 @@ public:
 
     assert(list2.size() == 0);
 
-
     std::cout << "  Testing clear..." << std::endl;
     LinkedList<int> list3;
 
@@ -322,9 +321,8 @@ public:
     assert(list3.size() == 0);
     assert(list3.begin() == list3.end());
 
-
     std::cout << "  Testing for memory leaks..." << std::endl;
-    const int LARGE_NUMBER = 1000; // 1 million
+    const int LARGE_NUMBER = 1000;  // 1 million
 
     for (int k = 0; k < 100; k++) {
       LinkedList<int> list4;
@@ -350,10 +348,10 @@ public:
     try {
       list4.remove();
       assert(false);
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       assert(true);
     }
   }
 };
-} // namespace cxstructs
-#endif // CXSTRUCTS_LINKEDLIST_H
+}  // namespace cxstructs
+#endif  // CXSTRUCTS_LINKEDLIST_H

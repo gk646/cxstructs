@@ -26,8 +26,9 @@
 #include <exception>
 #include <iostream>
 
-template <typename T> class Queue {
-  T *arr_;
+template <typename T>
+class Queue {
+  T* arr_;
   uint_fast32_t len_;
   uint_fast32_t begin_;
   uint_fast32_t rear_;
@@ -42,7 +43,7 @@ template <typename T> class Queue {
     rear_ = 0;
   }
 
-public:
+ public:
   explicit Queue(uint_fast32_t len = 16) : arr_(new T[len]), len_(len) {
     begin_ = 0;
     rear_ = 0;
@@ -53,11 +54,11 @@ public:
     std::fill(arr_, arr_ + len_, val);
   }
   ~Queue() { delete[] arr_; }
-  Queue(const Queue &o) : begin_(o.begin_), len_(o.len_), rear_(o.rear_) {
+  Queue(const Queue& o) : begin_(o.begin_), len_(o.len_), rear_(o.rear_) {
     arr_ = new T[len_];
     std::copy(o.arr_, o.arr_ + len_, arr_);
   }
-  Queue &operator=(const Queue &o) {
+  Queue& operator=(const Queue& o) {
     if (this != &o) {
       delete[] arr_;
 
@@ -74,7 +75,7 @@ public:
    *
    * @return the current size of the queue
    */
-  [[nodiscard]] uint_fast32_t size() const { return begin_ - rear_; }
+  [[nodiscard]] inline uint_fast32_t size() const { return begin_ - rear_; }
   /**
    * Adds a element to the end of the queue
    * @param e the element to be added
@@ -99,7 +100,7 @@ public:
    * Lets you peek at the front most element
    * @return a reference to the front element
    */
-  T &front() {
+  T& front() {
     if (begin_ > 0) {
       return arr_[begin_ - 1];
     }
@@ -109,7 +110,7 @@ public:
    * Lets you peek at the last element
    * @return a reference to the last element
    */
-  T &back() {
+  T& back() {
     if (begin_ > 0) {
       return arr_[rear_];
     }
@@ -137,13 +138,11 @@ public:
   }
   /**
    * Provides access to the underlying array
+   * Use with caution!
    * @return a pointer to the data array
    */
-  T* getRaw(){
-    return arr_;
-  }
-
-  friend std::ostream &operator<<(std::ostream &os, const Queue &q) {
+  T* getRaw() { return arr_; }
+  friend std::ostream& operator<<(std::ostream& os, const Queue& q) {
     if (q.size() == 0) {
       return os << "[]";
     }
@@ -155,19 +154,19 @@ public:
   }
 
   class iterator {
-    T *ptr;
+    T* ptr;
 
-  public:
-    explicit iterator(T *p) : ptr(p) {}
+   public:
+    explicit iterator(T* p) : ptr(p) {}
 
-    T &operator*() { return *ptr; }
+    T& operator*() { return *ptr; }
 
-    iterator &operator++() {
+    iterator& operator++() {
       ++ptr;
       return *this;
     }
 
-    bool operator!=(const iterator &other) const { return ptr != other.ptr; }
+    bool operator!=(const iterator& other) const { return ptr != other.ptr; }
   };
   iterator begin() { return iterator(arr_ + rear_); }
   iterator end() { return iterator(arr_ + begin_); }
@@ -250,9 +249,9 @@ public:
     // Test range-based for loop
     std::cout << "  Testing range-based for loop..." << std::endl;
     int check = 0;
-    for(auto num : q1){
+    for (auto num : q1) {
       assert(num == check++);
     }
   }
 };
-#endif // CXSTRUCTS_QUEUE_H
+#endif  // CXSTRUCTS_QUEUE_H
