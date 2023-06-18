@@ -110,7 +110,7 @@ class Queue {
    * The position at which elements get removed
    * @return a reference to the front element
    */
-  T& front() {
+  [[nodiscard]] T& front() {
     if (back_ > 0) {
       return arr_[front_];
     }

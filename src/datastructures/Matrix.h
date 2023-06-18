@@ -40,8 +40,8 @@ class mat {
  public:
   mat() : n_cols(0), n_rows(0), arr(nullptr){};
   mat(uint_fast32_t rows, uint_fast32_t cols) : n_rows(rows), n_cols(cols) {
-    arr = new float[n_cols * n_cols];
-    for (int i = 0; i < n_cols * n_cols; i++) {
+    arr = new float[n_rows * n_cols];
+    for (int i = 0; i < n_rows * n_cols; i++) {
       arr[i] = 0;
     }
   }
@@ -79,7 +79,6 @@ class mat {
 
       arr = new float[n_rows * n_cols];
       std::copy(other.arr, other.arr + n_rows * n_cols, arr);
-      return *this;
     }
     return *this;
   }
@@ -193,7 +192,7 @@ class mat {
    * @param o other matrix
    * @return true if the matrices are identical
    */
-  bool operator==(const mat& o) const {
+  bool operator==(const mat o) const {
     if (this == &o) {
       return true;
     }
@@ -366,6 +365,7 @@ class mat {
 
     mat m9({{2, 3}, {2, 3}});
     mat m10({{2, 3}, {2, 3}});
+
     assert(m9 == m10);
     assert(!(m9 != m10));
     m9(1, 1) = 5;

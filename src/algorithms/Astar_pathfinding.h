@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -17,39 +17,30 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#define F
+#ifndef CXSTRUCTS_ASTAR_PATHFINDING_H
+#define CXSTRUCTS_ASTAR_PATHFINDING_H
 
-#include <cassert>
+#include <cstdint>
+#include <type_traits>
 
-#include "datastructures/BinaryTree.h"
-#include "datastructures/HashMap.h"
-#include "datastructures/LinkedList.h"
-#include "datastructures/Matrix.h"
-#include "datastructures/Queue.h"
-#include "datastructures/Stack.h"
-#include "datastructures/ArrayList.h"
+namespace cxhelper {
+struct Node {
+  Node();
+  uint_fast16_t f_cost;
+  uint_fast16_t g_cost;
+};
 
-#include "algorithms/GraphTraversal.h"
-#include "algorithms/Search.h"
-#include "algorithms/Sorting.h"
-namespace cxtests {
-using namespace cxstructs;
-using namespace cxalgos;
+}  // namespace cxhelper
 
-static void test_cxstructs() {
-  mat::TEST();
-  LinkedList<int>::TEST();
-  Queue<int>::TEST();
-  HashMap<int, int>::TEST();
-  Stack<int>::TEST();
-  ArrayList<int>::TEST();
-  std::cout << "\nAll tests passed!" << std::endl;
-}
+namespace cxalgos {
 
-static void test_cxalgos() {
-  using namespace cxalgos;
-  TEST_ALGOS();
-  TEST_DFS();
-  TEST_SEARCH();
-}
+template <typename T>
+void astar_pathfinding() {
+  static_assert(std::is_arithmetic<T>::value,
+                "Template argument must be numeric");
+};
 
-}  // namespace cxtests
+}  // namespace cxalgos
+
+#endif  //CXSTRUCTS_ASTAR_PATHFINDING_H

@@ -21,25 +21,28 @@
 #include <iostream>
 
 #include <ctime>
+#include <queue>
+#include <stack>
 #include <unordered_map>
 #include <vector>
 #include "datastructures/HashMap.h"
+#include "gktime.h"
+
 using namespace cxstructs;
-void compareHashMaps() {
-  // Create instances
+
+void compareWithSTL() {
+  /* |-----------------------------------------------------|
+   * |                       HASHMAPS                      |
+   * |-----------------------------------------------------|
+   */
+  std::cout << "COMPARING HASHMAPS\n" << std::endl;
   HashMap<int, int> myMap;
   std::unordered_map<int, int> stdMap;
 
-  // For time measurement
-  std::clock_t start;
-  double duration;
+  int outerCount = 10000;
+  int innerCount = 1000;
 
-  int outerCount = 100;
-  int innerCount = 100000;
-
-  // Test HashMap implementation
-  start = std::clock();
-
+  gkutils::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       myMap.insert(i, i * 2);
@@ -52,12 +55,8 @@ void compareHashMaps() {
     }
   }
 
-  auto duration1 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-  std::cout << "HashMap: " << duration1 << " seconds" << '\n';
-
-  // Test std::unordered_map
-  start = std::clock();
-
+  gkutils::printTime<>("cxstructs HashMap:");
+  gkutils::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       stdMap.insert({i, i * 2});
@@ -69,9 +68,82 @@ void compareHashMaps() {
       stdMap.erase(i);
     }
   }
+  gkutils::printTime<>("std::unordered_map:");
 
-  auto duration2 = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-  std::cout << "std::unordered_map: " << duration2 << " seconds" << '\n';
+  /* |-----------------------------------------------------|
+   * |                 DYNAMIC ARRAYS                      |
+   * |-----------------------------------------------------|
+   */
+  outerCount = 100;
+  innerCount = 10000;
 
-  std::cout << duration1 / duration2 << std::endl;
+  std::cout << "COMPARING DYNAMIC ARRAYS\n" << std::endl;
+  ArrayList<int> list;
+  std::vector<int> vector;
+
+  gkutils::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      list.add(i * 2);
+    }
+    for (int i = 0; i < innerCount; i++) {
+      list[i];
+    }
+    for (int i = 0; i < innerCount; i++) {
+      list.removeAt(0);
+    }
+    for (auto& num : list) {}
+  }
+  gkutils::printTime<>("cxstructs ArrayList :");
+  gkutils::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      vector.emplace_back(i * 2);
+    }
+    for (int i = 0; i < innerCount; i++) {
+      vector[i];
+    }
+    for (int i = 0; i < innerCount; i++) {
+      vector.erase(vector.begin());
+    }
+    for (auto& num : vector) {}
+  }
+  gkutils::printTime<>("std::vector:");
+
+  /* |-----------------------------------------------------|
+   * |                     Queues                           |
+   * |-----------------------------------------------------|
+   */
+  outerCount = 10000;
+  innerCount = 100000;
+  std::cout << "COMPARING QUEUES\n" << std::endl;
+  Queue<int> queue;
+  std::queue<int> std_queue;
+
+  gkutils::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      queue.add(i * 2);
+    }
+    for (int i = 0; i < innerCount; i++) {
+      queue.front();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      queue.pop();
+    }
+  }
+  gkutils::printTime<>("cxstructs Queue :");
+  gkutils::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      std_queue.emplace(i * 2);
+    }
+    for (int i = 0; i < innerCount; i++) {
+      std_queue.front();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      std_queue.pop();
+    }
+  }
+  gkutils::printTime<>("std::queue:");
 }
