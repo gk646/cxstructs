@@ -18,10 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#pragma message( \
-        "|Trie.h| Using non ASCII characters wont throw an error but result in unintentional behaviour!")
 #ifndef CXSTRUCTS_TRIE_H
 #define CXSTRUCTS_TRIE_H
+
+#pragma message( \
+        "|Trie.h| Using non ASCII characters wont throw an error but result in unintentional behaviour!")
 
 #include <algorithm>
 #include <array>
@@ -30,23 +31,16 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace cxhelper {
+
 struct TrieNode {
   std::array<TrieNode*, 128> children{};
   bool filled = false;
   std::string word;
   TrieNode() = default;
-  TrieNode(bool value, std::string s) : filled(value), word(std::move(s)){};
-  ~TrieNode() {
-    for (auto& i : children) {
-      delete i;
-    }
-  }
-  TrieNode* operator[](uint8_t i) { return children[i]; }
-  void setWord(std::string s) {
+  inline void setWord(std::string s) {
     filled = true;
     word = std::move(s);
   }
@@ -54,18 +48,26 @@ struct TrieNode {
 
 }  // namespace cxhelper
 
+#ifdef CX_ALLOC
+#include "../CXAllocator.h"
+using AllocatorType = CXAllocator;
+#else
+using AllocatorType = std::allocator<cxhelper::TrieNode>;
+#endif
+
 namespace cxstructs {
+using namespace cxhelper;
 
 /**
  *Only supports ASCII characters (0-127)
  */
+template <class Allocator = AllocatorType>
 class Trie {
   TrieNode* root;
-
+  Allocator alloc;
   static inline uint8_t getASCII(char c) {
     return static_cast<uint8_t>(c) & 0x7F;
   }
-
   void getAllSubChildren(TrieNode* node, std::vector<std::string>& words) {
     for (auto subNode : node->children) {
       if (subNode) {
@@ -78,20 +80,42 @@ class Trie {
   }
 
  public:
-  Trie() : root(new TrieNode()) {}
-  ~Trie() { delete root; }
+  Trie() {
+    TrieNode* temp = alloc.allocate(1);
+    std::allocator_traits<Allocator>::construct(alloc, temp);
+    root = temp;
+  }
+  ~Trie() {
+    std::vector<TrieNode*> nodesToDelete;
+    nodesToDelete.push_back(root);
 
+    while (!nodesToDelete.empty()) {
+      TrieNode* node = nodesToDelete.back();
+      nodesToDelete.pop_back();
+
+      for (auto child : node->children) {
+        if (child != nullptr) {
+          nodesToDelete.push_back(child);
+        }
+      }
+
+      std::allocator_traits<Allocator>::destroy(alloc, node);
+      alloc.deallocate(node, 1);
+    }
+  }
   /**
  * Inserts the given string into the trie, saving it for lookups
  * @param s the string
  */
-  void insert(std::string s) {
+  void insert(const std::string s) {
     TrieNode* iterator = root;
     uint8_t ascii;
     for (auto& c : s) {
       ascii = getASCII(c);
       if (!iterator->children[ascii]) {
-        iterator->children[ascii] = new TrieNode();
+        TrieNode* temp = alloc.allocate(1);
+        std::allocator_traits<Allocator>::construct(alloc, temp);
+        iterator->children[ascii] = temp;
       }
       iterator = iterator->children[ascii];
     }
@@ -102,7 +126,7 @@ class Trie {
    * @param s  A string query
    * @return true if s is inside the trie
    */
-  bool contains(std::string s) {
+  bool contains(const std::string& s) {
     TrieNode* iterator = root;
     for (auto& c : s) {
       iterator = iterator->children[getASCII(c)];
@@ -120,22 +144,21 @@ class Trie {
  * @param prefix A string that serves as the prefix for the search.
  * @return A vector of strings where each string is a word that begins with the given prefix.
  */
-  std::vector<std::string> complete(std::string prefix) {
+  std::vector<std::string> complete(const std::string& prefix) {
     TrieNode* iterator = root;
-    for (char c : prefix) {
-      uint8_t ascii = getASCII(c);
-      auto node = iterator->children[ascii];
-      if (!node) {
+    for (auto& c : prefix) {
+      iterator = iterator->children[getASCII(c)];
+      if (!iterator) {
         return {};
       }
-      iterator = node;
     }
     if (iterator) {
       std::vector<std::string> re{};
       getAllSubChildren(iterator, re);
       return re;
+    } else {
+      return {};
     }
-    return {};
   }
   static void TEST() {
     std::cout << "TESTING TRIE" << std::endl;
