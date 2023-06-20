@@ -44,7 +44,7 @@ static void test_cxstructs() {
   HashMap<int, int>::TEST();
   Stack<int>::TEST();
   ArrayList<int>::TEST();
-  Trie::TEST();
+  Trie<>::TEST();
   std::cout << "\nAll tests passed!" << std::endl;
 }
 
