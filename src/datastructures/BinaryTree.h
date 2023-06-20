@@ -28,19 +28,13 @@
 #include <stdexcept>
 #include <vector>
 
-/**
- * Simple BinaryTree implementation
- * Only compatible with comparable types "\<"
- * @tparam T - type
- */
-namespace cxstructs {
+namespace cxhelper {  // namespace to hide helper structs
 template <typename T>
-class TreeNode {
+struct TreeNode {
   TreeNode* left_ = nullptr;
   TreeNode* right_ = nullptr;
   T data_;
 
- public:
   explicit TreeNode(T val) : data_(val), left_(nullptr), right_(nullptr) {}
 
   TreeNode(const TreeNode<T>& o)
@@ -48,7 +42,22 @@ class TreeNode {
         left_(o.left_ ? new TreeNode(*o.left_) : nullptr),
         right_(o.right_ ? new TreeNode(*o.right_) : nullptr) {}
 };
-
+}  // namespace cxhelper
+namespace cxstructs {
+using namespace cxhelper;
+/** <h2> Binary Tree.</h2>
+ *
+ * A Binary Tree is a fundamental data structure that uses a hierarchical model. Each element, known as a node,
+ * has at most two children: <b>left child</b> and <b>right child</b>.
+ *
+ * The tree starts from the <b>root node</b>, and any node with no children is called a <b>leaf node</b>.
+ *<br><br>
+ * It is most useful for data that can be organized hierarchically. Each node should be a type (T) that supports
+ * comparison using the '\<' operator, to enable sorting and searching operations.
+ * <br><br>
+ * While accessing or searching for a specific element in a binary tree requires traversing potentially half the tree,
+ * a balanced binary tree allows for faster lookup times of O(log N).
+ */
 template <typename T>
 class BinaryTree {
   TreeNode<T>* root_;
@@ -110,9 +119,7 @@ class BinaryTree {
    * Gives access to the root node of the tree
    * @return the root node
    */
-  TreeNode<T>* get_root(){
-    return root_;
-  }
+  TreeNode<T>* get_root() { return root_; }
 
   /**
    * Inverts this BinaryTree starting from the given node

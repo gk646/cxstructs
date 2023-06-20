@@ -174,7 +174,6 @@ struct HashLinkedList {
     head_ = nullptr;
     end_ = nullptr;
   }
-  bool isEmpty() { return size_ == 0; }
 };
 
 template <typename K>
@@ -193,10 +192,16 @@ struct KeyHash<std::string> {
 namespace cxstructs {
 using namespace cxhelper;
 /**
- * Linear probing HashMap. Apart from primitives and strings you should provide
- * your own hashFunction.
- *
+ * <h2>Linear Probing HashMap</h2>
+ * This data structure is an efficient key-value store, typically providing lookups in constant time (O(1)).
+ * <br><br>
+ * <b>Important:</b> For non-primitive and non-string types, a custom hash function is required.
+ * <br><br>
+ * A HashMap is notably beneficial due to its speed and ease of use. Hashing keys to numerical indices allows for quick value retrieval from the underlying array.
+ * <br><br>
+ * The term 'linear probing' refers to the technique used to handle hash collisions (when different keys produce the same hash). In this scenario, each array index hosts a linked list that is traversed to locate the correct key.
  */
+
 template <typename K, typename V>
 class HashMap {
   uint_fast32_t initialCapacity_;
@@ -225,7 +230,6 @@ class HashMap {
     maxSize = buckets_ * 0.75;
     minSize = buckets_ * 0.1 <= initialCapacity_ ? 0 : buckets_ * 0.1;
   }
-
   inline void reHashLow() {
     auto oldBuckets = buckets_;
     buckets_ = buckets_ / 2;
@@ -346,7 +350,26 @@ class HashMap {
     maxSize = buckets_ * 0.75;
     minSize = 0;
   }
-
+  /**
+   *
+   * @param key
+   * @return
+   */
+  bool contains(K key) {
+    size_t hash = hash_(key) % buckets_;
+    if (arr_[hash].size_ == 0) {
+      return false;
+    } else {
+      HashListNode<K, V>* it = arr_[hash_].head_;
+      while (it) {
+        if (it->key_ == key) {
+          return true;
+        }
+        it = it->next_;
+      }
+      return false;
+    }
+  }
   static void TEST() {
     std::cout << "HASHMAP TESTS" << std::endl;
     // Test insert and operator[key]

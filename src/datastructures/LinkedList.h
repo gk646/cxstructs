@@ -39,6 +39,18 @@ struct ListNode {
 }  // namespace cxhelper
 namespace cxstructs {
 using namespace cxhelper;
+/**
+ * <h2>Singly Linked List</h2>
+ *
+ * A singly linked list is a fundamental data structure that consists of a sequence of nodes, where each node contains
+ * data and a reference (or link) to the next node in the sequence.
+ * <br><br>
+ * Adding or removing nodes at the beginning of the list is a <b>highly efficient O(1) operation </b, as it only requires
+ * updating the head of the list and the link of a single node.
+ * <br><br>
+ * However, accessing or searching for specific elements in the list requires potentially <b> traversing the entire list,
+ * which is an O(N)</b operation. This makes it less suitable for cases where random access is frequently required.<p>
+ */
 template <typename T>
 class LinkedList {
   ListNode<T>* head_;
