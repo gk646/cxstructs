@@ -41,11 +41,11 @@ string get_duration_unit<chrono::duration<double>>() {
 
 template <typename durationType = chrono::duration<double>>
 void printTime(string prefix = "") {
+  auto diff = std::chrono::high_resolution_clock::now() - activeTimeStamp;
+  auto diffInMicroseconds = chrono::duration_cast<durationType>(diff);
   if (!prefix.empty()) {
     cout << prefix << " ";
   }
-  auto diff = std::chrono::high_resolution_clock::now() - activeTimeStamp;
-  auto diffInMicroseconds = chrono::duration_cast<durationType>(diff);
   cout << fixed << setprecision(3) << diffInMicroseconds.count() << " "
        << get_duration_unit<durationType>() << endl;
 }

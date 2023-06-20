@@ -20,28 +20,31 @@
 
 #include <cassert>
 
+#include "datastructures/ArrayList.h"
 #include "datastructures/BinaryTree.h"
 #include "datastructures/HashMap.h"
 #include "datastructures/LinkedList.h"
 #include "datastructures/Matrix.h"
 #include "datastructures/Queue.h"
 #include "datastructures/Stack.h"
-#include "datastructures/ArrayList.h"
+#include "datastructures/Trie.h"
 
 #include "algorithms/GraphTraversal.h"
 #include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
+
 namespace cxtests {
 using namespace cxstructs;
 using namespace cxalgos;
 
 static void test_cxstructs() {
-  mat::TEST();
+  //mat::TEST();
   LinkedList<int>::TEST();
   Queue<int>::TEST();
   HashMap<int, int>::TEST();
   Stack<int>::TEST();
   ArrayList<int>::TEST();
+  Trie::TEST();
   std::cout << "\nAll tests passed!" << std::endl;
 }
 

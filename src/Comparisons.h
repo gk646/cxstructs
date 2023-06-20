@@ -146,4 +146,26 @@ void compareWithSTL() {
     }
   }
   gkutils::printTime<>("std::queue:");
+
+  /* |-----------------------------------------------------|
+   * |                        Trie                         |
+   * |-----------------------------------------------------|
+   */
+  // no STL counterpart
+
+  Trie trie;
+
+  gkutils::now();
+
+  trie.insert("hello");
+
+  gkutils::printTime<std::chrono::nanoseconds>("insert time:");
+
+  gkutils::now();
+
+  trie.complete("hel");
+
+  gkutils::printTime<std::chrono::nanoseconds>("complete 1 time:");
+
+
 }
