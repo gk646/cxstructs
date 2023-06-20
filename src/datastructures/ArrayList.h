@@ -27,6 +27,7 @@
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
+#include "./gktime.h"
 
 namespace cxstructs {
 
@@ -69,7 +70,7 @@ class ArrayList {
    * Negative indices can be used to access the list from the last element onwards starting with -1
    * @param T a reference to the value at the given index
    */
-  T& operator[](int_fast32_t index) {
+  inline T& operator[](int_fast32_t index) {
     if (index < 0) {
       int_fast32_t access = size_ + index;
       if (access >= 0) {
@@ -85,7 +86,7 @@ class ArrayList {
    * Adds a element to the list
    * @param e the element to be added
    */
-  void add(T e) {
+  inline void add(T e) {
     if (size_ == len) {
       grow();
     }
@@ -147,6 +148,60 @@ class ArrayList {
    * @return a pointer to the data array
    */
   T* get_raw() { return arr; }
+  /**
+   * Searches the whole vector starting from the beginning (default)
+   * @param val value to search for
+   * @param startFront whether to start from the front
+   * @return true if the value was found
+   */
+  bool contains(T val, bool startFront = true) {
+    if (startFront) {
+      for (int i = 0; i < size_; i++) {
+        if (arr[i] == val) {
+          return true;
+        }
+      }
+      return false;
+    } else {
+      for (int i = size_ - 1; i > -1; i++) {
+        if (arr[i] == val) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+  /**
+ * Appends the contents of another ArrayList at the end of this list <p>
+ * If necessary, the capacity of this ArrayList is expanded
+ * @param list the list to append
+ */
+  void append(ArrayList<T>& list) {
+    while(len-size_ < list.size_){
+      grow();
+    }
+    std::copy(list.arr, list.arr+list.size_,arr+size_);
+    size_+=list.size_;
+  }
+  /**
+ * Appends a specified range of elements from another ArrayList to this ArrayList.
+ * If necessary, the capacity of this ArrayList is expanded.
+ * Throws a std::out_of_range exception if the start or end indices are not valid.
+ *
+ * @param list the list to append
+ * @param end index of the last element (exclusive)
+ * @param start the index of the first element (inclusive)
+ */
+  void append(ArrayList<T>& list, uint_fast32_t endIndex, uint_fast32_t startIndex = 0) {
+    if(startIndex >= endIndex || endIndex > list.size_){
+      throw std::out_of_range("index out of bounds");
+    }
+    while(len-size_ < endIndex - startIndex){
+      grow();
+    }
+    std::copy(list.arr+ startIndex, list.arr+ endIndex,arr+size_);
+    size_+= endIndex - startIndex;
+  }
   class Iterator {
     T* ptr;
 
@@ -172,6 +227,7 @@ class ArrayList {
     }
     return os << "]";
   }
+
   static void TEST() {
     std::cout << "TESTING ARRAY LIST" << std::endl;
 
@@ -213,6 +269,38 @@ class ArrayList {
     for (int i = 0; i < 10000; i++) {
       list1.remove(i);
     }
+
+    std::cout << "   Testing contains..." << std::endl;
+
+    list1.clear();
+    list1.add(5);
+    assert(list1.contains(5) == true);
+    assert(list1.contains(5, false) == true);
+
+    std::cout << "   Testing append..." << std::endl;
+    list1.clear();
+
+    list1.add(5);
+    list1.add(10);
+    ArrayList<int> list2;
+    for (int i = 0; i < 1000000; i++) {
+      list2.add(i);
+    }
+    assert(list2.size() == 1000000);
+    gkutils::now();
+    list1.append(list2);
+    gkutils::printTime<std::chrono::microseconds>("after");
+    assert(list1.size() ==1000002);
+    assert(list2[10] == 10);
+
+    list1.clear();
+
+    list1.append(list2,10,1);
+    int check = 1;
+    for(auto num : list1){
+      assert(check++ == num);
+    }
+    assert(list1.size()== 9);
   }
 };
 }  // namespace cxstructs

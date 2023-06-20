@@ -20,37 +20,35 @@
 
 #ifndef CXSTRUCTS_SRC_CXALLOCATOR_H_
 #define CXSTRUCTS_SRC_CXALLOCATOR_H_
-
+#pragma message( \
+        "|CXAllocator.h| The custom allocator will preallocate memory when constructing the datastructure to speed up general use. Don't frequently create new datastructures!")
 class CXAllocator {
  private:
-  char* pool;  // The memory pool
-  size_t size; // The size of the pool
-  size_t used; // The amount of the pool currently used
+  char* pool;
+  size_t size;
+  size_t used;
 
  public:
   explicit CXAllocator(size_t size) : size(size), used(0) {
     pool = new char[size];
   }
 
-  ~CXAllocator() {
-    delete[] pool;
-  }
+  ~CXAllocator() { delete[] pool; }
 
   void* allocate(size_t amount) {
-    if(used + amount <= size) {
+    if (used + amount <= size) {
       void* ptr = pool + used;
       used += amount;
       return ptr;
     } else {
-      // Not enough memory left in the pool
+
       return nullptr;
     }
   }
 
   void deallocate(void* ptr, size_t amount) {
-    // This simple allocator doesn't actually free memory
+
   }
 };
-
 
 #endif  //CXSTRUCTS_SRC_CXALLOCATOR_H_
