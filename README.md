@@ -16,16 +16,19 @@ To use these, simply include the **include directory**, which contains only fina
 
 ### DataStructures
 
-- HashMap
+- HashMap (Linear Probing with LinkedLists)
 - Linked List
 - Array List
-- Matrix
+- Matrix (flattened float [])
 - Queue
 - Stack
 - Binary Tree
+- Trie (fixed size array due to ASCII limit)
 
 
 ### Algorithms
 
-- Sorting: QuickSort
-- Search: Binary Search, 
+- Sorting: QuickSort 
+- Search: Binary Search (recursive and non-recursive)
+- Graph Traversal: DepthFirstSearch (on 2d-vector as adjacency matrix)
+- 
