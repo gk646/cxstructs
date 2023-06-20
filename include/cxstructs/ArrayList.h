@@ -21,6 +21,7 @@
 #ifndef CXSTRUCTS_ARRAYLIST_H
 #define CXSTRUCTS_ARRAYLIST_H
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -38,21 +39,36 @@ class ArrayList {
   uint_fast32_t size_;
   uint_fast32_t len;
   uint_fast32_t minlen;
-  void grow() {}
-  void shrink() {}
+  void grow() {
+    len *= 2;
+    auto newarr = new T[len];
+    std::move(arr, arr + size_, newarr);
+    delete[] arr;
+    arr = newarr;
+    minlen = size_ / 4 < 32 ? 0 : size_ / 4;
+  }
+  void shrink() {
+    len /= 2;
+    auto newarr = new T[len];
+    std::move(arr, arr + size_, newarr);
+    delete[] arr;
+    arr = newarr;
+
+    minlen = size_ / 4 < 32 ? 0 : size_ / 4;
+  }
 
  public:
-  explicit ArrayList(uint_fast32_t initial_capacity = 16)
+  explicit ArrayList(uint_fast32_t initial_capacity = 32)
       : len(initial_capacity),
         size_(0),
         arr(new T[initial_capacity]),
         minlen(0) {}
+  ~ArrayList() { delete[] arr; }
   /**
    * Allows direct access at the specified index starting with index 0 <p>
    * Negative indices can be used to access the list from the last element onwards starting with -1
    * @param T a reference to the value at the given index
    */
-  ~ArrayList() { delete[] arr; }
   T& operator[](int_fast32_t index) {
     if (index < 0) {
       int_fast32_t access = size_ + index;
@@ -86,12 +102,28 @@ class ArrayList {
     for (int i = 0; i < len; i++) {
       if (arr[i] == e) {
         for (int j = i; j < len - 1; j++) {
-          arr[i] = arr[i + 1];
+          arr[i] = std::move(arr[i + 1]);
         }
         size_--;
         return;
       }
     }
+  }
+  /**
+   * Removes the element at the given index
+   * @param index index of removal
+   */
+  void removeAt(uint_fast32_t index) {
+    if (index >= size_) {
+      throw std::out_of_range("index out of bounds");
+    }
+    if (size_ < minlen) {
+      shrink();
+    }
+    for (uint_fast32_t i = index; i < size_ - 1; ++i) {
+      arr[i] = std::move(arr[i + 1]);
+    }
+    --size_;
   }
   /**
  *
@@ -109,8 +141,15 @@ class ArrayList {
     delete[] arr;
     arr = new T[len];
   }
+  /**
+   * Provides access to the underlying array
+   * Use with caution!
+   * @return a pointer to the data array
+   */
+  T* get_raw() { return arr; }
   class Iterator {
     T* ptr;
+
    public:
     explicit Iterator(T* p) : ptr(p) {}
     T& operator*() { return *ptr; }
@@ -165,6 +204,15 @@ class ArrayList {
       assert(num == checkNum);
     }
     assert(checkNum == 15);
+
+    list1.clear();
+    std::cout << "   Testing resizing..." << std::endl;
+    for (int i = 0; i < 10000; i++) {
+      list1.add(i);
+    }
+    for (int i = 0; i < 10000; i++) {
+      list1.remove(i);
+    }
   }
 };
 }  // namespace cxstructs
