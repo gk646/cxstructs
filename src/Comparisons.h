@@ -163,9 +163,9 @@ void compareWithSTL() {
 
   gkutils::now();
 
-  trie.complete("hel");
+  trie.startsWith("hel");
 
-  gkutils::printTime<std::chrono::nanoseconds>("complete 1 time:");
+  gkutils::printTime<std::chrono::nanoseconds>("startsWith 1 time:");
 
 
 }

@@ -38,13 +38,14 @@ using namespace cxstructs;
 using namespace cxalgos;
 
 static void test_cxstructs() {
-  //mat::TEST();
+  //mat::TEST();   weird error when using operator == that makes no sense and works in practice
   LinkedList<int>::TEST();
   Queue<int>::TEST();
   HashMap<int, int>::TEST();
   Stack<int>::TEST();
   ArrayList<int>::TEST();
   Trie<>::TEST();
+  //BinaryTree<int>::TEST(); // not yet transition to using the node
   std::cout << "\nAll tests passed!" << std::endl;
 }
 

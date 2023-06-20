@@ -17,37 +17,91 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
+#define F
 #ifndef CXSTRUCTS_SRC_CXALLOCATOR_H_
 #define CXSTRUCTS_SRC_CXALLOCATOR_H_
 #pragma message( \
         "|CXAllocator.h| The custom allocator will preallocate memory when constructing the datastructure to speed up general use. Don't frequently create new datastructures!")
-class CXAllocator {
- private:
-  char* pool;
-  size_t size;
-  size_t used;
 
- public:
-  explicit CXAllocator(size_t size) : size(size), used(0) {
-    pool = new char[size];
+#include <iostream>
+#include <memory>
+#include <stack>
+
+template <size_t BlockSize, size_t ReservedBlocks = 0>
+class Pool {
+
+  size_t size_;
+  std::stack<void*> addrs_;
+  std::stack<uint8_t*> blocks_;
+
+  void allocateBlock() {
+    auto* block = new uint8_t[BlockSize];
+
+    auto total_size = BlockSize % size_ == 0 ? BlockSize : BlockSize - size_;
+
+    for (size_t i = 0; i < total_size; i += size_) {
+      addrs_.push(&block[i]);
+    }
+
+    blocks_.push(block);
   }
 
-  ~CXAllocator() { delete[] pool; }
-
-  void* allocate(size_t amount) {
-    if (used + amount <= size) {
-      void* ptr = pool + used;
-      used += amount;
-      return ptr;
-    } else {
-
-      return nullptr;
+ public:
+  explicit Pool(size_t size) : size_(size) {
+    for (size_t i = 0; i < ReservedBlocks; i++) {
+      allocateBlock();
+    }
+  }
+  ~Pool() {
+    while (!blocks_.empty()) {
+      delete[] blocks_.top();
+      blocks_.pop();
     }
   }
 
-  void deallocate(void* ptr, size_t amount) {
+  void* allocate() {
+    if (addrs_.empty()) {
+      allocateBlock();
+    }
 
+    auto ptr = addrs_.top();
+    addrs_.pop();
+    return ptr;
+  }
+  void deallocate(void* ptr) { addrs_.push(ptr); }
+};
+
+template <typename T, size_t BlockSize = 4096, size_t ReservedBlocks = 0>
+class CXPoolAllocator {
+  using PoolType = Pool<BlockSize, ReservedBlocks>;
+  std::shared_ptr<PoolType> pool_;
+
+ public:
+  using value_type = T;
+  using is_always_equal = std::false_type;
+
+  CXPoolAllocator() : pool_(std::make_shared<PoolType>(sizeof(T))) {}
+
+  CXPoolAllocator(const CXPoolAllocator& other) = default;
+  CXPoolAllocator(CXPoolAllocator&& other) noexcept = default;
+  CXPoolAllocator& operator=(const CXPoolAllocator& other) = default;
+  CXPoolAllocator& operator=(CXPoolAllocator&& other) noexcept = default;
+
+  T* allocate(size_t n) {
+    if (n > 1) {
+      return static_cast<T*>(malloc(sizeof(T) * n));
+    }
+
+    return static_cast<T*>(pool_->allocate());
+  }
+
+  void deallocate(T* ptr, size_t n) {
+    if (n > 1) {
+      free(ptr);
+      return;
+    }
+
+    pool_->deallocate(ptr);
   }
 };
 
