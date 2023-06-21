@@ -67,9 +67,7 @@ class mat {
    * Use with caution!
    * @return a pointer to the underlying array
    */
-  float* get_raw(){
-      return arr;
-  }
+  float* get_raw() { return arr; }
   mat& operator=(const mat& other) {
     if (this != &other) {
       delete[] arr;
@@ -192,7 +190,7 @@ class mat {
    * @param o other matrix
    * @return true if the matrices are identical
    */
-  bool operator==(const mat o) const {
+  bool operator==(const mat& o) const {
     if (this == &o) {
       return true;
     }

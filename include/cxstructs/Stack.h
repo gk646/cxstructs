@@ -171,7 +171,10 @@ class Stack {
     stack1.pop();
     assert(stack1.size() == 0);
 
-    std::cout << "  All tests passed!" << std::endl;
+    std::cout << "  Testing memory leak..." << std::endl;
+    for (int i = 0; i < 100000; i++) {
+      stack1.add(i);
+    }
   }
 };
 }  // namespace cxstructs

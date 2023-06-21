@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
+#define CX_ALLOC
 #ifndef CXSTRUCTS_TRIE_H
 #define CXSTRUCTS_TRIE_H
 
@@ -34,26 +35,32 @@
 #include <vector>
 
 namespace cxhelper {
-
 struct TrieNode {
   std::array<TrieNode*, 128> children{};
   bool filled = false;
   std::string word;
-  TrieNode() = default;
-  inline void setWord(std::string s) {
+  inline void setWord(std::string& s) {
     filled = true;
     word = std::move(s);
   }
 };
-
 }  // namespace cxhelper
 
 #ifdef CX_ALLOC
 #include "../CXAllocator.h"
-using AllocatorType = CXAllocator;
+using AllocatorType = CXPoolAllocator<cxhelper::TrieNode, 4098, 2>;
 #else
 using AllocatorType = std::allocator<cxhelper::TrieNode>;
 #endif
+
+namespace {
+inline constexpr bool using_custom_alloc =
+#ifdef CX_ALLOC
+    true;
+#else
+    false;
+#endif
+}  // namespace
 
 namespace cxstructs {
 using namespace cxhelper;
@@ -65,6 +72,7 @@ template <class Allocator = AllocatorType>
 class Trie {
   TrieNode* root;
   Allocator alloc;
+  uint_fast32_t size_;
   static inline uint8_t getASCII(char c) {
     return static_cast<uint8_t>(c) & 0x7F;
   }
@@ -80,34 +88,41 @@ class Trie {
   }
 
  public:
-  Trie() {
+  Trie() : size_(0) {
     TrieNode* temp = alloc.allocate(1);
     std::allocator_traits<Allocator>::construct(alloc, temp);
     root = temp;
   }
   ~Trie() {
-    std::vector<TrieNode*> nodesToDelete;
-    nodesToDelete.push_back(root);
+    if (!using_custom_alloc) {
+      std::vector<TrieNode*> nodesToDelete;
+      nodesToDelete.push_back(root);
 
-    while (!nodesToDelete.empty()) {
-      TrieNode* node = nodesToDelete.back();
-      nodesToDelete.pop_back();
+      while (!nodesToDelete.empty()) {
+        TrieNode* node = nodesToDelete.back();
+        nodesToDelete.pop_back();
 
-      for (auto child : node->children) {
-        if (child != nullptr) {
-          nodesToDelete.push_back(child);
+        for (auto child : node->children) {
+          if (child != nullptr) {
+            nodesToDelete.push_back(child);
+          }
         }
-      }
 
-      std::allocator_traits<Allocator>::destroy(alloc, node);
-      alloc.deallocate(node, 1);
+        std::allocator_traits<Allocator>::destroy(alloc, node);
+        alloc.deallocate(node, 1);
+      }
     }
   }
+  Trie& operator=(const Trie& o) = delete;
+  Trie& operator=(const Trie&& o) = delete;
+  Trie(const Trie& o) = delete;
+  Trie(const Trie&& o) = delete;
+
   /**
- * Inserts the given string into the trie, saving it for lookups
+ *  Inserts the given string into the trie, saving it for lookups
  * @param s the string
  */
-  void insert(const std::string s) {
+  void insert(std::string s) {
     TrieNode* iterator = root;
     uint8_t ascii;
     for (auto& c : s) {
@@ -120,6 +135,7 @@ class Trie {
       iterator = iterator->children[ascii];
     }
     iterator->setWord(s);
+    size_++;
   }
   /**
    * This function checks if the provided string is present in the Trie.
@@ -144,7 +160,7 @@ class Trie {
  * @param prefix A string that serves as the prefix for the search.
  * @return A vector of strings where each string is a word that begins with the given prefix.
  */
-  std::vector<std::string> complete(const std::string& prefix) {
+  std::vector<std::string> startsWith(const std::string& prefix) {
     TrieNode* iterator = root;
     for (auto& c : prefix) {
       iterator = iterator->children[getASCII(c)];
@@ -160,6 +176,49 @@ class Trie {
       return {};
     }
   }
+  /**
+   *
+   * @return the total amount of words in the trie
+   */
+  [[nodiscard]] uint_fast32_t size() const { return size_; }
+  /**
+   * Empty check on the trie
+   * @return true if the trie contains no words
+   */
+  [[nodiscard]] bool empty() const { return size_ == 0; }
+  /**
+   * Clears the trie of all words
+   */
+  void clear() {
+    if (using_custom_alloc) {
+
+    } else {
+      std::vector<TrieNode*> nodesToDelete;
+      nodesToDelete.push_back(root);
+
+      while (!nodesToDelete.empty()) {
+        TrieNode* node = nodesToDelete.back();
+        nodesToDelete.pop_back();
+
+        for (auto child : node->children) {
+          if (child != nullptr) {
+            nodesToDelete.push_back(child);
+          }
+        }
+
+        std::allocator_traits<Allocator>::destroy(alloc, node);
+        alloc.deallocate(node, 1);
+      }
+      size_ = 0;
+      TrieNode* temp = alloc.allocate(1);
+      std::allocator_traits<Allocator>::construct(alloc, temp);
+      root = temp;
+    }
+  }
+  /**
+   * Removes the given word from the trie
+   */
+  void remove(const std::string& s) { size_--; }
   static void TEST() {
     std::cout << "TESTING TRIE" << std::endl;
 
@@ -171,10 +230,10 @@ class Trie {
     std::cout << "   Testing contains..." << std::endl;
     assert(trie.contains("hello") == true);
     assert(trie.contains("helloh") == false);
-    std::cout << "   Testing complete..." << std::endl;
-    assert(trie.complete("he")[0] == "hello");
+    std::cout << "   Testing startsWith..." << std::endl;
+    assert(trie.startsWith("he")[0] == "hello");
   }
 };
 }  // namespace cxstructs
-
+#undef CX_ALLOC
 #endif  //CXSTRUCTS_TRIE_H

@@ -41,7 +41,18 @@ struct ListNode {
 }  // namespace cxhelper
 namespace cxstructs {
 using namespace cxhelper;
-
+/**
+ * <h2>Singly Linked List</h2>
+ *
+ * A singly linked list is a fundamental data structure that consists of a sequence of nodes, where each node contains
+ * data and a reference (or link) to the next node in the sequence.
+ * <br><br>
+ * Adding or removing nodes at the beginning of the list is a <b>highly efficient O(1) operation </b, as it only requires
+ * updating the head of the list and the link of a single node.
+ * <br><br>
+ * However, accessing or searching for specific elements in the list requires potentially <b> traversing the entire list,
+ * which is an O(N)</b operation. This makes it less suitable for cases where random access is frequently required.<p>
+ */
 template <typename T>
 class LinkedList {
   ListNode<T>* head_;
@@ -172,11 +183,10 @@ class LinkedList {
     --size_;
     delete toDelete;
   }
-
   /**
-         * Removes the first node with the given value
-         * @param val - the value to be matched
-         */
+   * Removes the first node with the given value
+   * @param val - the value to be matched
+   */
   void remove(T val) {
     if (!head_)
       throw std::out_of_range("list is empty");
@@ -216,9 +226,9 @@ class LinkedList {
     return os;
   }
 
-  /**
-         * Clears the linked list of all elements
-         */
+/**
+ * Clears the linked list of all elements
+ */
   void clear() {
     ListNode<T>* current = head_;
     while (current != nullptr) {
@@ -233,10 +243,9 @@ class LinkedList {
 
   ListNode<T>& last() { return *end_; }
 
-  /**
-         *
-         * @return the current size of this Linked List
-         */
+/**
+ * @return the current size of this Linked List
+ */
   [[nodiscard]] uint_fast32_t size() const { return size_; }
 
   class Iterator {
