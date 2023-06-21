@@ -81,12 +81,11 @@ class CXPoolAllocator {
   using is_always_equal = std::false_type;
 
   CXPoolAllocator() : pool_(std::make_shared<PoolType>(sizeof(T))) {}
-
   CXPoolAllocator(const CXPoolAllocator& other) = default;
   CXPoolAllocator(CXPoolAllocator&& other) noexcept = default;
   CXPoolAllocator& operator=(const CXPoolAllocator& other) = default;
   CXPoolAllocator& operator=(CXPoolAllocator&& other) noexcept = default;
-
+  ~CXPoolAllocator() { pool_.release(); }
   T* allocate(size_t n) {
     if (n > 1) {
       return static_cast<T*>(malloc(sizeof(T) * n));
@@ -94,7 +93,6 @@ class CXPoolAllocator {
 
     return static_cast<T*>(pool_->allocate());
   }
-
   void deallocate(T* ptr, size_t n) {
     if (n > 1) {
       free(ptr);

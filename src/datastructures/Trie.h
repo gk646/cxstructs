@@ -48,7 +48,7 @@ struct TrieNode {
 
 #ifdef CX_ALLOC
 #include "../CXAllocator.h"
-using AllocatorType = CXPoolAllocator<cxhelper::TrieNode, 4098, 3>;
+using AllocatorType = CXPoolAllocator<cxhelper::TrieNode, 4098, 2>;
 #else
 using AllocatorType = std::allocator<cxhelper::TrieNode>;
 #endif
@@ -72,6 +72,7 @@ template <class Allocator = AllocatorType>
 class Trie {
   TrieNode* root;
   Allocator alloc;
+  uint_fast32_t size_;
   static inline uint8_t getASCII(char c) {
     return static_cast<uint8_t>(c) & 0x7F;
   }
@@ -87,15 +88,13 @@ class Trie {
   }
 
  public:
-  Trie() {
+  Trie() : size_(0) {
     TrieNode* temp = alloc.allocate(1);
     std::allocator_traits<Allocator>::construct(alloc, temp);
     root = temp;
   }
   ~Trie() {
-    if (using_custom_alloc) {
-      delete alloc;
-    } else {
+    if (!using_custom_alloc) {
       std::vector<TrieNode*> nodesToDelete;
       nodesToDelete.push_back(root);
 
@@ -114,6 +113,11 @@ class Trie {
       }
     }
   }
+  Trie& operator=(const Trie& o) = delete;
+  Trie& operator=(const Trie&& o) = delete;
+  Trie(const Trie& o) = delete;
+  Trie(const Trie&& o) = delete;
+
   /**
  *  Inserts the given string into the trie, saving it for lookups
  * @param s the string
@@ -131,6 +135,7 @@ class Trie {
       iterator = iterator->children[ascii];
     }
     iterator->setWord(s);
+    size_++;
   }
   /**
    * This function checks if the provided string is present in the Trie.
@@ -171,6 +176,49 @@ class Trie {
       return {};
     }
   }
+  /**
+   *
+   * @return the total amount of words in the trie
+   */
+  [[nodiscard]] uint_fast32_t size() const { return size_; }
+  /**
+   * Empty check on the trie
+   * @return true if the trie contains no words
+   */
+  [[nodiscard]] bool empty() const { return size_ == 0; }
+  /**
+   * Clears the trie of all words
+   */
+  void clear() {
+    if (using_custom_alloc) {
+
+    } else {
+      std::vector<TrieNode*> nodesToDelete;
+      nodesToDelete.push_back(root);
+
+      while (!nodesToDelete.empty()) {
+        TrieNode* node = nodesToDelete.back();
+        nodesToDelete.pop_back();
+
+        for (auto child : node->children) {
+          if (child != nullptr) {
+            nodesToDelete.push_back(child);
+          }
+        }
+
+        std::allocator_traits<Allocator>::destroy(alloc, node);
+        alloc.deallocate(node, 1);
+      }
+      size_ = 0;
+      TrieNode* temp = alloc.allocate(1);
+      std::allocator_traits<Allocator>::construct(alloc, temp);
+      root = temp;
+    }
+  }
+  /**
+   * Removes the given word from the trie
+   */
+  void remove(const std::string& s) { size_--; }
   static void TEST() {
     std::cout << "TESTING TRIE" << std::endl;
 
