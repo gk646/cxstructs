@@ -40,7 +40,8 @@ namespace cxhelper {  // namespace to hide the classes
  */
 template <typename K, typename V>
 struct HashListNode {
-  HashListNode(K& key, V& val) : key_(key), value_(val), next_(nullptr) {}
+  HashListNode(K& key, V& val)
+      : key_(std::move(key)), value_(std::move(val)), next_(nullptr) {}
   inline explicit HashListNode(HashListNode<K, V>* o)
       : key_(o->key_), value_(o->value_), next_(nullptr){};
   inline HashListNode(HashListNode<K, V>* o, HashListNode<K, V>* next)
@@ -111,7 +112,7 @@ struct HashLinkedList {
     }
     return *this;
   }
-  V& operator[](K key) {
+  V& operator[](const K& key) {
     HashListNode<K, V>* current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
@@ -121,11 +122,11 @@ struct HashLinkedList {
     }
     throw std::out_of_range("no such element");
   }
-  bool replaceAdd(K key, V val) {
+  bool replaceAdd(K& key, V& val) {
     HashListNode<K, V>* current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
-        current->value_ = val;
+        current->value_ = std::move(val);
         return false;
       }
       current = current->next_;
@@ -160,7 +161,7 @@ struct HashLinkedList {
       }
     }
   }
-  inline void add(K key, V val) {
+  inline void add(K& key, V& val) {
     if (head_ == nullptr) {
       head_ = new HashListNode<K, V>(key, val);
       end_ = head_;
@@ -170,7 +171,7 @@ struct HashLinkedList {
     }
     size_++;
   }
-  void clear() {
+  inline void clear() {
     HashListNode<K, V>* current = head_;
     while (current != nullptr) {
       HashListNode<K, V>* next = current->next_;
@@ -195,6 +196,7 @@ struct KeyHash<std::string> {
   }
 };
 }  // namespace cxhelper
+
 namespace cxstructs {
 using namespace cxhelper;
 /**
@@ -218,7 +220,8 @@ class HashMap {
   uint_fast32_t maxSize;
   uint_fast32_t minSize;
 
-  inline void reHashHigh() {
+  // once the size limit is reached all values needs to be rehashed to fit to the keys with the new bucket size
+  void reHashHigh() {
     auto oldBuckets = buckets_;
     buckets_ = buckets_ * 4;
     auto newArr = new HashLinkedList<K, V>[buckets_];
@@ -234,9 +237,9 @@ class HashMap {
     delete[] arr_;
     arr_ = newArr;
     maxSize = buckets_ * 0.75;
-    minSize = buckets_ * 0.1 <= initialCapacity_ ? 0 : buckets_ * 0.1;
+    minSize = buckets_ * 0.1 < initialCapacity_ ? 0 : buckets_ * 0.1;
   }
-  inline void reHashLow() {
+  void reHashLow() {
     auto oldBuckets = buckets_;
     buckets_ = buckets_ / 2;
 
@@ -253,7 +256,7 @@ class HashMap {
     delete[] arr_;
     arr_ = newArr;
     maxSize = buckets_ * 0.75;
-    minSize = buckets_ * 0.1 <= initialCapacity_ ? 0 : buckets_ * 0.1;
+    minSize = buckets_ * 0.1 < initialCapacity_ ? 0 : buckets_ * 0.1;
   }
 
  public:
@@ -261,7 +264,7 @@ class HashMap {
       : buckets_(initialCapacity),
         initialCapacity_(initialCapacity),
         size_(0),
-        arr_(new HashLinkedList<K, V>[buckets_]) {
+        arr_(new HashLinkedList<K, V>[initialCapacity]) {
     maxSize = buckets_ * 0.75;
     minSize = 0;
   }
@@ -274,7 +277,7 @@ class HashMap {
         maxSize(o.maxSize),
         minSize(o.minSize) {
     arr_ = new HashLinkedList<K, V>[buckets_];
-    for (uint_fast32_t i = 0; i < buckets_; ++i) {
+    for (uint_fast32_t i = 0; i < buckets_; i++) {
       arr_[i] = o.arr_[i];
     }
   }
@@ -303,7 +306,7 @@ class HashMap {
    * @param key - the key to the value
    * @return the value at this key
    */
-  V& operator[](const K key) const {
+  V& operator[](const K& key) const {
     size_t hash = hash_(key) % buckets_;
     return arr_[hash][key];
   }
@@ -313,11 +316,11 @@ class HashMap {
    * @param val - the stored value at the given key
    */
   inline void insert(K key, V val) {
-    size_t hash = hash_(key) % buckets_;
-    size_ += arr_[hash].replaceAdd(key, val);
     if (size_ > maxSize) {
       reHashHigh();
     }
+    size_t hash = hash_(key) % buckets_;
+    size_ += arr_[hash].replaceAdd(key, val);
   }
   /**
    * Retrieves the value for the given key
@@ -350,16 +353,12 @@ class HashMap {
    * growing and rehashing
    * @return the current load factor of the hashmap
    */
-  float loadFactor(){
-    return 0.75;
-  }
+  float loadFactor() { return 0.75; }
   /**
    * The initialCapacity the hashmaps started with and expands along
    * @return the initial capacity
    */
-  uint_fast32_t  initialCapacity(){
-    return initialCapacity_;
-  }
+  uint_fast32_t initialCapacity() { return initialCapacity_; }
   /**
    * Clears the hashMap of all its contents
    */

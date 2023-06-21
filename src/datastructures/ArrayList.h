@@ -28,8 +28,7 @@
 #include <ostream>
 #include <stdexcept>
 
-
-//This implementation is well optimized (from what I can tell) and should be faster than the std::vector in a lot of use cases
+//This implementation is well optimized (from what I can tell) and should be faster or equal than the std::vector in a lot of use cases
 namespace cxstructs {
 /**
  * <h2>Array List</h2>
@@ -44,16 +43,17 @@ class ArrayList {
   uint_fast32_t size_;
   uint_fast32_t len;
   uint_fast32_t minlen;
-  void grow() {
+
+  inline void grow() {
     len *= 1.5;
     auto newarr = new T[len];
     std::move(arr, arr + size_, newarr);
     delete[] arr;
     arr = newarr;
 
-    minlen = size_ / 5 < 32 ? 0 : size_ / 5;
+    minlen = size_ / 6 < 32 ? 0 : size_ / 6; // lower bound is very lenient to avoid premature downsizing
   }
-  void shrink() {
+  inline void shrink() {
     len /= 2;
     auto newarr = new T[len];
     std::move(arr, arr + size_, newarr);
@@ -89,10 +89,7 @@ class ArrayList {
   }
   //move constructor
   ArrayList(ArrayList&& o) noexcept
-      : arr(o.arr),
-        size_(o.size_),
-        len(o.len),
-        minlen(o.minlen) {
+      : arr(o.arr), size_(o.size_), len(o.len), minlen(o.minlen) {
     o.arr = nullptr;
     o.size_ = 0;
     o.len = 0;
@@ -129,7 +126,7 @@ class ArrayList {
    * Throws std::out_of_range on invalid index
    * @param T a reference to the value at the given index
    */
-  inline T& at(const int_fast32_t& index){
+  inline T& at(const int_fast32_t& index) {
     if (index < 0) {
       int_fast32_t access = size_ + index;
       if (access >= 0) {
@@ -168,7 +165,7 @@ class ArrayList {
    * Removes the first occurrence of the given element from the list
    * @param e element to be removed
    */
- inline void remove(const T& e) {
+  inline void remove(const T& e) {
     if (size_ < minlen) {
       shrink();
     }
@@ -184,7 +181,7 @@ class ArrayList {
    * Removes the element at the given index
    * @param index index of removal
    */
-  void removeAt(const uint_fast32_t& index) {
+  inline void removeAt(const uint_fast32_t& index) {
     if (size_ < minlen) {
       shrink();
     }
@@ -270,6 +267,7 @@ class ArrayList {
   }
   class Iterator {
     T* ptr;
+
    public:
     explicit Iterator(T* p) : ptr(p) {}
     T& operator*() { return *ptr; }
@@ -296,7 +294,8 @@ class ArrayList {
   static void TEST() {
     std::cout << "TESTING ARRAY LIST" << std::endl;
 
-    std::cout << "   Testing remove..." << std::endl;
+    // Test 1: Testing add and remove
+    std::cout << "   Test 1: Testing add and remove..." << std::endl;
     ArrayList<int> list1;
     list1.add(5);
     list1.add(10);
@@ -306,19 +305,20 @@ class ArrayList {
     assert(list1.size() == 2);
     assert(list1[1] == 15);
 
-    std::cout << "   Testing List access..." << std::endl;
+    // Test 2: Testing List access
+    std::cout << "   Test 2: Testing List access..." << std::endl;
     assert(list1[0] == 5);
     assert(list1.at(-1) == 15);
     assert(list1.at(-2) == 5);
-    assert(list1[1] = 15);
+    assert(list1[1] == 15);
 
+    // Test 3: Testing iterator
+    std::cout << "   Test 3: Testing iterator..." << std::endl;
     list1.clear();
-
     list1.add(5);
     list1.add(10);
     list1.add(15);
 
-    std::cout << "   Testing iterator..." << std::endl;
     int checkNum = 0;
     for (auto& num : list1) {
       checkNum += 5;
@@ -326,23 +326,26 @@ class ArrayList {
     }
     assert(checkNum == 15);
 
+    // Test 4: Testing resizing
+    std::cout << "   Test 4: Testing resizing..." << std::endl;
     list1.clear();
-    std::cout << "   Testing resizing..." << std::endl;
     for (int i = 0; i < 10000; i++) {
       list1.add(i);
     }
     for (int i = 0; i < 10000; i++) {
       list1.remove(i);
     }
+    assert(list1.size() == 0);
 
-    std::cout << "   Testing contains..." << std::endl;
-
+    // Test 5: Testing contains
+    std::cout << "   Test 5: Testing contains..." << std::endl;
     list1.clear();
     list1.add(5);
     assert(list1.contains(5) == true);
     assert(list1.contains(5, false) == true);
 
-    std::cout << "   Testing append..." << std::endl;
+    // Test 6: Testing append
+    std::cout << "   Test 6: Testing append..." << std::endl;
     list1.clear();
 
     list1.add(5);
@@ -366,9 +369,8 @@ class ArrayList {
     }
     assert(list1.size() == 9);
 
-
-    // Test 5: copy constructor
-    std::cout << "   Testing copy constructor..." << std::endl;
+    // Test 7: copy constructor
+    std::cout << "   Test 7: Testing copy constructor..." << std::endl;
     ArrayList<int> list5(10);
     for (uint_fast32_t i = 0; i < 10; i++) {
       list5.add(i);
@@ -378,31 +380,33 @@ class ArrayList {
       assert(list6[i] == i);
     }
 
-    // Test 6: copy assignment
-    std::cout << "   Testing copy assignment..." << std::endl;
+    // Test 8: copy assignment
+    std::cout << "   Test 8: Testing copy assignment..." << std::endl;
     ArrayList<int> list7(10);
     list7 = list5;  // copy assignment
     for (uint_fast32_t i = 0; i < 10; i++) {
-      assert(list7[i]  == i);
+      assert(list7[i] == i);
     }
 
-    // Test 7: move constructor
-    std::cout << "   Testing move constructor..." << std::endl;
+    // Test 9: move constructor
+    std::cout << "   Test 9: Testing move constructor..." << std::endl;
     ArrayList<int> list8 = std::move(list5);  // move constructor
     for (uint_fast32_t i = 0; i < 10; i++) {
-      assert(list8[i]  == i);
+      assert(list8[i] == i);
     }
 
-    // Test 8: move assignment
-    std::cout << "   Testing move assignment..." << std::endl;
+    // Test 10: move assignment
+    std::cout << "   Test 10: Testing move assignment..." << std::endl;
     ArrayList<int> list9(10);
     list9 = std::move(list6);  // move assignment
     for (uint_fast32_t i = 0; i < 10; i++) {
-      assert(list9[i]  == i);
+      assert(list9[i] == i);
     }
 
-    std::cout << "   Testing memory leak..." << std::endl;
-    for (int i = 0; i < 1000000; i++) {
+    // Test 11: Checking for memory leaks
+    std::cout << "   Test 11: Checking for memory leaks..." << std::endl;
+    list1.clear();
+    for (int i = 0; i < 10000000; i++) {
       list1.add(i);
     }
   }

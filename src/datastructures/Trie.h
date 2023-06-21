@@ -39,7 +39,7 @@ struct TrieNode {
   std::array<TrieNode*, 128> children{};
   bool filled = false;
   std::string word;
-  inline void setWord(std::string s) {
+  inline void setWord(std::string& s) {
     filled = true;
     word = std::move(s);
   }
@@ -122,7 +122,7 @@ class Trie {
  *  Inserts the given string into the trie, saving it for lookups
  * @param s the string
  */
-  void insert(const std::string s) {
+  void insert(std::string s) {
     TrieNode* iterator = root;
     uint8_t ascii;
     for (auto& c : s) {
