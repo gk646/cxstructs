@@ -85,7 +85,7 @@ class CXPoolAllocator {
   CXPoolAllocator(CXPoolAllocator&& other) noexcept = default;
   CXPoolAllocator& operator=(const CXPoolAllocator& other) = default;
   CXPoolAllocator& operator=(CXPoolAllocator&& other) noexcept = default;
-  ~CXPoolAllocator() { pool_.release(); }
+  ~CXPoolAllocator() {  }
   T* allocate(size_t n) {
     if (n > 1) {
       return static_cast<T*>(malloc(sizeof(T) * n));

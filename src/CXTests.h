@@ -22,6 +22,7 @@
 
 #include "datastructures/ArrayList.h"
 #include "datastructures/BinaryTree.h"
+#include "datastructures/DoubleLinkedList.h"
 #include "datastructures/HashMap.h"
 #include "datastructures/LinkedList.h"
 #include "datastructures/Matrix.h"
@@ -38,14 +39,16 @@ using namespace cxstructs;
 using namespace cxalgos;
 
 static void test_cxstructs() {
-  //mat::TEST();   weird error when using operator == that makes no sense and works in practice
+
+  mat::TEST();
   LinkedList<int>::TEST();
   Queue<int>::TEST();
-  HashMap<int, int>::TEST();
+  HashMap<int, int>::TEST(); //potential memory leak
   Stack<int>::TEST();
-  ArrayList<int>::TEST();
+  ArrayList<int>::TEST(); // potential memory leak
   Trie<>::TEST();
-  //BinaryTree<int>::TEST(); // not yet transition to using the node
+  DoubleLinkedList<int>::TEST();
+
   std::cout << "\nAll tests passed!" << std::endl;
 }
 

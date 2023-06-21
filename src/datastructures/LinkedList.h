@@ -31,11 +31,13 @@ template <typename T>
 struct ListNode {
   T val_;
   ListNode* next_;
-  ListNode(const ListNode<T>& o)
-      : val_(o.val_), next_(o.next_ ? new ListNode(*o.next_) : nullptr) {}
-  explicit ListNode(T val) : val_(val), next_(nullptr){};
+
+  ListNode(const ListNode<T>& o) : val_(o.val_), next_(nullptr) {}
+  ListNode(const T& value, ListNode<T>* next): val_(value),next_(next){}
+  explicit ListNode(T val) : val_(val), next_(nullptr) {}
   T& get() { return val_; }
 };
+
 }  // namespace cxhelper
 namespace cxstructs {
 using namespace cxhelper;
@@ -62,13 +64,13 @@ class LinkedList {
   ~LinkedList() { clear(); }
   LinkedList(const LinkedList<T>& o) : size_(o.size_) {
     if (o.head_) {
-      head_ = new ListNode<T>(*o.head_);
+      head_ = new ListNode<T>(o.head_->val_, o.head_->next_);
 
       ListNode<T>* current_new = head_;
       ListNode<T>* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
-        current_new->next_ = new ListNode<T>(*current_old);
+        current_new->next_ = new ListNode<T>(current_old->val_);
 
         current_new = current_new->next_;
         current_old = current_old->next_;
@@ -79,34 +81,37 @@ class LinkedList {
     }
   }
   LinkedList& operator=(const LinkedList<T>& o) {
-    if (this == &o)
+    if (this == &o) {
       return *this;
-
+    }
     clear();
     size_ = o.size_;
 
     if (o.head_) {
-      head_ = new ListNode<T>(*o.head_);
+      head_ = new ListNode<T>(o.head_->val_);
 
       ListNode<T>* current_new = head_;
       ListNode<T>* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
-        current_new->next_ = new ListNode<T>(*current_old);
+        current_new->next_ = new ListNode<T>(current_old->val_);
 
         current_new = current_new->next_;
         current_old = current_old->next_;
       }
       end_ = current_new;
     } else {
+      delete head_;
+      delete end_;
       head_ = end_ = nullptr;
     }
     return *this;
   }
+
   /**
-   * Adds a new element to the end of the list
-   * @param val - the element to be added
-   */
+         * Adds a new element to the end of the list
+         * @param val - the element to be added
+         */
   void add(T val) {
     if (!head_) {
       head_ = new ListNode<T>(val);
@@ -117,11 +122,12 @@ class LinkedList {
     }
     size_++;
   }
+
   /**
-   * Removes the element at index counting from the start node
-   * @param index  - the index at which to remove the element
-   * @return the element removed with this operation
-   */
+         * Removes the element at index counting from the start node
+         * @param index  - the index at which to remove the element
+         * @return the element removed with this operation
+         */
   T removeAt(uint_fast32_t index) {
     if (index >= size_)
       throw std::out_of_range("index too big");
@@ -154,9 +160,9 @@ class LinkedList {
   }
 
   /**
-   * Removes the last element of this LinkedList
-   *
-   */
+         * Removes the last element of this LinkedList
+         *
+         */
   void remove() {
     if (!end_)
       throw std::out_of_range("list is empty");
@@ -219,9 +225,10 @@ class LinkedList {
     }
     return os;
   }
-  /**
-   * Clears the linked list of all elements
-   */
+
+/**
+ * Clears the linked list of all elements
+ */
   void clear() {
     ListNode<T>* current = head_;
     while (current != nullptr) {
@@ -233,11 +240,12 @@ class LinkedList {
     end_ = nullptr;
     size_ = 0;
   }
+
   ListNode<T>& last() { return *end_; }
-  /**
-   *
-   * @return the current size of this Linked List
-   */
+
+/**
+ * @return the current size of this Linked List
+ */
   [[nodiscard]] uint_fast32_t size() const { return size_; }
 
   class Iterator {
@@ -254,9 +262,11 @@ class LinkedList {
       }
       return *this;
     }
+
     bool operator==(const Iterator& other) const {
       return current == other.current;
     }
+
     bool operator!=(const Iterator& other) const {
       return current != other.current;
     }
@@ -282,6 +292,17 @@ class LinkedList {
     LinkedList<int> list6;
     list6 = list1;
 
+    int num = 5;
+    for (auto val : list1) {
+      assert(val == val);
+      val += 5;
+    }
+    num = 5;
+    for (auto val : list6) {
+      assert(val == val);
+      val += 5;
+    }
+
     assert(list1.size() == list6.size());
 
     LinkedList<int> list;
@@ -290,6 +311,18 @@ class LinkedList {
 
     list.add(2);
     assert(list.size() == 2);
+    std::cout << "  Testing copy constructor..." << std::endl;
+    list1.clear();
+    list1.add(5);
+    list1.add(10);
+    auto list10 = list1;
+
+    num = 5;
+    for (auto val : list10) {
+      assert(val == num);
+      num += 5;
+    }
+    // assert(list10 == list1 );
 
     std::cout << "  Testing addition..." << std::endl;
     // Testing iterator functionality along with add
@@ -363,6 +396,72 @@ class LinkedList {
     } catch (const std::exception& e) {
       assert(true);
     }
+    std::cout << "  Testing removing from single element list..." << std::endl;
+    LinkedList<int> list14;
+    list14.add(1);
+    int removedValue = list14.removeAt(0);
+    assert(removedValue == 1);
+    assert(list14.size() == 0);
+    assert(list14.begin() == list14.end());
+
+
+    std::cout << "  Testing removing from empty list..." << std::endl;
+    LinkedList<int> list13;
+    try {
+      list13.removeAt(0);
+      // This block should never execute
+      assert(false);
+    } catch (std::out_of_range& e) {
+      // Expected behavior
+    }
+
+
+    std::cout << "  Testing single element list..." << std::endl;
+    LinkedList<int> list12;
+    list12.add(1);
+    assert(list12.size() == 1);
+
+    // Testing iterator over single-element list
+    auto it12 = list12.begin();
+    assert(*it12 == 1);
+    ++it12;
+    assert(it12 == list12.end());
+
+
+    std::cout << "  Testing empty list..." << std::endl;
+    LinkedList<int> list30;
+    assert(list30.size() == 0);
+    assert(list30.begin() == list30.end());
+
+    // Testing iteration over empty list
+    for (auto val : list30) {
+      // This block should never execute
+      assert(false);
+    }
+
+
+    std::cout << "  Testing copy constructor and assignment operator..." << std::endl;
+    LinkedList<int> list7;
+    for (int i = 0; i < 5; i++) {
+      list7.add(i);
+    }
+    LinkedList<int> list8(list7);  // Copy constructor
+    LinkedList<int> list9 = list7;  // Assignment operator
+
+    // Check size
+    assert(list7.size() == list8.size());
+    assert(list7.size() == list9.size());
+
+    // Check values and correct next and previous pointers
+    auto it7 = list7.begin(), it8 = list8.begin(), it9 = list9.begin();
+    while (it7 != list7.end()) {
+      assert(*it7 == *it8 && *it7 == *it9);
+      ++it7;
+      ++it8;
+      ++it9;
+    }
+
+
   }
 };
 }  // namespace cxstructs
