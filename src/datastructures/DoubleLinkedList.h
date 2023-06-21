@@ -113,15 +113,14 @@ class DoubleLinkedList {
     size_ = 0;
   }
   /**
-   *
     * @return the current size of this Linked List
     */
   [[nodiscard]] uint_fast32_t size() const { return size_; }
   /**
-         * Removes the element at index counting from the start node
-         * @param index  - the index at which to remove the element
-         * @return the element removed with this operation
-         */
+  * Removes the element at index counting from the start node
+  * @param index  - the index at which to remove the element
+  * @return the element removed with this operation
+  */
   T removeAt(uint_fast32_t index) {
     if (index >= size_)
       throw std::out_of_range("index out of bounds");

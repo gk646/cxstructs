@@ -29,7 +29,11 @@
 #include "gktime.h"
 
 using namespace cxstructs;
-
+struct Data {
+  int arr[100];
+  int num;
+  std::string string = "aösldkfjöalksdöfklj";
+};
 void compareWithSTL() {
   /* |-----------------------------------------------------|
    * |                       HASHMAPS                      |
@@ -74,17 +78,17 @@ void compareWithSTL() {
    * |                 DYNAMIC ARRAYS                      |
    * |-----------------------------------------------------|
    */
-  outerCount = 100;
-  innerCount = 10000;
+  outerCount = 100000;
+  innerCount = 100;
 
   std::cout << "COMPARING DYNAMIC ARRAYS\n" << std::endl;
-  ArrayList<int> list;
-  std::vector<int> vector;
+  ArrayList<Data> list;
+  std::vector<Data> vector;
 
   gkutils::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
-      list.add(i * 2);
+      list.emplace_back();
     }
     for (int i = 0; i < innerCount; i++) {
       list[i];
@@ -92,13 +96,13 @@ void compareWithSTL() {
     for (int i = 0; i < innerCount; i++) {
       list.removeAt(0);
     }
-    for (auto& num : list) {}
+    for (const auto& num : list) {}
   }
   gkutils::printTime<>("cxstructs ArrayList :");
   gkutils::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
-      vector.emplace_back(i * 2);
+      vector.emplace_back();
     }
     for (int i = 0; i < innerCount; i++) {
       vector[i];
@@ -106,7 +110,7 @@ void compareWithSTL() {
     for (int i = 0; i < innerCount; i++) {
       vector.erase(vector.begin());
     }
-    for (auto& num : vector) {}
+    for (const auto& num : vector) {}
   }
   gkutils::printTime<>("std::vector:");
 
@@ -166,6 +170,4 @@ void compareWithSTL() {
   trie.startsWith("hel");
 
   gkutils::printTime<std::chrono::nanoseconds>("startsWith 1 time:");
-
-
 }
