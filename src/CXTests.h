@@ -22,6 +22,7 @@
 
 #include "datastructures/ArrayList.h"
 #include "datastructures/BinaryTree.h"
+#include "datastructures/DoubleLinkedList.h"
 #include "datastructures/HashMap.h"
 #include "datastructures/LinkedList.h"
 #include "datastructures/Matrix.h"
@@ -38,13 +39,16 @@ using namespace cxstructs;
 using namespace cxalgos;
 
 static void test_cxstructs() {
-  //mat::TEST();
+
+  mat::TEST();
   LinkedList<int>::TEST();
   Queue<int>::TEST();
-  HashMap<int, int>::TEST();
+  HashMap<int, int>::TEST(); //potential memory leak
   Stack<int>::TEST();
-  ArrayList<int>::TEST();
+  ArrayList<int>::TEST(); // potential memory leak
   Trie<>::TEST();
+  DoubleLinkedList<int>::TEST();
+
   std::cout << "\nAll tests passed!" << std::endl;
 }
 

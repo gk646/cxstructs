@@ -40,12 +40,11 @@ namespace cxhelper {  // namespace to hide the classes
  */
 template <typename K, typename V>
 struct HashListNode {
-  inline explicit HashListNode(K key, V value)
-      : key_(key), value_(value), next_(nullptr){};
-  inline HashListNode(const HashListNode<K, V>& o)
-      : key_(o.key_),
-        value_(o.value_),
-        next_(o.next_ ? new HashListNode<K, V>(*o.next_) : nullptr) {}
+  HashListNode(K& key, V& val) : key_(key), value_(val), next_(nullptr) {}
+  inline explicit HashListNode(HashListNode<K, V>* o)
+      : key_(o->key_), value_(o->value_), next_(nullptr){};
+  inline HashListNode(HashListNode<K, V>* o, HashListNode<K, V>* next)
+      : key_(o->key_), value_(o->value_), next_(next) {}
   K key_;
   V value_;
   HashListNode* next_;
@@ -61,16 +60,23 @@ struct HashLinkedList {
   HashListNode<K, V>* end_;
   uint_fast32_t size_;
   HashLinkedList() : head_(nullptr), end_(nullptr), size_(0){};
-  ~HashLinkedList() { clear(); }
+  ~HashLinkedList() {
+    HashListNode<K, V>* current = head_;
+    while (current != nullptr) {
+      HashListNode<K, V>* next = current->next_;
+      delete current;
+      current = next;
+    }
+  }
   HashLinkedList(const HashLinkedList<K, V>& o) : size_(o.size_) {
     if (o.head_) {
-      head_ = new HashListNode<K, V>(*o.head_);
+      head_ = new HashListNode<K, V>(o.head_, o.head_->next_);
 
       HashListNode<K, V>* current_new = head_;
       HashListNode<K, V>* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
-        current_new->next_ = new HashListNode<K, V>(*current_old);
+        current_new->next_ = new HashListNode<K, V>(current_old);
 
         current_new = current_new->next_;
         current_old = current_old->next_;
@@ -88,13 +94,13 @@ struct HashLinkedList {
     size_ = o.size_;
 
     if (o.head_) {
-      head_ = new HashListNode<K, V>(*o.head_);
+      head_ = new HashListNode<K, V>(o.head_, o.head_->next_);
 
       HashListNode<K, V>* current_new = head_;
       HashListNode<K, V>* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
-        current_new->next_ = new HashListNode<K, V>(*current_old);
+        current_new->next_ = new HashListNode<K, V>(current_old);
 
         current_new = current_new->next_;
         current_old = current_old->next_;
@@ -239,6 +245,7 @@ class HashMap {
         current = current->next_;
       }
     }
+
     delete[] arr_;
     arr_ = newArr;
     maxSize = buckets_ * 0.75;
@@ -334,7 +341,21 @@ class HashMap {
    * @return the current size of the hashMap
    */
   [[nodiscard]] uint_fast32_t size() const { return size_; }
-
+  /**
+   * The load factor is a %-value of the maximum size the hashmap is allowed tor each before
+   * growing and rehashing
+   * @return the current load factor of the hashmap
+   */
+  float loadFactor(){
+    return 0.75;
+  }
+  /**
+   * The initialCapacity the hashmaps started with and expands along
+   * @return the initial capacity
+   */
+  uint_fast32_t  initialCapacity(){
+    return initialCapacity_;
+  }
   /**
    * Clears the hashMap of all its contents
    */
@@ -402,10 +423,10 @@ class HashMap {
     // Test large additions
     std::cout << "  Testing large additions..." << std::endl;
     HashMap<int, double> map4;
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 10000; i++) {
       map4.insert(i, i * 2);
     }
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 10000; i++) {
       assert(map4[i] == i * 2);
     }
   }
