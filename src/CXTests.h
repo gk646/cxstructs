@@ -54,7 +54,7 @@ static void test_cxstructs() {
 
 static void test_cxalgos() {
   using namespace cxalgos;
-  TEST_ALGOS();
+  TEST_SORTING();
   TEST_DFS();
   TEST_SEARCH();
 }
