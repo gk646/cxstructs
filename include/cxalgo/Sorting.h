@@ -26,6 +26,29 @@
 #include <cstdint>
 #include <vector>
 
+namespace cxhelper {  // helper methods to provide clean calling interface
+template <typename T>
+void quick_sort_internal_sort(T* arr, int_fast32_t low, int_fast32_t high) {
+  if (low < high) {
+
+    const T& pivot = arr[high];
+    uint_fast32_t n = low;
+    for (uint_fast32_t i = low; i < high; i++) {
+      if (arr[i] <= pivot) {
+        std::swap(arr[n], arr[i]);
+        n++;
+      }
+    }
+
+    std::swap(arr[n], arr[high]);
+
+    quick_sort_internal_sort(arr, low, n - 1);
+    quick_sort_internal_sort(arr, n + 1, high);
+  }
+}
+
+}  // namespace cxhelper
+
 namespace cxalgos {
 /**
  * Bubble sort is the one of the simplest sorting algorithms. It works by
@@ -37,7 +60,7 @@ namespace cxalgos {
  * @param ascending true to sort ascending, false to sort descending
  */
 template <typename T>
-void bubble_sort(T* arr, uint_fast32_t len, bool ascending) {
+void bubble_sort(T* arr, uint_fast32_t len, bool ascending = true) {
   if (ascending) {
     for (uint_fast32_t i = 0; i < len; i++) {
       for (uint_fast32_t j = 1; j < len; j++) {
@@ -56,21 +79,71 @@ void bubble_sort(T* arr, uint_fast32_t len, bool ascending) {
     }
   }
 }
-
-template <typename T>
-T* selectionSort(T* arr, uint_fast32_t len, bool ascending) {}
 /**
- * Quick sort has the best possible O notation runtime for all cases but in
- * practice is often slower than for example quicksort. It works by dividing the
- * array into sub-arrays of decreasing length and sorting and merging them back
- * together.<p> Best: O(n) <p> Average: O(n*log(n)) <p> Worst: O(n^2)
- * @tparam T type
- * @param arr array to sort
- * @param len  length of the array
- * @param ascending true to sort ascending, false to sort descending
+ * Selection sort is also a simple in-place sorting algorithm. The idea is to search for the
+ * smallest element in the remaining list and then swap it with your position. Then move one forward.
+ * By repeating this n-times throughout the list we always swap in the smallest element giving us sorting in
+ * ascending order.
+ *<p> Best: O(n^2) <p> Average: O(n^2) <p> Worst: O(n^2)
+ * @tparam T
+ * @param arr
+ * @param len
+ * @param ascending
  */
 template <typename T>
-void quickSort(T* arr, uint_fast32_t len, bool ascending) {}
+void selectionSort(T* arr, uint_fast32_t len, bool ascending = true) {
+  uint_fast32_t index;
+  if(ascending){
+    for (int i = 0; i < len; i++) {
+      T low = arr[i];
+      index = i;
+      for (int j = i + 1; j < len; j++) {
+        if (arr[j] < low) {
+          low = arr[j];
+          index = j;
+        }
+      }
+      std::swap(arr[i], arr[index]);
+    }
+  } else {
+    for (int i = 0; i < len; i++) {
+      T low = arr[i];
+      index = i;
+      for (int j = i + 1; j < len; j++) {
+        if (arr[j] < low) {
+          low = arr[j];
+          index = j;
+        }
+      }
+      std::swap(arr[i], arr[index]);
+    }
+  }
+}
+/**
+ * <h2>Quicksort</h2>
+ * is the most widely used sorting algorithm. To start you choose a pivot value from the array.
+ * After this pivot value you rearrange all smaller values to its left and bigger values to its right.
+ * <p>
+ * This means that the pivot element is in its final state. Then you recursively apply the same step to both halves,
+ * the first from 0 to pivot-1, the second from pivot+1 to end.
+ * The partition step inherently makes it unstable. <p>
+ * Best: O(n log n)<p>
+ * Average: O(n log n)<p>
+ * Worst: O(n^2)<p>
+ *
+ * @tparam T type
+ * @param arr array to sort
+ * @param len length of the array
+ * @param ascending true to sort in ascending order, false to sort in descending order
+ */
+
+template <typename T>
+void quick_sort(T* arr, uint_fast32_t len, bool ascending = true) {
+  cxhelper::quick_sort_internal_sort(arr, 0, len - 1);
+  if (!ascending) {
+    std::reverse(arr, arr + len);
+  }
+}
 template <typename T>
 T* insertionSort(T* arr, uint_fast32_t len, bool ascending) {}
 /**
@@ -91,14 +164,37 @@ void heapSort(T* arr, uint_fast32_t len, bool ascending) {}
 }  // namespace cxalgos
 
 namespace cxtests {
+using namespace cxalgos;
 
-static void TEST_ALGOS() {
+static void TEST_SORTING() {
   std::cout << "TESTING BUBBLESORT" << std::endl;
   int arr[] = {3, 1, 2, 5, 1, 4, 0, 1001, -10};
   int sorted[] = {-10, 0, 1, 1, 2, 3, 4, 5, 1001};
-  bubble_sort(arr, 9, true);
-  for (std::uint_fast32_t i = 0; i < 8; i++) {
+  bubble_sort(arr, 9);
+  for (uint_fast32_t i = 0; i < 9; i++) {
     assert(arr[i] == sorted[i]);
+  }
+  int arr1[] = {3, 1, 2, 5, 1, 4, 0, 1001, -10};
+  int sorted1[] = {-10, 0, 1, 1, 2, 3, 4, 5, 1001};
+
+  quick_sort(arr1, 9);
+  for (uint_fast32_t i = 0; i < 9; i++) {
+    std::cout << arr1[i] << std::endl;
+    assert(arr1[i] == sorted1[i]);
+  }
+  quick_sort(arr1, 9, false);
+  for (uint_fast32_t i = 0; i < 9; i++) {
+
+    assert(arr1[8 - i] == sorted1[i]);
+  }
+
+  int arr2[] = {3, 1, 2, 5, 1, 4, 0, 1001, -10};
+  int sorted2[] = {-10, 0, 1, 1, 2, 3, 4, 5, 1001};
+
+  selectionSort(arr2, 9);
+  for (uint_fast32_t i = 0; i < 9; i++) {
+    std::cout << arr2[i] << std::endl;
+    assert(arr2[i] == sorted2[i]);
   }
 }
 }  // namespace cxtests
