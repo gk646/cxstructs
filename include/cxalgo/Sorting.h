@@ -23,7 +23,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstdint>
+#include <numeric>
+#include <random>
 #include <vector>
 
 namespace cxhelper {  // helper methods to provide clean calling interface
@@ -44,6 +47,43 @@ void quick_sort_internal_sort(T* arr, int_fast32_t low, int_fast32_t high) {
 
     quick_sort_internal_sort(arr, low, n - 1);
     quick_sort_internal_sort(arr, n + 1, high);
+  }
+}
+template <typename T>
+void merge_sort_internal(T* arr, uint_fast32_t low, uint_fast32_t high) {
+  if (low < high) {
+    uint_fast32_t mid = low + (high - low) / 2;
+
+    merge_sort_internal(arr, low, mid);
+    merge_sort_internal(arr, mid + 1, high);
+
+    uint_fast32_t s1 = mid - low + 1;
+    uint_fast32_t s2 = high - mid;
+
+    T* left = new T[s1];
+    T* right = new T[s2];
+
+    std::copy(arr + low, arr + mid + 1, left);
+    std::copy(arr + mid + 1, arr + high + 1, right);
+
+    mid = 0;
+    high = 0;
+    while (mid < s1 && high < s2) {
+      if (left[mid] <= right[high]) {
+        arr[low++] = left[mid++];
+      } else {
+        arr[low++] = right[high++];
+      }
+    }
+
+    while (mid < s1) {
+      arr[low++] = left[mid++];
+    }
+    while (high < s2) {
+      arr[low++] = right[high++];
+    }
+    delete[] left;
+    delete[] right;
   }
 }
 
@@ -91,9 +131,9 @@ void bubble_sort(T* arr, uint_fast32_t len, bool ascending = true) {
  * @param ascending
  */
 template <typename T>
-void selectionSort(T* arr, uint_fast32_t len, bool ascending = true) {
+void selection_sort(T* arr, uint_fast32_t len, bool ascending = true) {
   uint_fast32_t index;
-  if(ascending){
+  if (ascending) {
     for (int i = 0; i < len; i++) {
       T low = arr[i];
       index = i;
@@ -157,45 +197,59 @@ T* insertionSort(T* arr, uint_fast32_t len, bool ascending) {}
  * @param ascending true to sort ascending, false to sort descending
  */
 template <typename T>
-void mergeSort(T* arr, uint_fast32_t len, bool ascending) {}
+void merge_sort(T* arr, uint_fast32_t len, bool ascending = true) {
+  cxhelper::merge_sort_internal(arr, 0, len - 1);
+  if (!ascending) {
+    std::reverse(arr, arr + len);
+  }
+}
+
 template <typename T>
 void heapSort(T* arr, uint_fast32_t len, bool ascending) {}
 
 }  // namespace cxalgos
 
 namespace cxtests {
+std::vector<int> generate_shuffled_vector(int size) {
+  std::vector<int> vec(size);
+  std::iota(vec.begin(), vec.end(), 1);  // fill with increasing numbers
+  std::shuffle(vec.begin(), vec.end(), std::mt19937{std::random_device{}()});
+  return vec;
+}
+
+void assert_sorted(std::vector<int>& vec, bool ascending = true) {
+  for (size_t i = 1; i < vec.size(); i++) {
+    if (ascending) {
+      assert(vec[i - 1] <= vec[i]);
+    } else {
+      assert(vec[i - 1] >= vec[i]);
+    }
+  }
+}
 using namespace cxalgos;
 
 static void TEST_SORTING() {
+  const int SIZE = 10000;
+
   std::cout << "TESTING BUBBLESORT" << std::endl;
-  int arr[] = {3, 1, 2, 5, 1, 4, 0, 1001, -10};
-  int sorted[] = {-10, 0, 1, 1, 2, 3, 4, 5, 1001};
-  bubble_sort(arr, 9);
-  for (uint_fast32_t i = 0; i < 9; i++) {
-    assert(arr[i] == sorted[i]);
-  }
-  int arr1[] = {3, 1, 2, 5, 1, 4, 0, 1001, -10};
-  int sorted1[] = {-10, 0, 1, 1, 2, 3, 4, 5, 1001};
+  std::vector<int> bubble_vec = generate_shuffled_vector(SIZE);
+  bubble_sort(bubble_vec.data(), SIZE);
+  assert_sorted(bubble_vec);
 
-  quick_sort(arr1, 9);
-  for (uint_fast32_t i = 0; i < 9; i++) {
-    std::cout << arr1[i] << std::endl;
-    assert(arr1[i] == sorted1[i]);
-  }
-  quick_sort(arr1, 9, false);
-  for (uint_fast32_t i = 0; i < 9; i++) {
+  std::cout << "TESTING QUICKSORT" << std::endl;
+  std::vector<int> quick_vec = generate_shuffled_vector(SIZE);
+  quick_sort(quick_vec.data(), SIZE);
+  assert_sorted(quick_vec);
 
-    assert(arr1[8 - i] == sorted1[i]);
-  }
+  std::cout << "TESTING SELECTIONSORT" << std::endl;
+  std::vector<int> selection_vec = generate_shuffled_vector(SIZE);
+  selection_sort(selection_vec.data(), SIZE);
+  assert_sorted(selection_vec);
 
-  int arr2[] = {3, 1, 2, 5, 1, 4, 0, 1001, -10};
-  int sorted2[] = {-10, 0, 1, 1, 2, 3, 4, 5, 1001};
-
-  selectionSort(arr2, 9);
-  for (uint_fast32_t i = 0; i < 9; i++) {
-    std::cout << arr2[i] << std::endl;
-    assert(arr2[i] == sorted2[i]);
-  }
+  std::cout << "TESTING MERGE SORT" << std::endl;
+  std::vector<int> merge_vec = generate_shuffled_vector(SIZE);
+  merge_sort(merge_vec.data(), SIZE);
+  assert_sorted(merge_vec);
 }
 }  // namespace cxtests
 
