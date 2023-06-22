@@ -29,6 +29,7 @@
 #include "gktime.h"
 
 using namespace cxstructs;
+using namespace cxalgos;
 struct Data {
   int arr[100];
   int num;
@@ -39,7 +40,7 @@ void compareWithSTL() {
    * |                       HASHMAPS                      |
    * |-----------------------------------------------------|
    */
-  std::cout << "COMPARING HASHMAPS\n" << std::endl;
+  std::cout<< "\nComapring HashMaps" << std::endl;
   HashMap<int, int> myMap;
   std::unordered_map<int, int> stdMap;
 
@@ -78,10 +79,10 @@ void compareWithSTL() {
    * |                 DYNAMIC ARRAYS                      |
    * |-----------------------------------------------------|
    */
-  outerCount = 100000;
+  outerCount = 10000;
   innerCount = 100;
 
-  std::cout << "COMPARING DYNAMIC ARRAYS\n" << std::endl;
+  std::cout<< "\nComapring Dynamic Arrays" << std::endl;
   ArrayList<Data> list;
   std::vector<Data> vector;
 
@@ -118,16 +119,16 @@ void compareWithSTL() {
    * |                     Queues                           |
    * |-----------------------------------------------------|
    */
-  outerCount = 10000;
-  innerCount = 100000;
-  std::cout << "COMPARING QUEUES\n" << std::endl;
-  Queue<int> queue;
-  std::queue<int> std_queue;
+  outerCount = 1000;
+  innerCount = 1000000;
+  std::cout<< "\nComapring Queues" << std::endl;
+  Queue<Data> queue;
+  std::queue<Data> std_queue;
 
   gkutils::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
-      queue.add(i * 2);
+      queue.emplace_back();
     }
     for (int i = 0; i < innerCount; i++) {
       queue.front();
@@ -140,7 +141,7 @@ void compareWithSTL() {
   gkutils::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
-      std_queue.emplace(i * 2);
+      std_queue.emplace();
     }
     for (int i = 0; i < innerCount; i++) {
       std_queue.front();
@@ -155,6 +156,7 @@ void compareWithSTL() {
    * |                        Trie                         |
    * |-----------------------------------------------------|
    */
+  std::cout<< "\nTesting Trie" << std::endl;
   // no STL counterpart
 
   Trie trie;
@@ -170,4 +172,25 @@ void compareWithSTL() {
   trie.startsWith("hel");
 
   gkutils::printTime<std::chrono::nanoseconds>("startsWith 1 time:");
+
+  /* |-----------------------------------------------------|
+   * |                      QUICKSORT                      |
+   * |-----------------------------------------------------|
+   */
+    std::cout<< "\nComparing Quicksort" << std::endl;
+
+  auto vec1=  cxtests::generate_shuffled_vector(10000000);
+  auto vec2 = vec1;
+  gkutils::now();
+
+  quick_sort(vec1.data(),10000000);
+
+  gkutils::printTime<>("cxalgos quicksort:");
+
+  gkutils::now();
+
+  std::sort(vec2.begin(), vec2.end());
+
+  gkutils::printTime<>("std::sort:");
+
 }

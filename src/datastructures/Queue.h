@@ -96,14 +96,24 @@ class Queue {
     arr_[back_++] = e;
   }
   /**
+   * Construct a new T element at the end of the list
+   * Will produce a leaking queue if the T constructor throws an error
+   * @param args T constructor arguments
+   */
+  template <typename... Args>
+  inline void emplace_back(Args&&... args) {
+    if (back_ == len_) {
+      resize();
+    }
+    arr_[back_++] = T(std::forward<Args>(args)...);
+  }
+  /**
    * Removes and returns the element at the front of the queue
    * @return the removed element
    */
+
   T pop() {
-    if (front_ < back_) {
-      return arr_[front_++];
-    }
-    throw std::out_of_range("no such element");
+    return arr_[front_++];
   }
   /**
    * Lets you peek at the front most element <p>
@@ -111,10 +121,7 @@ class Queue {
    * @return a reference to the front element
    */
   [[nodiscard]] T& front() {
-    if (back_ > 0) {
-      return arr_[front_];
-    }
-    throw std::out_of_range("no such element");
+    return arr_[front_];
   }
   /**
    * Lets you peek at the last element <p>
