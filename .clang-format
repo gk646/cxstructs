@@ -60,12 +60,13 @@ ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
 PointerAlignment: Left
 ReflowComments: false
-# SeparateDefinitionBlocks: Always   # Only support since clang-format 14
+#SeparateDefinitionBlocks: Always   # Only support since clang-format 14
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeCpp11BracedList: false
+SortIncludes: CaseSensitive
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
@@ -79,5 +80,5 @@ SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++11
-TabWidth: 4
+TabWidth: 2
 UseTab: Never

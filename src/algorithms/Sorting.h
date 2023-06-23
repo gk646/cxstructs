@@ -31,7 +31,7 @@
 
 namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
-void quick_sort_internal_sort(T* arr, int_fast32_t low, int_fast32_t high) {
+void quick_sort_internal(T* arr, int_fast32_t low, int_fast32_t high) {
   if (low < high) {
 
     const T& pivot = arr[high];
@@ -45,8 +45,8 @@ void quick_sort_internal_sort(T* arr, int_fast32_t low, int_fast32_t high) {
 
     std::swap(arr[n], arr[high]);
 
-    quick_sort_internal_sort(arr, low, n - 1);
-    quick_sort_internal_sort(arr, n + 1, high);
+    quick_sort_internal(arr, low, n - 1);
+    quick_sort_internal(arr, n + 1, high);
   }
 }
 template <typename T>
@@ -86,18 +86,60 @@ void merge_sort_internal(T* arr, uint_fast32_t low, uint_fast32_t high) {
     delete[] right;
   }
 }
-
+template <typename T>
+bool bogo_sort_internal(T* arr, uint_fast32_t len, bool ascending) {
+  if(ascending){
+    for (int j = 1; j < len; j++) {
+      if (arr[j] < arr[j - 1]) {
+        return false;
+      }
+    }
+    return true;
+  }else{
+    for (int j = 1; j < len; j++) {
+      if (arr[j] > arr[j - 1]) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
 }  // namespace cxhelper
 
 namespace cxalgos {
-/**
- * Bubble sort is the one of the simplest sorting algorithms. It works by
+/** <h2>Bogo Sort</h2> also known as permutation sort, stupid sort, slow sort,
+ * monkey sort, shotgun sort or chaotic sort. It works by
+ * swapping random indices of the array and checks after each step weather its sorted. <p>
+ * This is obviously very inefficient and should not be used. <p>
+ * <b>This implementation is capped at 100000000 swaps</b> <p>
+ * Best: O(n), when we get incredibly lucky <p>
+ * Average: O((n+1)!), due to permutations <p>
+ * Worst: Unbounded, since there's no upper limit on the number of permutations <p>
+ * @tparam T type
+ * @param arr array to sort
+ * @param len length of the array
+ * @param ascending true to sort ascending, false to sort descending
+ */
+template <typename T>
+void bogo_sort(T* arr, uint_fast32_t len, bool ascending = true) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distr(0, len - 1);
+
+  for (uint_fast32_t i = 0; i < 100000000; i++) {
+    std::swap(arr[distr(gen)], arr[distr(gen)]);
+    if (cxhelper::bogo_sort_internal(arr, len, ascending)) {
+      return;
+    }
+  }
+}
+/** <h2>Bubble sort</h2> is the one of the simplest sorting algorithms. It works by
  * checking to adjacent values and swapping them if they are not in the right
  * order. <p> Best: O(n^2) <p> Average: O(n^2) <p> Worst: O(n^2)
  * @tparam T type
  * @param arr array to sort
  * @param len  length of the array
- * @param ascending true to sort ascending, false to sort descending
+ * @param ascending  false to sort descending
  */
 template <typename T>
 void bubble_sort(T* arr, uint_fast32_t len, bool ascending = true) {
@@ -120,15 +162,15 @@ void bubble_sort(T* arr, uint_fast32_t len, bool ascending = true) {
   }
 }
 /**
- * Selection sort is also a simple in-place sorting algorithm. The idea is to search for the
+ * <h2>Selection sort</h2> is also a simple in-place sorting algorithm. The idea is to search for the
  * smallest element in the remaining list and then swap it with your position. Then move one forward.
  * By repeating this n-times throughout the list we always swap in the smallest element giving us sorting in
  * ascending order.
  *<p> Best: O(n^2) <p> Average: O(n^2) <p> Worst: O(n^2)
- * @tparam T
- * @param arr
- * @param len
- * @param ascending
+ * @tparam T type
+* @param arr array to sort
+* @param len  length of the array
+* @param ascending  false to sort descending
  */
 template <typename T>
 void selection_sort(T* arr, uint_fast32_t len, bool ascending = true) {
@@ -173,13 +215,13 @@ void selection_sort(T* arr, uint_fast32_t len, bool ascending = true) {
  *
  * @tparam T type
  * @param arr array to sort
- * @param len length of the array
- * @param ascending true to sort in ascending order, false to sort in descending order
+ * @param len  length of the array
+ * @param ascending  false to sort descendingr
  */
 
 template <typename T>
 void quick_sort(T* arr, uint_fast32_t len, bool ascending = true) {
-  cxhelper::quick_sort_internal_sort(arr, 0, len - 1);
+  cxhelper::quick_sort_internal(arr, 0, len - 1);
   if (!ascending) {
     std::reverse(arr, arr + len);
   }
@@ -194,7 +236,7 @@ T* insertionSort(T* arr, uint_fast32_t len, bool ascending) {}
  * @tparam T type
  * @param arr array to sort
  * @param len  length of the array
- * @param ascending true to sort ascending, false to sort descending
+ * @param ascending  false to sort descending
  */
 template <typename T>
 void merge_sort(T* arr, uint_fast32_t len, bool ascending = true) {
@@ -250,6 +292,11 @@ static void TEST_SORTING() {
   std::vector<int> merge_vec = generate_shuffled_vector(SIZE);
   merge_sort(merge_vec.data(), SIZE);
   assert_sorted(merge_vec);
+
+  std::cout << "TESTING BOGO SORT" << std::endl;
+  std::vector<int> bogo_vec = generate_shuffled_vector(10);
+  bogo_sort(bogo_vec.data(), 10);
+  assert_sorted(bogo_vec);
 }
 }  // namespace cxtests
 

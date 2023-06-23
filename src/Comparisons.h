@@ -40,7 +40,7 @@ void compareWithSTL() {
    * |                       HASHMAPS                      |
    * |-----------------------------------------------------|
    */
-  std::cout<< "\nComapring HashMaps" << std::endl;
+  std::cout << "\nComapring HashMaps" << std::endl;
   HashMap<int, int> myMap;
   std::unordered_map<int, int> stdMap;
 
@@ -82,7 +82,7 @@ void compareWithSTL() {
   outerCount = 10000;
   innerCount = 100;
 
-  std::cout<< "\nComapring Dynamic Arrays" << std::endl;
+  std::cout << "\nComapring Dynamic Arrays" << std::endl;
   ArrayList<Data> list;
   std::vector<Data> vector;
 
@@ -120,8 +120,8 @@ void compareWithSTL() {
    * |-----------------------------------------------------|
    */
   outerCount = 1000;
-  innerCount = 1000000;
-  std::cout<< "\nComapring Queues" << std::endl;
+  innerCount = 10000;
+  std::cout << "\nComapring Queues" << std::endl;
   Queue<Data> queue;
   std::queue<Data> std_queue;
 
@@ -156,7 +156,7 @@ void compareWithSTL() {
    * |                        Trie                         |
    * |-----------------------------------------------------|
    */
-  std::cout<< "\nTesting Trie" << std::endl;
+  std::cout << "\nTesting Trie" << std::endl;
   // no STL counterpart
 
   Trie trie;
@@ -177,13 +177,13 @@ void compareWithSTL() {
    * |                      QUICKSORT                      |
    * |-----------------------------------------------------|
    */
-    std::cout<< "\nComparing Quicksort" << std::endl;
+  std::cout << "\nComparing Quicksort" << std::endl;
 
-  auto vec1=  cxtests::generate_shuffled_vector(10000000);
+  auto vec1 = cxtests::generate_shuffled_vector(10000000);
   auto vec2 = vec1;
   gkutils::now();
 
-  quick_sort(vec1.data(),10000000);
+  quick_sort(vec1.data(), 10000000);
 
   gkutils::printTime<>("cxalgos quicksort:");
 
@@ -192,5 +192,4 @@ void compareWithSTL() {
   std::sort(vec2.begin(), vec2.end());
 
   gkutils::printTime<>("std::sort:");
-
 }
