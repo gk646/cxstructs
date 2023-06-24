@@ -27,6 +27,7 @@
 #include <vector>
 #include "datastructures/HashMap.h"
 #include "gktime.h"
+#include <deque>
 
 using namespace cxstructs;
 using namespace cxalgos;
@@ -79,8 +80,8 @@ void compareWithSTL() {
    * |                 DYNAMIC ARRAYS                      |
    * |-----------------------------------------------------|
    */
-  outerCount = 10000;
-  innerCount = 100;
+  outerCount = 100;
+  innerCount = 1000;
 
   std::cout << "\nComapring Dynamic Arrays" << std::endl;
   ArrayList<Data> list;
@@ -192,4 +193,48 @@ void compareWithSTL() {
   std::sort(vec2.begin(), vec2.end());
 
   gkutils::printTime<>("std::sort:");
+
+  /* |-----------------------------------------------------|
+   * |                       DEQUEUE                       |
+   * |-----------------------------------------------------|
+   */
+
+
+
+  std::cout << "\nComparing DeQueues" << std::endl;
+
+  outerCount = 1000;
+  innerCount = 1000;
+  DeQueue<Data> de_queue;
+  std::deque<Data> std_dequeue;
+
+  gkutils::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      de_queue.emplace_front();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      de_queue.front();
+      de_queue.back();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      de_queue.pop_back();
+    }
+  }
+  gkutils::printTime<>("cxstructs Queue :");
+  gkutils::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      std_dequeue.emplace_front();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      std_dequeue.front();
+      std_dequeue.back();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      std_dequeue.pop_back();
+    }
+  }
+  gkutils::printTime<>("std::queue:");
+
 }

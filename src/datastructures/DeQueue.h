@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
+#define FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
 #define CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
 
@@ -53,22 +53,26 @@ class DeQueue {
   }
 
   void shrink() {
-    if ((front_ + back_) / 2 == 1) {
-      len_ /= 2;
-      auto o_mid = mid_;
-      mid_ = len_ / 2;
-      auto n_arr = new T[len_];
-      std::move(arr_ + o_mid - front_, arr_ + o_mid + back_,
-                n_arr + mid_ - (front_ + back_) / 2);
-      delete[] arr_;
-      arr_ = n_arr;
-      front_ = back_ = (front_ + back_) / 2;
+    len_ /= 2;
+    auto o_mid = mid_;
+    mid_ = len_ / 2;
+    auto n_arr = new T[len_];
 
-      back_++;
-      minlen_ = size() / 4 < 16 ? 0 : size() / 4;
-      std::cout<< len_ << std::endl;
+    //recentering the array
+    std::move(arr_ + o_mid - front_, arr_ + o_mid + back_,
+              n_arr + mid_ - (front_ + back_ + 1) / 2);
+
+    delete[] arr_;
+    arr_ = n_arr;
+    int_fast32_t sum = front_ + back_;
+    if (sum % 2 == 0) {
+      front_ = back_ = sum / 2;
+    } else {
+      front_ = back_ = (sum + 1) / 2;
+      back_--;
     }
 
+    minlen_ = size() / 4 < 16 ? 0 : size() / 4;
   }
 
  public:
@@ -77,10 +81,9 @@ class DeQueue {
         front_(1),
         back_(0),
         len_(initialSize),
-        minlen_(0) {
-    arr_ = new T[initialSize];
-  }
-  ~DeQueue() { delete[] arr_; }
+        minlen_(0),
+        arr_(new T[initialSize]) {}
+
   DeQueue(const DeQueue& o)
       : mid_(o.mid_),
         front_(o.front_),
@@ -90,6 +93,45 @@ class DeQueue {
     arr_ = new T[len_];
     std::copy(o.arr_, o.arr_ + len_, arr_);
   }
+  DeQueue& operator=(const DeQueue& o) noexcept {
+    if (this != &o) {
+      delete[] arr_;
+      len_ = o.len_;
+      front_ = o.front_;
+      back_ = o.back_;
+      minlen_ = o.minlen_;
+      arr_ = new T[len_];
+      std::copy(o.len_, o.len_ + len_, arr_);
+    }
+    return *this;
+  }
+  //move copy
+  DeQueue(const DeQueue&& o)
+      : mid_(o.mid_),
+        front_(o.front_),
+        back_(o.back_),
+        len_(o.len_),
+        minlen_(o.minlen_),
+        arr_(std::move(o.arr_, arr_)) {}
+  //move assign operator
+  DeQueue& operator=(DeQueue&& o) noexcept {
+    if (this != &o) {
+      delete[] arr_;
+
+      arr_ = std::move(o.arr_);
+      len_ = o.len_;
+      front_ = o.front_;
+      back_ = o.back_;
+      minlen_ = o.minlen_;
+    }
+    return *this;
+  }
+  ~DeQueue() { delete[] arr_; }
+  /**
+ * Emplaces an element at the front of the deque.
+ * Constructs the element in-place using the given arguments.
+ * @param args Arguments to forward to the constructor of the element.
+ */
   template <typename... Args>
   inline void emplace_front(Args&&... args) {
     if (front_ == mid_) {
@@ -97,43 +139,83 @@ class DeQueue {
     }
     arr_[mid_ - front_++] = T(std::forward<Args>(args)...);
   }
-  void add_front(T e) {
+  /**
+ * Emplaces an element at the back of the deque.
+ * Constructs the element in-place using the given arguments.
+ * @param args Arguments to forward to the constructor of the element.
+ */
+  template <typename... Args>
+  inline void emplace_back(Args&&... args) {
     if (front_ == mid_) {
       grow();
     }
-    arr_[mid_ - front_++] = e;
+    arr_[mid_ - front_++] = T(std::forward<Args>(args)...);
   }
-  void add_back(T e) {
+  /**
+ * Adds an element to the front of the deque.
+ * @param e The element to be added.
+ */
+  inline void add_front(const T& e) {
+    if (front_ == mid_) {
+      grow();
+    }
+    arr_[mid_ - front_] = e;
+    front_++;
+  }
+  /**
+ * Adds an element to the back of the deque.
+ * @param e The element to be added.
+ */
+  inline void add_back(const T& e) {
     if (mid_ == back_) {
       grow();
     }
-    arr_[mid_ + back_++] = e;
+    arr_[mid_ + back_] = e;
+    back_++;
   }
-  T& pop_back() {
-    if (front_ + back_ < minlen_) {
+  /**
+ * Removes and returns an element from the back of the deque.
+ * @return The removed element.
+ */
+  T pop_back() {
+    if (size() < minlen_) {
       shrink();
     }
-    return arr_[mid_ + back_-- - 1];
+    back_--;
+    return arr_[mid_ + back_];
   }
-  T& pop_front() {
-    if (front_ + back_ < minlen_) {
+  /**
+ * Removes and returns an element from the front of the deque.
+ * @return The removed element.
+ */
+  T pop_front() {
+    if (size() < minlen_) {
       shrink();
     }
-    return arr_[mid_ - front_-- + 1];
+    front_--;
+    return arr_[mid_ - front_];
   }
-  T& back() { return arr_[mid_ + back_ - 1]; }
-  T& front() { return arr_[mid_ - front_ + 1]; }
+  /**
+ * Accesses the last element in the deque.
+ * @return The reference to the last element in the deque.
+ */
+  [[nodiscard]] inline T& back() const { return arr_[mid_ + back_ - 1]; }
+  /**
+ * Accesses the first element in the deque.
+ * @return The reference to the first element in the deque.
+ */
+  [[nodiscard]] inline T& front() const { return arr_[mid_ - front_ + 1]; }
   /**
  *
  * @return the current size of the dequeue
  */
-  [[nodiscard]] uint_fast32_t size() const { return back_ + front_-1; }
+  [[nodiscard]] uint_fast32_t size() const { return back_ + front_ - 1; }
   /**
    * Provides access to the underlying array
    * Use with caution!
    * @return a pointer to the data array
    */
-  T* get_raw() { return arr_; }
+  [[nodiscard]] T* get_raw() const { return arr_; }
   friend std::ostream& operator<<(std::ostream& os, DeQueue& q) {
     if (q.size() == 0) {
       return os << "[]";
@@ -151,26 +233,26 @@ class DeQueue {
     // Testing add_front
     std::cout << "   Testing add_front..." << std::endl;
     DeQueue<int> de_queue;
-  
+
     for (int i = 0; i < 100; i++) {
       de_queue.add_front(i);
       assert(de_queue.front() == i);
     }
-    
+
     // Testing add_back
     std::cout << "   Testing add_back..." << std::endl;
     for (int i = 100; i < 200; i++) {
       de_queue.add_back(i);
       assert(de_queue.back() == i);
     }
-   
+
     // Testing pop_front
     std::cout << "   Testing pop_front..." << std::endl;
     for (int i = 99; i >= 0; i--) {
       assert(de_queue.front() == i);
       de_queue.pop_front();
     }
-    
+
     // Testing pop_back
     std::cout << "   Testing pop_back..." << std::endl;
     for (int i = 199; i >= 100; i--) {
@@ -182,17 +264,15 @@ class DeQueue {
     std::cout << "   Testing edge case: adding and removing a large number of "
                  "elements..."
               << std::endl;
-    
+
     for (int i = 0; i < 100000; i++) {
       de_queue.add_back(i);
     }
 
     for (int i = 0; i < 100000; i++) {
-
-      assert(de_queue.size()== 100000-i);
+      assert(de_queue.size() == 100000 - i);
       assert(de_queue.pop_front() == i);
     }
-
     assert(de_queue.size() == 0);
   }
 };
