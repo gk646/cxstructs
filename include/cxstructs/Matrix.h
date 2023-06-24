@@ -26,6 +26,10 @@
 #include <string>
 #include <vector>
 
+#ifdef CX_EXTRA
+#include "RowVector.h"
+#endif
+
 namespace cxstructs {
 /**
  * <h2>Matrix</h2>
@@ -269,7 +273,22 @@ class mat {
       arr[i * n_cols + col] = l(i, arr[i * n_cols + col]);
     }
   }
-  [[nodiscard]] float dotProduct(const mat& o) const;
+#ifdef CX_EXTRA
+  /**
+ * Takes the dot product of each row of the matrix with the given vector and returns a new vector
+ * @param vec
+ * @return a new vector with each index being the result of the vector-matrix dot product
+ */
+  [[nodiscard]] row_vec<float> dotProduct(const row_vec<float>& vec) const {
+    row_vec<float> re(n_rows, 0);
+    for (int i = 0; i < n_rows; ++i) {
+      for (int j = 0; j < n_cols; ++j) {
+        re[i] += arr[i * n_cols + j] * vec[j];
+      }
+    }
+    return re;
+  }
+#endif
   /**
    * Multiplies the whole matrix with the given scalar in-place
    * @param s the scalar
@@ -284,7 +303,7 @@ class mat {
   /**Prints out the matrix
    * @param header optional header
    */
-  void print(std::string header = "") const {
+  void print(const std::string& header = "") const {
     if (!header.empty()) {
       std::cout << header << std::endl;
       for (int i = 0; i < n_rows; i++) {
