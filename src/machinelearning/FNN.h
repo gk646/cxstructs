@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#ifndef CXSTRUCTS_SRC_DATASTRUCTURES_FNN_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_FNN_H_
+#ifndef CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
+#define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 
 #include <algorithm>
 #include <cmath>
@@ -82,10 +82,12 @@ struct Layer {
       : in_(in), out_(out), func(func), learnR_(learnR), inputs_(in) {
     if (func == relu) {
       d_func = d_relu;
-    } else if(func == sig) {
+    } else if (func == sig) {
       d_func = d_sig;
-    }else{
-      d_func = [](float x){return static_cast<float>(1.0);};
+    } else {
+      d_func = [](float x) {
+        return static_cast<float>(1.0);
+      };
     }
     weights_ = new float[in_ * out_];
     bias_ = new float[out_];
@@ -215,7 +217,7 @@ class FNN {
       std::vector<float> re = forward(in);
 
       for (int i = 0; i < re.size(); i++) {
-        re[i] =  (re[i] - out[i]);
+        re[i] = (re[i] - out[i]);
       }
 
       for (int i = len_ - 1; i > -1; i--) {
@@ -232,7 +234,7 @@ class FNN {
         std::vector<float> re = forward(in[l]);
 
         for (int i = 0; i < re.size(); i++) {
-          re[i] =  (re[i] - out[l][i]);
+          re[i] = (re[i] - out[l][i]);
         }
 
         for (int i = len_ - 1; i > -1; i--) {
@@ -248,11 +250,11 @@ class FNN {
     std::cout << fnn.forward({1, 0})[0] << std::endl;
 
     fnn.train({{1, 0}, {1, 1}, {0, 1}, {0, 0}}, {{1}, {0}, {1}, {0}}, 1000);
-    std::cout << fnn.forward({1,0})[0] << std::endl;
+    std::cout << fnn.forward({1, 0})[0] << std::endl;
   }
 };
 }  // namespace cxstructs
 
 #endif  // CX_MATRIX
 #undef CX_MATRIX
-#endif  //CXSTRUCTS_SRC_DATASTRUCTURES_FNN_H_
+#endif  //CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_

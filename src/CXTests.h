@@ -24,17 +24,18 @@
 #include "datastructures/BinaryTree.h"
 #include "datastructures/DeQueue.h"
 #include "datastructures/DoubleLinkedList.h"
-#include "datastructures/FNN.h"
 #include "datastructures/HashMap.h"
 #include "datastructures/LinkedList.h"
 #include "datastructures/Matrix.h"
 #include "datastructures/Queue.h"
 #include "datastructures/Stack.h"
 #include "datastructures/Trie.h"
+#include "machinelearning/FNN.h"
 
 #include "algorithms/GraphTraversal.h"
 #include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
+#include "algorithms/MathFunctions.h"
 
 namespace cxtests {
 using namespace cxstructs;
@@ -62,6 +63,7 @@ static void test_cxalgos() {
   TEST_SORTING();
   TEST_DFS();
   TEST_SEARCH();
+  TEST_MATH();
 }
 
 }  // namespace cxtests

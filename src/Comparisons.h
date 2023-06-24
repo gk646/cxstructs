@@ -37,7 +37,7 @@
 #include "datastructures/Queue.h"
 #include "datastructures/Stack.h"
 #include "datastructures/Trie.h"
-#include "datastructures/FNN.h"
+#include "machinelearning/FNN.h"
 
 #include "algorithms/GraphTraversal.h"
 #include "algorithms/Search.h"

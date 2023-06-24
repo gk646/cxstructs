@@ -28,6 +28,13 @@ jobs:
               cp $file ./include/cxalgo/$filename
             fi
           done
+          
+          for file in $(find src/machinelearning -name '*.h' -or -name '*.cpp'); do
+            if sed -n '20p' $file | grep -q "#define FINISHED"; then
+              filename=$(basename $file)
+              cp $file ./include/machinelearning/$filename
+            fi
+          done
 
       - name: Commit and push on change
         run: |
