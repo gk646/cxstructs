@@ -142,11 +142,11 @@ class ArrayList {
    * Adds a element to the list
    * @param e the element to be added
    */
-  inline void add(T e) {
+  inline void add(const T& e) {
     if (size_ == len) {
       grow();
     }
-    arr[size_++] = std::move(e);
+    arr[size_++] = e;
   }
   /**
    * Construct a new T element at the end of the list
