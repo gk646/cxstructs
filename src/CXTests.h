@@ -22,14 +22,15 @@
 
 #include "datastructures/ArrayList.h"
 #include "datastructures/BinaryTree.h"
+#include "datastructures/DeQueue.h"
 #include "datastructures/DoubleLinkedList.h"
+#include "datastructures/FNN.h"
 #include "datastructures/HashMap.h"
 #include "datastructures/LinkedList.h"
 #include "datastructures/Matrix.h"
 #include "datastructures/Queue.h"
 #include "datastructures/Stack.h"
 #include "datastructures/Trie.h"
-#include "datastructures/DeQueue.h"
 
 #include "algorithms/GraphTraversal.h"
 #include "algorithms/Search.h"
@@ -44,12 +45,13 @@ static void test_cxstructs() {
   mat::TEST();  // weird error in debug mode on the operator == for now reason
   LinkedList<int>::TEST();
   Queue<int>::TEST();
-  HashMap<int, int>::TEST(); //potential memory leak
+  HashMap<int, int>::TEST();  //potential memory leak
   Stack<int>::TEST();
-  ArrayList<int>::TEST(); // potential memory leak
+  ArrayList<int>::TEST();  // potential memory leak
   Trie<>::TEST();
   DoubleLinkedList<int>::TEST();
   DeQueue<int>::TEST();
+  FNN::TEST();
   //BinaryTree<int>::TEST();
 
   std::cout << "\nAll tests passed!" << std::endl;

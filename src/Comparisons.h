@@ -21,14 +21,27 @@
 #include <iostream>
 
 #include <ctime>
+#include <deque>
 #include <queue>
 #include <stack>
 #include <unordered_map>
 #include <vector>
-#include "datastructures/HashMap.h"
 #include "gktime.h"
-#include <deque>
 
+#include "datastructures/ArrayList.h"
+#include "datastructures/BinaryTree.h"
+#include "datastructures/DeQueue.h"
+#include "datastructures/DoubleLinkedList.h"
+#include "datastructures/HashMap.h"
+#include "datastructures/LinkedList.h"
+#include "datastructures/Queue.h"
+#include "datastructures/Stack.h"
+#include "datastructures/Trie.h"
+#include "datastructures/FNN.h"
+
+#include "algorithms/GraphTraversal.h"
+#include "algorithms/Search.h"
+#include "algorithms/Sorting.h"
 using namespace cxstructs;
 using namespace cxalgos;
 struct Data {
@@ -199,8 +212,6 @@ void compareWithSTL() {
    * |-----------------------------------------------------|
    */
 
-
-
   std::cout << "\nComparing DeQueues" << std::endl;
 
   outerCount = 1000;
@@ -236,5 +247,15 @@ void compareWithSTL() {
     }
   }
   gkutils::printTime<>("std::queue:");
+
+  /* |-----------------------------------------------------|
+   * |                         FNN                         |
+   * |-----------------------------------------------------|
+   */
+
+  FNN fnn({2,2,1}, relu,0.5);
+  for (auto num : fnn.forward({2, 2})) {
+    std::cout<< num << std::endl;
+  }
 
 }
