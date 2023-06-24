@@ -29,6 +29,7 @@
 #include "datastructures/Queue.h"
 #include "datastructures/Stack.h"
 #include "datastructures/Trie.h"
+#include "datastructures/DeQueue.h"
 
 #include "algorithms/GraphTraversal.h"
 #include "algorithms/Search.h"
@@ -40,7 +41,7 @@ using namespace cxalgos;
 
 static void test_cxstructs() {
 
-  //mat::TEST();  // weird error in debug mode on the operator == for now reason
+  mat::TEST();  // weird error in debug mode on the operator == for now reason
   LinkedList<int>::TEST();
   Queue<int>::TEST();
   HashMap<int, int>::TEST(); //potential memory leak
@@ -48,6 +49,8 @@ static void test_cxstructs() {
   ArrayList<int>::TEST(); // potential memory leak
   Trie<>::TEST();
   DoubleLinkedList<int>::TEST();
+  DeQueue<int>::TEST();
+  //BinaryTree<int>::TEST();
 
   std::cout << "\nAll tests passed!" << std::endl;
 }

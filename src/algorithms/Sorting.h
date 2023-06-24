@@ -229,10 +229,10 @@ void quick_sort(T* arr, uint_fast32_t len, bool ascending = true) {
 template <typename T>
 T* insertionSort(T* arr, uint_fast32_t len, bool ascending) {}
 /**
- * Merge sort has the best possible O notation runtime for all cases but in
+ * <h2>Merge sort</h2> has the best possible O notation runtime for all cases but in
  * practice is often slower than for example quicksort. It works by dividing the
- * array into sub-arrays of decreasing length to then sort and merge them back
- * together. <p> Best: O(n*log(n)) <p> Average: O(n*log(n)) <p> Worst: O(n*log(n))
+ * array into sub-arrays of decreasing length to and merge them back
+ * together, sorting it in the process. <p> Best: O(n*log(n)) <p> Average: O(n*log(n)) <p> Worst: O(n*log(n))
  * @tparam T type
  * @param arr array to sort
  * @param len  length of the array
