@@ -42,28 +42,39 @@ class Queue {
   uint_fast32_t back_;
   uint_fast32_t front_;
 
+  uint_fast32_t minlen_;
+
   void resize() {
-    len_ = 2 * len_;
+    len_ *= 2;
     auto narr = new T[len_];
     std::copy(arr_ + front_, arr_ + back_, narr);
     delete[] arr_;
     arr_ = narr;
     back_ -= front_;
     front_ = 0;
+    minlen_ = size() / 4 < 32 ? 0 : size() / 4;
+  }
+
+  void shrink() {
+    len_ /= 2;
+    auto narr = new T[len_];
+    std::copy(arr_ + front_, arr_ + back_, narr);
+    delete[] arr_;
+    arr_ = narr;
+    back_ -= front_;
+    front_ = 0;
+    minlen_ = size() / 4 < 32 ? 0 : size() / 4;
   }
 
  public:
-  explicit Queue(uint_fast32_t len = 16) : arr_(new T[len]), len_(len) {
+  explicit Queue(uint_fast32_t len = 32)
+      : arr_(new T[len]), len_(len), minlen_(0) {
     back_ = 0;
     front_ = 0;
   }
-  Queue(uint_fast32_t len, T val) : arr_(new T[len]), len_(len) {
-    back_ = len;
-    front_ = 0;
-    std::fill(arr_, arr_ + len_, val);
-  }
   ~Queue() { delete[] arr_; }
-  Queue(const Queue& o) : back_(o.back_), len_(o.len_), front_(o.front_) {
+  Queue(const Queue& o)
+      : back_(o.back_), len_(o.len_), front_(o.front_), minlen_(o.minlen_) {
     arr_ = new T[len_];
     std::copy(o.arr_, o.arr_ + len_, arr_);
   }
@@ -89,7 +100,7 @@ class Queue {
    * Adds a element to the back of the queue
    * @param e the element to be added
    */
-  void add(T e) {
+  inline void add(T e) {
     if (back_ == len_) {
       resize();
     }
@@ -111,8 +122,10 @@ class Queue {
    * Removes and returns the element at the front of the queue
    * @return the removed element
    */
-
-  T pop() {
+  inline T pop() {
+    if (back_ - front_ < minlen_) {
+      shrink();
+    }
     return arr_[front_++];
   }
   /**
@@ -120,15 +133,13 @@ class Queue {
    * The position at which elements get removed
    * @return a reference to the front element
    */
-  [[nodiscard]] T& front() {
-    return arr_[front_];
-  }
+  [[nodiscard]] inline T& front() const { return arr_[front_]; }
   /**
    * Lets you peek at the last element <p>
    * The position at which elements get added
    * @return a reference to the last element
    */
-  T& back() {
+  [[nodiscard]] inline T& back() const {
     if (back_ > 0) {
       return arr_[back_ - 1];
     }
@@ -138,28 +149,23 @@ class Queue {
    *
    * @return true if the queue is empty
    */
- inline bool isEmpty() { return back_ - front_ == 0; }
+  inline bool isEmpty() { return back_ - front_ == 0; }
   /**
    *
    * @return true if the queue is full
    */
- inline bool isFull() { return back_ == len_; }
+  inline bool isFull() { return back_ == len_; }
   /**
    * Clears the queue of all elements
    */
-  void clear() {
+  inline void clear() {
     back_ = 0;
     front_ = 0;
+    minlen_ = 0;
     delete[] arr_;
-    arr_ = new T[16];
-    len_ = 16;
+    arr_ = new T[32];
+    len_ = 32;
   }
-  /**
-   * Provides access to the underlying array
-   * Use with caution!
-   * @return a pointer to the data array
-   */
-  T* getRaw() { return arr_; }
   friend std::ostream& operator<<(std::ostream& os, const Queue& q) {
     if (q.size() == 0) {
       return os << "[]";
@@ -215,7 +221,10 @@ class Queue {
 
     // Test non-empty constructor
     std::cout << "  Testing non-empty constructor..." << std::endl;
-    Queue<int> q2(5, 10);
+    Queue<int> q2(5);
+    for (int i = 0; i < 5; i++) {
+      q2.add(10);
+    }
     assert(q2.size() == 5);
     assert(q2.isEmpty() == false);
     assert(q2.front() == 10);
@@ -240,11 +249,11 @@ class Queue {
 
     // Test multiple add/pop
     std::cout << "  Testing multiple add/pop..." << std::endl;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 1000; i++) {
       q1.add(i);
     }
-    assert(q1.size() == 10);
-    for (int i = 0; i < 10; i++) {
+    assert(q1.size() == 1000);
+    for (int i = 0; i < 1000; i++) {
       int temp = q1.pop();
 
       assert(temp == i);

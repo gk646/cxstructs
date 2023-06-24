@@ -49,7 +49,7 @@ class DeQueue {
               n_arr + mid_ - front_);
     delete[] arr_;
     arr_ = n_arr;
-    minlen_ = size() / 4 < 16 ? 0 : size() / 4;
+    minlen_ = size() / 4 < 32 ? 0 : size() / 4;
   }
 
   void shrink() {
@@ -72,11 +72,11 @@ class DeQueue {
       back_--;
     }
 
-    minlen_ = size() / 4 < 16 ? 0 : size() / 4;
+    minlen_ = size() / 4 < 32 ? 0 : size() / 4;
   }
 
  public:
-  explicit DeQueue(uint_fast32_t initialSize = 16)
+  explicit DeQueue(uint_fast32_t initialSize = 32)
       : mid_(initialSize / 2),
         front_(1),
         back_(0),
@@ -178,7 +178,7 @@ class DeQueue {
  * @return The removed element.
  */
   T pop_back() {
-    if (size() < minlen_) {
+    if (back_ + front_ < minlen_) {
       shrink();
     }
     back_--;
@@ -189,7 +189,7 @@ class DeQueue {
  * @return The removed element.
  */
   T pop_front() {
-    if (size() < minlen_) {
+    if (back_ + front_ < minlen_) {
       shrink();
     }
     front_--;
@@ -209,13 +209,19 @@ class DeQueue {
  *
  * @return the current size of the dequeue
  */
-  [[nodiscard]] uint_fast32_t size() const { return back_ + front_ - 1; }
+  [[nodiscard]] inline uint_fast32_t size() const { return back_ + front_ - 1; }
   /**
-   * Provides access to the underlying array
-   * Use with caution!
-   * @return a pointer to the data array
+   * Clears the queue of all elements
    */
-  [[nodiscard]] T* get_raw() const { return arr_; }
+  void clear() {
+    back_ = 0;
+    front_ = 1;
+    minlen_ = 0;
+    mid_ = 16;
+    len_ = 32;
+    delete[] arr_;
+    arr_ = new T[32];
+  }
   friend std::ostream& operator<<(std::ostream& os, DeQueue& q) {
     if (q.size() == 0) {
       return os << "[]";
@@ -226,6 +232,23 @@ class DeQueue {
     }
     return os << "]";
   }
+  class Iterator {
+    T* ptr;
+
+   public:
+    explicit Iterator(T* p) : ptr(p) {}
+
+    T& operator*() { return *ptr; }
+
+    Iterator& operator++() {
+      ++ptr;
+      return *this;
+    }
+
+    bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+  };
+  Iterator begin() { return Iterator(arr_ + mid_ - front_ + 1); }
+  Iterator end() { return Iterator(arr_+ mid_ + back_); }
 
   static void TEST() {
     std::cout << "TESTING DEQUEUE" << std::endl;
@@ -274,6 +297,27 @@ class DeQueue {
       assert(de_queue.pop_front() == i);
     }
     assert(de_queue.size() == 0);
+
+    std::cout << "   Testing clear..." << std::endl;
+    de_queue.clear();
+    assert(de_queue.size() == 0);
+    for (int i = 0; i < 1000; i++) {
+      de_queue.add_back(i);
+    }
+    for (int i = 0; i < 1000; i++) {
+      assert(de_queue.pop_back() == 999 - i);
+    }
+
+    std::cout << "   Testing iterator..." << std::endl;
+    de_queue.clear();
+    assert(de_queue.size() == 0);
+    for (int i = 0; i < 1000; i++) {
+      de_queue.add_back(i);
+    }
+    int check = 0;
+    for (const auto& num : de_queue) {
+      assert(num == check++);
+    }
   }
 };
 }  // namespace cxstructs
