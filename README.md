@@ -15,6 +15,9 @@ To use these, simply include the **include directory**, which contains only fina
 - Each header is **self-contained** without any cross dependencies.
 - Comparisons with STL counterparts can be run using the Comparison.h header
 
+### Macros
+- `#define CX_ALLOC` to use the custom allocator (unfinished)
+- `#define CX_EXTRA` to enable cross dependencies and to get additional methods
 
 ### Data Structures
 
