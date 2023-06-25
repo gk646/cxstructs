@@ -68,7 +68,7 @@ class mat {
   /**
    * The underlying array is flattened!
    * A specific row and column can be accessed with:<p>
-   * arr[row * n_cols + column] <p>
+   * arr_[row * n_cols + column] <p>
    * Use with caution!
    * @return a pointer to the underlying array
    */
@@ -283,7 +283,7 @@ class mat {
     row_vec<float> re(n_rows, 0);
     for (int i = 0; i < n_rows; ++i) {
       for (int j = 0; j < n_cols; ++j) {
-        re[i] += arr[i * n_cols + j] * vec[j];
+        re[i] += arr_[i * n_cols + j] * vec[j];
       }
     }
     return re;
