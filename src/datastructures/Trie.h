@@ -30,6 +30,7 @@
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <stack>
 #include <string>
 #include <vector>
 #include "../cxconfig.h"
@@ -45,21 +46,14 @@ struct TrieNode {
   }
 };
 }  // namespace cxhelper
+
 #ifdef CX_ALLOC
 #include "../CXAllocator.h"
-using AllocatorType = CXPoolAllocator<cxhelper::TrieNode, 4098, 2>;
+using AllocatorType =
+    CXPoolAllocator<cxhelper::TrieNode, sizeof(cxhelper::TrieNode) * 50, 1>;
 #else
 using AllocatorType = std::allocator<cxhelper::TrieNode>;
 #endif
-
-namespace {
-inline constexpr bool using_custom_alloc =
-#ifdef CX_ALLOC
-    true;
-#else
-    false;
-#endif
-}  // namespace
 
 namespace cxstructs {
 using namespace cxhelper;
@@ -93,23 +87,21 @@ class Trie {
     root = temp;
   }
   ~Trie() {
-    if (!using_custom_alloc) {
-      std::vector<TrieNode*> nodesToDelete;
-      nodesToDelete.push_back(root);
+    std::stack<TrieNode*> nodesToDelete;
+    nodesToDelete.push(root);
 
-      while (!nodesToDelete.empty()) {
-        TrieNode* node = nodesToDelete.back();
-        nodesToDelete.pop_back();
+    while (!nodesToDelete.empty()) {
+      TrieNode* node = nodesToDelete.top();
+      nodesToDelete.pop();
 
-        for (auto child : node->children) {
-          if (child != nullptr) {
-            nodesToDelete.push_back(child);
-          }
+      for (auto child : node->children) {
+        if (child != nullptr) {
+          nodesToDelete.push(child);
         }
-
-        std::allocator_traits<Allocator>::destroy(alloc, node);
-        alloc.deallocate(node, 1);
       }
+
+      std::allocator_traits<Allocator>::destroy(alloc, node);
+      alloc.deallocate(node, 1);
     }
   }
   Trie& operator=(const Trie& o) = delete;
@@ -189,7 +181,7 @@ class Trie {
    * Clears the trie of all words
    */
   void clear() {
-    if (using_custom_alloc) {
+    if (CX_CUSTOM_ALLOC) {
 
     } else {
       std::vector<TrieNode*> nodesToDelete;

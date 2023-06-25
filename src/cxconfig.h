@@ -23,6 +23,16 @@
 
 #include <cstdint>
 
+
+namespace {
+inline constexpr bool CX_CUSTOM_ALLOC =
+#ifdef CX_ALLOC
+    true;
+#else
+    false;
+#endif
+}  // namespace
+
 typedef uint_fast32_t uint_32_cx;
 typedef int_fast32_t int_32_cx;
 

@@ -26,12 +26,14 @@
 #include <cstdint>
 #include <initializer_list>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <stdexcept>
 #include <vector>
 #include "../cxconfig.h"
 
 //This implementation is well optimized (from what I can tell) and should be equal or slightly slower than the std::vector in a lot of use cases
+
 namespace cxstructs {
 /**
  * <h2>vec</h2>
@@ -42,40 +44,71 @@ namespace cxstructs {
  */
 template <typename T>
 class vec {
+#ifdef CX_ALLOC
+#include "../CXAllocator.h"
+  using Allocator = CXPoolAllocator<T, sizeof(T) * 32, 1>;
+#else
+  using AllocatorType = std::allocator<T>;
+#endif
+  Allocator alloc;
   T* arr_;
   uint_32_cx size_;
   uint_32_cx len_;
   uint_32_cx minlen_;
 
   inline void grow() {
-    len_ *= 1.5;
-    auto n_arr = new T[len_];
-    std::move(arr_, arr_ + size_, n_arr);
-    delete[] arr_;
-    arr_ = n_arr;
+    len_ *= 2;
 
+    T* n_arr = alloc.allocate(len_);
+
+    for (size_t i = 0; i < size_; ++i) {
+      std::allocator_traits<Allocator>::construct(alloc, &n_arr[i], std::move(arr_[i]));
+    }
+
+    // Destroy the original objects
+    for (size_t i = 0; i < size_; ++i) {
+      std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+    }
+
+    alloc.deallocate(arr_, size_);
+    arr_ = n_arr;
+    //as array is moved no need for delete []
     minlen_ = size_ / 6 < 64 ? 0 : size_ / 6;
   }
   inline void shrink() {
     len_ /= 2;
-    auto n_arr = new T[len_];
-    std::move(arr_, arr_ + size_, n_arr);
-    delete[] arr_;
+    T* n_arr = alloc.allocate(len_);
+
+    for (size_t i = 0; i < size_; ++i) {
+      std::allocator_traits<Allocator>::construct(alloc, &n_arr[i], std::move(arr_[i]));
+    }
+
+    // Destroy the original objects
+    for (size_t i = 0; i < size_; ++i) {
+      std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+    }
+
+    alloc.deallocate(arr_, size_);
     arr_ = n_arr;
-    // lower bound is very lenient to avoid premature downsizing
+    // lower bound is very lenient to avoid premature downsizing and memory is plenty...
     minlen_ = size_ / 6 < 64 ? 0 : size_ / 6;
   }
 
  public:
-  explicit vec(uint_32_cx n_elem = 64)
+  /**
+   * Default constructor<p>
+   * Recommended to leave it at 64 due to optimizations with the allocator
+   * @param n_elem number of starting elements
+   */
+  explicit vec(uint_32_cx n_elem = 32)
       : len_(n_elem),
         size_(0),
-        arr_(new T[n_elem]),
+        arr_(alloc.allocate(n_elem)),
         minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {}
   vec(uint_32_cx n_elem, const T val)
       : len_(n_elem),
         size_(n_elem),
-        arr_(new T[n_elem]),
+        arr_(alloc.allocate(n_elem)),
         minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {
     std::fill(arr_, arr_ + n_elem, val);
   }
@@ -92,73 +125,103 @@ class vec {
   vec(uint_32_cx n_elem, fill_form form)
       : len_(n_elem),
         size_(n_elem),
-        arr_(new T[n_elem]),
+        arr_(alloc.allocate(n_elem)),
         minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
     }
   }
+  /**
+   * std::vector constructor<p>
+   * vec vec1({1,2,3});<p>
+   * @param vector
+   */
   explicit vec(const std::vector<T>& vector)
       : len_(vector.size() * 1.5),
         size_(vector.size()),
-        arr_(new T[vector.size() * 1.5]),
+        arr_(alloc.allocate(vector.size() * 1.5)),
         minlen_(vector.size() / 6 < 64 ? 0 : vector.size() / 6) {
     std::copy(vector.begin(), vector.end(), arr_);
   }
-  explicit vec(const std::vector<T>&& vector)
-      : len_(vector.size()),
-        size_(vector.size()),
-        arr_(vector.data()),
-        minlen_(vector.size() / 6 < 64 ? 0 : vector.size() / 6) {}
+  explicit vec(const std::vector<T>&& move_vector)
+      : len_(move_vector.size() * 1.5),
+        size_(move_vector.size()),
+        arr_(alloc.allocate(move_vector.size() * 1.5)),
+        minlen_(move_vector.size() / 6 < 64 ? 0 : move_vector.size() / 6) {
+    std::move(move_vector.begin(), move_vector.end(), arr_);
+  }
+  /**
+   * Initializer list constructor<p>
+   * vec vec1 = {1,2,3};<p>
+   * vec vec2{1,2,3};
+   * @param init_list init list elements
+   */
   vec(std::initializer_list<T> init_list)
       : size_(init_list.size()),
-        len_(init_list.size() * 2),
-        arr_(new T[init_list.size()]),
+        len_(init_list.size() * 10),
+        arr_(alloc.allocate(init_list.size() * 10)),
         minlen_(0) {
     std::copy(init_list.begin(), init_list.end(), arr_);
   }
   vec(const vec<T>& o) : size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
-    arr_ = new T[len_];
+    arr_ = alloc.allocate(len_);
     std::copy(o.arr_, o.arr_ + size_, arr_);
   }
   vec& operator=(const vec<T>& o) {
     if (this != &o) {
-      delete[] arr_;
+      //ugly allocator syntax but saves a lot when using e.g vec<float>
+      if (!std::is_trivially_destructible<T>::value) {
+        for (uint_32_cx i = 0; i < len_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+      alloc.deallocate(arr_, len_);
 
       size_ = o.size_;
       len_ = o.len_;
       minlen_ = o.minlen_;
-      arr_ = new T[size_];
-      std::copy(o.arr_, o.arr_ + size_, arr_);
+      arr_ = alloc.allocate(len_);
+
+      for (uint_32_cx i = 0; i < size_; i++) {
+        std::allocator_traits<Allocator>::construct(alloc, &arr_[i], o.arr_[i]);
+      }
     }
     return *this;
   }
   //move constructor
   vec(vec&& o) noexcept
       : arr_(o.arr_), size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
-    o.arr_ = nullptr;
-    o.size_ = 0;
-    o.len_ = 0;
-    o.minlen_ = 0;
+   //leve other in previous state
+    o.arr_ = nullptr; // PREVENT DOUBLE DELETION!
   }
   //move assignment
   vec& operator=(vec&& o) noexcept {
     if (this != &o) {
-      delete[] arr_;
+      if (!std::is_trivially_destructible<T>::value) {
+        for (uint_32_cx i = 0; i < len_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+      alloc.deallocate(arr_, len_);
 
       arr_ = o.arr_;
       size_ = o.size_;
       len_ = o.len_;
       minlen_ = o.minlen_;
 
-      o.arr_ = nullptr;
-      o.size_ = 0;
-      o.len_ = 0;
-      o.minlen_ = 0;
+      //other is left in previous state but invalidated
+      o.arr_ = nullptr; // PREVENT DOUBLE DELETION!
     }
     return *this;
   }
-  ~vec() { delete[] arr_; }
+  ~vec() {
+    if (!std::is_trivially_destructible<T>::value) {
+      for (uint_32_cx i = 0; i < len_; i++) {
+        std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+      }
+    }
+    alloc.deallocate(arr_, len_);
+  }
   /**
    * Direct access to the underlying array
    * @param index the accessed index
@@ -205,7 +268,8 @@ class vec {
     if (size_ == len_) {
       grow();
     }
-    arr_[size_++] = T(std::forward<Args>(args)...);
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_], std::forward<Args>(args)...);
+    size_++;
   }
   /**
    * Removes the first occurrence of the given element from the list
@@ -243,11 +307,16 @@ class vec {
    * Resets the length back to its starting value
    */
   void clear() {
+    if (!std::is_trivially_destructible<T>::value) {
+      for (uint_32_cx i = 0; i < len_; i++) {
+        std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+      }
+    }
+    alloc.deallocate(arr_, len_);
     minlen_ = 0;
     size_ = 0;
     len_ = 32;
-    delete[] arr_;
-    arr_ = new T[len_];
+    arr_ = alloc.allocate(len_);
   }
   /**
    * Provides access to the underlying array which can be used for sorting
@@ -299,8 +368,7 @@ class vec {
  * @param end index of the last element (exclusive)
  * @param start the index of the first element (inclusive)
  */
-  void append(vec<T>& list, uint_32_cx endIndex,
-              uint_32_cx startIndex = 0) {
+  void append(vec<T>& list, uint_32_cx endIndex, uint_32_cx startIndex = 0) {
     if (startIndex >= endIndex || endIndex > list.size_) {
       throw std::out_of_range("index out of bounds");
     }
