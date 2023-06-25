@@ -32,8 +32,9 @@
 #include <vector>
 #include "../cxconfig.h"
 
-//This implementation is well optimized (from what I can tell) and should be equal or slightly slower than the std::vector in a lot of use cases
-
+/*This implementation is well optimized (from what I can tell) and should be equal or slightly slower than the std::vector in a lot of use cases
+ * Its using explicit allocator syntax to switch between the default and a custom one
+*/
 namespace cxstructs {
 /**
  * <h2>vec</h2>
@@ -62,7 +63,8 @@ class vec {
     T* n_arr = alloc.allocate(len_);
 
     for (size_t i = 0; i < size_; ++i) {
-      std::allocator_traits<Allocator>::construct(alloc, &n_arr[i], std::move(arr_[i]));
+      std::allocator_traits<Allocator>::construct(alloc, &n_arr[i],
+                                                  std::move(arr_[i]));
     }
 
     // Destroy the original objects
@@ -80,7 +82,8 @@ class vec {
     T* n_arr = alloc.allocate(len_);
 
     for (size_t i = 0; i < size_; ++i) {
-      std::allocator_traits<Allocator>::construct(alloc, &n_arr[i], std::move(arr_[i]));
+      std::allocator_traits<Allocator>::construct(alloc, &n_arr[i],
+                                                  std::move(arr_[i]));
     }
 
     // Destroy the original objects
@@ -191,8 +194,8 @@ class vec {
   //move constructor
   vec(vec&& o) noexcept
       : arr_(o.arr_), size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
-   //leve other in previous state
-    o.arr_ = nullptr; // PREVENT DOUBLE DELETION!
+    //leve other in previous state
+    o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
   }
   //move assignment
   vec& operator=(vec&& o) noexcept {
@@ -210,7 +213,7 @@ class vec {
       minlen_ = o.minlen_;
 
       //other is left in previous state but invalidated
-      o.arr_ = nullptr; // PREVENT DOUBLE DELETION!
+      o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
     }
     return *this;
   }
@@ -268,7 +271,8 @@ class vec {
     if (size_ == len_) {
       grow();
     }
-    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_], std::forward<Args>(args)...);
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_],
+                                                std::forward<Args>(args)...);
     size_++;
   }
   /**
