@@ -220,7 +220,7 @@ class HashMap {
   uint_fast32_t maxSize;
   uint_fast32_t minSize;
 
-  // once the size limit is reached all values needs to be rehashed to fit to the keys with the new bucket size
+  // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
   void reHashHigh() {
     auto oldBuckets = buckets_;
     buckets_ = buckets_ * 4;
@@ -345,11 +345,11 @@ class HashMap {
   }
   /**
    *
-   * @return the current size of the hashMap
+   * @return the current n_elem of the hashMap
    */
   [[nodiscard]] uint_fast32_t size() const { return size_; }
   /**
-   * The load factor is a %-value of the maximum size the hashmap is allowed tor each before
+   * The load factor is a %-value of the maximum n_elem the hashmap is allowed tor each before
    * growing and rehashing
    * @return the current load factor of the hashmap
    */
@@ -427,8 +427,8 @@ class HashMap {
     map3 = map1;
     assert(map3[2] == "Two");
 
-    // Test size
-    std::cout << "  Testing size method..." << std::endl;
+    // Test n_elem
+    std::cout << "  Testing n_elem method..." << std::endl;
     assert(map1.size() == 1);
     assert(map2.size() == 1);
     assert(map3.size() == 1);

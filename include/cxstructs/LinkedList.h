@@ -244,7 +244,7 @@ class LinkedList {
   ListNode<T>& last() { return *end_; }
 
 /**
- * @return the current size of this Linked List
+ * @return the current n_elem of this Linked List
  */
   [[nodiscard]] uint_fast32_t size() const { return size_; }
 
@@ -448,7 +448,7 @@ class LinkedList {
     LinkedList<int> list8(list7);  // Copy constructor
     LinkedList<int> list9 = list7;  // Assignment operator
 
-    // Check size
+    // Check n_elem
     assert(list7.size() == list8.size());
     assert(list7.size() == list9.size());
 

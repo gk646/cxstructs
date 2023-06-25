@@ -34,9 +34,9 @@
 namespace cxstructs {
 /**
  * <h2>vec</h2>
- * This is an implementation of a dynamic array data structure, similar to <code>vec</code> in Java or <code>std::vector</code> in C++.
+ * This is an implementation of a dynamic array data structure, similar to the <code>ArrayList</code> in Java or <code>std::vector</code> in C++.
  * <br><br>
- * <p>A dynamic array is a random access, variable-size list data structure that allows elements to be added or removed.
+ * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
  * It provides the capability to index into the list, add elements to the end, and remove elements from the end in a time-efficient manner.</p>
  */
 template <typename T>
@@ -78,6 +78,13 @@ class vec {
         minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {
     std::fill(arr_, arr_ + n_elem, val);
   }
+  /**
+* @brief Constructs a vec with the specified number of elements, and initializes them using a provided function.
+*
+* @tparam fill_form A callable object or function that takes a single int as an argument and returns a float
+* @param n_elem The number of elements in the vec.
+* @param form The callable object or function used to initialize the elements of the vec. It is invoked for each element with the element's index as an argument.
+**/
   template <typename fill_form,
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
@@ -197,8 +204,7 @@ class vec {
     if (size_ == len_) {
       grow();
     }
-    arr_[size_] = T(std::forward<Args>(args)...);
-    ++size_;
+    arr_[size_++] = T(std::forward<Args>(args)...);
   }
   /**
    * Removes the first occurrence of the given element from the list
@@ -224,12 +230,11 @@ class vec {
     if (size_ < minlen_) {
       shrink();
     }
-    std::move(arr_ + index + 1, arr_ + size_, arr_ + index);
-    --size_;
+    std::move(arr_ + index + 1, arr_ + size_--, arr_ + index);
   }
   /**
  *
- * @return the current size of the list
+ * @return the current n_elem of the list
  */
   [[nodiscard]] inline uint_fast32_t size() const { return size_; }
   /**
@@ -245,7 +250,7 @@ class vec {
   }
   /**
    * Provides access to the underlying array which can be used for sorting
-   * Use with caution! Valid data is only guaranteed from 0 up to size
+   * Use with caution! Valid data is only guaranteed from 0 up to n_elem
    * @return a pointer to the data array
    */
   T* get_raw() { return arr_; }

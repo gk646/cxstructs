@@ -207,7 +207,7 @@ class DeQueue {
   [[nodiscard]] inline T& front() const { return arr_[mid_ - front_ + 1]; }
   /**
  *
- * @return the current size of the dequeue
+ * @return the current n_elem of the dequeue
  */
   [[nodiscard]] inline uint_fast32_t size() const { return back_ + front_ - 1; }
   /**
