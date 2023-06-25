@@ -24,7 +24,7 @@ jobs:
           for file in $(find src -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               filename=$(basename $file)
-              cp $file ./include/cxstructs/$filename
+              cp $file ./include/$filename
             fi
           done
           
