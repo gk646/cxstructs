@@ -12,8 +12,9 @@ jobs:
 
       - name: Copy Files
         run: |
-          rm -rf include/*
-         
+          rm -rf include/cxstructs
+          rm -rf include/cxalgo
+          rm -rf include/machinelearning
           
           mkdir -p include/cxstructs
           mkdir -p include/cxalgo
@@ -33,7 +34,7 @@ jobs:
               cp $file ./include/cxstructs/$filename
             fi
           done
-      
+          
           for file in $(find src/algorithms -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               filename=$(basename $file)
