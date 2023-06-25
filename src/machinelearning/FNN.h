@@ -21,7 +21,7 @@
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 #define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 
-#define CX_MATRIX
+
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -124,14 +124,14 @@ struct Layer {
     return *this;
   }
   ~Layer() = default;
-  [[nodiscard]] vec<float> forward(vec<float>& in) {
+  [[nodiscard]] mat forward(mat& in) {
     inputs_ = in;
-    std::vector<float> out(out_, 0);
+    mat out(out_, 0);
     float w_sum;
     for (int i = 0; i < out_; i++) {
       w_sum = 0;
       for (int j = 0; j < in_; j++) {
-        w_sum += in[j] * weights_[j * out_ + i];
+        w_sum += in(0,j) * weights_(j,i);
       }
       w_sums_[i] = w_sum + bias_[i];
       out[i] = func(w_sums_[i]);
@@ -297,7 +297,7 @@ class FNN {
  public:
   explicit FNN(const std::vector<uint_fast16_t>& bound, a_func a_func,
                float learnR)
-      : learnR_(learnR), len_(bound.n_elem() - 1), bounds_(bound) {
+      : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
     layers_ = new Layer[len_];
     for (int i = 1; i < len_ + 1; i++) {
       if (i == len_) {
@@ -322,7 +322,7 @@ class FNN {
     for (int k = 0; k < n; k++) {
       std::vector<float> re = forward(in);
 
-      for (int i = 0; i < re.n_elem(); i++) {
+      for (int i = 0; i < re.size(); i++) {
         re[i] = (re[i] - out[i]);
       }
 
@@ -336,10 +336,10 @@ class FNN {
 
     for (int k = 0; k < n; k++) {
 
-      for (int l = 0; l < in.n_elem(); l++) {
+      for (int l = 0; l < in.size(); l++) {
         std::vector<float> re = forward(in[l]);
 
-        for (int i = 0; i < re.n_elem(); i++) {
+        for (int i = 0; i < re.size(); i++) {
           re[i] = 2 * (re[i] - out[l][i]);
         }
 
@@ -363,7 +363,7 @@ class FNN {
 
       fnn.train(inputs, expected_outputs, 5000);
 
-      for (size_t j = 0; j < inputs.n_elem(); ++j) {
+      for (size_t j = 0; j < inputs.size(); ++j) {
         double output = fnn.forward(inputs[j])[0];
         double expected = expected_outputs[j][0];
         assert(output - expected < 0.1);
