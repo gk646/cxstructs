@@ -24,101 +24,140 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <initializer_list>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
+#include <vector>
 
-//This implementation is well optimized (from what I can tell) and should be faster or equal than the std::vector in a lot of use cases
+//This implementation is well optimized (from what I can tell) and should be equal or slightly slower than the std::vector in a lot of use cases
 namespace cxstructs {
 /**
- * <h2>Array List</h2>
- * This is an implementation of a dynamic array data structure, similar to <code>ArrayList</code> in Java or <code>std::vector</code> in C++.
+ * <h2>vec</h2>
+ * This is an implementation of a dynamic array data structure, similar to <code>vec</code> in Java or <code>std::vector</code> in C++.
  * <br><br>
  * <p>A dynamic array is a random access, variable-size list data structure that allows elements to be added or removed.
  * It provides the capability to index into the list, add elements to the end, and remove elements from the end in a time-efficient manner.</p>
  */
 template <typename T>
-class ArrayList {
-  T* arr;
+class vec {
+  T* arr_;
   uint_fast32_t size_;
-  uint_fast32_t len;
-  uint_fast32_t minlen;
+  uint_fast32_t len_;
+  uint_fast32_t minlen_;
 
   inline void grow() {
-    len *= 1.5;
-    auto newarr = new T[len];
-    std::move(arr, arr + size_, newarr);
-    delete[] arr;
-    arr = newarr;
+    len_ *= 1.5;
+    auto n_arr = new T[len_];
+    std::move(arr_, arr_ + size_, n_arr);
+    delete[] arr_;
+    arr_ = n_arr;
 
-    minlen = size_ / 6 < 32 ? 0 : size_ / 6; // lower bound is very lenient to avoid premature downsizing
+    minlen_ = size_ / 6 < 64 ? 0 : size_ / 6;
   }
   inline void shrink() {
-    len /= 2;
-    auto newarr = new T[len];
-    std::move(arr, arr + size_, newarr);
-    delete[] arr;
-    arr = newarr;
-
-    minlen = size_ / 6 < 32 ? 0 : size_ / 6;
+    len_ /= 2;
+    auto n_arr = new T[len_];
+    std::move(arr_, arr_ + size_, n_arr);
+    delete[] arr_;
+    arr_ = n_arr;
+    // lower bound is very lenient to avoid premature downsizing
+    minlen_ = size_ / 6 < 64 ? 0 : size_ / 6;
   }
 
  public:
-  explicit ArrayList(uint_fast32_t initial_capacity = 64)
-      : len(initial_capacity),
+  explicit vec(uint_fast32_t n_elem = 64)
+      : len_(n_elem),
         size_(0),
-        arr(new T[initial_capacity]),
-        minlen(0) {}
-  ~ArrayList() { delete[] arr; }
-  ArrayList(const ArrayList<T>& o)
-      : size_(o.size_), len(o.len), minlen(o.minlen) {
-    arr = new T[len];
-    std::copy(o.arr, o.arr + size_, arr);
+        arr_(new T[n_elem]),
+        minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {}
+  vec(uint_fast32_t n_elem, const T val)
+      : len_(n_elem),
+        size_(n_elem),
+        arr_(new T[n_elem]),
+        minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {
+    std::fill(arr_, arr_ + n_elem, val);
   }
-  ArrayList& operator=(const ArrayList<T>& o) {
+  template <typename fill_form,
+            typename = std::enable_if_t<
+                std::is_invocable_r_v<double, fill_form, double>>>
+  vec(uint_fast32_t n_elem, fill_form form)
+      : len_(n_elem),
+        size_(n_elem),
+        arr_(new T[n_elem]),
+        minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {
+    for (uint_fast32_t i = 0; i < n_elem; i++) {
+      arr_[i] = form(i);
+    }
+  }
+  explicit vec(const std::vector<T>& vector)
+      : len_(vector.size() * 1.5),
+        size_(vector.size()),
+        arr_(new T[vector.size() * 1.5]),
+        minlen_(vector.size() / 6 < 64 ? 0 : vector.size() / 6) {
+    std::copy(vector.begin(), vector.end(), arr_);
+  }
+  explicit vec(const std::vector<T>&& vector)
+      : len_(vector.size()),
+        size_(vector.size()),
+        arr_(vector.data()),
+        minlen_(vector.size() / 6 < 64 ? 0 : vector.size() / 6) {}
+  vec(std::initializer_list<T> init_list)
+      : size_(init_list.size()),
+        len_(init_list.size() * 2),
+        arr_(new T[init_list.size()]),
+        minlen_(0) {
+    std::copy(init_list.begin(), init_list.end(), arr_);
+  }
+  vec(const vec<T>& o) : size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
+    arr_ = new T[len_];
+    std::copy(o.arr_, o.arr_ + size_, arr_);
+  }
+  vec& operator=(const vec<T>& o) {
     if (this != &o) {
-      delete[] arr;
+      delete[] arr_;
 
       size_ = o.size_;
-      len = o.len;
-      minlen = o.minlen;
-      arr = new T[size_];
-      std::copy(o.arr, o.arr + size_, arr);
+      len_ = o.len_;
+      minlen_ = o.minlen_;
+      arr_ = new T[size_];
+      std::copy(o.arr_, o.arr_ + size_, arr_);
     }
     return *this;
   }
   //move constructor
-  ArrayList(ArrayList&& o) noexcept
-      : arr(o.arr), size_(o.size_), len(o.len), minlen(o.minlen) {
-    o.arr = nullptr;
+  vec(vec&& o) noexcept
+      : arr_(o.arr_), size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
+    o.arr_ = nullptr;
     o.size_ = 0;
-    o.len = 0;
-    o.minlen = 0;
+    o.len_ = 0;
+    o.minlen_ = 0;
   }
   //move assignment
-  ArrayList& operator=(ArrayList&& o) noexcept {
+  vec& operator=(vec&& o) noexcept {
     if (this != &o) {
-      delete[] arr;
+      delete[] arr_;
 
-      arr = o.arr;
+      arr_ = o.arr_;
       size_ = o.size_;
-      len = o.len;
-      minlen = o.minlen;
+      len_ = o.len_;
+      minlen_ = o.minlen_;
 
-      o.arr = nullptr;
+      o.arr_ = nullptr;
       o.size_ = 0;
-      o.len = 0;
-      o.minlen = 0;
+      o.len_ = 0;
+      o.minlen_ = 0;
     }
     return *this;
   }
+  ~vec() { delete[] arr_; }
   /**
    * Direct access to the underlying array
    * @param index the accessed index
    * @return a reference to the value
    */
   [[nodiscard]] inline T& operator[](const uint_fast32_t& index) {
-    return arr[index];
+    return arr_[index];
   }
   /**
    * Allows direct access at the specified index starting with index 0 <p>
@@ -130,11 +169,11 @@ class ArrayList {
     if (index < 0) {
       int_fast32_t access = size_ + index;
       if (access >= 0) {
-        return arr[access];
+        return arr_[access];
       }
       throw std::out_of_range("index out of bounds");
     } else if (index < size_) {
-      return arr[index];
+      return arr_[index];
     }
     throw std::out_of_range("index out of bounds");
   }
@@ -143,10 +182,10 @@ class ArrayList {
    * @param e the element to be added
    */
   inline void add(const T& e) {
-    if (size_ == len) {
+    if (size_ == len_) {
       grow();
     }
-    arr[size_++] = e;
+    arr_[size_++] = e;
   }
   /**
    * Construct a new T element at the end of the list
@@ -155,10 +194,10 @@ class ArrayList {
    */
   template <typename... Args>
   inline void emplace_back(Args&&... args) {
-    if (size_ == len) {
+    if (size_ == len_) {
       grow();
     }
-    arr[size_] = T(std::forward<Args>(args)...);
+    arr_[size_] = T(std::forward<Args>(args)...);
     ++size_;
   }
   /**
@@ -166,12 +205,12 @@ class ArrayList {
    * @param e element to be removed
    */
   inline void remove(const T& e) {
-    if (size_ < minlen) {
+    if (size_ < minlen_) {
       shrink();
     }
-    for (uint_fast32_t i = 0; i < len; i++) {
-      if (arr[i] == e) {
-        std::move(arr + i + 1, arr + size_, arr + i);
+    for (uint_fast32_t i = 0; i < len_; i++) {
+      if (arr_[i] == e) {
+        std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
         size_--;
         return;
       }
@@ -182,10 +221,10 @@ class ArrayList {
    * @param index index of removal
    */
   inline void removeAt(const uint_fast32_t& index) {
-    if (size_ < minlen) {
+    if (size_ < minlen_) {
       shrink();
     }
-    std::move(arr + index + 1, arr + size_, arr + index);
+    std::move(arr_ + index + 1, arr_ + size_, arr_ + index);
     --size_;
   }
   /**
@@ -198,18 +237,18 @@ class ArrayList {
    * Resets the length back to its starting value
    */
   void clear() {
-    minlen = 0;
+    minlen_ = 0;
     size_ = 0;
-    len = 32;
-    delete[] arr;
-    arr = new T[len];
+    len_ = 32;
+    delete[] arr_;
+    arr_ = new T[len_];
   }
   /**
-   * Provides access to the underlying array
-   * Use with caution!
+   * Provides access to the underlying array which can be used for sorting
+   * Use with caution! Valid data is only guaranteed from 0 up to size
    * @return a pointer to the data array
    */
-  T* get_raw() { return arr; }
+  T* get_raw() { return arr_; }
   /**
    * Searches the whole vector starting from the beginning (default)
    * @param val value to search for
@@ -219,14 +258,14 @@ class ArrayList {
   bool contains(const T& val, bool startFront = true) {
     if (startFront) {
       for (int i = 0; i < size_; i++) {
-        if (arr[i] == val) {
+        if (arr_[i] == val) {
           return true;
         }
       }
       return false;
     } else {
       for (int i = size_ - 1; i > -1; i++) {
-        if (arr[i] == val) {
+        if (arr_[i] == val) {
           return true;
         }
       }
@@ -234,36 +273,47 @@ class ArrayList {
     }
   }
   /**
- * Appends the contents of another ArrayList at the end of this list <p>
- * If necessary, the capacity of this ArrayList is expanded
- * @param list the list to append
+ * Appends the contents of another vec at the end of this vec <p>
+ * If necessary, the capacity of this vec is expanded
+ * @param vec  the vec to append
  */
-  void append(ArrayList<T>& list) {
-    while (len - size_ < list.size_) {
+  void append(vec<T>& vec) {
+    while (len_ - size_ < vec.size_) {
       grow();
     }
-    std::copy(list.arr, list.arr + list.size_, arr + size_);
-    size_ += list.size_;
+    std::copy(vec.arr_, vec.arr_ + vec.size_, arr_ + size_);
+    size_ += vec.size_;
   }
   /**
- * Appends a specified range of elements from another ArrayList to this ArrayList.
- * If necessary, the capacity of this ArrayList is expanded.
+ * Appends a specified range of elements from another vec to this vec.
+ * If necessary, the capacity of this vec is expanded.
  * Throws a std::out_of_range exception if the start or end indices are not valid.
  *
  * @param list the list to append
  * @param end index of the last element (exclusive)
  * @param start the index of the first element (inclusive)
  */
-  void append(ArrayList<T>& list, uint_fast32_t endIndex,
+  void append(vec<T>& list, uint_fast32_t endIndex,
               uint_fast32_t startIndex = 0) {
     if (startIndex >= endIndex || endIndex > list.size_) {
       throw std::out_of_range("index out of bounds");
     }
-    while (len - size_ < endIndex - startIndex) {
+    while (len_ - size_ < endIndex - startIndex) {
       grow();
     }
-    std::copy(list.arr + startIndex, list.arr + endIndex, arr + size_);
+    std::copy(list.arr_ + startIndex, list.arr_ + endIndex, arr_ + size_);
     size_ += endIndex - startIndex;
+  }
+  /**
+  * Attempts to print the complete list to std::cout
+  * @param prefix optional prefix
+  */
+  void print(const std::string& prefix) {
+    if (!prefix.empty()) {
+      std::cout << prefix << std::endl;
+      std::cout << "   ";
+    }
+    std::cout << this << std::endl;
   }
   class Iterator {
     T* ptr;
@@ -277,16 +327,16 @@ class ArrayList {
     }
     bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
   };
-  Iterator begin() { return Iterator(arr); }
-  Iterator end() { return Iterator(arr + size_); }
-  friend std::ostream& operator<<(std::ostream& os, const ArrayList<T>& list) {
+  Iterator begin() { return Iterator(arr_); }
+  Iterator end() { return Iterator(arr_ + size_); }
+  friend std::ostream& operator<<(std::ostream& os, const vec<T>& list) {
     if (list.size_ == 0) {
       return os << "[]";
     }
-    os << "[" << list.arr[0];
+    os << "[" << list.arr_[0];
 
     for (int i = 1; i < list.size_; i++) {
-      os << "," << list.arr[i];
+      os << "," << list.arr_[i];
     }
     return os << "]";
   }
@@ -296,7 +346,7 @@ class ArrayList {
 
     // Test 1: Testing add and remove
     std::cout << "   Test 1: Testing add and remove..." << std::endl;
-    ArrayList<int> list1;
+    vec<int> list1;
     list1.add(5);
     list1.add(10);
     list1.add(15);
@@ -350,7 +400,7 @@ class ArrayList {
 
     list1.add(5);
     list1.add(10);
-    ArrayList<int> list2;
+    vec<int> list2;
     for (int i = 0; i < 1000000; i++) {
       list2.add(i);
     }
@@ -371,18 +421,18 @@ class ArrayList {
 
     // Test 7: copy constructor
     std::cout << "   Test 7: Testing copy constructor..." << std::endl;
-    ArrayList<int> list5(10);
+    vec<int> list5(10);
     for (uint_fast32_t i = 0; i < 10; i++) {
       list5.add(i);
     }
-    ArrayList<int> list6 = list5;  // copy constructor
+    vec<int> list6 = list5;  // copy constructor
     for (uint_fast32_t i = 0; i < 10; i++) {
       assert(list6[i] == i);
     }
 
     // Test 8: copy assignment
     std::cout << "   Test 8: Testing copy assignment..." << std::endl;
-    ArrayList<int> list7(10);
+    vec<int> list7(10);
     list7 = list5;  // copy assignment
     for (uint_fast32_t i = 0; i < 10; i++) {
       assert(list7[i] == i);
@@ -390,14 +440,14 @@ class ArrayList {
 
     // Test 9: move constructor
     std::cout << "   Test 9: Testing move constructor..." << std::endl;
-    ArrayList<int> list8 = std::move(list5);  // move constructor
+    vec<int> list8 = std::move(list5);  // move constructor
     for (uint_fast32_t i = 0; i < 10; i++) {
       assert(list8[i] == i);
     }
 
     // Test 10: move assignment
     std::cout << "   Test 10: Testing move assignment..." << std::endl;
-    ArrayList<int> list9(10);
+    vec<int> list9(10);
     list9 = std::move(list6);  // move assignment
     for (uint_fast32_t i = 0; i < 10; i++) {
       assert(list9[i] == i);
