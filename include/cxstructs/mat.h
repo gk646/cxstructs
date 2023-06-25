@@ -25,10 +25,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#ifdef CX_EXTRA
-#include "RowVector.h"
-#endif
+#include "row_vec.h"
 
 namespace cxstructs {
 /**
@@ -44,7 +41,14 @@ class mat {
 
  public:
   mat() : n_cols(0), n_rows(0), arr(nullptr){};
-  mat(uint_fast32_t rows, uint_fast32_t cols) : n_rows(rows), n_cols(cols) {
+  /**
+   * Constructs a matrix object with n_rows rows and n_cols columns <p>
+   * Initialized with 0
+   * @param rows number of rows
+   * @param cols number of columns
+   */
+  mat(const uint_fast32_t& n_rows, const uint_fast32_t& n_cols)
+      : n_rows(n_rows), n_cols(n_cols) {
     arr = new float[n_rows * n_cols];
     for (int i = 0; i < n_rows * n_cols; i++) {
       arr[i] = 0;
@@ -57,12 +61,31 @@ class mat {
       std::copy_n(vec[i].begin(), n_cols, arr + i * n_cols);
     }
   }
+  /**
+ * @brief Constructs a matrix with the specified number of rows and columns, and initializes its elements using a provided function.
+ *
+ * @tparam fill_form A callable object or function that takes a single int as an argument and returns a float
+ * @param n_rows The number of rows in the matrix.
+ * @param n_cols The number of columns in the matrix.
+ * @param form The callable object or function used to initialize the elements of the matrix. It is invoked for each element with the element's index as an argument.
+ * @note The `fill_form` function is invoked for each element of the matrix as `form(index)`, where `index` is the linear index of the element in row-major order (0-indexed).
+ */
+  template <typename fill_form,
+            typename = std::enable_if_t<
+                std::is_invocable_r_v<double, fill_form, double>>>
+  mat(uint_fast32_t n_rows, uint_fast32_t n_cols, fill_form form)
+      : n_rows(n_rows), n_cols(n_cols) {
+    arr = new float[n_rows * n_cols];
+    for (int i = 0; i < n_rows * n_cols; i++) {
+      arr[i] = form(i);
+    }
+  }
   mat(const mat& o) : n_rows(o.n_rows), n_cols(o.n_cols) {
     arr = new float[n_rows * n_cols];
     std::copy(o.arr, o.arr + n_rows * n_cols, arr);
   }
   ~mat() { delete[] arr; };
-  inline float& operator()(uint_fast32_t row, uint_fast32_t col) {
+  inline float& operator()(const uint_fast32_t& row, const uint_fast32_t& col) {
     return arr[row * n_cols + col];
   }
   /**
@@ -115,7 +138,7 @@ class mat {
   /**
    * Returns a new matrix that
    * is the result of the addition of the current matrix with the provided matrix
-   * The matrices must be of the same size
+   * The matrices must be of the same n_elem
    * @param o other matrix
    * @return the result of the operation
    */
@@ -135,7 +158,7 @@ class mat {
   /**
    * Returns a new matrix that is the
    * result of the subtraction of the provided matrix from the current matrix.
-   * The matrices must be of the same size
+   * The matrices must be of the same n_elem
    * @param o other matrix
    * @return the result of the operation
    */
@@ -154,7 +177,7 @@ class mat {
   };
   /**
    * Returns a new matrix that is the matrix Hadamard product (element-wise multiplication).
-   * The matrices must be of the same size
+   * The matrices must be of the same n_elem
    * @param o other matrix
 * @return the result of the operation
    */
@@ -173,7 +196,7 @@ class mat {
   }
   /**
    * Returns a new matrix that is the result of element-wise division of the current matrix by the provided matrix
-   * The matrices must be of the same size
+   * The matrices must be of the same n_elem
    * @param o other matrix
    * @return the result of the operation
    */
@@ -191,7 +214,7 @@ class mat {
     return res;
   }
   /**
-   * Checks whether the current matrix and the provided matrix are equal, i.e., have the same size and identical elements in corresponding positions
+   * Checks whether the current matrix and the provided matrix are equal, i.e., have the same n_elem and identical elements in corresponding positions
    * @param o other matrix
    * @return true if the matrices are identical
    */
@@ -273,22 +296,20 @@ class mat {
       arr[i * n_cols + col] = l(i, arr[i * n_cols + col]);
     }
   }
-#ifdef CX_EXTRA
   /**
  * Takes the dot product of each row of the matrix with the given vector and returns a new vector
  * @param vec
- * @return a new vector with each index being the result of the vector-matrix dot product
+ * @return a new row with each index being the result of the vector-matrix dot product
  */
   [[nodiscard]] row_vec<float> dotProduct(const row_vec<float>& vec) const {
     row_vec<float> re(n_rows, 0);
     for (int i = 0; i < n_rows; ++i) {
       for (int j = 0; j < n_cols; ++j) {
-        re[i] += arr_[i * n_cols + j] * vec[j];
+        re[i] += arr[i * n_cols + j] * vec[j];
       }
     }
     return re;
   }
-#endif
   /**
    * Multiplies the whole matrix with the given scalar in-place
    * @param s the scalar
