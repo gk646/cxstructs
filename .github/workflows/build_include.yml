@@ -21,7 +21,7 @@ jobs:
           mkdir -p include/machinelearning
           
           
-          for file in $(find src -name '*.h' -or -name '*.cpp'); do
+          for file in $(find src -maxdepth 1 -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               filename=$(basename $file)
               cp $file ./include/$filename
