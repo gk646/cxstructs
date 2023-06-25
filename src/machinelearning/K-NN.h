@@ -24,5 +24,6 @@
 #include "../datastructures/HashMap.h"
 #include "../datastructures/mat.h"
 #include "../datastructures/row.h"
+#include "../cxconfig.h"
 
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_

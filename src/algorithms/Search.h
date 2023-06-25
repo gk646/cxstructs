@@ -24,15 +24,16 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include "../cxconfig.h"
 
 namespace cxhelper { // helper methods to provide clean calling interface
 template <typename T>
-bool binarySearch_recursive_internal(T *arr, T target, int_fast32_t low,
-                                     int_fast32_t high) {
+bool binarySearch_recursive_internal(T *arr, T target, int_32_cx low,
+                                     int_32_cx high) {
   if (low > high) {
     return false;
   }
-  int_fast32_t mid = low + (high - low) / 2;
+  int_32_cx mid = low + (high - low) / 2;
 
   if (arr[mid] == target) {
     return true;
@@ -44,7 +45,7 @@ bool binarySearch_recursive_internal(T *arr, T target, int_fast32_t low,
 }
 } // namespace cxhelper
 
-namespace cxalgo {
+namespace cxalgos {
 /**
  * Binary search on the specified ASCENDED SORTED array without recursion <p>
  * runtime: O(log(n))
@@ -54,10 +55,10 @@ namespace cxalgo {
  * @param len the length of the given array
  * @return true if the target was found inside arr_
  */
-template <typename T> bool binarySearch(T *arr, T target, int_fast32_t len) {
-  int_fast32_t low = 0;
-  int_fast32_t high = len - 1;
-  int_fast32_t mid;
+template <typename T> bool binarySearch(T *arr, T target, int_32_cx len) {
+  int_32_cx low = 0;
+  int_32_cx high = len - 1;
+  int_32_cx mid;
   while (low <= high) {
     mid = low + (high - low) / 2;
     if (arr[mid] == target) {
@@ -81,18 +82,18 @@ template <typename T> bool binarySearch(T *arr, T target, int_fast32_t len) {
  * @return true if the target was found inside arr_
  */
 template <typename T>
-bool binarySearch_recursive(T *arr, T target, int_fast32_t len) {
+bool binarySearch_recursive(T *arr, T target, int_32_cx len) {
   if (len == 0) {
     return false;
   }
   return cxhelper::binarySearch_recursive_internal(arr, target, 0, len - 1);
 }
 
-} // namespace cxalgo
+} // namespace cxalgos
 
 namespace cxtests {
 
-using namespace cxalgo;
+using namespace cxalgos;
 
 static void TEST_SEARCH() {
   std::cout << "TESTING BINARY SEARCH" << std::endl;

@@ -21,11 +21,13 @@
 #ifndef CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
 #define CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
 
+#include <cmath>
 #include <cstdint>
-#include <type_traits>
 #include <iostream>
+#include <type_traits>
 
-namespace cxalgo {
+namespace cxalgos {
+constexpr static inline double PI = 3.14159265358979323846;
 /**
  * @brief Approximates the definite integral of a function over a given interval.
  *
@@ -36,26 +38,32 @@ namespace cxalgo {
  * @param steps The number of steps to use in the approximation (optional, default is 100 mil).
  * @return The approximate value of the integral over the specified interval.
  */
-template <typename Function, typename = std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
+template <typename Function,
+          typename =
+              std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
 double integral_aprox(Function fx, double a, double b,
-                      uint_fast32_t steps = 100000000) {
+                      uint_32_cx steps = 100000000) {
   double width = b - a;
   double step_size = width / steps;
   double integral = 0;
-  for (int i = 0; i < steps; i++) {
+  for (uint_32_cx i = 0; i < steps; i++) {
     integral += fx(a) * step_size;
     a += step_size;
   }
   return integral;
 }
-}  // namespace cxalgo
+}  // namespace cxalgos
 
 namespace cxtests {
-using namespace cxalgo;
+using namespace cxalgos;
 static void TEST_MATH() {
 
-  auto a =integral_aprox([](double x) { return x * x; }, 0, 5);
-  std::cout<< a << std::endl;
+  auto a = integral_aprox([](double x) { return x * x; }, 0, 5);
+  std::cout << a << std::endl;
+  a = integral_aprox(
+      [](double x) { return std::pow(std::sin(x), 4) * std::cos(x); }, 0,
+      PI / 2,100000);
+  std::cout << a << std::endl;
 }
 }  // namespace cxtests
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_

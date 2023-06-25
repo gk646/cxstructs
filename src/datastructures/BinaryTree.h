@@ -27,6 +27,7 @@
 #include <stack>
 #include <stdexcept>
 #include <vector>
+#include "../cxconfig.h"
 
 namespace cxhelper {  // namespace to hide helper structs
 template <typename T>
@@ -61,7 +62,7 @@ using namespace cxhelper;
 template <typename T>
 class BinaryTree {
   TreeNode<T>* root_;
-  uint_fast32_t size_ = 0;
+  uint_32_cx size_ = 0;
 
   int subTreeDepth(BinaryTree* node) {
     if (node == nullptr) {
@@ -186,7 +187,7 @@ class BinaryTree {
   /**
    * @return the total amount of nodes in the tree
    */
-  [[nodiscard]] uint_fast32_t size() const { return size_; }
+  [[nodiscard]] uint_32_cx size() const { return size_; }
 
   [[nodiscard]] bool empty() const { return size_ == 0; }
 
@@ -194,7 +195,7 @@ class BinaryTree {
    *
    * @return the maximum depth of the tree
    */
-  uint_fast32_t maxDepth() { return subTreeDepth(this); }
+  uint_32_cx maxDepth() { return subTreeDepth(this); }
 
   class InOrderIterator {
     std::stack<TreeNode<T>*> nodes;

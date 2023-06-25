@@ -17,31 +17,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
-#ifndef CXSTRUCTS_ASTAR_PATHFINDING_H
-#define CXSTRUCTS_ASTAR_PATHFINDING_H
+#define FINISHED
+#ifndef CXSTRUCTS_SRC_CONFIG_H_
+#define CXSTRUCTS_SRC_CONFIG_H_
 
 #include <cstdint>
-#include <type_traits>
-#include "../cxconfig.h"
 
-namespace cxhelper {
-struct Node {
-  Node();
-  uint_fast16_t f_cost;
-  uint_fast16_t g_cost;
-};
+typedef uint_fast32_t uint_32_cx;
+typedef int_fast32_t int_32_cx;
 
-}  // namespace cxhelper
-
-namespace cxalgos {
-
-template <typename T>
-void astar_pathfinding() {
-  static_assert(std::is_arithmetic<T>::value,
-                "Template argument must be numeric");
-};
-
-}  // namespace cxalgos
-
-#endif  //CXSTRUCTS_ASTAR_PATHFINDING_H
+#endif  //CXSTRUCTS_SRC_CONFIG_H_

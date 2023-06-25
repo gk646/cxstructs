@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include "../cxconfig.h"
 
 namespace cxstructs {
 /**
@@ -33,12 +34,12 @@ namespace cxstructs {
 template <typename T>
 class DeQueue {
   T* arr_;
-  uint_fast32_t mid_;
-  int_fast32_t front_;
-  int_fast32_t back_;
+  uint_32_cx mid_;
+  int_32_cx front_;
+  int_32_cx back_;
 
-  uint_fast32_t len_;
-  uint_fast32_t minlen_;
+  uint_32_cx len_;
+  uint_32_cx minlen_;
 
   void grow() {
     len_ *= 2;
@@ -64,7 +65,7 @@ class DeQueue {
 
     delete[] arr_;
     arr_ = n_arr;
-    int_fast32_t sum = front_ + back_;
+    int_32_cx sum = front_ + back_;
     if (sum % 2 == 0) {
       front_ = back_ = sum / 2;
     } else {
@@ -76,7 +77,7 @@ class DeQueue {
   }
 
  public:
-  explicit DeQueue(uint_fast32_t initialSize = 32)
+  explicit DeQueue(uint_32_cx initialSize = 32)
       : mid_(initialSize / 2),
         front_(1),
         back_(0),
@@ -209,7 +210,7 @@ class DeQueue {
  *
  * @return the current n_elem of the dequeue
  */
-  [[nodiscard]] inline uint_fast32_t size() const { return back_ + front_ - 1; }
+  [[nodiscard]] inline uint_32_cx size() const { return back_ + front_ - 1; }
   /**
    * Clears the queue of all elements
    */
@@ -227,7 +228,7 @@ class DeQueue {
       return os << "[]";
     }
     os << "[" << q.front();
-    for (int i = 2; i < q.back_ + q.front_; i++) {
+    for (uint_32_cx i = 2; i < q.back_ + q.front_; i++) {
       os << "," << q.arr_[q.mid_ - q.front_ + i];
     }
     return os << "]";
@@ -257,14 +258,14 @@ class DeQueue {
     std::cout << "   Testing add_front..." << std::endl;
     DeQueue<int> de_queue;
 
-    for (int i = 0; i < 100; i++) {
+    for (uint_32_cx i = 0; i < 100; i++) {
       de_queue.add_front(i);
       assert(de_queue.front() == i);
     }
 
     // Testing add_back
     std::cout << "   Testing add_back..." << std::endl;
-    for (int i = 100; i < 200; i++) {
+    for (uint_32_cx i = 100; i < 200; i++) {
       de_queue.add_back(i);
       assert(de_queue.back() == i);
     }
@@ -278,7 +279,7 @@ class DeQueue {
 
     // Testing pop_back
     std::cout << "   Testing pop_back..." << std::endl;
-    for (int i = 199; i >= 100; i--) {
+    for (uint_32_cx i = 199; i >= 100; i--) {
       assert(de_queue.back() == i);
       de_queue.pop_back();
     }
@@ -288,11 +289,11 @@ class DeQueue {
                  "elements..."
               << std::endl;
 
-    for (int i = 0; i < 100000; i++) {
+    for (uint_32_cx i = 0; i < 100000; i++) {
       de_queue.add_back(i);
     }
 
-    for (int i = 0; i < 100000; i++) {
+    for (uint_32_cx i = 0; i < 100000; i++) {
       assert(de_queue.size() == 100000 - i);
       assert(de_queue.pop_front() == i);
     }

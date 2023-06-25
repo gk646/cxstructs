@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
+#pragma warning(disable : 4834)
 #include <iostream>
 
 #include <ctime>
@@ -26,7 +26,7 @@
 #include <stack>
 #include <unordered_map>
 #include <vector>
-#include "gktime.h"
+#include "cxtime.h"
 
 #include "datastructures/BinaryTree.h"
 #include "datastructures/DeQueue.h"
@@ -42,8 +42,9 @@
 #include "algorithms/GraphTraversal.h"
 #include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
+
 using namespace cxstructs;
-using namespace cxalgo;
+using namespace cxalgos;
 struct Data {
   int arr[100];
   int num;
@@ -195,7 +196,7 @@ void compareWithSTL() {
 
   quick_sort(vec1.data(), 10000000);
 
-  cxutil::printTime<>("cxalgo quicksort:");
+  cxutil::printTime<>("cxalgos quicksort:");
 
   cxutil::now();
 
@@ -253,11 +254,26 @@ void compareWithSTL() {
       {1, 0}, {1, 1}, {0, 1}, {0, 0}};
   const std::vector<std::vector<float>> expected_outputs = {{1}, {0}, {1}, {0}};
 
-
   cxml::FNN fnn({2, 2, 1}, sig, 0.11);
   cxutil::now();
   for (int i = 0; i < 1000; ++i) {
     fnn.train(inputs, expected_outputs, 2000);
   }
   cxutil::printTime("FNN: 100 XOR trainings with 2000 iterations each:");
+
+  /* |-----------------------------------------------------|
+   * |                      MATRIX                         |
+   * |-----------------------------------------------------|
+   */
+
+  std::cout << "\nTiming FNN" << std::endl;
+
+  mat mat1{{2, 2}, {2, 2}};
+  mat mat2{{4, 4}, {4, 4}};
+
+  cxutil::now();
+  for (int i = 0; i < 10000000; i++) {
+    mat1* mat2;
+  }
+  cxutil::printTime("10 mil matrix 2x2 matrix multiplication");
 }

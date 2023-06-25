@@ -17,6 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
 #define FINISHED
 #include <cassert>
 #include <cstdint>
@@ -25,7 +26,8 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "row_vec.h"
+#include "../cxconfig.h"
+#include "vec.h"
 
 namespace cxstructs {
 /**
@@ -36,18 +38,35 @@ namespace cxstructs {
  */
 class mat {
   float* arr;
-  uint_fast32_t n_rows;
-  uint_fast32_t n_cols;
+  uint_32_cx n_rows;
+  uint_32_cx n_cols;
 
  public:
   mat() : n_cols(0), n_rows(0), arr(nullptr){};
+  mat(std::initializer_list<float> list) : n_rows(1), n_cols(list.size()) {
+    arr = new float[n_cols];
+    uint32_t i = 0;
+    for (float val : list) {
+      arr[i++] = val;
+    }
+  }
+  mat(std::initializer_list<std::initializer_list<float>> list)
+      : n_rows(list.size()), n_cols(list.begin()->size()) {
+    arr = new float[n_rows * n_cols];
+    uint32_t i = 0;
+    for (const auto& sublist : list) {
+      for (float val : sublist) {
+        arr[i++] = val;
+      }
+    }
+  }
   /**
    * Constructs a matrix object with n_rows rows and n_cols columns <p>
    * Initialized with 0
    * @param rows number of rows
    * @param cols number of columns
    */
-  mat(const uint_fast32_t& n_rows, const uint_fast32_t& n_cols)
+  mat(const uint_32_cx& n_rows, const uint_32_cx& n_cols)
       : n_rows(n_rows), n_cols(n_cols) {
     arr = new float[n_rows * n_cols];
     for (int i = 0; i < n_rows * n_cols; i++) {
@@ -73,7 +92,7 @@ class mat {
   template <typename fill_form,
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
-  mat(uint_fast32_t n_rows, uint_fast32_t n_cols, fill_form form)
+  mat(uint_32_cx n_rows, uint_32_cx n_cols, fill_form form)
       : n_rows(n_rows), n_cols(n_cols) {
     arr = new float[n_rows * n_cols];
     for (int i = 0; i < n_rows * n_cols; i++) {
@@ -85,7 +104,7 @@ class mat {
     std::copy(o.arr, o.arr + n_rows * n_cols, arr);
   }
   ~mat() { delete[] arr; };
-  inline float& operator()(const uint_fast32_t& row, const uint_fast32_t& col) {
+  inline float& operator()(const uint_32_cx& row, const uint_32_cx& col) {
     return arr[row * n_cols + col];
   }
   /**
@@ -124,10 +143,10 @@ class mat {
 
     mat result(n_rows, o.n_cols);
 
-    for (uint_fast32_t i = 0; i < n_rows; i++) {
-      for (uint_fast32_t j = 0; j < o.n_cols; j++) {
+    for (uint_32_cx i = 0; i < n_rows; i++) {
+      for (uint_32_cx j = 0; j < o.n_cols; j++) {
         float sum = 0.0f;
-        for (uint_fast32_t k = 0; k < n_cols; k++) {
+        for (uint_32_cx k = 0; k < n_cols; k++) {
           sum += arr[i * n_cols + k] * o.arr[k * o.n_cols + j];
         }
         result.arr[i * result.n_cols + j] = sum;
@@ -223,8 +242,8 @@ class mat {
       return true;
     }
     if (o.n_cols == n_cols && o.n_rows == n_rows) {
-      for (uint_fast32_t i = 0; i < n_rows; i++) {
-        for (uint_fast32_t j = 0; j < n_cols; j++) {
+      for (uint_32_cx i = 0; i < n_rows; i++) {
+        for (uint_32_cx j = 0; j < n_cols; j++) {
           if (o.arr[i * n_cols + j] != arr[i * n_cols + j]) {
             return false;
           }
@@ -244,8 +263,8 @@ class mat {
       return false;
     }
     if (o.n_cols == n_cols && o.n_rows == n_rows) {
-      for (uint_fast32_t i = 0; i < n_rows; i++) {
-        for (uint_fast32_t j = 0; j < n_cols; j++) {
+      for (uint_32_cx i = 0; i < n_rows; i++) {
+        for (uint_32_cx j = 0; j < n_cols; j++) {
           if (o.arr[i * n_cols + j] != arr[i * n_cols + j]) {
             return true;
           }
@@ -278,7 +297,7 @@ class mat {
    * @param l the function to determine the new value
    */
   template <typename lambda>
-  void row_op(uint_fast32_t row, lambda l) {
+  void row_op(uint_32_cx row, lambda l) {
     for (int i = 0; i < n_cols; i++) {
       arr[row * n_cols + i] = l(i, arr[row * n_cols + i]);
     }
@@ -291,7 +310,7 @@ class mat {
    * @param l the function to determine the new value
    */
   template <typename lambda>
-  void col_op(uint_fast32_t col, lambda l) {
+  void col_op(uint_32_cx col, lambda l) {
     for (int i = 0; i < n_rows; i++) {
       arr[i * n_cols + col] = l(i, arr[i * n_cols + col]);
     }
@@ -301,8 +320,8 @@ class mat {
  * @param vec
  * @return a new row with each index being the result of the vector-matrix dot product
  */
-  [[nodiscard]] row_vec<float> dotProduct(const row_vec<float>& vec) const {
-    row_vec<float> re(n_rows, 0);
+  [[nodiscard]] vec<float> dotProduct(const vec<float>& vec) const {
+    cxstructs::vec<float> re(n_rows, 0);
     for (int i = 0; i < n_rows; ++i) {
       for (int j = 0; j < n_cols; ++j) {
         re[i] += arr[i * n_cols + j] * vec[j];
@@ -355,8 +374,8 @@ class mat {
     }
     return os;
   }
-  [[nodiscard]] inline uint_fast32_t getRows() const { return n_rows; };
-  [[nodiscard]] inline uint_fast32_t getCols() const { return n_cols; };
+  [[nodiscard]] inline uint_32_cx getRows() const { return n_rows; };
+  [[nodiscard]] inline uint_32_cx getCols() const { return n_cols; };
 
   static void TEST() {
     std::cout << "MATRIX TESTS" << std::endl;
@@ -492,11 +511,11 @@ class mat {
     m20(1, 0) = 3;
     m20(1, 1) = 4;
 
-    m20.row_op(1, [](uint_fast32_t col, float val) { return val * 2; });
+    m20.row_op(1, [](uint_32_cx col, float val) { return val * 2; });
     assert(m20(1, 0) == 6);
     assert(m20(1, 1) == 8);
 
-    m20.col_op(0, [](uint_fast32_t row, float val) { return val + 1; });
+    m20.col_op(0, [](uint_32_cx row, float val) { return val + 1; });
     assert(m20(0, 0) == 2);
     assert(m20(1, 0) == 7);
 

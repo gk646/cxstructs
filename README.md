@@ -7,40 +7,54 @@ That said, getting more experience iam aiming for reference type implementations
 
 To use these, simply include the **include directory**, which contains only finalized and tested headers.
 
+Comparisons with standard library counterparts can be run using the Comparison.h header
+### Library Notes
+
 #### Features
+- **Rich documentation**
+  - Algorithms come with full runtime complexity and core principle
+  - data structures each have a description header and fully documented methods
+- **Tests**
+  - Every algorithm and data structure has lots of tests
+- **Clarity**
+  - the source code is (generally) clean to read and formatted
 
-- Each algorithm comes with a runtime description and a documentation of the underlying principle
-- The data structures have fully documented methods, adhering to a consistent calling syntax for ease of use
-- Each header is **self-contained** without any cross dependencies.
-- Comparisons with STL counterparts can be run using the Comparison.h header
-
-#### Namespaces
+##### namespaces
 - **`cxstructs` for datastructures**
 - **`cxalgos` for algorithms**
-- **`cxml` for machinelearning** 
-- *`cxhelper`is used to hide helper methods or structs*
-- *`cxtests` (still) used to hide tests*
+- **`cxml` for machinelearning**
+- *internal:*
+  - *`cxhelper`is used to hide helper methods or structs*
+  - *`cxtests` used to hide tests*
 
-#### Global Macros
-- `#define CX_ALLOC` to use the custom allocator (unfinished)
+##### config.h
+- `typedef uint_fast32_t uint_32_cx`
+- `typedef int_fast32_t int_32_cx`
 
+##### macros
+- `#define CX_ALLOC` to use the custom allocator (applies globally)
+
+## Contents
 ### Data Structures
 
-- **HashMap** *(Linear Probing with LinkedLists)*
-- **Linked List**
-- **Double Linked List**
-- **Vector**(*vec*) *(very fast!)*
-- **Matrix**(*mat*) *(lots of methods)*
-- **Queue**
-- **DeQueue**
-- **Stack**
-- **Binary Tree**
-- **Trie** *(limited to ASCII -> very fast!)*
+- **Vector**(*vec*): *very fast!*
+- **Matrix**(*mat*): *flattened float array, lots of methods*
+- **Row**(*row*): *compile-time non-mutable container*
+- **Trie**: *limited to ASCII -> very fast!*
+- **HashMap**: *Linear Probing with LinkedLists)*
+- **Linked List**:
+- **Double Linked List**:
+- **Queue**:
+- **DeQueue**:
+- **Stack**:
+- **Binary Tree**:
+- **Geometry**: Rectangle, Circle
 - 
-### Machine Learning
+### Machine Learning 
+###### *(NN = Neural Network)*
 
-- **FNN** *first implementation using matrices, second using traditional loops*
-- 
+- **FNN**(*Feed-forward*) *first implementation using matrices, second using traditional loops*
+
 
 ### Algorithms
 
@@ -51,6 +65,4 @@ To use these, simply include the **include directory**, which contains only fina
 
 
 ### Utilities
-
-- **Geometry**: Rectangle, Circle
-- 
+- **cxtime** *easily measure the time from `now()` to `printTime()`*

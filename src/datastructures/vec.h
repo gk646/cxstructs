@@ -29,6 +29,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <vector>
+#include "../cxconfig.h"
 
 //This implementation is well optimized (from what I can tell) and should be equal or slightly slower than the std::vector in a lot of use cases
 namespace cxstructs {
@@ -42,9 +43,9 @@ namespace cxstructs {
 template <typename T>
 class vec {
   T* arr_;
-  uint_fast32_t size_;
-  uint_fast32_t len_;
-  uint_fast32_t minlen_;
+  uint_32_cx size_;
+  uint_32_cx len_;
+  uint_32_cx minlen_;
 
   inline void grow() {
     len_ *= 1.5;
@@ -66,12 +67,12 @@ class vec {
   }
 
  public:
-  explicit vec(uint_fast32_t n_elem = 64)
+  explicit vec(uint_32_cx n_elem = 64)
       : len_(n_elem),
         size_(0),
         arr_(new T[n_elem]),
         minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {}
-  vec(uint_fast32_t n_elem, const T val)
+  vec(uint_32_cx n_elem, const T val)
       : len_(n_elem),
         size_(n_elem),
         arr_(new T[n_elem]),
@@ -88,12 +89,12 @@ class vec {
   template <typename fill_form,
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
-  vec(uint_fast32_t n_elem, fill_form form)
+  vec(uint_32_cx n_elem, fill_form form)
       : len_(n_elem),
         size_(n_elem),
         arr_(new T[n_elem]),
         minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {
-    for (uint_fast32_t i = 0; i < n_elem; i++) {
+    for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
     }
   }
@@ -163,7 +164,7 @@ class vec {
    * @param index the accessed index
    * @return a reference to the value
    */
-  [[nodiscard]] inline T& operator[](const uint_fast32_t& index) {
+  [[nodiscard]] inline T& operator[](const uint_32_cx& index) const {
     return arr_[index];
   }
   /**
@@ -172,9 +173,9 @@ class vec {
    * Throws std::out_of_range on invalid index
    * @param T a reference to the value at the given index
    */
-  inline T& at(const int_fast32_t& index) {
+  inline T& at(const int_32_cx& index) {
     if (index < 0) {
-      int_fast32_t access = size_ + index;
+      int_32_cx access = size_ + index;
       if (access >= 0) {
         return arr_[access];
       }
@@ -214,7 +215,7 @@ class vec {
     if (size_ < minlen_) {
       shrink();
     }
-    for (uint_fast32_t i = 0; i < len_; i++) {
+    for (uint_32_cx i = 0; i < len_; i++) {
       if (arr_[i] == e) {
         std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
         size_--;
@@ -226,7 +227,7 @@ class vec {
    * Removes the element at the given index
    * @param index index of removal
    */
-  inline void removeAt(const uint_fast32_t& index) {
+  inline void removeAt(const uint_32_cx& index) {
     if (size_ < minlen_) {
       shrink();
     }
@@ -236,7 +237,7 @@ class vec {
  *
  * @return the current n_elem of the list
  */
-  [[nodiscard]] inline uint_fast32_t size() const { return size_; }
+  [[nodiscard]] inline uint_32_cx size() const { return size_; }
   /**
    * Clears the list of all its elements <br>
    * Resets the length back to its starting value
@@ -298,8 +299,8 @@ class vec {
  * @param end index of the last element (exclusive)
  * @param start the index of the first element (inclusive)
  */
-  void append(vec<T>& list, uint_fast32_t endIndex,
-              uint_fast32_t startIndex = 0) {
+  void append(vec<T>& list, uint_32_cx endIndex,
+              uint_32_cx startIndex = 0) {
     if (startIndex >= endIndex || endIndex > list.size_) {
       throw std::out_of_range("index out of bounds");
     }
@@ -427,11 +428,11 @@ class vec {
     // Test 7: copy constructor
     std::cout << "   Test 7: Testing copy constructor..." << std::endl;
     vec<int> list5(10);
-    for (uint_fast32_t i = 0; i < 10; i++) {
+    for (uint_32_cx i = 0; i < 10; i++) {
       list5.add(i);
     }
     vec<int> list6 = list5;  // copy constructor
-    for (uint_fast32_t i = 0; i < 10; i++) {
+    for (uint_32_cx i = 0; i < 10; i++) {
       assert(list6[i] == i);
     }
 
@@ -439,14 +440,14 @@ class vec {
     std::cout << "   Test 8: Testing copy assignment..." << std::endl;
     vec<int> list7(10);
     list7 = list5;  // copy assignment
-    for (uint_fast32_t i = 0; i < 10; i++) {
+    for (uint_32_cx i = 0; i < 10; i++) {
       assert(list7[i] == i);
     }
 
     // Test 9: move constructor
     std::cout << "   Test 9: Testing move constructor..." << std::endl;
     vec<int> list8 = std::move(list5);  // move constructor
-    for (uint_fast32_t i = 0; i < 10; i++) {
+    for (uint_32_cx i = 0; i < 10; i++) {
       assert(list8[i] == i);
     }
 
@@ -454,7 +455,7 @@ class vec {
     std::cout << "   Test 10: Testing move assignment..." << std::endl;
     vec<int> list9(10);
     list9 = std::move(list6);  // move assignment
-    for (uint_fast32_t i = 0; i < 10; i++) {
+    for (uint_32_cx i = 0; i < 10; i++) {
       assert(list9[i] == i);
     }
 

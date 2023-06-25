@@ -41,7 +41,7 @@
 
 namespace cxtests {
 using namespace cxstructs;
-using namespace cxalgo;
+using namespace cxalgos;
 
 static void test_cxstructs() {
 
@@ -60,8 +60,8 @@ static void test_cxstructs() {
   std::cout << "\nAll tests passed!" << std::endl;
 }
 
-static void test_cxalgo() {
-  using namespace cxalgo;
+static void test_cxalgos() {
+  using namespace cxalgos;
   TEST_SORTING();
   TEST_DFS();
   TEST_SEARCH();

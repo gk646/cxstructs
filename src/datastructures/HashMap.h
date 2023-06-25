@@ -21,6 +21,7 @@
 #ifndef CXSTRUCTS_HASHMAP_H
 #define CXSTRUCTS_HASHMAP_H
 
+#include "../cxconfig.h"
 #include <cassert>
 #include <cstdint>
 #include <stdexcept>
@@ -59,7 +60,7 @@ template <typename K, typename V>
 struct HashLinkedList {
   HashListNode<K, V>* head_;
   HashListNode<K, V>* end_;
-  uint_fast32_t size_;
+  uint_32_cx size_;
   HashLinkedList() : head_(nullptr), end_(nullptr), size_(0){};
   ~HashLinkedList() {
     HashListNode<K, V>* current = head_;
@@ -212,13 +213,13 @@ using namespace cxhelper;
 
 template <typename K, typename V>
 class HashMap {
-  uint_fast32_t initialCapacity_;
-  uint_fast32_t size_;
-  uint_fast32_t buckets_;
+  uint_32_cx initialCapacity_;
+  uint_32_cx size_;
+  uint_32_cx buckets_;
   HashLinkedList<K, V>* arr_;
   KeyHash<K> hash_;
-  uint_fast32_t maxSize;
-  uint_fast32_t minSize;
+  uint_32_cx maxSize;
+  uint_32_cx minSize;
 
   // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
   void reHashHigh() {
@@ -260,7 +261,7 @@ class HashMap {
   }
 
  public:
-  explicit HashMap(uint_fast32_t initialCapacity = 64)
+  explicit HashMap(uint_32_cx initialCapacity = 64)
       : buckets_(initialCapacity),
         initialCapacity_(initialCapacity),
         size_(0),
@@ -277,7 +278,7 @@ class HashMap {
         maxSize(o.maxSize),
         minSize(o.minSize) {
     arr_ = new HashLinkedList<K, V>[buckets_];
-    for (uint_fast32_t i = 0; i < buckets_; i++) {
+    for (uint_32_cx i = 0; i < buckets_; i++) {
       arr_[i] = o.arr_[i];
     }
   }
@@ -295,7 +296,7 @@ class HashMap {
     minSize = o.minSize;
 
     arr_ = new HashLinkedList<K, V>[buckets_];
-    for (uint_fast32_t i = 0; i < buckets_; ++i) {
+    for (uint_32_cx i = 0; i < buckets_; ++i) {
       arr_[i] = o.arr_[i];
     }
 
@@ -347,7 +348,7 @@ class HashMap {
    *
    * @return the current n_elem of the hashMap
    */
-  [[nodiscard]] uint_fast32_t size() const { return size_; }
+  [[nodiscard]] uint_32_cx size() const { return size_; }
   /**
    * The load factor is a %-value of the maximum n_elem the hashmap is allowed tor each before
    * growing and rehashing
@@ -358,7 +359,7 @@ class HashMap {
    * The initialCapacity the hashmaps started with and expands along
    * @return the initial capacity
    */
-  uint_fast32_t initialCapacity() { return initialCapacity_; }
+  uint_32_cx initialCapacity() { return initialCapacity_; }
   /**
    * Clears the hashMap of all its contents
    */

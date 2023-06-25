@@ -21,6 +21,7 @@
 #ifndef CXSTRUCTS_QUEUE_H
 #define CXSTRUCTS_QUEUE_H
 
+#include "../cxconfig.h"
 #include <cassert>
 #include <cstdint>
 #include <exception>
@@ -38,11 +39,11 @@
 template <typename T>
 class Queue {
   T* arr_;
-  uint_fast32_t len_;
-  uint_fast32_t back_;
-  uint_fast32_t front_;
+  uint_32_cx len_;
+  uint_32_cx back_;
+  uint_32_cx front_;
 
-  uint_fast32_t minlen_;
+  uint_32_cx minlen_;
 
   void resize() {
     len_ *= 2;
@@ -67,7 +68,7 @@ class Queue {
   }
 
  public:
-  explicit Queue(uint_fast32_t len = 32)
+  explicit Queue(uint_32_cx len = 32)
       : arr_(new T[len]), len_(len), minlen_(0) {
     back_ = 0;
     front_ = 0;
@@ -95,7 +96,7 @@ class Queue {
    *
    * @return the current n_elem of the queue
    */
-  [[nodiscard]] inline uint_fast32_t size() const { return back_ - front_; }
+  [[nodiscard]] inline uint_32_cx size() const { return back_ - front_; }
   /**
    * Adds a element to the back of the queue
    * @param e the element to be added
@@ -171,7 +172,7 @@ class Queue {
       return os << "[]";
     }
     os << "[" << q.arr_[0];
-    for (uint_fast32_t i = q.front_ + 1; i < q.back_; i++) {
+    for (uint_32_cx i = q.front_ + 1; i < q.back_; i++) {
       os << "," << q.arr_[i];
     }
     return os << "]";
