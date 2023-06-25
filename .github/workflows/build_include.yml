@@ -12,9 +12,9 @@ jobs:
 
       - name: Copy Files
         run: |
-          rmdir -f -r include/cxstructs
-          rmdir -f -r include/cxalgo
-          rmdir -f -r include/machinelearning
+          rm -rf include/cxstructs
+          rm -rf include/cxalgo
+          rm -rf include/machinelearning
           
           mkdir -p include/cxstructs
           mkdir -p include/cxalgo
