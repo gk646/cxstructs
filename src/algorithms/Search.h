@@ -52,7 +52,7 @@ namespace cxalgos {
  * @param arr search array
  * @param target target value to search for
  * @param len the length of the given array
- * @return true if the target was found inside arr
+ * @return true if the target was found inside arr_
  */
 template <typename T> bool binarySearch(T *arr, T target, int_fast32_t len) {
   int_fast32_t low = 0;
@@ -78,7 +78,7 @@ template <typename T> bool binarySearch(T *arr, T target, int_fast32_t len) {
  * @param arr search array
  * @param target target value to search for
  * @param len the length of the given array
- * @return true if the target was found inside arr
+ * @return true if the target was found inside arr_
  */
 template <typename T>
 bool binarySearch_recursive(T *arr, T target, int_fast32_t len) {

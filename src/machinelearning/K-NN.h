@@ -21,6 +21,8 @@
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
 #define CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
 
-
+#include "../datastructures/HashMap.h"
+#include "../datastructures/mat.h"
+#include "../datastructures/row_vec.h"
 
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_

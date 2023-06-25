@@ -28,7 +28,6 @@
 #include <vector>
 #include "gktime.h"
 
-#include "datastructures/ArrayList.h"
 #include "datastructures/BinaryTree.h"
 #include "datastructures/DeQueue.h"
 #include "datastructures/DoubleLinkedList.h"
@@ -37,6 +36,7 @@
 #include "datastructures/Queue.h"
 #include "datastructures/Stack.h"
 #include "datastructures/Trie.h"
+#include "datastructures/vec.h"
 #include "machinelearning/FNN.h"
 
 #include "algorithms/GraphTraversal.h"
@@ -97,7 +97,7 @@ void compareWithSTL() {
   innerCount = 1000;
 
   std::cout << "\nComapring Dynamic Arrays" << std::endl;
-  ArrayList<Data> list;
+  vec<Data> list;
   std::vector<Data> vector;
 
   gkutils::now();
@@ -113,7 +113,7 @@ void compareWithSTL() {
     }
     for (const auto& num : list) {}
   }
-  gkutils::printTime<>("cxstructs ArrayList :");
+  gkutils::printTime<>("cxstructs vec :");
   gkutils::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {

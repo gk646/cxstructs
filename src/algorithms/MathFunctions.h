@@ -27,13 +27,14 @@
 
 namespace cxalgos {
 /**
+ * @brief Approximates the definite integral of a function over a given interval.
  *
- * @tparam Function
- * @param fx
- * @param a
- * @param b
- * @param steps
- * @return
+ * @tparam Function A callable object (e.g. function, lambda) that takes a double as an argument and returns a double.
+ * @param fx The function to be integrated.
+ * @param a The start of the interval over which to integrate.
+ * @param b The end of the interval over which to integrate.
+ * @param steps The number of steps to use in the approximation (optional, default is 100 mil).
+ * @return The approximate value of the integral over the specified interval.
  */
 template <typename Function, typename = std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
 double integral_aprox(Function fx, double a, double b,

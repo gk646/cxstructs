@@ -25,6 +25,10 @@
 #include <cstdint>
 
 namespace cxstructs {
+/**
+ * non-mutable scientific counterpart of the normal vec
+ * @tparam T
+ */
 template <typename T>
 class row_vec {
   uint_fast32_t size_;
