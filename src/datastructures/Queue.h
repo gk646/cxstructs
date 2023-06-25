@@ -93,7 +93,7 @@ class Queue {
   }
   /**
    *
-   * @return the current size of the queue
+   * @return the current n_elem of the queue
    */
   [[nodiscard]] inline uint_fast32_t size() const { return back_ - front_; }
   /**

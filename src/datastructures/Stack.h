@@ -99,7 +99,7 @@ class Stack {
   [[maybe_unused]] T* get_raw() { return arr_; }
   /**
    *
-   * @return the current size of the stack
+   * @return the current n_elem of the stack
    */
   [[nodiscard]] uint_fast32_t size() { return size_; }
   /**

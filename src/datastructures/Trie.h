@@ -38,13 +38,12 @@ struct TrieNode {
   std::array<TrieNode*, 128> children{};
   bool filled = false;
   std::string word;
-  inline void setWord(std::string& s) {
+  inline void setWord(const std::string& s) {
     filled = true;
-    word = std::move(s);
+    word = s;
   }
 };
 }  // namespace cxhelper
-
 #ifdef CX_ALLOC
 #include "../CXAllocator.h"
 using AllocatorType = CXPoolAllocator<cxhelper::TrieNode, 4098, 2>;
@@ -121,7 +120,7 @@ class Trie {
  *  Inserts the given string into the trie, saving it for lookups
  * @param s the string
  */
-  void insert(std::string s) {
+  void insert(const std::string& s) {
     TrieNode* iterator = root;
     uint8_t ascii;
     for (auto& c : s) {
@@ -234,5 +233,4 @@ class Trie {
   }
 };
 }  // namespace cxstructs
-#undef CX_ALLOC
 #endif  //CXSTRUCTS_TRIE_H

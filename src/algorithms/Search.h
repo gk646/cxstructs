@@ -44,7 +44,7 @@ bool binarySearch_recursive_internal(T *arr, T target, int_fast32_t low,
 }
 } // namespace cxhelper
 
-namespace cxalgos {
+namespace cxalgo {
 /**
  * Binary search on the specified ASCENDED SORTED array without recursion <p>
  * runtime: O(log(n))
@@ -88,11 +88,11 @@ bool binarySearch_recursive(T *arr, T target, int_fast32_t len) {
   return cxhelper::binarySearch_recursive_internal(arr, target, 0, len - 1);
 }
 
-} // namespace cxalgos
+} // namespace cxalgo
 
 namespace cxtests {
 
-using namespace cxalgos;
+using namespace cxalgo;
 
 static void TEST_SEARCH() {
   std::cout << "TESTING BINARY SEARCH" << std::endl;

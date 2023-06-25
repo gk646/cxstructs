@@ -25,7 +25,7 @@
 #include <type_traits>
 #include <iostream>
 
-namespace cxalgos {
+namespace cxalgo {
 /**
  * @brief Approximates the definite integral of a function over a given interval.
  *
@@ -48,10 +48,10 @@ double integral_aprox(Function fx, double a, double b,
   }
   return integral;
 }
-}  // namespace cxalgos
+}  // namespace cxalgo
 
 namespace cxtests {
-using namespace cxalgos;
+using namespace cxalgo;
 static void TEST_MATH() {
 
   auto a =integral_aprox([](double x) { return x * x; }, 0, 5);

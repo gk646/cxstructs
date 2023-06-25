@@ -43,7 +43,7 @@
 #include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
 using namespace cxstructs;
-using namespace cxalgos;
+using namespace cxalgo;
 struct Data {
   int arr[100];
   int num;
@@ -61,7 +61,7 @@ void compareWithSTL() {
   int outerCount = 10000;
   int innerCount = 1000;
 
-  gkutils::now();
+  cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       myMap.insert(i, i * 2);
@@ -74,8 +74,8 @@ void compareWithSTL() {
     }
   }
 
-  gkutils::printTime<>("cxstructs HashMap:");
-  gkutils::now();
+  cxutil::printTime<>("cxstructs HashMap:");
+  cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       stdMap.insert({i, i * 2});
@@ -87,7 +87,7 @@ void compareWithSTL() {
       stdMap.erase(i);
     }
   }
-  gkutils::printTime<>("std::unordered_map:");
+  cxutil::printTime<>("std::unordered_map:");
 
   /* |-----------------------------------------------------|
    * |                 DYNAMIC ARRAYS                      |
@@ -100,7 +100,7 @@ void compareWithSTL() {
   vec<Data> list;
   std::vector<Data> vector;
 
-  gkutils::now();
+  cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       list.emplace_back();
@@ -113,8 +113,8 @@ void compareWithSTL() {
     }
     for (const auto& num : list) {}
   }
-  gkutils::printTime<>("cxstructs vec :");
-  gkutils::now();
+  cxutil::printTime<>("cxstructs vec :");
+  cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       vector.emplace_back();
@@ -127,7 +127,7 @@ void compareWithSTL() {
     }
     for (const auto& num : vector) {}
   }
-  gkutils::printTime<>("std::vector:");
+  cxutil::printTime<>("std::vector:");
 
   /* |-----------------------------------------------------|
    * |                     Queues                           |
@@ -139,7 +139,7 @@ void compareWithSTL() {
   Queue<Data> queue;
   std::queue<Data> std_queue;
 
-  gkutils::now();
+  cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       queue.emplace_back();
@@ -151,8 +151,8 @@ void compareWithSTL() {
       queue.pop();
     }
   }
-  gkutils::printTime<>("cxstructs Queue :");
-  gkutils::now();
+  cxutil::printTime<>("cxstructs Queue :");
+  cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       std_queue.emplace();
@@ -164,7 +164,7 @@ void compareWithSTL() {
       std_queue.pop();
     }
   }
-  gkutils::printTime<>("std::queue:");
+  cxutil::printTime<>("std::queue:");
 
   /* |-----------------------------------------------------|
    * |                        Trie                         |
@@ -175,17 +175,13 @@ void compareWithSTL() {
 
   Trie trie;
 
-  gkutils::now();
-
+  cxutil::now();
   trie.insert("hello");
+  cxutil::printTime<std::chrono::nanoseconds>("insert time:");
 
-  gkutils::printTime<std::chrono::nanoseconds>("insert time:");
-
-  gkutils::now();
-
+  cxutil::now();
   trie.startsWith("hel");
-
-  gkutils::printTime<std::chrono::nanoseconds>("startsWith 1 time:");
+  cxutil::printTime<std::chrono::nanoseconds>("startsWith 1 time:");
 
   /* |-----------------------------------------------------|
    * |                      QUICKSORT                      |
@@ -195,17 +191,17 @@ void compareWithSTL() {
 
   auto vec1 = cxtests::generate_shuffled_vector(10000000);
   auto vec2 = vec1;
-  gkutils::now();
+  cxutil::now();
 
   quick_sort(vec1.data(), 10000000);
 
-  gkutils::printTime<>("cxalgos quicksort:");
+  cxutil::printTime<>("cxalgo quicksort:");
 
-  gkutils::now();
+  cxutil::now();
 
   std::sort(vec2.begin(), vec2.end());
 
-  gkutils::printTime<>("std::sort:");
+  cxutil::printTime<>("std::sort:");
 
   /* |-----------------------------------------------------|
    * |                       DEQUEUE                       |
@@ -219,7 +215,7 @@ void compareWithSTL() {
   DeQueue<Data> de_queue;
   std::deque<Data> std_dequeue;
 
-  gkutils::now();
+  cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       de_queue.emplace_front();
@@ -232,8 +228,8 @@ void compareWithSTL() {
       de_queue.pop_back();
     }
   }
-  gkutils::printTime<>("cxstructs Queue :");
-  gkutils::now();
+  cxutil::printTime<>("cxstructs Queue :");
+  cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
       std_dequeue.emplace_front();
@@ -246,16 +242,22 @@ void compareWithSTL() {
       std_dequeue.pop_back();
     }
   }
-  gkutils::printTime<>("std::queue:");
+  cxutil::printTime<>("std::queue:");
 
   /* |-----------------------------------------------------|
    * |                         FNN                         |
    * |-----------------------------------------------------|
    */
+  std::cout << "\nTiming FNN" << std::endl;
+  const std::vector<std::vector<float>> inputs = {
+      {1, 0}, {1, 1}, {0, 1}, {0, 0}};
+  const std::vector<std::vector<float>> expected_outputs = {{1}, {0}, {1}, {0}};
 
-  FNN fnn({2,2,1}, relu,0.5);
-  for (auto num : fnn.forward({2, 2})) {
-    std::cout<< num << std::endl;
+
+  cxml::FNN fnn({2, 2, 1}, sig, 0.11);
+  cxutil::now();
+  for (int i = 0; i < 1000; ++i) {
+    fnn.train(inputs, expected_outputs, 2000);
   }
-
+  cxutil::printTime("FNN: 100 XOR trainings with 2000 iterations each:");
 }

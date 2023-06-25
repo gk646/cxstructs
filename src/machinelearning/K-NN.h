@@ -23,6 +23,6 @@
 
 #include "../datastructures/HashMap.h"
 #include "../datastructures/mat.h"
-#include "../datastructures/row_vec.h"
+#include "../datastructures/row.h"
 
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_

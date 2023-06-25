@@ -7,24 +7,30 @@ That said, getting more experience iam aiming for reference type implementations
 
 To use these, simply include the **include directory**, which contains only finalized and tested headers.
 
-**Features**
+#### Features
 
 - Each algorithm comes with a runtime description and a documentation of the underlying principle
 - The data structures have fully documented methods, adhering to a consistent calling syntax for ease of use
 - Each header is **self-contained** without any cross dependencies.
 - Comparisons with STL counterparts can be run using the Comparison.h header
 
-### Global Macros
+#### Namespaces
+- **`cxstructs` for datastructures**
+- **`cxalgos` for algorithms**
+- **`cxml` for machinelearning** 
+- *`cxhelper`is used to hide helper methods or structs*
+- *`cxtests` (still) used to hide tests*
+
+#### Global Macros
 - `#define CX_ALLOC` to use the custom allocator (unfinished)
-- `#define CX_EXTRA` to enable cross dependencies and to get additional methods
 
 ### Data Structures
 
 - **HashMap** *(Linear Probing with LinkedLists)*
 - **Linked List**
 - **Double Linked List**
-- **Array List** *(very fast!)*
-- **Matrix** *(lots of methods)*
+- **Vector**(*vec*) *(very fast!)*
+- **Matrix**(*mat*) *(lots of methods)*
 - **Queue**
 - **DeQueue**
 - **Stack**
@@ -42,3 +48,9 @@ To use these, simply include the **include directory**, which contains only fina
 - **Search**: Binary Search *(recursive and non-recursive)*
 - **Graph Traversal**: DepthFirstSearch *(on 2d-vector as adjacency matrix)*
 - **MathFunctions**: Integral,
+
+
+### Utilities
+
+- **Geometry**: Rectangle, Circle
+- 

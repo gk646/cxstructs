@@ -25,7 +25,7 @@
 #ifndef CXSTRUCTS_DFS_H
 #define CXSTRUCTS_DFS_H
 
-namespace cxalgos {
+namespace cxalgo {
 
 /**
  * Treats the vector as an adjacency matrix
@@ -50,10 +50,10 @@ int depth_first_search(std::vector<std::vector<T>>& mat, int nodeIndex,
   }
   return count;
 }
-}  // namespace cxalgos
+}  // namespace cxalgo
 
 namespace cxtests {  // namespace cxtests
-using namespace cxalgos;
+using namespace cxalgo;
 static void TEST_DFS() {
 
   std::cout << "TESTING DEPTH FIRST SEARCH" << std::endl;

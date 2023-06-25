@@ -169,12 +169,12 @@ class BinaryTree {
     if (!hasData_)
       return false;
 
-    if (data_ == val) {
+    if (arr_ == val) {
       throw std::logic_error("unsupported");
     } else {
-      if (val < data_ && left_) {
+      if (val < arr_ && left_) {
         left_->deleteNode(this, val, true);
-      } else if (val > data_ && right_) {
+      } else if (val > arr_ && right_) {
         right_->deleteNode(this, val, false);
       } else {
         return false;
@@ -209,7 +209,7 @@ class BinaryTree {
       }
     }
 
-    T& operator*() { return nodes.top().data_; }
+    T& operator*() { return nodes.top().arr_; }
 
     InOrderIterator& operator++() {
       TreeNode<T>* node = nodes.top();
@@ -235,13 +235,13 @@ class BinaryTree {
     BinaryTree<int> tree;
 
     assert(tree.empty());      // Test empty on newly created tree
-    assert(tree.size() == 0);  // Test size on newly created tree
+    assert(tree.size() == 0);  // Test n_elem on newly created tree
 
     tree.insert(10);
     assert(tree.contains(10));
     assert(tree.maxDepth() == 1);  // Test maxDepth after inserting one element
     assert(!tree.empty());         // Test empty after inserting one element
-    assert(tree.size() == 1);      // Test size after inserting one element
+    assert(tree.size() == 1);      // Test n_elem after inserting one element
 
     tree.insert(15);
     assert(tree.contains(15));

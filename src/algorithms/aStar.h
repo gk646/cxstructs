@@ -18,31 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define F
-#ifndef CXSTRUCTS_SRC_DATASTRUCTURES_ROWVECTOR_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_ROWVECTOR_H_
+#ifndef CXSTRUCTS_ASTAR_PATHFINDING_H
+#define CXSTRUCTS_ASTAR_PATHFINDING_H
 
-#include <algorithm>
 #include <cstdint>
+#include <type_traits>
 
-namespace cxstructs {
-/**
- * non-mutable scientific counterpart of the normal vec
- * @tparam T
- */
-template <typename T>
-class row_vec {
-  uint_fast32_t size_;
-  T* data_;
-
- public:
-  row_vec() : size_(0), data_(nullptr) {}
-  explicit row_vec(uint_fast32_t size) : size_(size), data_(new T[size]) {}
-  row_vec(uint_fast32_t size, const T val) : size_(size), data_(new T[size]) {
-    std::fill(data_, data_ + size, val);
-  }
-
-  [[nodiscard]] inline T& operator[](uint_fast32_t i) const { return data_[i]; }
+namespace cxhelper {
+struct Node {
+  Node();
+  uint_fast16_t f_cost;
+  uint_fast16_t g_cost;
 };
-}  // namespace cxstructs
 
-#endif  //CXSTRUCTS_SRC_DATASTRUCTURES_ROWVECTOR_H_
+}  // namespace cxhelper
+
+namespace cxalgo {
+
+template <typename T>
+void astar_pathfinding() {
+  static_assert(std::is_arithmetic<T>::value,
+                "Template argument must be numeric");
+};
+
+}  // namespace cxalgo
+
+#endif  //CXSTRUCTS_ASTAR_PATHFINDING_H

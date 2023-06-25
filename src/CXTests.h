@@ -23,6 +23,7 @@
 #include "datastructures/BinaryTree.h"
 #include "datastructures/DeQueue.h"
 #include "datastructures/DoubleLinkedList.h"
+#include "datastructures/Geometry.h"
 #include "datastructures/HashMap.h"
 #include "datastructures/LinkedList.h"
 #include "datastructures/Queue.h"
@@ -30,20 +31,21 @@
 #include "datastructures/Trie.h"
 #include "datastructures/mat.h"
 #include "datastructures/vec.h"
+
 #include "machinelearning/FNN.h"
 
 #include "algorithms/GraphTraversal.h"
+#include "algorithms/MathFunctions.h"
 #include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
-#include "algorithms/MathFunctions.h"
 
 namespace cxtests {
 using namespace cxstructs;
-using namespace cxalgos;
+using namespace cxalgo;
 
 static void test_cxstructs() {
 
-  mat::TEST();  // weird error in debug mode on the operator == for now reason
+  mat::TEST();  // weird error in debug mode on the operator == for no reason
   LinkedList<int>::TEST();
   Queue<int>::TEST();
   HashMap<int, int>::TEST();  //potential memory leak
@@ -52,18 +54,23 @@ static void test_cxstructs() {
   Trie<>::TEST();
   DoubleLinkedList<int>::TEST();
   DeQueue<int>::TEST();
-  FNN::TEST();
+  cxml::FNN::TEST();
   //BinaryTree<int>::TEST();
 
   std::cout << "\nAll tests passed!" << std::endl;
 }
 
-static void test_cxalgos() {
-  using namespace cxalgos;
+static void test_cxalgo() {
+  using namespace cxalgo;
   TEST_SORTING();
   TEST_DFS();
   TEST_SEARCH();
   TEST_MATH();
+  std::cout << "\nAll tests passed!" << std::endl;
+}
+
+static void test_cxml(){
+
 }
 
 }  // namespace cxtests

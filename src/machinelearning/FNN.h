@@ -21,6 +21,7 @@
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 #define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 
+#define CX_MATRIX
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -45,8 +46,113 @@ typedef float (*a_func)(float);
 }  // namespace cxhelper
 
 #ifdef CX_MATRIX
-#include "Matrix.h"
+
+#include "../datastructures/mat.h"
+#include "../datastructures/row_vec.h"
+
 #pragma message("|FNN.h| Using Matrices for calculations.")
+
+namespace cxhelper {
+using namespace cxstructs;
+struct Layer {
+  mat weights_;
+  vec<float> bias_;
+  vec<float> w_sums_;
+  mat inputs_;
+  uint_fast16_t in_;
+  uint_fast16_t out_;
+  a_func func;
+  a_func d_func;
+  float learnR_;
+
+ public:
+  Layer()
+      : weights_(0, 0),
+        bias_(0, 0),
+        w_sums_(0, 0),
+        in_(0),
+        out_(0),
+        func(relu),
+        d_func(d_relu),
+        learnR_(0.5) {}
+  Layer(uint_fast16_t in, uint_fast16_t out, a_func func, float learnR)
+      : in_(in), out_(out), func(func), learnR_(learnR), inputs_(1, in) {
+    if (func == relu) {
+      d_func = d_relu;
+    } else if (func == sig) {
+      d_func = d_sig;
+    } else {
+      d_func = [](float x) {
+        return static_cast<float>(1.0);
+      };
+    }
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-0.3, 0.3);
+
+    weights_ = mat(in, out, [&dis, &gen](int i) { return dis(gen); });
+    bias_ = vec<float>(out_, [&dis, &gen](int i) { return dis(gen); });
+    w_sums_ = vec<float>(out_, [&dis, &gen](int i) { return dis(gen); });
+  }
+  Layer(const Layer& other)
+      : in_(other.in_),
+        out_(other.out_),
+        func(other.func),
+        learnR_(other.learnR_),
+        inputs_(other.inputs_),
+        weights_(other.weights_),
+        bias_(other.bias_),
+        w_sums_(other.w_sums_) {
+    d_func = other.d_func;
+  }
+
+  // Assignment operator
+  Layer& operator=(const Layer& other) {
+    if (this != &other) {
+      in_ = other.in_;
+      out_ = other.out_;
+      func = other.func;
+      learnR_ = other.learnR_;
+      inputs_ = other.inputs_;
+      d_func = other.d_func;
+
+      weights_ = other.weights_;
+      bias_ = other.bias_;
+      w_sums_ = other.w_sums_;
+    }
+    return *this;
+  }
+  ~Layer() = default;
+  [[nodiscard]] vec<float> forward(vec<float>& in) {
+    inputs_ = in;
+    std::vector<float> out(out_, 0);
+    float w_sum;
+    for (int i = 0; i < out_; i++) {
+      w_sum = 0;
+      for (int j = 0; j < in_; j++) {
+        w_sum += in[j] * weights_[j * out_ + i];
+      }
+      w_sums_[i] = w_sum + bias_[i];
+      out[i] = func(w_sums_[i]);
+    }
+    return out;
+  }
+  [[nodiscard]] std::vector<float> backward(std::vector<float>& error) const {
+    std::vector<float> n_error(in_, 0);
+    for (int i = 0; i < out_; i++) {
+      error[i] *= d_func(w_sums_[i]);
+      for (int j = 0; j < in_; j++) {
+        n_error[j] += weights_[j * out_ + i] * error[i];
+        weights_[j * out_ + i] -= inputs_[j] * error[i] * learnR_;
+      }
+      bias_[i] -= learnR_ * error[i];
+    }
+    return n_error;
+  }
+};
+}  // namespace cxhelper
+
 /**
  * <h2>Feedforward Neural Network</h2>
  *
@@ -154,7 +260,7 @@ struct Layer {
     for (int i = 0; i < out_; i++) {
       w_sum = 0;
       for (int j = 0; j < in_; j++) {
-        w_sum += inputs_[j] * weights_[j * out_ + i];
+        w_sum += in[j] * weights_[j * out_ + i];
       }
       w_sums_[i] = w_sum + bias_[i];
       out[i] = func(w_sums_[i]);
@@ -162,7 +268,7 @@ struct Layer {
     return out;
   }
   [[nodiscard]] std::vector<float> backward(std::vector<float>& error) const {
-    std::vector<float> n_error(in_);
+    std::vector<float> n_error(in_, 0);
     for (int i = 0; i < out_; i++) {
       error[i] *= d_func(w_sums_[i]);
       for (int j = 0; j < in_; j++) {
@@ -175,7 +281,7 @@ struct Layer {
   }
 };
 }  // namespace cxhelper
-namespace cxstructs {
+namespace cxml {
 using namespace cxhelper;
 /**
  * <h2>Feedforward Neural Network</h2>
@@ -191,7 +297,7 @@ class FNN {
  public:
   explicit FNN(const std::vector<uint_fast16_t>& bound, a_func a_func,
                float learnR)
-      : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
+      : learnR_(learnR), len_(bound.n_elem() - 1), bounds_(bound) {
     layers_ = new Layer[len_];
     for (int i = 1; i < len_ + 1; i++) {
       if (i == len_) {
@@ -216,7 +322,7 @@ class FNN {
     for (int k = 0; k < n; k++) {
       std::vector<float> re = forward(in);
 
-      for (int i = 0; i < re.size(); i++) {
+      for (int i = 0; i < re.n_elem(); i++) {
         re[i] = (re[i] - out[i]);
       }
 
@@ -230,11 +336,11 @@ class FNN {
 
     for (int k = 0; k < n; k++) {
 
-      for (int l = 0; l < in.size(); l++) {
+      for (int l = 0; l < in.n_elem(); l++) {
         std::vector<float> re = forward(in[l]);
 
-        for (int i = 0; i < re.size(); i++) {
-          re[i] = (re[i] - out[l][i]);
+        for (int i = 0; i < re.n_elem(); i++) {
+          re[i] = 2 * (re[i] - out[l][i]);
         }
 
         for (int i = len_ - 1; i > -1; i--) {
@@ -246,14 +352,26 @@ class FNN {
 
   static void TEST() {
     std::cout << "TESING FNN" << std::endl;
-    FNN fnn({2, 2, 1}, sig, 0.01);
-    std::cout << fnn.forward({1, 0})[0] << std::endl;
 
-    fnn.train({{1, 0}, {1, 1}, {0, 1}, {0, 0}}, {{1}, {0}, {1}, {0}}, 1000);
-    std::cout << fnn.forward({1, 0})[0] << std::endl;
+    const std::vector<std::vector<float>> inputs = {
+        {1, 0}, {1, 1}, {0, 1}, {0, 0}};
+    const std::vector<std::vector<float>> expected_outputs = {
+        {1}, {0}, {1}, {0}};
+
+    for (int i = 0; i < 10; ++i) {
+      FNN fnn({2, 2, 1}, sig, 0.16);
+
+      fnn.train(inputs, expected_outputs, 5000);
+
+      for (size_t j = 0; j < inputs.n_elem(); ++j) {
+        double output = fnn.forward(inputs[j])[0];
+        double expected = expected_outputs[j][0];
+        assert(output - expected < 0.1);
+      }
+    }
   }
 };
-}  // namespace cxstructs
+}  // namespace cxml
 
 #endif  // CX_MATRIX
 #undef CX_MATRIX
