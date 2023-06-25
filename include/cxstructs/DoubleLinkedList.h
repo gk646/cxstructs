@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include "../cxconfig.h"
 
 namespace cxhelper {
 template <typename T>
@@ -46,7 +47,7 @@ class DoubleLinkedList {
   DListNode<T>* head_;
   DListNode<T>* end_;
 
-  uint_fast32_t size_;
+  uint_32_cx size_;
 
  public:
   DoubleLinkedList() : size_(0), head_(nullptr), end_(nullptr){};
@@ -134,13 +135,13 @@ class DoubleLinkedList {
   /**
     * @return the current n_elem of this Linked List
     */
-  [[nodiscard]] uint_fast32_t size() const { return size_; }
+  [[nodiscard]] uint_32_cx size() const { return size_; }
   /**
   * Removes the element at index counting from the start node
   * @param index  - the index at which to remove the element
   * @return the element removed with this operation
   */
-  T removeAt(uint_fast32_t index) {
+  T removeAt(uint_32_cx index) {
     if (index >= size_)
       throw std::out_of_range("index out of bounds");
 
@@ -157,7 +158,7 @@ class DoubleLinkedList {
       }
     } else {
       DListNode<T>* it = head_;
-      for (int i = 0; i < index; i++) {
+      for (uint_32_cx i = 0; i < index; i++) {
         it = it->next_;
       }
 

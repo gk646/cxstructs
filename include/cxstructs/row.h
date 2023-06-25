@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <type_traits>
+#include "../cxconfig.h"
 
 namespace cxstructs {
 
@@ -43,7 +44,7 @@ namespace cxstructs {
  * @tparam n_elem The number of elements in the row (fixed at compile-time).
  * @tparam T The type of elements in the row. Defaults to `float`.
  */
-  template <uint_fast32_t n_elem, typename T = float>
+  template <uint_32_cx n_elem, typename T = float>
   class row {
     T arr_[n_elem];
 
@@ -71,9 +72,9 @@ namespace cxstructs {
    * @param form The callable object or function used to initialize the elements of the row. It is invoked for each element with the element's index as an argument.
    */
     template <typename fill_form,
-              typename = std::enable_if_t<std::is_invocable_r_v<T, fill_form, uint_fast32_t>>>
+              typename = std::enable_if_t<std::is_invocable_r_v<T, fill_form, uint_32_cx>>>
     explicit row(fill_form form) {
-      for (uint_fast32_t i = 0; i < n_elem; i++) {
+      for (uint_32_cx i = 0; i < n_elem; i++) {
         arr_[i] = form(i);
       }
     }
@@ -83,14 +84,14 @@ namespace cxstructs {
    * @param i The index of the element to access.
    * @return A reference to the element at the specified index.
    */
-    [[nodiscard]] inline T& operator[](const uint_fast32_t& i) const { return arr_[i]; }
+    [[nodiscard]] inline T& operator[](const uint_32_cx& i) const { return arr_[i]; }
 
     /**
    * @brief Returns the number of elements in the row.
    *
    * @return The number of elements in the row.
    */
-    [[nodiscard]] constexpr inline uint_fast32_t size() const { return n_elem; }
+    [[nodiscard]] constexpr inline uint_32_cx size() const { return n_elem; }
   };
 
 }  // namespace cxstructs

@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#ifndef GK_TIME_HPP
-#define GK_TIME_HPP
+#ifndef CX_TIME_HPP
+#define CX_TIME_HPP
 
 #include <chrono>
 #include <iomanip>
@@ -27,12 +27,21 @@
 #include <string>
 
 namespace cxutil {
-using namespace std; //std:: makes this code unreadable
+using namespace std;  //std:: makes this code unreadable
 
-inline chrono::time_point<chrono::high_resolution_clock> activeTimeStamp;
-
-void static now() {
-  activeTimeStamp = std::chrono::high_resolution_clock::now();
+static inline chrono::time_point<chrono::high_resolution_clock> activeTimeStamp;
+static inline chrono::time_point<chrono::high_resolution_clock>
+    checkpoints[2];
+/**
+ * Sets the activeTimeStamp or alternatively the time of a checkpoint
+ * @param checkpoint (optional, max=1) the checkpoint to set the current time
+ */
+void static now(int_32_cx checkpoint = -1) {
+  if (checkpoint > -1) {
+    checkpoints[checkpoint] = chrono::high_resolution_clock::now();
+    return;
+  }
+  activeTimeStamp = chrono::high_resolution_clock::now();
 }
 
 template <typename T>
@@ -59,23 +68,37 @@ string get_duration_unit<chrono::duration<double>>() {
   return "seconds";
 }
 
-template <typename durationType = chrono::duration<double>>
-void printTime(string prefix = "") {
-  auto diff = std::chrono::high_resolution_clock::now() - activeTimeStamp;
-  auto diffInMicroseconds = chrono::duration_cast<durationType>(diff);
+template <typename DurationType = std::chrono::duration<double>>
+void printTime(const std::string& prefix = "", const int32_t& checkpoint = -1) {
+  using namespace std::chrono;
+  using std::cout;
+  using std::endl;
+  using std::fixed;
+  using std::setprecision;
+
+  time_point<high_resolution_clock> start_time;
+  if (checkpoint > -1) {
+    start_time = checkpoints[checkpoint];
+  } else {
+    start_time = activeTimeStamp;
+  }
+
+  auto diff = high_resolution_clock::now() - start_time;
+  auto diffInDesiredUnits = duration_cast<DurationType>(diff);
+
   if (!prefix.empty()) {
     cout << prefix << " ";
   }
-  cout << fixed << setprecision(3) << diffInMicroseconds.count() << " "
-       << get_duration_unit<durationType>() << endl;
+  cout << fixed << setprecision(3) << diffInDesiredUnits.count() << " "
+       << get_duration_unit<DurationType>() << endl;
 }
 
+template <typename durationType = chrono::duration<double>>
 long long getTime() {
-  auto diff = chrono::high_resolution_clock::now() - activeTimeStamp;
-  auto diffInMicroseconds = chrono::duration_cast<chrono::microseconds>(diff);
-  cout << fixed << setprecision(9) << diffInMicroseconds.count() << endl;
+  auto diff = std::chrono::high_resolution_clock::now() - activeTimeStamp;
+  auto diffInMicroseconds = chrono::duration_cast<durationType>(diff);
   return diffInMicroseconds.count();
 }
 
 }  // namespace cxutil
-#endif  //GK_TIME_HPP
+#endif  //CX_TIME_HPP

@@ -28,15 +28,16 @@
 #include <numeric>
 #include <random>
 #include <vector>
+#include "../cxconfig.h"
 
 namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
-void quick_sort_internal(T* arr, int_fast32_t low, int_fast32_t high) {
+void quick_sort_internal(T* arr, int_32_cx low, int_32_cx high) {
   if (low < high) {
 
     const T& pivot = arr[high];
-    uint_fast32_t n = low;
-    for (uint_fast32_t i = low; i < high; i++) {
+    uint_32_cx n = low;
+    for (uint_32_cx i = low; i < high; i++) {
       if (arr[i] <= pivot) {
         std::swap(arr[n], arr[i]);
         n++;
@@ -50,15 +51,15 @@ void quick_sort_internal(T* arr, int_fast32_t low, int_fast32_t high) {
   }
 }
 template <typename T>
-void merge_sort_internal(T* arr, uint_fast32_t low, uint_fast32_t high) {
+void merge_sort_internal(T* arr, uint_32_cx low, uint_32_cx high) {
   if (low < high) {
-    uint_fast32_t mid = low + (high - low) / 2;
+    uint_32_cx mid = low + (high - low) / 2;
 
     merge_sort_internal(arr, low, mid);
     merge_sort_internal(arr, mid + 1, high);
 
-    uint_fast32_t s1 = mid - low + 1;
-    uint_fast32_t s2 = high - mid;
+    uint_32_cx s1 = mid - low + 1;
+    uint_32_cx s2 = high - mid;
 
     T* left = new T[s1];
     T* right = new T[s2];
@@ -87,16 +88,16 @@ void merge_sort_internal(T* arr, uint_fast32_t low, uint_fast32_t high) {
   }
 }
 template <typename T>
-bool bogo_sort_internal(T* arr, uint_fast32_t len, bool ascending) {
+bool bogo_sort_internal(T* arr, uint_32_cx len, bool ascending) {
   if(ascending){
-    for (int j = 1; j < len; j++) {
+    for (uint_32_cx j = 1; j < len; j++) {
       if (arr[j] < arr[j - 1]) {
         return false;
       }
     }
     return true;
   }else{
-    for (int j = 1; j < len; j++) {
+    for (uint_32_cx j = 1; j < len; j++) {
       if (arr[j] > arr[j - 1]) {
         return false;
       }
@@ -106,7 +107,7 @@ bool bogo_sort_internal(T* arr, uint_fast32_t len, bool ascending) {
 }
 }  // namespace cxhelper
 
-namespace cxalgo {
+namespace cxalgos {
 /** <h2>Bogo Sort</h2> also known as permutation sort, stupid sort, slow sort,
  * monkey sort, shotgun sort or chaotic sort. It works by
  * swapping random indices of the array and checks after each step weather its sorted. <p>
@@ -121,12 +122,12 @@ namespace cxalgo {
  * @param ascending true to sort ascending, false to sort descending
  */
 template <typename T>
-void bogo_sort(T* arr, uint_fast32_t len, bool ascending = true) {
+void bogo_sort(T* arr, uint_32_cx len, bool ascending = true) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> distr(0, len - 1);
 
-  for (uint_fast32_t i = 0; i < 100000000; i++) {
+  for (uint_32_cx i = 0; i < 100000000; i++) {
     std::swap(arr[distr(gen)], arr[distr(gen)]);
     if (cxhelper::bogo_sort_internal(arr, len, ascending)) {
       return;
@@ -142,18 +143,18 @@ void bogo_sort(T* arr, uint_fast32_t len, bool ascending = true) {
  * @param ascending  false to sort descending
  */
 template <typename T>
-void bubble_sort(T* arr, uint_fast32_t len, bool ascending = true) {
+void bubble_sort(T* arr, uint_32_cx len, bool ascending = true) {
   if (ascending) {
-    for (uint_fast32_t i = 0; i < len; i++) {
-      for (uint_fast32_t j = 1; j < len; j++) {
+    for (uint_32_cx i = 0; i < len; i++) {
+      for (uint_32_cx j = 1; j < len; j++) {
         if (arr[j] < arr[j - 1]) {
           std::swap(arr[j], arr[j - 1]);
         }
       }
     }
   } else {
-    for (uint_fast32_t i = 0; i < len; i++) {
-      for (uint_fast32_t j = 1; j < len; j++) {
+    for (uint_32_cx i = 0; i < len; i++) {
+      for (uint_32_cx j = 1; j < len; j++) {
         if (arr[j] > arr[j - 1]) {
           std::swap(arr[j], arr[j - 1]);
         }
@@ -173,13 +174,13 @@ void bubble_sort(T* arr, uint_fast32_t len, bool ascending = true) {
 * @param ascending  false to sort descending
  */
 template <typename T>
-void selection_sort(T* arr, uint_fast32_t len, bool ascending = true) {
-  uint_fast32_t index;
+void selection_sort(T* arr, uint_32_cx len, bool ascending = true) {
+  uint_32_cx index;
   if (ascending) {
-    for (int i = 0; i < len; i++) {
+    for (uint_32_cx i = 0; i < len; i++) {
       T low = arr[i];
       index = i;
-      for (int j = i + 1; j < len; j++) {
+      for (uint_32_cx j = i + 1; j < len; j++) {
         if (arr[j] < low) {
           low = arr[j];
           index = j;
@@ -188,10 +189,10 @@ void selection_sort(T* arr, uint_fast32_t len, bool ascending = true) {
       std::swap(arr[i], arr[index]);
     }
   } else {
-    for (int i = 0; i < len; i++) {
+    for (uint_32_cx i = 0; i < len; i++) {
       T low = arr[i];
       index = i;
-      for (int j = i + 1; j < len; j++) {
+      for (uint_32_cx j = i + 1; j < len; j++) {
         if (arr[j] < low) {
           low = arr[j];
           index = j;
@@ -220,14 +221,14 @@ void selection_sort(T* arr, uint_fast32_t len, bool ascending = true) {
  */
 
 template <typename T>
-void quick_sort(T* arr, uint_fast32_t len, bool ascending = true) {
+void quick_sort(T* arr, uint_32_cx len, bool ascending = true) {
   cxhelper::quick_sort_internal(arr, 0, len - 1);
   if (!ascending) {
     std::reverse(arr, arr + len);
   }
 }
 template <typename T>
-T* insertionSort(T* arr, uint_fast32_t len, bool ascending) {}
+T* insertionSort(T* arr, uint_32_cx len, bool ascending) {}
 /**
  * <h2>Merge sort</h2> has the best possible O notation runtime for all cases but in
  * practice is often slower than for example quicksort. It works by dividing the
@@ -239,7 +240,7 @@ T* insertionSort(T* arr, uint_fast32_t len, bool ascending) {}
  * @param ascending  false to sort descending
  */
 template <typename T>
-void merge_sort(T* arr, uint_fast32_t len, bool ascending = true) {
+void merge_sort(T* arr, uint_32_cx len, bool ascending = true) {
   cxhelper::merge_sort_internal(arr, 0, len - 1);
   if (!ascending) {
     std::reverse(arr, arr + len);
@@ -247,9 +248,9 @@ void merge_sort(T* arr, uint_fast32_t len, bool ascending = true) {
 }
 
 template <typename T>
-void heapSort(T* arr, uint_fast32_t len, bool ascending) {}
+void heapSort(T* arr, uint_32_cx len, bool ascending) {}
 
-}  // namespace cxalgo
+}  // namespace cxalgos
 
 namespace cxtests {
 std::vector<int> generate_shuffled_vector(int size) {
@@ -268,7 +269,7 @@ void assert_sorted(std::vector<int>& vec, bool ascending = true) {
     }
   }
 }
-using namespace cxalgo;
+using namespace cxalgos;
 
 static void TEST_SORTING() {
   const int SIZE = 10000;

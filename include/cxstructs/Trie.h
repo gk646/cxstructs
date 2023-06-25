@@ -32,6 +32,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "../cxconfig.h"
 
 namespace cxhelper {
 struct TrieNode {
@@ -70,7 +71,7 @@ template <class Allocator = AllocatorType>
 class Trie {
   TrieNode* root;
   Allocator alloc;
-  uint_fast32_t size_;
+  uint_32_cx size_;
   static inline uint8_t getASCII(char c) {
     return static_cast<uint8_t>(c) & 0x7F;
   }
@@ -178,7 +179,7 @@ class Trie {
    *
    * @return the total amount of words in the trie
    */
-  [[nodiscard]] uint_fast32_t size() const { return size_; }
+  [[nodiscard]] uint_32_cx size() const { return size_; }
   /**
    * Empty check on the trie
    * @return true if the trie contains no words

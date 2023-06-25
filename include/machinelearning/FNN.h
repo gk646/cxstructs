@@ -21,7 +21,7 @@
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 #define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 
-
+#include "../cxconfig.h"
 #include <algorithm>
 #include <cmath>
 #include <random>

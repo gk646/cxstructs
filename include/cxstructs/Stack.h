@@ -26,14 +26,15 @@
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
+#include "../cxconfig.h"
 
 namespace cxstructs {
 template <typename T>
 class Stack {
   T* arr_;
-  uint_fast32_t size_;
-  uint_fast32_t arrlen_;
-  uint_fast32_t minlen;
+  uint_32_cx size_;
+  uint_32_cx arrlen_;
+  uint_32_cx minlen;
 
   void grow() {
     arrlen_ *= 2;
@@ -53,13 +54,13 @@ class Stack {
   }
 
  public:
-  explicit Stack(uint_fast32_t initialCapacity = 16)
+  explicit Stack(uint_32_cx initialCapacity = 16)
       : arrlen_(initialCapacity),
         size_(0),
         arr_(new T[initialCapacity]),
         minlen(0) {}
 
-  explicit Stack(T fillVal, uint_fast32_t initialCapacity = 16)
+  explicit Stack(T fillVal, uint_32_cx initialCapacity = 16)
       : arrlen_(initialCapacity),
         size_(0),
         arr_(new T[initialCapacity]),
@@ -101,7 +102,7 @@ class Stack {
    *
    * @return the current n_elem of the stack
    */
-  [[nodiscard]] uint_fast32_t size() { return size_; }
+  [[nodiscard]] uint_32_cx size() { return size_; }
   /**
  * Adds an element to the top of the stack
  * @param val element to be added

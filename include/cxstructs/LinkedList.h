@@ -56,7 +56,7 @@ using namespace cxhelper;
 template <typename T>
 class LinkedList {
   ListNode<T>* head_;
-  uint_fast32_t size_;
+  uint_32_cx size_;
   ListNode<T>* end_;
 
  public:
@@ -128,7 +128,7 @@ class LinkedList {
          * @param index  - the index at which to remove the element
          * @return the element removed with this operation
          */
-  T removeAt(uint_fast32_t index) {
+  T removeAt(uint_32_cx index) {
     if (index >= size_)
       throw std::out_of_range("index too big");
 
@@ -142,7 +142,7 @@ class LinkedList {
       }
     } else {
       ListNode<T>* previous = head_;
-      for (uint_fast32_t i = 0; i < index - 1; ++i) {
+      for (uint_32_cx i = 0; i < index - 1; ++i) {
         previous = previous->next_;
       }
       toDelete = previous->next_;
@@ -246,7 +246,7 @@ class LinkedList {
 /**
  * @return the current n_elem of this Linked List
  */
-  [[nodiscard]] uint_fast32_t size() const { return size_; }
+  [[nodiscard]] uint_32_cx size() const { return size_; }
 
   class Iterator {
    public:
