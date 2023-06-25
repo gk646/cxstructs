@@ -12,6 +12,7 @@ jobs:
 
       - name: Copy Files
         run: |
+          rm -rf include/*
           rm -rf include/cxstructs
           rm -rf include/cxalgo
           rm -rf include/machinelearning
