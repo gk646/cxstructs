@@ -9,8 +9,44 @@ To use these, simply include the **include directory**, which contains only fina
 
 Comparisons with standard library counterparts can be run using the Comparison.h header
 
---- 
+---
+### Contents
 
+#### Data Structures
+
+- **Vector**(*vec*): *very fast!*
+- **Matrix**(*mat*): *flattened float array, lots of methods*
+- **Row**(*row*): *compile-time non-mutable container*
+- **Trie**: *limited to ASCII -> very fast!*
+- **HashMap**: *Linear Probing with LinkedLists*
+- **Linked List**:
+- **Double Linked List**:
+- **Queue**:
+- **DeQueue**: *using centered array*
+- **Stack**:
+- **Binary Tree**:
+- **Geometry**: Rectangle, Circle
+
+
+#### Machine Learning
+###### *(NN = Neural Network)*
+
+- **FNN**(*Feed-forward*) *first implementation using matrices, second using traditional loops*
+
+
+#### Algorithms
+
+- **Sorting**: QuickSort, MergeSort, Bubblesort, Bogosort, Selectionsort
+- **Search**: Binary Search *(recursive and non-recursive)*
+- **Graph Traversal**: DepthFirstSearch *(on 2d-vector as adjacency matrix)*
+- **MathFunctions**: Integral,
+
+
+#### Utilities
+- **cxtime** *easily measure the time from `now()` to `printTime()`* 
+- **cxio** *load files*
+
+---
 ### Library Notes
 
 #### Features
@@ -38,37 +74,3 @@ Comparisons with standard library counterparts can be run using the Comparison.h
 #### macros
 - `#define CX_ALLOC` to use the custom allocator (applies globally)
 
----
-### Contents
-
-#### Data Structures
-
-- **Vector**(*vec*): *very fast!*
-- **Matrix**(*mat*): *flattened float array, lots of methods*
-- **Row**(*row*): *compile-time non-mutable container*
-- **Trie**: *limited to ASCII -> very fast!*
-- **HashMap**: *Linear Probing with LinkedLists)*
-- **Linked List**:
-- **Double Linked List**:
-- **Queue**:
-- **DeQueue**:
-- **Stack**:
-- **Binary Tree**:
-- **Geometry**: Rectangle, Circle
-- 
-#### Machine Learning 
-###### *(NN = Neural Network)*
-
-- **FNN**(*Feed-forward*) *first implementation using matrices, second using traditional loops*
-
-
-#### Algorithms
-
-- **Sorting**: QuickSort, MergeSort, Bubblesort, Bogosort, Selectionsort
-- **Search**: Binary Search *(recursive and non-recursive)*
-- **Graph Traversal**: DepthFirstSearch *(on 2d-vector as adjacency matrix)*
-- **MathFunctions**: Integral,
-
-
-#### Utilities
-- **cxtime** *easily measure the time from `now()` to `printTime()`*

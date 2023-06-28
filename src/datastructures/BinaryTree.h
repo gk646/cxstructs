@@ -232,6 +232,7 @@ class BinaryTree {
 
    */
   InOrderIterator end() { return InOrderIterator(nullptr); }
+
   static void TEST() {
     BinaryTree<int> tree;
 

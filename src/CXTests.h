@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 #include <cassert>
+#include "cxio.h"
 
 #include "datastructures/BinaryTree.h"
 #include "datastructures/DeQueue.h"
@@ -36,13 +37,15 @@
 
 #include "algorithms/GraphTraversal.h"
 #include "algorithms/MathFunctions.h"
+#include "algorithms/PatternMatching.h"
 #include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
 
 namespace cxtests {
 using namespace cxstructs;
 using namespace cxalgos;
-
+using namespace cxml;
+using namespace cxutil;
 static void test_cxstructs() {
 
   mat::TEST();  // weird error in debug mode on the operator == for no reason
@@ -54,23 +57,25 @@ static void test_cxstructs() {
   Trie<>::TEST();
   DoubleLinkedList<int>::TEST();
   DeQueue<int>::TEST();
-  cxml::FNN::TEST();
   //BinaryTree<int>::TEST();
 
   std::cout << "\nAll tests passed!" << std::endl;
 }
 
 static void test_cxalgos() {
-  using namespace cxalgos;
   TEST_SORTING();
   TEST_DFS();
   TEST_SEARCH();
   TEST_MATH();
+
+  std::cout << "TESTING PATTERN MATCHING" << std::endl;
+
+
   std::cout << "\nAll tests passed!" << std::endl;
 }
 
-static void test_cxml(){
-
+static void test_cxml() {
+  FNN::TEST();
 }
 
 }  // namespace cxtests

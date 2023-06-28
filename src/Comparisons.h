@@ -24,9 +24,10 @@
 #include <deque>
 #include <queue>
 #include <stack>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
+#include "cxio.h"
 #include "cxtime.h"
 
 #include "datastructures/BinaryTree.h"
@@ -41,6 +42,7 @@
 #include "machinelearning/FNN.h"
 
 #include "algorithms/GraphTraversal.h"
+#include "algorithms/PatternMatching.h"
 #include "algorithms/Search.h"
 #include "algorithms/Sorting.h"
 
@@ -178,12 +180,18 @@ void compareWithSTL() {
   Trie trie;
 
   cxutil::now();
-  trie.insert("hello");
-  cxutil::printTime<std::chrono::nanoseconds>("insert time:");
+  std::string nums;
+  for (int i = 0; i < 100; i++) {
+    trie.insert(nums += "a");
+  }
+  cxutil::printTime<std::chrono::milliseconds>("insert time:");
 
   cxutil::now();
-  trie.startsWith("hel");
-  cxutil::printTime<std::chrono::nanoseconds>("startsWith 1 time:");
+  for (int i = 0; i < 10; i++) {
+    trie.startsWith("a");
+  }
+
+  cxutil::printTime<std::chrono::milliseconds>("startsWith 1 time:");
 
   /* |-----------------------------------------------------|
    * |                      QUICKSORT                      |
@@ -277,4 +285,18 @@ void compareWithSTL() {
     mat1* mat2;
   }
   cxutil::printTime("10 mil matrix 2x2 matrix multiplication");
+
+  /* |-----------------------------------------------------|
+   * |               PATTERN MATCHING                      |
+   * |-----------------------------------------------------|
+   */
+  std::cout << "\nTiming Pattern Matching" << std::endl;
+
+  std::string text;
+  cxutil::load_txt("res/vulkan_doc.txt", text);
+
+  cxutil::now();
+  std::cout << findString_brute_force(text, "Yanjun") << std::endl;
+
+  cxutil::printTime("13.9 mil characters searched in:");
 }
