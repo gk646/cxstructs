@@ -47,7 +47,7 @@ template <typename T>
 class vec {
 #ifdef CX_ALLOC
 #include "../CXAllocator.h"
-  using Allocator = CXPoolAllocator<T, sizeof(T) * 32, 1>;
+  using Allocator = CXPoolAllocator<T, sizeof(T) * 31, 1>;
 #else
   using AllocatorType = std::allocator<T>;
 #endif
@@ -100,7 +100,7 @@ class vec {
  public:
   /**
    * Default constructor<p>
-   * Recommended to leave it at 64 due to optimizations with the allocator
+   * Recommended to leave it at 31 due to optimizations with the allocator
    * @param n_elem number of starting elements
    */
   explicit vec(uint_32_cx n_elem = 32)
