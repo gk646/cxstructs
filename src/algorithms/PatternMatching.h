@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
+#define FINISHED
 #ifndef CXSTRUCTS_SRC_ALGORITHMS_PATTERNMATCHING_H_
 #define CXSTRUCTS_SRC_ALGORITHMS_PATTERNMATCHING_H_
 
@@ -73,12 +73,12 @@ int findString_brute_force(const std::string& text,
   }
   //unsigned integers for better performance
   int_fast32_t count = 0;
-  uint_fast16_t len = pattern.size();
-  uint_fast32_t text_len = text.size() - len;
-  uint_fast32_t i = 0;
+  uint_16_cx len = pattern.size();
+  uint_32_cx text_len = text.size() - len;
+  uint_32_cx i = 0;
 
   while (i < text_len) {
-    for (uint_fast32_t j = 0; j < len; j++) {
+    for (uint_32_cx j = 0; j < len; j++) {
       if (text[i + j] == pattern[j]) {
         if (j == len - 1) {
           count++;
@@ -98,8 +98,8 @@ int findString_KMP(const std::string& text, const std::string& pattern) {
   }
 
   int count = 0;
-  uint_fast16_t len = pattern.size();
-  uint_fast32_t text_len = text.size();
+  uint_16_cx len = pattern.size();
+  uint_32_cx text_len = text.size();
   auto* lps = new uint8_t[len];  //lps array
 
   lps[0] = 0;
@@ -123,8 +123,8 @@ int findString_KMP(const std::string& text, const std::string& pattern) {
   }
 
   //search operation
-  for (uint_fast32_t i = 0; i < text_len; i++) {
-    for (uint_fast32_t j = 0; j < len; j++) {
+  for (uint_32_cx i = 0; i < text_len; i++) {
+    for (uint_32_cx j = 0; j < len; j++) {
       if (text[i + j] == pattern[j]) {  //compare from i+j onwards
         if (j == len - 1) {
           count++;
@@ -145,14 +145,14 @@ int findString_Boyer_Moore(const std::string& text,
   }
 
   int count = 0;
-  uint_fast16_t len = pattern.size();
-  uint_fast32_t text_len = text.size();
+  uint_16_cx len = pattern.size();
+  uint_32_cx text_len = text.size();
 
   int bad_char[128];                         //stack array due to fixed size
   std::fill(bad_char, bad_char + 128, len);  //fill array with default values
 
   //produce bad character table
-  for (uint_fast32_t i = 0; i < len; i++) {
+  for (uint_32_cx i = 0; i < len; i++) {
     bad_char[static_cast<uint8_t>(pattern[i]) & 0x7F] =
         len - 1 -
         i;  //cast number to 0-256 and bitwise and with 01111111 to zero the first bit / from my Trie implementation
@@ -177,7 +177,7 @@ int findString_Boyer_Moore(const std::string& text,
   }
 
   len--;  //precalculate outside the loop
-  uint_fast32_t i = 0, j = 0;
+  uint_32_cx i = 0, j = 0;
   while(i < text_len){
     for (j = len; pattern[j] == text[i]; --i, --j) {
       if (j == 0) {

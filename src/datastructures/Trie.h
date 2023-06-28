@@ -47,13 +47,6 @@ struct TrieNode {
 };
 }  // namespace cxhelper
 
-#ifdef CX_ALLOC
-#include "../CXAllocator.h"
-using AllocatorType =
-    CXPoolAllocator<cxhelper::TrieNode, sizeof(cxhelper::TrieNode) * 50, 1>;
-#else
-using AllocatorType = std::allocator<cxhelper::TrieNode>;
-#endif
 
 namespace cxstructs {
 using namespace cxhelper;
@@ -61,8 +54,14 @@ using namespace cxhelper;
 /**
  *Only supports ASCII characters (0-127)
  */
-template <class Allocator = AllocatorType>
+
 class Trie {
+#ifdef CX_ALLOC
+  using Allocator =
+      CXPoolAllocator<cxhelper::TrieNode, sizeof(cxhelper::TrieNode) * 31, 2>;
+#else
+  using Allocator = std::allocator<cxhelper::TrieNode>;
+#endif
   TrieNode* root;
   Allocator alloc;
   uint_32_cx size_;
@@ -181,30 +180,26 @@ class Trie {
    * Clears the trie of all words
    */
   void clear() {
-    if (CX_CUSTOM_ALLOC) {
+    std::vector<TrieNode*> nodesToDelete;
+    nodesToDelete.push_back(root);
 
-    } else {
-      std::vector<TrieNode*> nodesToDelete;
-      nodesToDelete.push_back(root);
+    while (!nodesToDelete.empty()) {
+      TrieNode* node = nodesToDelete.back();
+      nodesToDelete.pop_back();
 
-      while (!nodesToDelete.empty()) {
-        TrieNode* node = nodesToDelete.back();
-        nodesToDelete.pop_back();
-
-        for (auto child : node->children) {
-          if (child != nullptr) {
-            nodesToDelete.push_back(child);
-          }
+      for (auto child : node->children) {
+        if (child != nullptr) {
+          nodesToDelete.push_back(child);
         }
-
-        std::allocator_traits<Allocator>::destroy(alloc, node);
-        alloc.deallocate(node, 1);
       }
-      size_ = 0;
-      TrieNode* temp = alloc.allocate(1);
-      std::allocator_traits<Allocator>::construct(alloc, temp);
-      root = temp;
+
+      std::allocator_traits<Allocator>::destroy(alloc, node);
+      alloc.deallocate(node, 1);
     }
+    size_ = 0;
+    TrieNode* temp = alloc.allocate(1);
+    std::allocator_traits<Allocator>::construct(alloc, temp);
+    root = temp;
   }
   /**
    * Removes the given word from the trie

@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.22)
 project(cxstructs)
 
 set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_FLAGS_RELEASE "/Ox")
+#set(CMAKE_CXX_FLAGS_RELEASE "/Ox")
 file(GLOB_RECURSE SRC_FILES
         "src/*.cpp"
         "src/*.h"

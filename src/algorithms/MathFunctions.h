@@ -79,7 +79,7 @@ double integral_volume_solids_of_revolution(Function fx, double a, double b,
   double volume = 0;
   double width = b - a;
   double step_size = width / steps;
-  for (uint_fast32_t i = 0; i < steps; i++) {
+  for (uint_32_cx i = 0; i < steps; i++) {
     volume += std::numbers::pi * std::pow(fx(a), 2) * step_size;
     a += step_size;
   }
@@ -93,7 +93,7 @@ double integral_arc_length(Function fx, double a, double b,
   double arc_length = 0;
   double step_size = (b - a) / steps;
   double step_squared = step_size * step_size;
-  for (uint_fast32_t i = 0; i < steps; i++) {
+  for (uint_32_cx i = 0; i < steps; i++) {
     arc_length +=
         std::sqrt(step_squared + std::pow(fx(a + step_size) - fx(a), 2));
     a += step_size;

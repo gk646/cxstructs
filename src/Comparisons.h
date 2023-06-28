@@ -54,6 +54,7 @@ struct Data {
   std::string string = "aösldkfjöalksdöfklj";
 };
 void compareWithSTL() {
+
   /* |-----------------------------------------------------|
    * |                       HASHMAPS                      |
    * |-----------------------------------------------------|
@@ -133,6 +134,44 @@ void compareWithSTL() {
   }
   cxutil::printTime<>("std::vector:");
 
+
+
+  /* |-----------------------------------------------------|
+   * |                       STACK                         |
+   * |-----------------------------------------------------|
+   */
+  outerCount = 1000;
+  innerCount = 10000;
+
+  std::cout << "\nComapring Stacks" << std::endl;
+  Stack<Data> stack;
+  std::stack<Data> std_stack;
+  cxutil::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      stack.emplace();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      stack.top();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      stack.pop();
+    }
+  }
+  cxutil::printTime<>("cxstructs stack :");
+  cxutil::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      std_stack.emplace();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      std_stack.top();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      std_stack.pop();
+    }
+  }
+  cxutil::printTime<>("std::stack:");
   /* |-----------------------------------------------------|
    * |                     Queues                           |
    * |-----------------------------------------------------|

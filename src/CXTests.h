@@ -54,7 +54,7 @@ static void test_cxstructs() {
   HashMap<int, int>::TEST();  //potential memory leak
   Stack<int>::TEST();
   vec<int>::TEST();  // potential memory leak
-  Trie<>::TEST();
+  Trie::TEST();
   DoubleLinkedList<int>::TEST();
   DeQueue<int>::TEST();
   //BinaryTree<int>::TEST();

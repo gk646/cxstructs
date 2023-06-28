@@ -23,17 +23,15 @@
 
 #include <cstdint>
 
-
-namespace {
-inline constexpr bool CX_CUSTOM_ALLOC =
-#ifdef CX_ALLOC
-    true;
-#else
-    false;
-#endif
-}  // namespace
-
 typedef uint_fast32_t uint_32_cx;
+typedef uint_fast16_t uint_16_cx;
 typedef int_fast32_t int_32_cx;
+
+#ifdef CX_ALLOC
+#include "CXAllocator.h"
+#endif
+
+
+
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_

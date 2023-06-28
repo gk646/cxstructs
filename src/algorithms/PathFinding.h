@@ -28,8 +28,8 @@
 namespace cxhelper {
 struct Node {
   Node();
-  uint_fast16_t f_cost;
-  uint_fast16_t g_cost;
+  uint_16_cx f_cost;
+  uint_16_cx g_cost;
 };
 
 }  // namespace cxhelper
