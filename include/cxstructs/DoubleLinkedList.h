@@ -287,7 +287,7 @@ class DoubleLinkedList {
     // assert(list10 == list1 );
 
     std::cout << "  Testing addition..." << std::endl;
-    // Testing iterator functionality along with add
+    // Testing iterator functionality along with push
     auto it = list.begin();
     assert(*it == 1);
     ++it;
