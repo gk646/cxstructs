@@ -59,8 +59,8 @@ struct Layer {
   vec<float> bias_;
   vec<float> w_sums_;
   mat inputs_;
-  uint_fast16_t in_;
-  uint_fast16_t out_;
+  uint_16_cx in_;
+  uint_16_cx out_;
   a_func func;
   a_func d_func;
   float learnR_;
@@ -75,7 +75,7 @@ struct Layer {
         func(relu),
         d_func(d_relu),
         learnR_(0.5) {}
-  Layer(uint_fast16_t in, uint_fast16_t out, a_func func, float learnR)
+  Layer(uint_16_cx in, uint_16_cx out, a_func func, float learnR)
       : in_(in), out_(out), func(func), learnR_(learnR), inputs_(1, in) {
     if (func == relu) {
       d_func = d_relu;
@@ -168,8 +168,8 @@ struct Layer {
   float* bias_;
   float* w_sums_;
   std::vector<float> inputs_;
-  uint_fast16_t in_;
-  uint_fast16_t out_;
+  uint_16_cx in_;
+  uint_16_cx out_;
   a_func func;
   a_func d_func;
   float learnR_;
@@ -184,7 +184,7 @@ struct Layer {
         func(relu),
         d_func(d_relu),
         learnR_(0.5) {}
-  Layer(uint_fast16_t in, uint_fast16_t out, a_func func, float learnR)
+  Layer(uint_16_cx in, uint_16_cx out, a_func func, float learnR)
       : in_(in), out_(out), func(func), learnR_(learnR), inputs_(in) {
     if (func == relu) {
       d_func = d_relu;
@@ -290,12 +290,12 @@ using namespace cxhelper;
  */
 class FNN {
   Layer* layers_;
-  std::vector<uint_fast16_t> bounds_;
-  uint_fast16_t len_;
+  std::vector<uint_16_cx> bounds_;
+  uint_16_cx len_;
   float learnR_;
 
  public:
-  explicit FNN(const std::vector<uint_fast16_t>& bound, a_func a_func,
+  explicit FNN(const std::vector<uint_16_cx>& bound, a_func a_func,
                float learnR)
       : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
     layers_ = new Layer[len_];
@@ -318,7 +318,7 @@ class FNN {
   }
 
   void train(const std::vector<float>& in, const std::vector<float>& out,
-             uint_fast16_t n = 10) {
+             uint_16_cx n = 10) {
     for (int k = 0; k < n; k++) {
       std::vector<float> re = forward(in);
 
@@ -332,7 +332,7 @@ class FNN {
     }
   }
   void train(const std::vector<std::vector<float>>& in,
-             const std::vector<std::vector<float>>& out, uint_fast16_t n = 10) {
+             const std::vector<std::vector<float>>& out, uint_16_cx n = 10) {
 
     for (int k = 0; k < n; k++) {
 

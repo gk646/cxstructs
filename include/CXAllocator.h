@@ -25,36 +25,34 @@
 #include <iostream>
 #include <memory>
 #include <stack>
+#include "cxconfig.h"
 
-template <uint_32_cx BlockSize = 512, uint_32_cx ReservedBlocks = 1>
+template <uint_32_cx BlockSize, uint_16_cx ReservedBlocks>
 class Pool {
-
   uint_32_cx size_;
-  std::stack<void*> addrs_;
-  std::stack<uint8_t*> blocks_;
+  std::vector<void*> addrs_;
+  std::vector<uint8_t*> blocks_;
 
   void allocateBlock() {
     auto* block = new uint8_t[BlockSize];
-
-    long long total_size =
-        BlockSize % size_ == 0 ? BlockSize : BlockSize - size_;
-
-    for (size_t i = 0; i < total_size; i += size_) {
-      addrs_.push(&block[i]);
+    addrs_.reserve(addrs_.capacity()+BlockSize/size_);
+    for (uint_32_cx i = 0; i < BlockSize; i += size_) {
+      addrs_.push_back(&block[i]);
     }
-    blocks_.push(block);
+    blocks_.push_back(block);
   }
 
  public:
-  explicit Pool(size_t size) : size_(size) {
-    for (size_t i = 0; i < ReservedBlocks; i++) {
+  explicit Pool(uint_32_cx size) : size_(size)  {
+    addrs_.reserve(32);
+    blocks_.reserve(2);
+    for (uint8_t i = 0; i < ReservedBlocks; i++) {
       allocateBlock();
     }
   }
   ~Pool() {
-    while (!blocks_.empty()) {
-      delete[] blocks_.top();
-      blocks_.pop();
+    for (auto block : blocks_) {
+      delete[] block;
     }
   }
 
@@ -63,14 +61,14 @@ class Pool {
       allocateBlock();
     }
 
-    auto ptr = addrs_.top();
-    addrs_.pop();
+    auto ptr = addrs_.back();
+    addrs_.pop_back();
     return ptr;
   }
-  void deallocate(void* ptr) { addrs_.push(ptr); }
+  void deallocate(void* ptr) { addrs_.push_back(ptr); }
 };
 
-template <typename T, size_t BlockSize = 512, size_t ReservedBlocks = 1>
+template <typename T, uint_32_cx BlockSize = 256, uint_16_cx ReservedBlocks = 1>
 class CXPoolAllocator {
   using PoolType = Pool<BlockSize, ReservedBlocks>;
   PoolType pool_;
@@ -78,7 +76,6 @@ class CXPoolAllocator {
  public:
   using value_type = T;
   using is_always_equal = std::false_type;
-
   CXPoolAllocator() : pool_(PoolType(sizeof(T))) {}
   CXPoolAllocator(const CXPoolAllocator& other) = default;
   CXPoolAllocator(CXPoolAllocator&& other) noexcept = default;
@@ -88,15 +85,18 @@ class CXPoolAllocator {
   T* allocate(size_t n) {
     if (n > 1) {
       return static_cast<T*>(malloc(sizeof(T) * n));
+    }else{
+      return (T*)pool_.allocate();
     }
-    return static_cast<T*>(pool_.allocate());
   }
   void deallocate(T* ptr, size_t n) {
     if (n > 1) {
       free(ptr);
       return;
+    }else{
+      pool_.deallocate(ptr);
     }
-    pool_.deallocate(ptr);
+
   }
 };
 

@@ -32,7 +32,7 @@
 #include <vector>
 #include "../cxconfig.h"
 
-/*This implementation is well optimized (from what I can tell) and should be equal or slightly slower than the std::vector in a lot of use cases
+/*This implementation is well optimized (from what I can tell) and should generally be a bit faster than the std::vector in a lot of use cases
  * Its using explicit allocator syntax to switch between the default and a custom one
 */
 namespace cxstructs {
@@ -41,15 +41,14 @@ namespace cxstructs {
  * This is an implementation of a dynamic array data structure, similar to the <code>ArrayList</code> in Java or <code>std::vector</code> in C++.
  * <br><br>
  * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
- * It provides the capability to index into the list, add elements to the end, and remove elements from the end in a time-efficient manner.</p>
+ * It provides the capability to index into the list, push elements to the end, and remove elements from the end in a time-efficient manner.</p>
  */
-template <typename T>
+template <typename T, uint_16_cx PreAllocBlocks = 1>
 class vec {
 #ifdef CX_ALLOC
-#include "../CXAllocator.h"
-  using Allocator = CXPoolAllocator<T, sizeof(T) * 31, 1>;
+  using Allocator = CXPoolAllocator<T, sizeof(T) * 33, PreAllocBlocks>;
 #else
-  using AllocatorType = std::allocator<T>;
+  using Allocator = std::allocator<cxhelper::TrieNode>;
 #endif
   Allocator alloc;
   T* arr_;
@@ -62,45 +61,43 @@ class vec {
 
     T* n_arr = alloc.allocate(len_);
 
-    for (size_t i = 0; i < size_; ++i) {
-      std::allocator_traits<Allocator>::construct(alloc, &n_arr[i],
-                                                  std::move(arr_[i]));
-    }
+    std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    for (size_t i = 0; i < size_; ++i) {
-      std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+    if (!std::is_trivially_destructible<T>::value) {
+      for (size_t i = 0; i < size_; i++) {
+        std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+      }
     }
 
     alloc.deallocate(arr_, size_);
     arr_ = n_arr;
     //as array is moved no need for delete []
-    minlen_ = size_ / 6 < 64 ? 0 : size_ / 6;
   }
+
   inline void shrink() {
-    len_ /= 2;
+    auto old_len = len_;
+    len_ = size_ * 1.5;
+
     T* n_arr = alloc.allocate(len_);
 
-    for (size_t i = 0; i < size_; ++i) {
-      std::allocator_traits<Allocator>::construct(alloc, &n_arr[i],
-                                                  std::move(arr_[i]));
-    }
+    std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    for (size_t i = 0; i < size_; ++i) {
-      std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+    if (!std::is_trivially_destructible<T>::value) {
+      for (size_t i = 0; i < size_; i++) {
+        std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+      }
     }
 
-    alloc.deallocate(arr_, size_);
+    alloc.deallocate(arr_, old_len);
     arr_ = n_arr;
-    // lower bound is very lenient to avoid premature downsizing and memory is plenty...
-    minlen_ = size_ / 6 < 64 ? 0 : size_ / 6;
   }
 
  public:
   /**
    * Default constructor<p>
-   * Recommended to leave it at 31 due to optimizations with the allocator
+   * Recommended to leave it at 32 due to optimizations with the allocator
    * @param n_elem number of starting elements
    */
   explicit vec(uint_32_cx n_elem = 32)
@@ -172,7 +169,7 @@ class vec {
   }
   vec& operator=(const vec<T>& o) {
     if (this != &o) {
-      //ugly allocator syntax but saves a lot when using e.g vec<float>
+      //ugly allocator syntax but saves a lot when using e.g. vec<float>
       if (!std::is_trivially_destructible<T>::value) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
@@ -241,15 +238,12 @@ class vec {
    */
   inline T& at(const int_32_cx& index) {
     if (index < 0) {
-      int_32_cx access = size_ + index;
-      if (access >= 0) {
-        return arr_[access];
-      }
-      throw std::out_of_range("index out of bounds");
-    } else if (index < size_) {
+      assert(size_ + index >= 0 && "index out of bounds");
+      return arr_[size_ + index];
+    } else {
+      assert(index < size_ && "index out of bounds");
       return arr_[index];
     }
-    throw std::out_of_range("index out of bounds");
   }
   /**
    * Adds a element to the list
@@ -263,7 +257,6 @@ class vec {
   }
   /**
    * Construct a new T element at the end of the list
-   * Will produce a leaking vector if the T constructor throws an error
    * @param args T constructor arguments
    */
   template <typename... Args>
@@ -271,18 +264,32 @@ class vec {
     if (size_ == len_) {
       grow();
     }
-    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_],
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_++],
                                                 std::forward<Args>(args)...);
-    size_++;
+  }
+
+  /**
+   * Reduces the underlying array size to something close to the actual data size.
+   * This decreases memory usage.
+   */
+  inline void shrink_to_fit() {
+    if (len_ > size_ * 1.5) {
+      shrink();
+    }
+  }
+  /**
+  * Removes the last element of the stack.
+  * Reduces the size by one.
+  */
+  [[nodiscard]] inline T& pop_back() {
+    assert(size_ > 0 && "out of bounds");
+    return arr_[--size_];
   }
   /**
    * Removes the first occurrence of the given element from the list
    * @param e element to be removed
    */
   inline void remove(const T& e) {
-    if (size_ < minlen_) {
-      shrink();
-    }
     for (uint_32_cx i = 0; i < len_; i++) {
       if (arr_[i] == e) {
         std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
@@ -296,9 +303,7 @@ class vec {
    * @param index index of removal
    */
   inline void removeAt(const uint_32_cx& index) {
-    if (size_ < minlen_) {
-      shrink();
-    }
+    assert(index < len_ && "index out of bounds");
     std::move(arr_ + index + 1, arr_ + size_--, arr_ + index);
   }
   /**
@@ -306,6 +311,7 @@ class vec {
  * @return the current n_elem of the list
  */
   [[nodiscard]] inline uint_32_cx size() const { return size_; }
+  [[nodiscard]] inline uint_32_cx capacity() const { return len_; }
   /**
    * Clears the list of all its elements <br>
    * Resets the length back to its starting value
@@ -393,6 +399,11 @@ class vec {
     }
     std::cout << this << std::endl;
   }
+  /**
+   * Performs an empty check
+   * @return true if the vec is empty
+   */
+  [[nodiscard]] inline bool empty() const { return size_ == 0; }
   class Iterator {
     T* ptr;
 
@@ -420,10 +431,10 @@ class vec {
   }
 
   static void TEST() {
-    std::cout << "TESTING ARRAY LIST" << std::endl;
+    std::cout << "TESTING ARRAY LIST\n";
 
-    // Test 1: Testing add and remove
-    std::cout << "   Test 1: Testing add and remove..." << std::endl;
+    // Test: Testing push and remove
+    std::cout << "   Testing push and remove...\n";
     vec<int> list1;
     list1.add(5);
     list1.add(10);
@@ -433,15 +444,15 @@ class vec {
     assert(list1.size() == 2);
     assert(list1[1] == 15);
 
-    // Test 2: Testing List access
-    std::cout << "   Test 2: Testing List access..." << std::endl;
+    // Test: Testing List access
+    std::cout << "   Testing List access...\n";
     assert(list1[0] == 5);
     assert(list1.at(-1) == 15);
     assert(list1.at(-2) == 5);
     assert(list1[1] == 15);
 
-    // Test 3: Testing iterator
-    std::cout << "   Test 3: Testing iterator..." << std::endl;
+    // Test: Testing iterator
+    std::cout << "   Testing iterator...\n";
     list1.clear();
     list1.add(5);
     list1.add(10);
@@ -454,26 +465,29 @@ class vec {
     }
     assert(checkNum == 15);
 
-    // Test 4: Testing resizing
-    std::cout << "   Test 4: Testing resizing..." << std::endl;
+    // Test: Testing resizing and shrink_to_fit
+    std::cout << "   Testing resizing and shrink_to_fit...\n";
     list1.clear();
     for (int i = 0; i < 10000; i++) {
       list1.add(i);
     }
+    list1.shrink_to_fit();
+    assert(list1.capacity() == list1.size() * 1.5);
+
     for (int i = 0; i < 10000; i++) {
       list1.remove(i);
     }
     assert(list1.size() == 0);
 
-    // Test 5: Testing contains
-    std::cout << "   Test 5: Testing contains..." << std::endl;
+    // Test: Testing contains
+    std::cout << "   Testing contains...\n";
     list1.clear();
     list1.add(5);
     assert(list1.contains(5) == true);
     assert(list1.contains(5, false) == true);
 
-    // Test 6: Testing append
-    std::cout << "   Test 6: Testing append..." << std::endl;
+    // Test: Testing append
+    std::cout << "   Testing append...\n";
     list1.clear();
 
     list1.add(5);
@@ -497,8 +511,8 @@ class vec {
     }
     assert(list1.size() == 9);
 
-    // Test 7: copy constructor
-    std::cout << "   Test 7: Testing copy constructor..." << std::endl;
+    // Test: Testing copy constructor
+    std::cout << "   Testing copy constructor...\n";
     vec<int> list5(10);
     for (uint_32_cx i = 0; i < 10; i++) {
       list5.add(i);
@@ -508,31 +522,38 @@ class vec {
       assert(list6[i] == i);
     }
 
-    // Test 8: copy assignment
-    std::cout << "   Test 8: Testing copy assignment..." << std::endl;
+    // Test: Testing copy assignment
+    std::cout << "   Testing copy assignment...\n";
     vec<int> list7(10);
     list7 = list5;  // copy assignment
     for (uint_32_cx i = 0; i < 10; i++) {
       assert(list7[i] == i);
     }
 
-    // Test 9: move constructor
-    std::cout << "   Test 9: Testing move constructor..." << std::endl;
+    // Test: Testing move constructor
+    std::cout << "   Testing move constructor...\n";
     vec<int> list8 = std::move(list5);  // move constructor
     for (uint_32_cx i = 0; i < 10; i++) {
       assert(list8[i] == i);
     }
 
-    // Test 10: move assignment
-    std::cout << "   Test 10: Testing move assignment..." << std::endl;
+    // Test: Testing move assignment
+    std::cout << "   Testing move assignment...\n";
     vec<int> list9(10);
     list9 = std::move(list6);  // move assignment
     for (uint_32_cx i = 0; i < 10; i++) {
       assert(list9[i] == i);
     }
 
-    // Test 11: Checking for memory leaks
-    std::cout << "   Test 11: Checking for memory leaks..." << std::endl;
+    // Test: Testing pop_back()
+    std::cout << "   Testing pop_back()...\n";
+    list9.add(100);
+    assert(list9.pop_back() == 100);
+    std::cout<< list9.size() << std::endl;
+    assert(list9.size() == 10);
+
+    // Test: Checking for memory leaks
+    std::cout << "   Checking for memory leaks...\n";
     list1.clear();
     for (int i = 0; i < 10000000; i++) {
       list1.add(i);
