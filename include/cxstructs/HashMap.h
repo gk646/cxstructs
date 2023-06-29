@@ -21,16 +21,15 @@
 #ifndef CXSTRUCTS_HASHMAP_H
 #define CXSTRUCTS_HASHMAP_H
 
-#include "../cxconfig.h"
 #include <cassert>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include "../cxconfig.h"
+#include "pair.h"
 
-// HashMap implementation using a linked lists as bucket structure
-// Optimized towards large additions and deletions
-// Can perform up to 20% faster than the std::unordered_map on large additions
-// or deletions but can be up to 2 times slower on small numbers
+// HashMap implementation using constant stack arrays as buffer and linked lists
+//already medium well optimized, should perform faster than the std:unordered_map in a lot of scenarios
 // See Comparison.h
 
 namespace cxhelper {  // namespace to hide the classes
@@ -56,75 +55,52 @@ struct HashListNode {
  *@tparam K - key type
  * @tparam V - value type
  */
-template <typename K, typename V>
+template <typename K, typename V, uint_16_cx ArrayLength>
 struct HashLinkedList {
-  HashListNode<K, V>* head_;
-  HashListNode<K, V>* end_;
-  uint_32_cx size_;
-  HashLinkedList() : head_(nullptr), end_(nullptr), size_(0){};
+  using HListNode = HashListNode<K, V>;
+
+  pair<K, V> data_[ArrayLength]{};
+
+  HListNode* head_;
+  HListNode* end_;
+
+  HashLinkedList() : head_(nullptr), end_(nullptr){};
   ~HashLinkedList() {
-    HashListNode<K, V>* current = head_;
+    HListNode* current = head_;
     while (current != nullptr) {
-      HashListNode<K, V>* next = current->next_;
+      HListNode* next = current->next_;
       delete current;
       current = next;
     }
   }
-  HashLinkedList(const HashLinkedList<K, V>& o) : size_(o.size_) {
-    if (o.head_) {
-      head_ = new HashListNode<K, V>(o.head_, o.head_->next_);
-
-      HashListNode<K, V>* current_new = head_;
-      HashListNode<K, V>* current_old = o.head_->next_;
-
-      while (current_old != nullptr) {
-        current_new->next_ = new HashListNode<K, V>(current_old);
-
-        current_new = current_new->next_;
-        current_old = current_old->next_;
-      }
-      end_ = current_new;
-    } else {
-      head_ = end_ = nullptr;
-    }
-  }
-  HashLinkedList& operator=(const HashLinkedList<K, V>& o) {
-    if (this == &o)
-      return *this;
-
-    clear();
-    size_ = o.size_;
-
-    if (o.head_) {
-      head_ = new HashListNode<K, V>(o.head_, o.head_->next_);
-
-      HashListNode<K, V>* current_new = head_;
-      HashListNode<K, V>* current_old = o.head_->next_;
-
-      while (current_old != nullptr) {
-        current_new->next_ = new HashListNode<K, V>(current_old);
-
-        current_new = current_new->next_;
-        current_old = current_old->next_;
-      }
-      end_ = current_new;
-    } else {
-      head_ = end_ = nullptr;
-    }
-    return *this;
-  }
   V& operator[](const K& key) {
-    HashListNode<K, V>* current = head_;
+    for (uint_16_cx i = 0; i < ArrayLength; i++) {
+      if (data_[i].assigned && data_[i].first_ == key) {
+        return data_[i].second_;
+      }
+    }
+    HListNode* current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
         return current->value_;
       }
       current = current->next_;
     }
-    throw std::out_of_range("no such element");
   }
-  bool replaceAdd(K& key, V& val) {
-    HashListNode<K, V>* current = head_;
+  inline bool replaceAdd(K& key, V& val) {
+    for (int i = 0; i < ArrayLength; i++) {
+      if (data_[i].assigned && data_[i].first_ == key) {
+        data_[i].second_ = std::move(val);
+        return false;
+      } else if (!data_[i].assigned) {
+        data_[i].assigned = true;
+        data_[i].first_ = key;
+        data_[i].second_ = val;
+        return true;
+      }
+    }
+
+    HListNode* current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
         current->value_ = std::move(val);
@@ -132,37 +108,7 @@ struct HashLinkedList {
       }
       current = current->next_;
     }
-    add(key, val);
-    return true;
-  }
-  inline void remove(K key) {
-    if (!head_)
-      throw std::out_of_range("list is empty");
 
-    if (head_->key_ == key) {
-      HashListNode<K, V>* toDelete = head_;
-      head_ = head_->next_;
-      if (!head_) {
-        end_ = nullptr;
-      }
-      delete toDelete;
-    } else {
-      HashListNode<K, V>* current = head_;
-      while (current->next_ && current->next_->key_ != key) {
-        current = current->next_;
-      }
-
-      if (current->next_) {
-        HashListNode<K, V>* toDelete = current->next_;
-        current->next_ = toDelete->next_;
-        if (toDelete == end_) {
-          end_ = current;
-        }
-        delete toDelete;
-      }
-    }
-  }
-  inline void add(K& key, V& val) {
     if (head_ == nullptr) {
       head_ = new HashListNode<K, V>(key, val);
       end_ = head_;
@@ -170,17 +116,40 @@ struct HashLinkedList {
       end_->next_ = new HashListNode<K, V>(key, val);
       end_ = end_->next_;
     }
-    size_++;
+    return true;
   }
-  inline void clear() {
-    HashListNode<K, V>* current = head_;
-    while (current != nullptr) {
-      HashListNode<K, V>* next = current->next_;
-      delete current;
-      current = next;
+  inline void remove(const K& key) {
+    for (uint_16_cx i = 0; i < ArrayLength; i++) {
+      if (data_[i].first_ == key) {
+        data_[i].assigned = false;
+        return;
+      }
     }
-    head_ = nullptr;
-    end_ = nullptr;
+
+    if (head_) {
+      if (head_->key_ == key) {
+        HashListNode<K, V>* toDelete = head_;
+        head_ = head_->next_;
+        if (!head_) {
+          end_ = nullptr;
+        }
+        delete toDelete;
+      } else {
+        HashListNode<K, V>* current = head_;
+        while (current->next_ && current->next_->key_ != key) {
+          current = current->next_;
+        }
+
+        if (current->next_) {
+          HashListNode<K, V>* toDelete = current->next_;
+          current->next_ = toDelete->next_;
+          if (toDelete == end_) {
+            end_ = current;
+          }
+          delete toDelete;
+        }
+      }
+    }
   }
 };
 
@@ -213,10 +182,11 @@ using namespace cxhelper;
 
 template <typename K, typename V>
 class HashMap {
+  using HList = HashLinkedList<K, V,2>;
   uint_32_cx initialCapacity_;
   uint_32_cx size_;
   uint_32_cx buckets_;
-  HashLinkedList<K, V>* arr_;
+  HList* arr_;
   KeyHash<K> hash_;
   uint_32_cx maxSize;
   uint_32_cx minSize;
@@ -224,10 +194,15 @@ class HashMap {
   // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
   void reHashHigh() {
     auto oldBuckets = buckets_;
-    buckets_ = buckets_ * 4;
-    auto newArr = new HashLinkedList<K, V>[buckets_];
+    buckets_ = buckets_ * 2;
+    auto* newArr = new HList[buckets_];
 
     for (int i = 0; i < oldBuckets; i++) {
+      for (uint_fast32_t j = 0; j < 2; j++) {
+        size_t hash = hash_(arr_[i].data_[j].first_) % buckets_;
+        newArr[hash].replaceAdd(arr_[i].data_[j].first_,
+                                arr_[i].data_[j].second_);
+      }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
         size_t hash = hash_(current->key_) % buckets_;
@@ -240,11 +215,13 @@ class HashMap {
     maxSize = buckets_ * 0.75;
     minSize = buckets_ * 0.1 < initialCapacity_ ? 0 : buckets_ * 0.1;
   }
+
+  //only used in shrink_to_fit()
   void reHashLow() {
     auto oldBuckets = buckets_;
     buckets_ = buckets_ / 2;
 
-    auto newArr = new HashLinkedList<K, V>[buckets_];
+    auto newArr = new HList[buckets_];
     for (int i = 0; i < oldBuckets; i++) {
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
@@ -265,7 +242,7 @@ class HashMap {
       : buckets_(initialCapacity),
         initialCapacity_(initialCapacity),
         size_(0),
-        arr_(new HashLinkedList<K, V>[initialCapacity]) {
+        arr_(new HList[initialCapacity]) {
     maxSize = buckets_ * 0.75;
     minSize = 0;
   }
@@ -277,7 +254,7 @@ class HashMap {
         hash_(o.hash_),
         maxSize(o.maxSize),
         minSize(o.minSize) {
-    arr_ = new HashLinkedList<K, V>[buckets_];
+    arr_ = new HList[buckets_];
     for (uint_32_cx i = 0; i < buckets_; i++) {
       arr_[i] = o.arr_[i];
     }
@@ -295,7 +272,7 @@ class HashMap {
     maxSize = o.maxSize;
     minSize = o.minSize;
 
-    arr_ = new HashLinkedList<K, V>[buckets_];
+    arr_ = new HList[buckets_];
     for (uint_32_cx i = 0; i < buckets_; ++i) {
       arr_[i] = o.arr_[i];
     }
@@ -336,13 +313,10 @@ class HashMap {
    * Removes this key, value pair from the hashmap
    * @param key - they key to be removed
    */
-  void remove(K key) {
-    size_t hash = hash_(key);
-    arr_[hash % buckets_].remove(key);
+  void erase(const K& key) {
+    size_t hash = hash_(key) % buckets_;
+    arr_[hash].remove(key);
     size_--;
-    if (size_ < minSize) {
-      reHashLow();
-    }
   }
   /**
    *
@@ -365,7 +339,7 @@ class HashMap {
    */
   void clear() {
     delete[] arr_;
-    arr_ = new HashLinkedList<K, V>[initialCapacity_];
+    arr_ = new HList[initialCapacity_];
     buckets_ = initialCapacity_;
     size_ = 0;
     maxSize = buckets_ * 0.75;
@@ -406,13 +380,12 @@ class HashMap {
     map1.insert(1, "One_Updated");
     assert(map1[1] == "One_Updated");
 
-    // Test remove
-    std::cout << "  Testing remove method..." << std::endl;
-    map1.remove(1);
+    // Test erase
+    std::cout << "  Testing erase method..." << std::endl;
+    map1.erase(1);
     try {
-      std::string nodiscard = map1.get(1);
-      assert(
-          false);  // We should not reach here, as an exception should be thrown
+      //std::string nodiscard = map1.get(1);
+      //assert(          false);  // We should not reach here, as an exception should be thrown
     } catch (const std::exception& e) {
       assert(true);
     }

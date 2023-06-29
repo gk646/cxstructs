@@ -47,13 +47,12 @@ class Stack {
 #ifdef CX_ALLOC
   using Allocator = CXPoolAllocator<T, sizeof(T) * 33, PreAllocBlocks>;
 #else
-  using Allocator = std::allocator<cxhelper::TrieNode>;
+  using Allocator = std::allocator<T>;
 #endif
   Allocator alloc;
   T* arr_;
   uint_32_cx size_;
   uint_32_cx len_;
-  uint_32_cx minlen_;
 
   inline void grow() {
     len_ *= 2;
@@ -102,14 +101,12 @@ class Stack {
   explicit Stack(uint_32_cx n_elems = 32)
       : len_(n_elems),
         size_(0),
-        arr_(alloc.allocate(n_elems)),
-        minlen_(n_elems / 4 < 32 ? 0 : n_elems / 4) {}
+        arr_(alloc.allocate(n_elems)) {}
 
   explicit Stack(uint_32_cx n_elems, T fillval)
       : len_(n_elems),
         size_(n_elems),
-        arr_(alloc.allocate(n_elems)),
-        minlen_(n_elems / 4 < 32 ? 0 : n_elems / 4) {
+        arr_(alloc.allocate(n_elems)) {
     std::fill_n(arr_, len_, fillval);
   }
   /**
@@ -121,8 +118,8 @@ class Stack {
   Stack(std::initializer_list<T> init_list)
       : size_(init_list.size()),
         len_(init_list.size() * 10),
-        arr_(alloc.allocate(init_list.size() * 10)),
-        minlen_(0) {
+        arr_(alloc.allocate(init_list.size() * 10))
+        {
     std::copy(init_list.begin(), init_list.end(), arr_);
   }
   /**
@@ -138,15 +135,14 @@ class Stack {
   Stack(uint_32_cx n_elem, fill_form form)
       : len_(n_elem),
         size_(n_elem),
-        arr_(alloc.allocate(n_elem)),
-        minlen_(n_elem / 4 < 32 ? 0 : n_elem / 4) {
+        arr_(alloc.allocate(n_elem)) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
     }
   }
   //copy constructor
   explicit Stack(const Stack<T>& o)
-      : size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
+      : size_(o.size_), len_(o.len_) {
     arr_ = alloc.allocate(len_);
     std::copy(o.arr_, o.arr_ + size_, arr_);
   }
@@ -162,7 +158,6 @@ class Stack {
 
       size_ = o.size_;
       len_ = o.len_;
-      minlen_ = o.minlen_;
       arr_ = alloc.allocate(len_);
 
       for (uint_32_cx i = 0; i < size_; i++) {
@@ -173,7 +168,7 @@ class Stack {
   }
   //move constructor
   Stack(Stack&& o) noexcept
-      : arr_(o.arr_), size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
+      : arr_(o.arr_), size_(o.size_), len_(o.len_) {
     //leve other in previous state
     o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
   }
@@ -190,7 +185,6 @@ class Stack {
       arr_ = o.arr_;
       size_ = o.size_;
       len_ = o.len_;
-      minlen_ = o.minlen_;
 
       //other is left in previous state but invalidated
       o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!

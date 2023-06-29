@@ -41,20 +41,20 @@ namespace cxstructs {
  * This is an implementation of a dynamic array data structure, similar to the <code>ArrayList</code> in Java or <code>std::vector</code> in C++.
  * <br><br>
  * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
- * It provides the capability to index into the list, push elements to the end, and remove elements from the end in a time-efficient manner.</p>
+ * It provides the capability to index into the list, push elements to the end, and erase elements from the end in a time-efficient manner.</p>
  */
 template <typename T, uint_16_cx PreAllocBlocks = 1>
 class vec {
 #ifdef CX_ALLOC
   using Allocator = CXPoolAllocator<T, sizeof(T) * 33, PreAllocBlocks>;
 #else
-  using Allocator = std::allocator<cxhelper::TrieNode>;
+  using Allocator = std::allocator<T>;
 #endif
+
   Allocator alloc;
   T* arr_;
   uint_32_cx size_;
   uint_32_cx len_;
-  uint_32_cx minlen_;
 
   inline void grow() {
     len_ *= 2;
@@ -101,15 +101,9 @@ class vec {
    * @param n_elem number of starting elements
    */
   explicit vec(uint_32_cx n_elem = 32)
-      : len_(n_elem),
-        size_(0),
-        arr_(alloc.allocate(n_elem)),
-        minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {}
+      : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {}
   vec(uint_32_cx n_elem, const T val)
-      : len_(n_elem),
-        size_(n_elem),
-        arr_(alloc.allocate(n_elem)),
-        minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {
+      : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     std::fill(arr_, arr_ + n_elem, val);
   }
   /**
@@ -123,10 +117,7 @@ class vec {
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
   vec(uint_32_cx n_elem, fill_form form)
-      : len_(n_elem),
-        size_(n_elem),
-        arr_(alloc.allocate(n_elem)),
-        minlen_(n_elem / 6 < 64 ? 0 : n_elem / 6) {
+      : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
     }
@@ -139,15 +130,13 @@ class vec {
   explicit vec(const std::vector<T>& vector)
       : len_(vector.size() * 1.5),
         size_(vector.size()),
-        arr_(alloc.allocate(vector.size() * 1.5)),
-        minlen_(vector.size() / 6 < 64 ? 0 : vector.size() / 6) {
+        arr_(alloc.allocate(vector.size() * 1.5)) {
     std::copy(vector.begin(), vector.end(), arr_);
   }
   explicit vec(const std::vector<T>&& move_vector)
       : len_(move_vector.size() * 1.5),
         size_(move_vector.size()),
-        arr_(alloc.allocate(move_vector.size() * 1.5)),
-        minlen_(move_vector.size() / 6 < 64 ? 0 : move_vector.size() / 6) {
+        arr_(alloc.allocate(move_vector.size() * 1.5)) {
     std::move(move_vector.begin(), move_vector.end(), arr_);
   }
   /**
@@ -159,11 +148,10 @@ class vec {
   vec(std::initializer_list<T> init_list)
       : size_(init_list.size()),
         len_(init_list.size() * 10),
-        arr_(alloc.allocate(init_list.size() * 10)),
-        minlen_(0) {
+        arr_(alloc.allocate(init_list.size() * 10)) {
     std::copy(init_list.begin(), init_list.end(), arr_);
   }
-  vec(const vec<T>& o) : size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
+  vec(const vec<T>& o) : size_(o.size_), len_(o.len_) {
     arr_ = alloc.allocate(len_);
     std::copy(o.arr_, o.arr_ + size_, arr_);
   }
@@ -179,7 +167,6 @@ class vec {
 
       size_ = o.size_;
       len_ = o.len_;
-      minlen_ = o.minlen_;
       arr_ = alloc.allocate(len_);
 
       for (uint_32_cx i = 0; i < size_; i++) {
@@ -189,8 +176,7 @@ class vec {
     return *this;
   }
   //move constructor
-  vec(vec&& o) noexcept
-      : arr_(o.arr_), size_(o.size_), len_(o.len_), minlen_(o.minlen_) {
+  vec(vec&& o) noexcept : arr_(o.arr_), size_(o.size_), len_(o.len_) {
     //leve other in previous state
     o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
   }
@@ -207,7 +193,6 @@ class vec {
       arr_ = o.arr_;
       size_ = o.size_;
       len_ = o.len_;
-      minlen_ = o.minlen_;
 
       //other is left in previous state but invalidated
       o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
@@ -312,6 +297,11 @@ class vec {
  */
   [[nodiscard]] inline uint_32_cx size() const { return size_; }
   [[nodiscard]] inline uint_32_cx capacity() const { return len_; }
+  void reserve(uint_32_cx new_capacity) {
+    if (len_ < new_capacity) {
+
+    }
+  }
   /**
    * Clears the list of all its elements <br>
    * Resets the length back to its starting value
@@ -323,7 +313,6 @@ class vec {
       }
     }
     alloc.deallocate(arr_, len_);
-    minlen_ = 0;
     size_ = 0;
     len_ = 32;
     arr_ = alloc.allocate(len_);
@@ -430,11 +419,12 @@ class vec {
     return os << "]";
   }
 
+#ifndef DELETE_TESTS
   static void TEST() {
     std::cout << "TESTING ARRAY LIST\n";
 
-    // Test: Testing push and remove
-    std::cout << "   Testing push and remove...\n";
+    // Test: Testing push and erase
+    std::cout << "   Testing push and erase...\n";
     vec<int> list1;
     list1.add(5);
     list1.add(10);
@@ -549,7 +539,7 @@ class vec {
     std::cout << "   Testing pop_back()...\n";
     list9.add(100);
     assert(list9.pop_back() == 100);
-    std::cout<< list9.size() << std::endl;
+    std::cout << list9.size() << std::endl;
     assert(list9.size() == 10);
 
     // Test: Checking for memory leaks
@@ -559,6 +549,7 @@ class vec {
       list1.add(i);
     }
   }
+#endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_ARRAYLIST_H
