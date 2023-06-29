@@ -76,8 +76,8 @@ struct HashLinkedList {
   }
   V& operator[](const K& key) {
     for (uint_16_cx i = 0; i < ArrayLength; i++) {
-      if (data_[i].assigned && data_[i].first_ == key) {
-        return data_[i].second_;
+      if (data_[i].assigned() && data_[i].first() == key) {
+        return data_[i].second();
       }
     }
     HListNode* current = head_;
@@ -91,13 +91,13 @@ struct HashLinkedList {
   }
   inline bool replaceAdd(K& key, V& val) {
     for (int i = 0; i < ArrayLength; i++) {
-      if (data_[i].assigned && data_[i].first_ == key) {
-        data_[i].second_ = std::move(val);
+      if (data_[i].assigned() && data_[i].first() == key) {
+        data_[i].second() = std::move(val);
         return false;
-      } else if (!data_[i].assigned) {
-        data_[i].assigned = true;
-        data_[i].first_ = key;
-        data_[i].second_ = val;
+      } else if (!data_[i].assigned()) {
+        data_[i].assigned() = true;
+        data_[i].first() = key;
+        data_[i].second() = val;
         return true;
       }
     }
@@ -122,8 +122,8 @@ struct HashLinkedList {
   }
   inline void remove(const K& key) {
     for (uint_16_cx i = 0; i < ArrayLength; i++) {
-      if (data_[i].assigned && data_[i].first_ == key) {
-        data_[i].assigned = false;
+      if (data_[i].assigned() && data_[i].first() == key) {
+        data_[i].assigned() = false;
         return;
       }
     }
@@ -208,9 +208,9 @@ class HashMap {
 
     for (int i = 0; i < oldBuckets; i++) {
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
-        size_t hash = hash_(arr_[i].data_[j].first_) % buckets_;
-        newArr[hash].replaceAdd(arr_[i].data_[j].first_,
-                                arr_[i].data_[j].second_);
+        size_t hash = hash_(arr_[i].data_[j].first()) % buckets_;
+        newArr[hash].replaceAdd(arr_[i].data_[j].first(),
+                                arr_[i].data_[j].second());
       }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
@@ -231,9 +231,9 @@ class HashMap {
 
     for (int i = 0; i < oldBuckets; i++) {
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
-        size_t hash = hash_(arr_[i].data_[j].first_) % buckets_;
-        newArr[hash].replaceAdd(arr_[i].data_[j].first_,
-                                arr_[i].data_[j].second_);
+        size_t hash = hash_(arr_[i].data_[j].first()) % buckets_;
+        newArr[hash].replaceAdd(arr_[i].data_[j].first(),
+                                arr_[i].data_[j].second());
       }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
@@ -401,7 +401,7 @@ class HashMap {
     size_t hash = hash_(key) % buckets_;
     auto data = arr_[hash].data_;
     for (uint_fast32_t i = 0; i < BufferLen; i++) {
-      if (data[i].first_ == key) {
+      if (data[i].first() == key) {
         return true;
       }
     }
