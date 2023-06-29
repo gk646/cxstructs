@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <stdexcept>
 #include <string>
 #include "../cxconfig.h"
@@ -86,6 +87,7 @@ struct HashLinkedList {
       }
       current = current->next_;
     }
+    throw std::exception("no such element");
   }
   inline bool replaceAdd(K& key, V& val) {
     for (int i = 0; i < ArrayLength; i++) {
@@ -120,7 +122,7 @@ struct HashLinkedList {
   }
   inline void remove(const K& key) {
     for (uint_16_cx i = 0; i < ArrayLength; i++) {
-      if (data_[i].first_ == key) {
+      if (data_[i].assigned && data_[i].first_ == key) {
         data_[i].assigned = false;
         return;
       }
@@ -150,6 +152,7 @@ struct HashLinkedList {
         }
       }
     }
+    throw  std::exception("no such element");
   }
 };
 
@@ -165,6 +168,7 @@ struct KeyHash<std::string> {
     return hash_fn(key);
   }
 };
+
 }  // namespace cxhelper
 
 namespace cxstructs {
@@ -182,23 +186,28 @@ using namespace cxhelper;
 
 template <typename K, typename V>
 class HashMap {
-  using HList = HashLinkedList<K, V,2>;
+
+  constexpr static uint_16_cx BufferLen = 2;
+  using hash_func = std::function<int(const K&)>;
+  using HList = HashLinkedList<K, V, BufferLen>;
+
   uint_32_cx initialCapacity_;
   uint_32_cx size_;
   uint_32_cx buckets_;
-  HList* arr_;
-  KeyHash<K> hash_;
   uint_32_cx maxSize;
-  uint_32_cx minSize;
+  float load_factor_;
 
-  // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
-  void reHashHigh() {
+  HList* arr_;
+  hash_func hash_;
+
+  inline void reHashBig() {
+    // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
     auto oldBuckets = buckets_;
     buckets_ = buckets_ * 2;
     auto* newArr = new HList[buckets_];
 
     for (int i = 0; i < oldBuckets; i++) {
-      for (uint_fast32_t j = 0; j < 2; j++) {
+      for (uint_fast32_t j = 0; j < BufferLen; j++) {
         size_t hash = hash_(arr_[i].data_[j].first_) % buckets_;
         newArr[hash].replaceAdd(arr_[i].data_[j].first_,
                                 arr_[i].data_[j].second_);
@@ -212,17 +221,20 @@ class HashMap {
     }
     delete[] arr_;
     arr_ = newArr;
-    maxSize = buckets_ * 0.75;
-    minSize = buckets_ * 0.1 < initialCapacity_ ? 0 : buckets_ * 0.1;
+    maxSize = buckets_ * load_factor_;
   }
-
-  //only used in shrink_to_fit()
-  void reHashLow() {
+  inline void reHashSmall() {
+    //only used in shrink_to_fit()
     auto oldBuckets = buckets_;
-    buckets_ = buckets_ / 2;
+    buckets_ = size_ * 1.5;
+    auto* newArr = new HList[buckets_];
 
-    auto newArr = new HList[buckets_];
     for (int i = 0; i < oldBuckets; i++) {
+      for (uint_fast32_t j = 0; j < BufferLen; j++) {
+        size_t hash = hash_(arr_[i].data_[j].first_) % buckets_;
+        newArr[hash].replaceAdd(arr_[i].data_[j].first_,
+                                arr_[i].data_[j].second_);
+      }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
         size_t hash = hash_(current->key_) % buckets_;
@@ -230,34 +242,60 @@ class HashMap {
         current = current->next_;
       }
     }
-
     delete[] arr_;
     arr_ = newArr;
-    maxSize = buckets_ * 0.75;
-    minSize = buckets_ * 0.1 < initialCapacity_ ? 0 : buckets_ * 0.1;
+    maxSize = buckets_ * load_factor_;
   }
 
  public:
-  explicit HashMap(uint_32_cx initialCapacity = 64)
+  explicit HashMap(uint_32_cx initialCapacity = 64, float loadFactor = 0.75)
       : buckets_(initialCapacity),
         initialCapacity_(initialCapacity),
         size_(0),
-        arr_(new HList[initialCapacity]) {
-    maxSize = buckets_ * 0.75;
-    minSize = 0;
-  }
-  ~HashMap() { delete[] arr_; };
+        arr_(new HList[initialCapacity]),
+        maxSize(initialCapacity * 0.75),
+        hash_(KeyHash<K>{}),
+        load_factor_(loadFactor) {}
+  /**
+   * This constructor allows the user to supply their own hash function for the key type
+   * @tparam HashFunction callable that takes a key with type K and returns int
+   * @param hash_function  this function is called with any given key with type K
+   * @param initialCapacity the initial size of the container and the growth size
+   */
+  template <
+      typename HashFunction,
+      typename = std::enable_if_t<std::is_invocable_r_v<int, HashFunction, K>>>
+  explicit HashMap(HashFunction hash_function, uint_32_cx initialCapacity = 64,
+                   float loadFactor = 0.75)
+      : buckets_(initialCapacity),
+        initialCapacity_(initialCapacity),
+        size_(0),
+        arr_(new HList[initialCapacity]),
+        maxSize(initialCapacity * 0.75),
+        hash_(hash_function),
+        load_factor_(loadFactor) {}
   HashMap(const HashMap<K, V>& o)
       : initialCapacity_(o.initialCapacity_),
         size_(o.size_),
         buckets_(o.buckets_),
         hash_(o.hash_),
         maxSize(o.maxSize),
-        minSize(o.minSize) {
+        load_factor_(o.load_factor_) {
     arr_ = new HList[buckets_];
     for (uint_32_cx i = 0; i < buckets_; i++) {
       arr_[i] = o.arr_[i];
     }
+  }
+  HashMap(HashMap<K, V>&& o) noexcept
+      : initialCapacity_(o.initialCapacity_),
+        size_(o.size_),
+        buckets_(o.buckets_),
+        hash_(std::move(o.hash_)),
+        maxSize(o.maxSize),
+        load_factor_(o.load_factor_),
+        arr_(o.arr_) {
+    o.arr_ = nullptr;
+    o.size_ = 0;
   }
   HashMap& operator=(const HashMap<K, V>& o) {
     if (this == &o)
@@ -270,7 +308,6 @@ class HashMap {
     buckets_ = o.buckets_;
     hash_ = o.hash_;
     maxSize = o.maxSize;
-    minSize = o.minSize;
 
     arr_ = new HList[buckets_];
     for (uint_32_cx i = 0; i < buckets_; ++i) {
@@ -279,6 +316,23 @@ class HashMap {
 
     return *this;
   }
+  HashMap& operator=(HashMap<K, V>&& o) noexcept {
+    if (this != &o) {
+      delete[] arr_;
+
+      initialCapacity_ = o.initialCapacity_;
+      size_ = o.size_;
+      buckets_ = o.buckets_;
+      hash_ = std::move(o.hash_);
+      maxSize = o.maxSize;
+      arr_ = o.arr_;
+
+      o.arr_ = nullptr;
+      o.size_ = 0;
+    }
+    return *this;
+  }
+  ~HashMap() { delete[] arr_; };
   /**
    * Retrieves the value for the given key
    * @param key - the key to the value
@@ -295,7 +349,7 @@ class HashMap {
    */
   inline void insert(K key, V val) {
     if (size_ > maxSize) {
-      reHashHigh();
+      reHashBig();
     }
     size_t hash = hash_(key) % buckets_;
     size_ += arr_[hash].replaceAdd(key, val);
@@ -324,16 +378,10 @@ class HashMap {
    */
   [[nodiscard]] uint_32_cx size() const { return size_; }
   /**
-   * The load factor is a %-value of the maximum n_elem the hashmap is allowed tor each before
-   * growing and rehashing
-   * @return the current load factor of the hashmap
-   */
-  float loadFactor() { return 0.75; }
-  /**
    * The initialCapacity the hashmaps started with and expands along
    * @return the initial capacity
    */
-  uint_32_cx initialCapacity() { return initialCapacity_; }
+  uint_32_cx capacity() { return buckets_; }
   /**
    * Clears the hashMap of all its contents
    */
@@ -342,8 +390,7 @@ class HashMap {
     arr_ = new HList[initialCapacity_];
     buckets_ = initialCapacity_;
     size_ = 0;
-    maxSize = buckets_ * 0.75;
-    minSize = 0;
+    maxSize = buckets_ * load_factor_;
   }
   /**
    *
@@ -352,17 +399,28 @@ class HashMap {
    */
   bool contains(K key) {
     size_t hash = hash_(key) % buckets_;
-    if (arr_[hash].size_ == 0) {
-      return false;
-    } else {
-      HashListNode<K, V>* it = arr_[hash_].head_;
-      while (it) {
-        if (it->key_ == key) {
-          return true;
-        }
-        it = it->next_;
+    auto data = arr_[hash].data_;
+    for (uint_fast32_t i = 0; i < BufferLen; i++) {
+      if (data[i].first_ == key) {
+        return true;
       }
-      return false;
+    }
+    HashListNode<K, V>* it = arr_[hash].head_;
+    while (it) {
+      if (it->key_ == key) {
+        return true;
+      }
+      it = it->next_;
+    }
+    return false;
+  }
+  /**
+   * Reduces the underlying array size to something close to the actual data size.
+   * This decreases memory usage.
+   */
+  inline void shrink_to_fit() {
+    if (buckets_ > size_ * 1.5) {
+      reHashSmall();
     }
   }
   static void TEST() {
@@ -384,8 +442,8 @@ class HashMap {
     std::cout << "  Testing erase method..." << std::endl;
     map1.erase(1);
     try {
-      //std::string nodiscard = map1.get(1);
-      //assert(          false);  // We should not reach here, as an exception should be thrown
+      std::string nodiscard = map1.get(1);
+      assert(          false);  // We should not reach here, as an exception should be thrown
     } catch (const std::exception& e) {
       assert(true);
     }
@@ -402,7 +460,7 @@ class HashMap {
     assert(map3[2] == "Two");
 
     // Test n_elem
-    std::cout << "  Testing n_elem method..." << std::endl;
+    std::cout << "  Testing size()..." << std::endl;
     assert(map1.size() == 1);
     assert(map2.size() == 1);
     assert(map3.size() == 1);
@@ -424,6 +482,89 @@ class HashMap {
     }
     for (int i = 0; i < 10000; i++) {
       assert(map4[i] == i * 2);
+    }
+    std::cout << "  Testing contains method..." << std::endl;
+    HashMap<int, std::string> map5;
+    map5.insert(1, "One");
+    map5.insert(2, "Two");
+    assert(map5.contains(1));
+    assert(map5.contains(2));
+    assert(!map5.contains(3));
+
+    // Test shrink_to_fit
+    std::cout << "  Testing shrink_to_fit method..." << std::endl;
+    map5.shrink_to_fit();
+    assert(map5.capacity() == map5.size() * 1.5);
+    HashMap<int, int> map6;
+    for (int i = 0; i < 10000; i++) {
+      map6.insert(i, i * 2);
+    }
+    for (int i = 0; i < 10000; i++) {
+      assert(map6[i] == i * 2);
+    }
+    map6.shrink_to_fit();
+    assert(map6.capacity() == map6.size()*1.5);
+
+    // Test move constructor
+    std::cout << "  Testing move constructor..." << std::endl;
+
+    HashMap<int, std::string> map7(std::move(map3));
+    assert(map7[2] == "Two");
+    assert(map3.size() == 0);
+
+    // Test move assignment operator
+    std::cout << "  Testing move assignment operator..." << std::endl;
+    HashMap<int, std::string> map8;
+    map8 = std::move(map2);
+    assert(map8[2] == "Two");
+    assert(map2.size() == 0);
+
+    // Test destructor
+    std::cout << "  Testing destructor indirectly..." << std::endl;
+    {
+      HashMap<int, std::string> map9;
+      map9.insert(1, "One");
+    } // map9 goes out of scope here, its destructor should be called.
+
+    // Stress test
+    std::cout << "  Stress testing..." << std::endl;
+    HashMap<int, int> map10;
+    for (int i = 0; i < 1000000; i++) {
+      map10.insert(i, i);
+    }
+    for (int i = 0; i < 1000000; i += 2) {
+      map10.erase(i);
+    }
+    for (int i = 1; i < 1000000; i += 2) {
+      assert(map10[i] == i);
+    }
+
+    // Test with empty HashMap
+    std::cout << "  Testing empty HashMap..." << std::endl;
+    HashMap<int, std::string> map11;
+    try {
+      map11.erase(0);  // No keys exist, so an exception should be thrown.
+      assert(false); // We should not reach here.
+    } catch (const std::exception& e) {
+      assert(true); // We should reach here.
+    }
+
+    // Test operator[] with non-existent key
+    std::cout << "  Testing operator[] with non-existent key..." << std::endl;
+    try {
+      std::string nodiscard = map11[3];  // This key does not exist, so an exception should be thrown.
+      assert(false); // We should not reach here.
+    } catch (const std::exception& e) {
+      assert(true); // We should reach here.
+    }
+
+    // Test get with non-existent key
+    std::cout << "  Testing get with non-existent key..." << std::endl;
+    try {
+      std::string nodiscard = map11.get(3);  // This key does not exist, so an exception should be thrown.
+      assert(false); // We should not reach here.
+    } catch (const std::exception& e) {
+      assert(true); // We should reach here.
     }
   }
 };
