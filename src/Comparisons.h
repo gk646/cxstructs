@@ -48,12 +48,13 @@
 
 using namespace cxstructs;
 using namespace cxalgos;
+
 struct Data {
   int arr[100];
   int num;
   std::string string = "aösldkfjöalksdöfklj";
 };
-void compareWithSTL() {
+void compareWithSTL()  {
 
   /* |-----------------------------------------------------|
    * |                       HASHMAPS                      |
@@ -75,7 +76,7 @@ void compareWithSTL() {
       myMap[i];
     }
     for (int i = 0; i < innerCount; i++) {
-      myMap.remove(i);
+      myMap.erase(i);
     }
   }
 
@@ -108,20 +109,6 @@ void compareWithSTL() {
   cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
-      list.emplace_back();
-    }
-    for (int i = 0; i < innerCount; i++) {
-      list[i];
-    }
-    for (int i = 0; i < innerCount; i++) {
-      list.removeAt(0);
-    }
-    for (const auto& num : list) {}
-  }
-  cxutil::printTime<>("cxstructs vec :");
-  cxutil::now();
-  for (int k = 0; k < outerCount; k++) {
-    for (int i = 0; i < innerCount; i++) {
       vector.emplace_back();
     }
     for (int i = 0; i < innerCount; i++) {
@@ -134,7 +121,20 @@ void compareWithSTL() {
   }
   cxutil::printTime<>("std::vector:");
 
-
+  cxutil::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
+      list.emplace_back();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      list[i];
+    }
+    for (int i = 0; i < innerCount; i++) {
+      list.removeAt(0);
+    }
+    for (const auto& num : list) {}
+  }
+  cxutil::printTime<>("cxstructs vec :");
 
   /* |-----------------------------------------------------|
    * |                       STACK                         |
@@ -339,3 +339,8 @@ void compareWithSTL() {
 
   cxutil::printTime("13.9 mil characters searched in:");
 }
+
+void VEC() {
+
+}
+

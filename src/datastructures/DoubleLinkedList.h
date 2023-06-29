@@ -138,7 +138,7 @@ class DoubleLinkedList {
   [[nodiscard]] uint_32_cx size() const { return size_; }
   /**
   * Removes the element at index counting from the start node
-  * @param index  - the index at which to remove the element
+  * @param index  - the index at which to erase the element
   * @return the element removed with this operation
   */
   T removeAt(uint_32_cx index) {

@@ -33,7 +33,7 @@ struct ListNode {
   ListNode* next_;
 
   ListNode(const ListNode<T>& o) : val_(o.val_), next_(nullptr) {}
-  ListNode(const T& value, ListNode<T>* next): val_(value),next_(next){}
+  ListNode(const T& value, ListNode<T>* next) : val_(value), next_(next) {}
   explicit ListNode(T val) : val_(val), next_(nullptr) {}
   T& get() { return val_; }
 };
@@ -51,7 +51,7 @@ using namespace cxhelper;
  * updating the head of the list and the link of a single node.
  * <br><br>
  * However, accessing or searching for specific elements in the list requires potentially <b> traversing the entire list,
- * which is an O(N)</b operation. This makes it less suitable for cases where random access is frequently required.<p>
+ * which is an O(N)</b> operation. This makes it less suitable for cases where random access is frequently required.<p>
  */
 template <typename T>
 class LinkedList {
@@ -125,7 +125,7 @@ class LinkedList {
 
   /**
          * Removes the element at index counting from the start node
-         * @param index  - the index at which to remove the element
+         * @param index  - the index at which to erase the element
          * @return the element removed with this operation
          */
   T removeAt(uint_32_cx index) {
@@ -226,7 +226,7 @@ class LinkedList {
     return os;
   }
 
-/**
+  /**
  * Clears the linked list of all elements
  */
   void clear() {
@@ -243,7 +243,7 @@ class LinkedList {
 
   ListNode<T>& last() { return *end_; }
 
-/**
+  /**
  * @return the current n_elem of this Linked List
  */
   [[nodiscard]] uint_32_cx size() const { return size_; }
@@ -253,20 +253,16 @@ class LinkedList {
     ListNode<T>* current;
 
     explicit Iterator(ListNode<T>* start) : current(start){};
-
     T operator*() { return current->val_; }
-
     Iterator& operator++() {
       if (current) {
         current = current->next_;
       }
       return *this;
     }
-
     bool operator==(const Iterator& other) const {
       return current == other.current;
     }
-
     bool operator!=(const Iterator& other) const {
       return current != other.current;
     }
@@ -404,7 +400,6 @@ class LinkedList {
     assert(list14.size() == 0);
     assert(list14.begin() == list14.end());
 
-
     std::cout << "  Testing removing from empty list..." << std::endl;
     LinkedList<int> list13;
     try {
@@ -414,7 +409,6 @@ class LinkedList {
     } catch (std::out_of_range& e) {
       // Expected behavior
     }
-
 
     std::cout << "  Testing single element list..." << std::endl;
     LinkedList<int> list12;
@@ -427,7 +421,6 @@ class LinkedList {
     ++it12;
     assert(it12 == list12.end());
 
-
     std::cout << "  Testing empty list..." << std::endl;
     LinkedList<int> list30;
     assert(list30.size() == 0);
@@ -439,13 +432,13 @@ class LinkedList {
       assert(false);
     }
 
-
-    std::cout << "  Testing copy constructor and assignment operator..." << std::endl;
+    std::cout << "  Testing copy constructor and assignment operator..."
+              << std::endl;
     LinkedList<int> list7;
     for (int i = 0; i < 5; i++) {
       list7.add(i);
     }
-    LinkedList<int> list8(list7);  // Copy constructor
+    LinkedList<int> list8(list7);   // Copy constructor
     LinkedList<int> list9 = list7;  // Assignment operator
 
     // Check n_elem
@@ -460,8 +453,6 @@ class LinkedList {
       ++it8;
       ++it9;
     }
-
-
   }
 };
 }  // namespace cxstructs
