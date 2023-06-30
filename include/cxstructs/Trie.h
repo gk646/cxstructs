@@ -205,19 +205,6 @@ class Trie {
    * Removes the given word from the trie
    */
   void remove(const std::string& s) { size_--; }
-    std::cout << "TESTING TRIE" << std::endl;
-
-    std::cout << "   Testing insertion..." << std::endl;
-
-    Trie trie;
-    trie.insert("hello");
-
-    std::cout << "   Testing contains..." << std::endl;
-    assert(trie.contains("hello") == true);
-    assert(trie.contains("helloh") == false);
-    std::cout << "   Testing startsWith..." << std::endl;
-    assert(trie.startsWith("he")[0] == "hello");
-  }
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_TRIE_H
