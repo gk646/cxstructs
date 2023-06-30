@@ -521,6 +521,7 @@ class mat {
     std::cout << "  Testing print...\n";
     m20.print();
     m20.print("m20");
+    mat mem_leak(20000, 20000);
   }
 };
 }  // namespace cxstructs

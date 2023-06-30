@@ -41,7 +41,7 @@ namespace cxstructs {
  * This is an implementation of a dynamic array data structure, similar to the <code>ArrayList</code> in Java or <code>std::vector</code> in C++.
  * <br><br>
  * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
- * It provides the capability to index into the list, push elements to the end, and erase elements from the end in a time-efficient manner.</p>
+ * It provides the capability to index into the list, push_back elements to the end, and erase elements from the end in a time-efficient manner.</p>
  */
 template <typename T, uint_16_cx PreAllocBlocks = 1>
 class vec {
@@ -423,8 +423,8 @@ class vec {
   static void TEST() {
     std::cout << "TESTING VEC\n";
 
-    // Test: Testing push and erase
-    std::cout << "   Testing push and erase...\n";
+    // Test: Testing push_back and erase
+    std::cout << "   Testing push_back and erase...\n";
     vec<int> list1;
     list1.push(5);
     list1.push(10);

@@ -13,22 +13,24 @@ Comparisons with standard library counterparts can be run using the Comparison.h
 
 *Relative to the fastest*
 
-|                 |  vector  |  Stack   | HashMap  |
-|:----------------|:--------:|:--------:|:--------:|
-| **std::**       |  *0.81*  |  *0.52*  |  *0.49*  |
-| **cxstructs::** | **1.00** | **1.00** | **1.00** |
+|                 |  vector  |  Stack   | HashMap  | LinkedList |
+|:----------------|:--------:|:--------:|:--------:|:----------:|
+| **std::**       |  *0.81*  |  *0.52*  |  *0.49*  |  **1.00**  |
+| **cxstructs::** | **1.00** | **1.00** | **1.00** |   *0.92*   |
 
 ### Features
 
 - **Custom Allocator** `#define CX_ALLOC`  (recommended)
-- **Large featureset**
+- **Extensive featureset**
     - Each cxstruct contains lots of utility methods
-    - Each cxstruct has an iterator if possible
+    - Each cxstruct has an iterator if applicable
 - **Rich documentation**
     - Algorithms come with full runtime complexity and core principle
     - data structures each have a description header and fully documented methods
 - **Tests**
     - Every algorithm and data structure has lots of tests
+- **Debug Symbols**
+    - assert *(from <cassert>) are used to show out of line access when compiling in Debug
 - **Clarity**
     - the source code is clean to read and nicely formatted
 
@@ -41,6 +43,7 @@ Comparisons with standard library counterparts can be run using the Comparison.h
 - **Vector**(*vec*): *very fast!*
 - **Matrix**(*mat*): *flattened float array, lots of methods*
 - **Row**(*row*): *compile-time non-mutable container*
+- **Pair**(*pair*): static container for two types
 - **Trie**: *limited to ASCII -> very fast!*
 - **HashMap**: *Linear Probing with LinkedLists but buffered with stack arrays ->fast!*
 - **Linked List**:

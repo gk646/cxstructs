@@ -48,16 +48,17 @@ using namespace cxml;
 using namespace cxutil;
 static void test_cxstructs() {
 
-  mat::TEST();  // weird error in debug mode on the operator == for no reason
+
+  mat::TEST();
   LinkedList<int>::TEST();
   Queue<int>::TEST();
-  HashMap<int, int>::TEST();  //potential memory leak
   Stack<int>::TEST();
-  vec<int>::TEST();  // potential memory leak
+  vec<int>::TEST();
   Trie::TEST();
   DoubleLinkedList<int>::TEST();
   DeQueue<int>::TEST();
   //BinaryTree<int>::TEST();
+  HashMap<int, int>::TEST();
 
   std::cout << "\nAll tests passed!" << std::endl;
 }

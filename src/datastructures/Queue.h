@@ -28,12 +28,12 @@
 #include <iostream>
 /**
  * A queue is a datastructure that defaults to appending elements to the end but retrieving them from the beginning.<p>
- * 1,2,3,4 -> push(5) -> 1,2,3,4,5 <p>
+ * 1,2,3,4 -> push_back(5) -> 1,2,3,4,5 <p>
  * 1,2,3,4,5 -> pop() -> 2,3,4,5 <p>
  * Useful for when you need to process data in exactly this order.
  * If you would pop elements from the back it would become a stack.
  *
- * The difference to a DeQueue (double ended queue) is the limitation of only being able to push to the end and pop from the start.
+ * The difference to a DeQueue (double ended queue) is the limitation of only being able to push_back to the end and pop from the start.
  * @tparam T the datatype
  */
 template <typename T>
@@ -55,7 +55,6 @@ class Queue {
     front_ = 0;
     minlen_ = size() / 4 < 32 ? 0 : size() / 4;
   }
-
   void shrink() {
     len_ /= 2;
     auto narr = new T[len_];
@@ -205,8 +204,8 @@ class Queue {
     assert(q1.isEmpty());
     assert(q1.isFull() == false);
 
-    // Test push
-    std::cout << "  Testing push..." << std::endl;
+    // Test push_back
+    std::cout << "  Testing push_back..." << std::endl;
     q1.add(5);
     assert(q1.size() == 1);
     assert(q1.isEmpty() == false);
@@ -248,8 +247,8 @@ class Queue {
     assert(q4.front() == q2.front());
     assert(q4.back() == q2.back());
 
-    // Test multiple push/pop
-    std::cout << "  Testing multiple push/pop..." << std::endl;
+    // Test multiple push_back/pop
+    std::cout << "  Testing multiple push_back/pop..." << std::endl;
     for (int i = 0; i < 1000; i++) {
       q1.add(i);
     }
@@ -267,8 +266,8 @@ class Queue {
     assert(q1.size() == 0);
     assert(q1.isEmpty());
 
-    // Test push after clear
-    std::cout << "  Testing push after clear..." << std::endl;
+    // Test push_back after clear
+    std::cout << "  Testing push_back after clear..." << std::endl;
     for (int i = 0; i < 10; i++) {
       q1.add(i);
     }

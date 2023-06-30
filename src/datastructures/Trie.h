@@ -21,7 +21,8 @@
 #ifndef CXSTRUCTS_TRIE_H
 #define CXSTRUCTS_TRIE_H
 
-#pragma message"|Trie.h| Using non ASCII characters wont throw an error but result in unintentional behaviour!"
+#pragma message "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!"
+
 
 #include <algorithm>
 #include <array>

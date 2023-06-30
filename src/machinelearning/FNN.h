@@ -21,11 +21,11 @@
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 #define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 
-#include "../cxconfig.h"
 #include <algorithm>
 #include <cmath>
 #include <random>
 #include <vector>
+#include "../cxconfig.h"
 
 namespace cxhelper {
 
@@ -131,7 +131,7 @@ struct Layer {
     for (int i = 0; i < out_; i++) {
       w_sum = 0;
       for (int j = 0; j < in_; j++) {
-        w_sum += in(0,j) * weights_(j,i);
+        w_sum += in(0, j) * weights_(j, i);
       }
       w_sums_[i] = w_sum + bias_[i];
       out[i] = func(w_sums_[i]);
@@ -160,8 +160,8 @@ struct Layer {
 class FNN {};
 
 #else
-#pragma message( \
-        "|FNN.h| Using FNN.h without '#define CX_MATRIX', calculations are loop based.")
+#pragma message \
+    "|FNN.h| Using FNN.h without '#define CX_MATRIX', calculations are loop based."
 namespace cxhelper {
 struct Layer {
   float* weights_;
