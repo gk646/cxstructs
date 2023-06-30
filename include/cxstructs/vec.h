@@ -32,7 +32,7 @@
 #include <vector>
 #include "../cxconfig.h"
 
-/*This implementation is well optimized (from what I can tell) and should generally be a bit faster than the std::vector in a lot of use cases
+/*This implementation is well optimized and should generally be a bit faster than the std::vector in a lot of use cases
  * Its using explicit allocator syntax to switch between the default and a custom one
 */
 namespace cxstructs {
@@ -41,7 +41,7 @@ namespace cxstructs {
  * This is an implementation of a dynamic array data structure, similar to the <code>ArrayList</code> in Java or <code>std::vector</code> in C++.
  * <br><br>
  * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
- * It provides the capability to index into the list, push elements to the end, and erase elements from the end in a time-efficient manner.</p>
+ * It provides the capability to index into the list, push_back elements to the end, and erase elements from the end in a time-efficient manner.</p>
  */
 template <typename T, uint_16_cx PreAllocBlocks = 1>
 class vec {
@@ -234,7 +234,7 @@ class vec {
    * Adds a element to the list
    * @param e the element to be added
    */
-  inline void add(const T& e) {
+  inline void push(const T& e) {
     if (size_ == len_) {
       grow();
     }
@@ -419,16 +419,14 @@ class vec {
     return os << "]";
   }
 
-#ifndef DELETE_TESTS
-  static void TEST() {
-    std::cout << "TESTING ARRAY LIST\n";
+    std::cout << "TESTING VEC\n";
 
-    // Test: Testing push and erase
-    std::cout << "   Testing push and erase...\n";
+    // Test: Testing push_back and erase
+    std::cout << "   Testing push_back and erase...\n";
     vec<int> list1;
-    list1.add(5);
-    list1.add(10);
-    list1.add(15);
+    list1.push(5);
+    list1.push(10);
+    list1.push(15);
 
     list1.remove(10);
     assert(list1.size() == 2);
@@ -444,9 +442,9 @@ class vec {
     // Test: Testing iterator
     std::cout << "   Testing iterator...\n";
     list1.clear();
-    list1.add(5);
-    list1.add(10);
-    list1.add(15);
+    list1.push(5);
+    list1.push(10);
+    list1.push(15);
 
     int checkNum = 0;
     for (auto& num : list1) {
@@ -459,7 +457,7 @@ class vec {
     std::cout << "   Testing resizing and shrink_to_fit...\n";
     list1.clear();
     for (int i = 0; i < 10000; i++) {
-      list1.add(i);
+      list1.push(i);
     }
     list1.shrink_to_fit();
     assert(list1.capacity() == list1.size() * 1.5);
@@ -472,7 +470,7 @@ class vec {
     // Test: Testing contains
     std::cout << "   Testing contains...\n";
     list1.clear();
-    list1.add(5);
+    list1.push(5);
     assert(list1.contains(5) == true);
     assert(list1.contains(5, false) == true);
 
@@ -480,11 +478,11 @@ class vec {
     std::cout << "   Testing append...\n";
     list1.clear();
 
-    list1.add(5);
-    list1.add(10);
+    list1.push(5);
+    list1.push(10);
     vec<int> list2;
     for (int i = 0; i < 1000000; i++) {
-      list2.add(i);
+      list2.push(i);
     }
     assert(list2.size() == 1000000);
 
@@ -505,7 +503,7 @@ class vec {
     std::cout << "   Testing copy constructor...\n";
     vec<int> list5(10);
     for (uint_32_cx i = 0; i < 10; i++) {
-      list5.add(i);
+      list5.push(i);
     }
     vec<int> list6 = list5;  // copy constructor
     for (uint_32_cx i = 0; i < 10; i++) {
@@ -537,19 +535,17 @@ class vec {
 
     // Test: Testing pop_back()
     std::cout << "   Testing pop_back()...\n";
-    list9.add(100);
+    list9.push(100);
     assert(list9.pop_back() == 100);
-    std::cout << list9.size() << std::endl;
     assert(list9.size() == 10);
 
     // Test: Checking for memory leaks
     std::cout << "   Checking for memory leaks...\n";
     list1.clear();
     for (int i = 0; i < 10000000; i++) {
-      list1.add(i);
+      list1.push(i);
     }
   }
-#endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_ARRAYLIST_H

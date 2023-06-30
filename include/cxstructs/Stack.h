@@ -283,8 +283,6 @@ class Stack {
   };
   Iterator begin() { return Iterator(arr_); }
   Iterator end() { return Iterator(arr_ + size_); }
-
-  static void TEST() {
     std::cout << "STACK TESTS" << std::endl;
 
     std::cout << "  Testing default constructor..." << std::endl;
@@ -327,7 +325,7 @@ class Stack {
     assert(moveAssignStack.size() == assignStack.size());
     assert(copyStack.empty());
 
-    std::cout << "  Testing push method..." << std::endl;
+    std::cout << "  Testing push_back method..." << std::endl;
     defaultStack.push(1);
     assert(defaultStack.top() == 1);
     assert(defaultStack.size() == 1);

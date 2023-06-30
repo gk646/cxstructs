@@ -113,7 +113,7 @@ namespace cxalgos {
  * swapping random indices of the array and checks after each step weather its sorted. <p>
  * This is obviously very inefficient and should not be used. <p>
  * <b>This implementation is capped at 100000000 swaps</b> <p>
- * Best: O(n), when we get incredibly lucky <p>
+ * Best: O(n), when we at incredibly lucky <p>
  * Average: O((n+1)!), due to permutations <p>
  * Worst: Unbounded, since there's no upper limit on the number of permutations <p>
  * @tparam T type
