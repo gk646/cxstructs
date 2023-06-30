@@ -21,8 +21,8 @@
 #ifndef CXSTRUCTS_TRIE_H
 #define CXSTRUCTS_TRIE_H
 
-#pragma message( \
-        "|Trie.h| Using non ASCII characters wont throw an error but result in unintentional behaviour!")
+#pragma message "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!"
+
 
 #include <algorithm>
 #include <array>
@@ -205,7 +205,6 @@ class Trie {
    * Removes the given word from the trie
    */
   void remove(const std::string& s) { size_--; }
-  static void TEST() {
     std::cout << "TESTING TRIE" << std::endl;
 
     std::cout << "   Testing insertion..." << std::endl;
