@@ -23,6 +23,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <deque>
 #include <functional>
 #include <stdexcept>
 #include <string>
@@ -41,8 +42,8 @@ namespace cxhelper {  // namespace to hide the classes
  */
 template <typename K, typename V>
 struct HashListNode {
-  HashListNode(K& key, V& val)
-      : key_(std::move(key)), value_(std::move(val)), next_(nullptr) {}
+  HashListNode(const K& key, const V& val)
+      : key_(key), value_(val), next_(nullptr) {}
   inline explicit HashListNode(HashListNode<K, V>* o)
       : key_(o->key_), value_(o->value_), next_(nullptr){};
   inline HashListNode(HashListNode<K, V>* o, HashListNode<K, V>* next)
@@ -66,6 +67,28 @@ struct HashLinkedList {
   HListNode* end_;
 
   HashLinkedList() : head_(nullptr), end_(nullptr){};
+  HashLinkedList& operator=(const HashLinkedList& o) {
+    if (this != &o) {
+      std::copy(o.data_, o.data_ + ArrayLength, data_);
+
+      if (o.head_) {
+        head_ = new HashListNode<K, V>(o.head_, o.head_->next_);
+        HashListNode<K, V>* current_new = head_;
+        HashListNode<K, V>* current_old = o.head_->next_;
+
+        while (current_old != nullptr) {
+          current_new->next_ = new HashListNode<K, V>(current_old);
+
+          current_new = current_new->next_;
+          current_old = current_old->next_;
+        }
+        end_ = current_new;
+      } else {
+        head_ = end_ = nullptr;
+      }
+    }
+    return *this;
+  }
   ~HashLinkedList() {
     HListNode* current = head_;
     while (current != nullptr) {
@@ -74,12 +97,13 @@ struct HashLinkedList {
       current = next;
     }
   }
-  V& operator[](const K& key) {
+  inline V& operator[](const K& key) {
     for (uint_16_cx i = 0; i < ArrayLength; i++) {
       if (data_[i].assigned() && data_[i].first() == key) {
         return data_[i].second();
       }
     }
+
     HListNode* current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
@@ -87,12 +111,28 @@ struct HashLinkedList {
       }
       current = current->next_;
     }
-    throw std::exception("no such element");
+    return data_[0].second();
   }
-  inline bool replaceAdd(K& key, V& val) {
+  inline V& at(const K& key) {
+    for (uint_16_cx i = 0; i < ArrayLength; i++) {
+      if (data_[i].assigned() && data_[i].first() == key) {
+        return data_[i].second();
+      }
+    }
+
+    HListNode* current = head_;
+    while (current != nullptr) {
+      if (current->key_ == key) {
+        return current->value_;
+      }
+      current = current->next_;
+    }
+    throw std::out_of_range("no such key");
+  }
+  inline bool replaceAdd(const K& key, const V& val) {
     for (int i = 0; i < ArrayLength; i++) {
       if (data_[i].assigned() && data_[i].first() == key) {
-        data_[i].second() = std::move(val);
+        data_[i].second() = val;
         return false;
       } else if (!data_[i].assigned()) {
         data_[i].assigned() = true;
@@ -105,7 +145,7 @@ struct HashLinkedList {
     HListNode* current = head_;
     while (current != nullptr) {
       if (current->key_ == key) {
-        current->value_ = std::move(val);
+        current->value_ = val;
         return false;
       }
       current = current->next_;
@@ -120,11 +160,11 @@ struct HashLinkedList {
     }
     return true;
   }
-  inline void remove(const K& key) {
+  inline bool remove(const K& key) {
     for (uint_16_cx i = 0; i < ArrayLength; i++) {
       if (data_[i].assigned() && data_[i].first() == key) {
         data_[i].assigned() = false;
-        return;
+        return true;
       }
     }
 
@@ -136,6 +176,7 @@ struct HashLinkedList {
           end_ = nullptr;
         }
         delete toDelete;
+        return true;
       } else {
         HashListNode<K, V>* current = head_;
         while (current->next_ && current->next_->key_ != key) {
@@ -149,22 +190,57 @@ struct HashLinkedList {
             end_ = current;
           }
           delete toDelete;
+          return true;
         }
       }
     }
-    throw  std::exception("no such element");
+    return false;
+    // throw std::out_of_range("no such element");
+  }
+  inline bool contains(const K& key) {
+    for (uint_fast32_t i = 0; i < ArrayLength; i++) {
+      if (data_[i].first() == key) {
+        return true;
+      }
+    }
+    HashListNode<K, V>* it = head_;
+    while (it) {
+      if (it->key_ == key) {
+        return true;
+      }
+      it = it->next_;
+    }
+    return false;
   }
 };
 
 template <typename K>
 struct KeyHash {
-  size_t operator()(const K& key) const { return static_cast<size_t>(key); }
+  size_t operator()(const K& key) const {
+    return static_cast<size_t>(key);
+  }
 };
 
 template <>
 struct KeyHash<std::string> {
   size_t operator()(const std::string& key) const {
     std::hash<std::string> hash_fn;
+    return hash_fn(key);
+  }
+};
+
+template <>
+struct KeyHash<float> {
+  size_t operator()(const float& key) const {
+    std::hash<float> hash_fn;
+    return hash_fn(key);
+  }
+};
+
+template <>
+struct KeyHash<double> {
+  size_t operator()(const double& key) const {
+    std::hash<double> hash_fn;
     return hash_fn(key);
   }
 };
@@ -198,7 +274,7 @@ class HashMap {
   float load_factor_;
 
   HList* arr_;
-  hash_func hash_;
+  hash_func hash_func_;
 
   inline void reHashBig() {
     // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
@@ -208,13 +284,13 @@ class HashMap {
 
     for (int i = 0; i < oldBuckets; i++) {
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
-        size_t hash = hash_(arr_[i].data_[j].first()) % buckets_;
+        size_t hash = hash_func_(arr_[i].data_[j].first()) % buckets_;
         newArr[hash].replaceAdd(arr_[i].data_[j].first(),
                                 arr_[i].data_[j].second());
       }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
-        size_t hash = hash_(current->key_) % buckets_;
+        size_t hash = hash_func_(current->key_) % buckets_;
         newArr[hash].replaceAdd(current->key_, current->value_);
         current = current->next_;
       }
@@ -231,13 +307,13 @@ class HashMap {
 
     for (int i = 0; i < oldBuckets; i++) {
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
-        size_t hash = hash_(arr_[i].data_[j].first()) % buckets_;
+        size_t hash = hash_func_(arr_[i].data_[j].first()) % buckets_;
         newArr[hash].replaceAdd(arr_[i].data_[j].first(),
                                 arr_[i].data_[j].second());
       }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
-        size_t hash = hash_(current->key_) % buckets_;
+        size_t hash = hash_func_(current->key_) % buckets_;
         newArr[hash].replaceAdd(current->key_, current->value_);
         current = current->next_;
       }
@@ -254,7 +330,7 @@ class HashMap {
         size_(0),
         arr_(new HList[initialCapacity]),
         maxSize(initialCapacity * 0.75),
-        hash_(KeyHash<K>{}),
+        hash_func_(KeyHash<K>{}),
         load_factor_(loadFactor) {}
   /**
    * This constructor allows the user to supply their own hash function for the key type
@@ -272,13 +348,13 @@ class HashMap {
         size_(0),
         arr_(new HList[initialCapacity]),
         maxSize(initialCapacity * 0.75),
-        hash_(hash_function),
+        hash_func_(hash_function),
         load_factor_(loadFactor) {}
   HashMap(const HashMap<K, V>& o)
       : initialCapacity_(o.initialCapacity_),
         size_(o.size_),
         buckets_(o.buckets_),
-        hash_(o.hash_),
+        hash_func_(o.hash_func_),
         maxSize(o.maxSize),
         load_factor_(o.load_factor_) {
     arr_ = new HList[buckets_];
@@ -290,7 +366,7 @@ class HashMap {
       : initialCapacity_(o.initialCapacity_),
         size_(o.size_),
         buckets_(o.buckets_),
-        hash_(std::move(o.hash_)),
+        hash_func_(std::move(o.hash_func_)),
         maxSize(o.maxSize),
         load_factor_(o.load_factor_),
         arr_(o.arr_) {
@@ -298,22 +374,20 @@ class HashMap {
     o.size_ = 0;
   }
   HashMap& operator=(const HashMap<K, V>& o) {
-    if (this == &o)
-      return *this;
+    if (this != &o) {
+      delete[] arr_;
 
-    delete[] arr_;
+      initialCapacity_ = o.initialCapacity_;
+      size_ = o.size_;
+      buckets_ = o.buckets_;
+      hash_func_ = o.hash_func_;
+      maxSize = o.maxSize;
 
-    initialCapacity_ = o.initialCapacity_;
-    size_ = o.size_;
-    buckets_ = o.buckets_;
-    hash_ = o.hash_;
-    maxSize = o.maxSize;
-
-    arr_ = new HList[buckets_];
-    for (uint_32_cx i = 0; i < buckets_; ++i) {
-      arr_[i] = o.arr_[i];
+      arr_ = new HList[buckets_];
+      for (uint_32_cx i = 0; i < buckets_; ++i) {
+        arr_[i] = o.arr_[i];
+      }
     }
-
     return *this;
   }
   HashMap& operator=(HashMap<K, V>&& o) noexcept {
@@ -323,7 +397,7 @@ class HashMap {
       initialCapacity_ = o.initialCapacity_;
       size_ = o.size_;
       buckets_ = o.buckets_;
-      hash_ = std::move(o.hash_);
+      hash_func_ = std::move(o.hash_func_);
       maxSize = o.maxSize;
       arr_ = o.arr_;
 
@@ -334,58 +408,57 @@ class HashMap {
   }
   ~HashMap() { delete[] arr_; };
   /**
-   * Retrieves the value for the given key
+   * Retrieves the value for the given key<p>
+   * If the key doesnt exist will return a dummy value
    * @param key - the key to the value
    * @return the value at this key
    */
-  V& operator[](const K& key) const {
-    size_t hash = hash_(key) % buckets_;
-    return arr_[hash][key];
+  inline V& operator[](const K& key) const {
+    return arr_[hash_func_(key) % buckets_][key];
   }
   /**
    * Inserts a key, value pair into the map
    * @param key - the key to access the stored element
    * @param val - the stored value at the given key
    */
-  inline void insert(K key, V val) {
+  inline void insert(const K& key, const V& val) {
     if (size_ > maxSize) {
       reHashBig();
     }
-    size_t hash = hash_(key) % buckets_;
-    size_ += arr_[hash].replaceAdd(key, val);
+    size_ += arr_[hash_func_(key) % buckets_].replaceAdd(key, val);
   }
   /**
-   * Retrieves the value for the given key
+   * Retrieves the value for the given key <p>
+   * <b>Throws an std::out_of_range if the key doesnt exist</b>
    * @param key - the key to the value
    * @return the value at this key
    */
-  [[nodiscard]] V& get(const K key) const {
-    size_t hash = hash_(key) % buckets_;
-    return arr_[hash][key];
+  [[nodiscard]] inline V& at(const K key) const {
+    return arr_[hash_func_(key) % buckets_].at(key);
   }
   /**
    * Removes this key, value pair from the hashmap
    * @param key - they key to be removed
    */
-  void erase(const K& key) {
-    size_t hash = hash_(key) % buckets_;
-    arr_[hash].remove(key);
-    size_--;
+  inline void erase(const K& key) {
+    size_t hash = hash_func_(key) % buckets_;
+    size_ -= arr_[hash].remove(key);
+    assert(size_ > 0 && "out of bounds");
   }
   /**
    *
    * @return the current n_elem of the hashMap
    */
-  [[nodiscard]] uint_32_cx size() const { return size_; }
+  [[nodiscard]] inline uint_32_cx size() const { return size_; }
   /**
    * The initialCapacity the hashmaps started with and expands along
    * @return the initial capacity
    */
-  uint_32_cx capacity() { return buckets_; }
+  [[nodiscard]] inline uint_32_cx capacity() const { return buckets_; }
   /**
    * Clears the hashMap of all its contents
    */
-  void clear() {
+  inline void clear() {
     delete[] arr_;
     arr_ = new HList[initialCapacity_];
     buckets_ = initialCapacity_;
@@ -393,26 +466,13 @@ class HashMap {
     maxSize = buckets_ * load_factor_;
   }
   /**
-   *
-   * @param key
-   * @return
-   */
-  bool contains(K key) {
-    size_t hash = hash_(key) % buckets_;
-    auto data = arr_[hash].data_;
-    for (uint_fast32_t i = 0; i < BufferLen; i++) {
-      if (data[i].first() == key) {
-        return true;
-      }
-    }
-    HashListNode<K, V>* it = arr_[hash].head_;
-    while (it) {
-      if (it->key_ == key) {
-        return true;
-      }
-      it = it->next_;
-    }
-    return false;
+ * @brief Checks if the HashMap contains a specific key.
+ *
+ * @param key The key to search for in the HashMap.
+ * @return true if the key is present in the HashMap, false otherwise.
+ */
+  inline bool contains(const K& key) {
+    return arr_[hash_func_(key) % buckets_].contains(key);
   }
   /**
    * Reduces the underlying array size to something close to the actual data size.
@@ -423,6 +483,14 @@ class HashMap {
       reHashSmall();
     }
   }
+  class ValueIterator {
+    std::deque<V> values_;
+    explicit ValueIterator(HList* h_list, uint_32_cx size)
+        : values_(){
+
+          };
+  };
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "HASHMAP TESTS" << std::endl;
     // Test insert and operator[key]
@@ -442,8 +510,8 @@ class HashMap {
     std::cout << "  Testing erase method..." << std::endl;
     map1.erase(1);
     try {
-      std::string nodiscard = map1.get(1);
-      assert(          false);  // We should not reach here, as an exception should be thrown
+      std::string nodiscard = map1.at(1);
+      assert(false);
     } catch (const std::exception& e) {
       assert(true);
     }
@@ -458,19 +526,20 @@ class HashMap {
     HashMap<int, std::string> map3;
     map3 = map1;
     assert(map3[2] == "Two");
-
+    std::cout << map3[2] << std::endl;
     // Test n_elem
     std::cout << "  Testing size()..." << std::endl;
     assert(map1.size() == 1);
     assert(map2.size() == 1);
     assert(map3.size() == 1);
 
-    // Test get
-    std::cout << "  Testing get method..." << std::endl;
-    assert(map1.get(2) == "Two");
-
+    // Test at
+    std::cout << "  Testing at method..." << std::endl;
+    assert(map1.at(2) == "Two");
+    std::cout << map3[2] << std::endl;
     // Test clear
     std::cout << "  Testing clear method..." << std::endl;
+    std::cout << map3[2] << std::endl;
     map1.clear();
     assert(map1.size() == 0);
 
@@ -503,11 +572,10 @@ class HashMap {
       assert(map6[i] == i * 2);
     }
     map6.shrink_to_fit();
-    assert(map6.capacity() == map6.size()*1.5);
+    assert(map6.capacity() == map6.size() * 1.5);
 
     // Test move constructor
     std::cout << "  Testing move constructor..." << std::endl;
-
     HashMap<int, std::string> map7(std::move(map3));
     assert(map7[2] == "Two");
     assert(map3.size() == 0);
@@ -524,7 +592,7 @@ class HashMap {
     {
       HashMap<int, std::string> map9;
       map9.insert(1, "One");
-    } // map9 goes out of scope here, its destructor should be called.
+    }  // map9 goes out of scope here, its destructor should be called.
 
     // Stress test
     std::cout << "  Stress testing..." << std::endl;
@@ -538,35 +606,17 @@ class HashMap {
     for (int i = 1; i < 1000000; i += 2) {
       assert(map10[i] == i);
     }
-
-    // Test with empty HashMap
-    std::cout << "  Testing empty HashMap..." << std::endl;
     HashMap<int, std::string> map11;
+    // Test at with non-existent key
+    std::cout << "  Testing at with non-existent key..." << std::endl;
     try {
-      map11.erase(0);  // No keys exist, so an exception should be thrown.
-      assert(false); // We should not reach here.
+      std::string nodiscard = map11.at(3);
+      assert(false);
     } catch (const std::exception& e) {
-      assert(true); // We should reach here.
-    }
-
-    // Test operator[] with non-existent key
-    std::cout << "  Testing operator[] with non-existent key..." << std::endl;
-    try {
-      std::string nodiscard = map11[3];  // This key does not exist, so an exception should be thrown.
-      assert(false); // We should not reach here.
-    } catch (const std::exception& e) {
-      assert(true); // We should reach here.
-    }
-
-    // Test get with non-existent key
-    std::cout << "  Testing get with non-existent key..." << std::endl;
-    try {
-      std::string nodiscard = map11.get(3);  // This key does not exist, so an exception should be thrown.
-      assert(false); // We should not reach here.
-    } catch (const std::exception& e) {
-      assert(true); // We should reach here.
+      assert(true);
     }
   }
+#endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_HASHMAP_H

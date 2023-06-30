@@ -24,7 +24,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-#include <stack>
+#include <deque>
 #include <stdexcept>
 #include <vector>
 #include "../cxconfig.h"
@@ -198,10 +198,10 @@ class BinaryTree {
   uint_32_cx maxDepth() { return subTreeDepth(this); }
 
   class InOrderIterator {
-    std::stack<TreeNode<T>*> nodes;
+    std::deque<TreeNode<T>*> nodes;
 
    public:
-    InOrderIterator(TreeNode<T>* root) { pushLeft(root); }
+    explicit InOrderIterator(TreeNode<T>* root) { pushLeft(root); }
 
     void pushLeft(TreeNode<T>* node) {
       while (node) {
@@ -233,6 +233,7 @@ class BinaryTree {
    */
   InOrderIterator end() { return InOrderIterator(nullptr); }
 
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     BinaryTree<int> tree;
 
@@ -275,6 +276,7 @@ class BinaryTree {
 
     std::cout << "All tests passed!" << std::endl;
   }
+#endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_BINARYTREE_H

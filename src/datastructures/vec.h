@@ -419,7 +419,7 @@ class vec {
     return os << "]";
   }
 
-#ifndef DELETE_TESTS
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "TESTING VEC\n";
 

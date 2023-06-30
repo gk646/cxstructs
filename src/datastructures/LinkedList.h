@@ -32,10 +32,10 @@ struct ListNode {
   T val_;
   ListNode* next_;
 
-  ListNode(const ListNode<T>& o) : val_(o.val_), next_(nullptr) {}
-  ListNode(const T& value, ListNode<T>* next) : val_(value), next_(next) {}
-  explicit ListNode(T val) : val_(val), next_(nullptr) {}
-  T& get() { return val_; }
+  ListNode(const ListNode& o) : val_(o.val_), next_(nullptr) {}
+  ListNode(const T& val, ListNode* next) : val_(val), next_(next) {}
+  explicit ListNode(const T& val) : val_(val), next_(nullptr) {}
+  inline T& get() const { return val_; }
 };
 
 }  // namespace cxhelper
@@ -55,22 +55,23 @@ using namespace cxhelper;
  */
 template <typename T>
 class LinkedList {
-  ListNode<T>* head_;
+  using Node = ListNode<T>;
+
   uint_32_cx size_;
-  ListNode<T>* end_;
+  Node* head_;
+  Node* end_;
 
  public:
   LinkedList() : head_(nullptr), end_(nullptr), size_(0){};
-  ~LinkedList() { clear(); }
   LinkedList(const LinkedList<T>& o) : size_(o.size_) {
     if (o.head_) {
-      head_ = new ListNode<T>(o.head_->val_, o.head_->next_);
+      head_ = new Node(o.head_->val_, o.head_->next_);
 
-      ListNode<T>* current_new = head_;
-      ListNode<T>* current_old = o.head_->next_;
+      Node* current_new = head_;
+      Node* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
-        current_new->next_ = new ListNode<T>(current_old->val_);
+        current_new->next_ = new Node(current_old->val_);
 
         current_new = current_new->next_;
         current_old = current_old->next_;
@@ -88,13 +89,13 @@ class LinkedList {
     size_ = o.size_;
 
     if (o.head_) {
-      head_ = new ListNode<T>(o.head_->val_);
+      head_ = new Node(o.head_->val_);
 
-      ListNode<T>* current_new = head_;
-      ListNode<T>* current_old = o.head_->next_;
+      Node* current_new = head_;
+      Node* current_old = o.head_->next_;
 
       while (current_old != nullptr) {
-        current_new->next_ = new ListNode<T>(current_old->val_);
+        current_new->next_ = new Node(current_old->val_);
 
         current_new = current_new->next_;
         current_old = current_old->next_;
@@ -107,32 +108,38 @@ class LinkedList {
     }
     return *this;
   }
-
+  ~LinkedList() {
+    Node* current = head_;
+    while (current != nullptr) {
+      Node* next = current->next_;
+      delete current;
+      current = next;
+    }
+  }
   /**
-         * Adds a new element to the end of the list
-         * @param val - the element to be added
-         */
-  void add(T val) {
+* Adds a new element to the end of the list
+* @param val - the element to be added
+*/
+  void push(const T& val) {
     if (!head_) {
-      head_ = new ListNode<T>(val);
+      head_ = new Node(val);
       end_ = head_;
     } else {
-      end_->next_ = new ListNode<T>(val);
+      end_->next_ = new Node(val);
       end_ = end_->next_;
     }
     size_++;
   }
 
   /**
-         * Removes the element at index counting from the start node
-         * @param index  - the index at which to erase the element
-         * @return the element removed with this operation
-         */
+  * Removes the element at index counting from the start node
+ * @param index  - the index at which to erase the element
+ * @return the element removed with this operation
+  */
   T removeAt(uint_32_cx index) {
-    if (index >= size_)
-      throw std::out_of_range("index too big");
+    assert(index < size_ && "index too big");
 
-    ListNode<T>* toDelete;
+    Node* toDelete;
     T val;
     if (index == 0) {
       toDelete = head_;
@@ -141,7 +148,7 @@ class LinkedList {
         end_ = nullptr;
       }
     } else {
-      ListNode<T>* previous = head_;
+      Node* previous = head_;
       for (uint_32_cx i = 0; i < index - 1; ++i) {
         previous = previous->next_;
       }
@@ -160,79 +167,78 @@ class LinkedList {
   }
 
   /**
-         * Removes the last element of this LinkedList
-         *
-         */
-  void remove() {
-    if (!end_)
-      throw std::out_of_range("list is empty");
+ * Removes the last element of this LinkedList<p>
+   * <b>This operation is very slow (O(n) runtime).</b>
+   * In a Singly Linked List each node doesnt have access to the previous
+   * so in order to delete the last it has to iterate over all nodes to update the pointers.
+  */
+  inline void pop() {
+    assert(!end_ && "list is empty");
 
-    ListNode<T>* toDelete = end_;
+    Node* toDelete = end_;
 
     if (end_ == head_) {
       head_ = nullptr;
       end_ = nullptr;
+      size_--;
     } else {
-      ListNode<T>* previous = head_;
+      Node* previous = head_;
       while (previous->next_ != end_) {
         previous = previous->next_;
       }
       previous->next_ = nullptr;
       end_ = previous;
+      size_--;
     }
-    --size_;
+
     delete toDelete;
+  }
+  /**
+   * @return a reference to the last element
+   */
+  [[nodiscard]] inline T& back() const {
+    assert(end_ && "no such element");
+    return end_->get();
   }
   /**
    * Removes the first node with the given value
    * @param val - the value to be matched
    */
-  void remove(T val) {
-    if (!head_)
-      throw std::out_of_range("list is empty");
+  inline void remove(T val) {
+    assert(!head_ && "list is empty");
 
     if (head_->val_ == val) {
-      ListNode<T>* toDelete = head_;
+      Node* toDelete = head_;
       head_ = head_->next_;
       if (!head_) {
         end_ = nullptr;
       }
       delete toDelete;
-      --size_;
+      size_--;
     } else {
-      ListNode<T>* current = head_;
+      Node* current = head_;
       while (current->next_ && current->next_->val_ != val) {
         current = current->next_;
       }
 
       if (current->next_) {
-        ListNode<T>* toDelete = current->next_;
+        Node* toDelete = current->next_;
         current->next_ = toDelete->next_;
         if (toDelete == end_) {
           end_ = current;
         }
         delete toDelete;
-        --size_;
+        size_--;
       }
     }
   }
-
-  friend std::ostream& operator<<(std::ostream& os, const LinkedList<T>& q) {
-    ListNode<T>* current = q.head_;
-    while (current != nullptr) {
-      os << current->val_ << "->";
-      current = current->next_;
-    }
-    return os;
-  }
-
   /**
  * Clears the linked list of all elements
  */
-  void clear() {
-    ListNode<T>* current = head_;
+  inline void clear() {
+    Node* current = head_;
     while (current != nullptr) {
-      ListNode<T>* next = current->next_;
+      Node* next = current->next_;
       delete current;
       current = next;
     }
@@ -240,20 +246,16 @@ class LinkedList {
     end_ = nullptr;
     size_ = 0;
   }
-
-  ListNode<T>& last() { return *end_; }
-
   /**
- * @return the current n_elem of this Linked List
+ * @return the current size of this Linked List
  */
-  [[nodiscard]] uint_32_cx size() const { return size_; }
+  [[nodiscard]] inline uint_32_cx size() const { return size_; }
 
   class Iterator {
    public:
-    ListNode<T>* current;
-
-    explicit Iterator(ListNode<T>* start) : current(start){};
-    T operator*() { return current->val_; }
+    Node* current;
+    explicit Iterator(Node* start) : current(start){};
+    T& operator*() { return current->val_; }
     Iterator& operator++() {
       if (current) {
         current = current->next_;
@@ -269,15 +271,22 @@ class LinkedList {
   };
 
   Iterator begin() { return Iterator(head_); }
-
   Iterator end() { return Iterator(nullptr); }
 
+  friend std::ostream& operator<<(std::ostream& os, const LinkedList<T>& q) {
+    Node* current = q.head_;
+    while (current != nullptr) {
+      os << current->val_ << "->";
+      current = current->next_;
+    }
+    return os;
+  }
   static void TEST() {
     std::cout << "LINKED LIST TESTS" << std::endl;
     LinkedList<int> list1;
-    list1.add(5);
-    list1.add(10);
-    list1.add(15);
+    list1.push(5);
+    list1.push(10);
+    list1.push(15);
 
     // Test Copy Constructor
     LinkedList<int> list5(list1);
@@ -302,15 +311,15 @@ class LinkedList {
     assert(list1.size() == list6.size());
 
     LinkedList<int> list;
-    list.add(1);
+    list.push(1);
     assert(list.size() == 1);
 
-    list.add(2);
+    list.push(2);
     assert(list.size() == 2);
     std::cout << "  Testing copy constructor..." << std::endl;
     list1.clear();
-    list1.add(5);
-    list1.add(10);
+    list1.push(5);
+    list1.push(10);
     auto list10 = list1;
 
     num = 5;
@@ -332,9 +341,9 @@ class LinkedList {
     std::cout << "  Testing removal..." << std::endl;
     LinkedList<int> list2;
 
-    list2.add(1);
-    list2.add(2);
-    list2.add(3);
+    list2.push(1);
+    list2.push(2);
+    list2.push(3);
 
     auto removedNode = list2.removeAt(1);
     assert(removedNode == 2);
@@ -354,9 +363,9 @@ class LinkedList {
     std::cout << "  Testing clear..." << std::endl;
     LinkedList<int> list3;
 
-    list3.add(1);
-    list3.add(2);
-    list3.add(3);
+    list3.push(1);
+    list3.push(2);
+    list3.push(3);
     list3.clear();
 
     assert(list3.size() == 0);
@@ -368,7 +377,7 @@ class LinkedList {
     for (int k = 0; k < 100; k++) {
       LinkedList<int> list4;
       for (int i = 0; i < LARGE_NUMBER; i++) {
-        list4.add(i);
+        list4.push(i);
       }
       assert(list4.size() == LARGE_NUMBER);
       for (int i = 0; i < LARGE_NUMBER; i++) {
@@ -380,21 +389,21 @@ class LinkedList {
     std::cout << "  Testing last removal..." << std::endl;
 
     LinkedList<int> list4;
-    list4.add(5);
-    list4.add(10);
+    list4.push(5);
+    list4.push(10);
     assert(list4.last().get() == 10);
-    list4.remove();
+    list4.pop();
     assert(list4.last().get() == 5);
-    list4.remove();
+    list4.pop();
     try {
-      list4.remove();
+      list4.pop();
       assert(false);
     } catch (const std::exception& e) {
       assert(true);
     }
     std::cout << "  Testing removing from single element list..." << std::endl;
     LinkedList<int> list14;
-    list14.add(1);
+    list14.push(1);
     int removedValue = list14.removeAt(0);
     assert(removedValue == 1);
     assert(list14.size() == 0);
@@ -412,7 +421,7 @@ class LinkedList {
 
     std::cout << "  Testing single element list..." << std::endl;
     LinkedList<int> list12;
-    list12.add(1);
+    list12.push(1);
     assert(list12.size() == 1);
 
     // Testing iterator over single-element list
@@ -436,7 +445,7 @@ class LinkedList {
               << std::endl;
     LinkedList<int> list7;
     for (int i = 0; i < 5; i++) {
-      list7.add(i);
+      list7.push(i);
     }
     LinkedList<int> list8(list7);   // Copy constructor
     LinkedList<int> list9 = list7;  // Assignment operator

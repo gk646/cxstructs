@@ -283,7 +283,7 @@ class Stack {
   };
   Iterator begin() { return Iterator(arr_); }
   Iterator end() { return Iterator(arr_ + size_); }
-
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "STACK TESTS" << std::endl;
 
@@ -356,6 +356,7 @@ class Stack {
       defaultStack.push(i);
     }
   }
+#endif
 };
 }  // namespace cxstructs
 

@@ -131,13 +131,13 @@ class Queue {
   }
   /**
    * Lets you peek at the front most element <p>
-   * The position at which elements get removed
+   * The position at which elements at removed
    * @return a reference to the front element
    */
   [[nodiscard]] inline T& front() const { return arr_[front_]; }
   /**
    * Lets you peek at the last element <p>
-   * The position at which elements get added
+   * The position at which elements at added
    * @return a reference to the last element
    */
   [[nodiscard]] inline T& back() const {
@@ -195,7 +195,7 @@ class Queue {
   };
   Iterator begin() { return Iterator(arr_ + front_); }
   Iterator end() { return Iterator(arr_ + back_); }
-
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "QUEUE TESTS" << std::endl;
     // Test default constructor
@@ -281,5 +281,6 @@ class Queue {
       assert(num == check++);
     }
   }
+#endif
 };
 #endif  // CXSTRUCTS_QUEUE_H
