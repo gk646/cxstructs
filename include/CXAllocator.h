@@ -23,6 +23,7 @@
 //#pragma message( "|CXAllocator.h| The custom allocator will preallocate memory when constructing the datastructure to speed up general use. Don't frequently create new datastructures!")
 
 #include <iostream>
+#include <vector>
 #include <memory>
 #include <stack>
 #include "cxconfig.h"
