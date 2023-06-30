@@ -25,6 +25,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <numeric>
 #include <random>
 #include <vector>
@@ -89,14 +90,14 @@ void merge_sort_internal(T* arr, uint_32_cx low, uint_32_cx high) {
 }
 template <typename T>
 bool bogo_sort_internal(T* arr, uint_32_cx len, bool ascending) {
-  if(ascending){
+  if (ascending) {
     for (uint_32_cx j = 1; j < len; j++) {
       if (arr[j] < arr[j - 1]) {
         return false;
       }
     }
     return true;
-  }else{
+  } else {
     for (uint_32_cx j = 1; j < len; j++) {
       if (arr[j] > arr[j - 1]) {
         return false;
@@ -251,7 +252,7 @@ template <typename T>
 void heapSort(T* arr, uint_32_cx len, bool ascending) {}
 
 }  // namespace cxalgos
-
+#ifndef CX_DELETE_TESTS
 namespace cxtests {
 std::vector<int> generate_shuffled_vector(int size) {
   std::vector<int> vec(size);
@@ -259,7 +260,6 @@ std::vector<int> generate_shuffled_vector(int size) {
   std::shuffle(vec.begin(), vec.end(), std::mt19937{std::random_device{}()});
   return vec;
 }
-
 void assert_sorted(std::vector<int>& vec, bool ascending = true) {
   for (size_t i = 1; i < vec.size(); i++) {
     if (ascending) {
@@ -270,7 +270,6 @@ void assert_sorted(std::vector<int>& vec, bool ascending = true) {
   }
 }
 using namespace cxalgos;
-
 static void TEST_SORTING() {
   const int SIZE = 10000;
 
@@ -300,5 +299,5 @@ static void TEST_SORTING() {
   assert_sorted(bogo_vec);
 }
 }  // namespace cxtests
-
+#endif
 #endif  // CXSTRUCTS_SORTING_H

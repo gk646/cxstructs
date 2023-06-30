@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <cstdint>
 #include "../cxconfig.h"
 
@@ -250,7 +251,7 @@ class DeQueue {
   };
   Iterator begin() { return Iterator(arr_ + mid_ - front_ + 1); }
   Iterator end() { return Iterator(arr_+ mid_ + back_); }
-
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "TESTING DEQUEUE" << std::endl;
 
@@ -320,6 +321,7 @@ class DeQueue {
       assert(num == check++);
     }
   }
+#endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_

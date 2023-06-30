@@ -25,6 +25,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include "cxconfig.h"
 
 namespace cxutil {
 using namespace std;  //std:: makes this code unreadable

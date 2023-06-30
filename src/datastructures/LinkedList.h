@@ -26,6 +26,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include "../cxconfig.h"
 
 namespace cxhelper {
 template <typename T>
@@ -259,6 +260,7 @@ class LinkedList {
     }
     return os;
   }
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "LINKED LIST TESTS" << std::endl;
     LinkedList<int> list1;
@@ -437,6 +439,7 @@ class LinkedList {
       ++it9;
     }
   }
+#endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_LINKEDLIST_H

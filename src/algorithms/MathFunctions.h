@@ -26,6 +26,7 @@
 #include <iostream>
 #include <numbers>
 #include <type_traits>
+#include "../cxconfig.h"
 
 namespace cxalgos {
 
@@ -101,7 +102,7 @@ double integral_arc_length(Function fx, double a, double b,
   return arc_length;
 }
 }  // namespace cxalgos
-
+#ifndef CX_DELETE_TESTS
 namespace cxtests {
 using namespace cxalgos;
 static void TEST_MATH() {
@@ -112,9 +113,10 @@ static void TEST_MATH() {
 
   assert(volume - std::numbers::pi * 8 < 0.001);
   auto length = integral_arc_length(
-      [](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); }, 0,
-      std::sqrt(8));
+      [](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
+      0, std::sqrt(8));
   std::cout << length << std::endl;
 }
 }  // namespace cxtests
+#endif
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_

@@ -1,13 +1,12 @@
-## Datastructures, Algorithms and Utilities Collection in C++
+## Datastructures, Algorithms and Utilities library in C++
 
-A small (but growing) header only collection of selected datastructures and algorithms.
-This collection is primarily built for educational purposes as the implementations are easy to read and well documented.
+A medium-sized header only library of selected datastructures, algorithms, machinelearning topics and utilities. This collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read and well documented
 
-That said, getting more experience iam aiming for reference type implementations in both speed and interface.
+While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of efficiency and interface.
 
-To use these, simply include the **include directory**, which contains only finalized and tested headers.
+**To use these, simply include the *include directory*, which contains only finalized and tested headers.**
 
-Comparisons with standard library counterparts can be run using the Comparison.h header
+**Comparisons with standard library counterparts can be run using the Comparison.h header**
 
 ### Speed Comparison
 
@@ -20,18 +19,20 @@ Comparisons with standard library counterparts can be run using the Comparison.h
 
 ### Features
 
-- **Custom Allocator** `#define CX_ALLOC`  (recommended)
-- **Extensive featureset**
-    - Each cxstruct contains lots of utility methods
-    - Each cxstruct has an iterator if applicable
-- **Rich documentation**
-    - Algorithms come with full runtime complexity and core principle
-    - data structures each have a description header and fully documented methods
-- **Tests**
-    - Every algorithm and data structure has lots of tests
+- **Performance**
+  - every cxstruct is natively implemented (*no adapters*) at the *lowest* level
+- **Custom Allocator**
+  - with `#define CX_ALLOC` allows cxstructs to use the faster custom pool-allocator
+- **Standard Interface**
+    - *cxstructs* follow a similar interface to stl containers
+    - but each *cxstruct* has added utility methods
+- **Documentation**
+    - all *cxstructs* and *cxalgos* come with full method and class docs
+- **Testing**
+    - every has lots of tests (removed in *include*)
 - **Debug Symbols**
     - assert *(from <cassert>) are used to show out of line access when compiling in Debug
-- **Clarity**
+- **Accessibility**
     - the source code is clean to read and nicely formatted
 
 ---
@@ -40,32 +41,33 @@ Comparisons with standard library counterparts can be run using the Comparison.h
 
 #### Data Structures
 
-- **Vector**(*vec*): *very fast!*
+- **Vector**(*vec*): *standard efficient vector*
 - **Matrix**(*mat*): *flattened float array, lots of methods*
-- **Row**(*row*): *compile-time non-mutable container*
-- **Pair**(*pair*): static container for two types
-- **Trie**: *limited to ASCII -> very fast!*
-- **HashMap**: *Linear Probing with LinkedLists but buffered with stack arrays ->fast!*
-- **Linked List**:
+- **Row**(*row*): *compile-time sized, non-mutable container*
+- **Pair**(*pair*): *static container for two types*
+- **Trie**: *limited to ASCII (128)*
+- **Stack**:
+- **HashMap**: *linear Probing with LinkedLists but buffered with static arrays*
+- **HashSet**: *linear Probing with LinkedLists but buffered with static arrays*
+- **Linked List**: *allows for O(1) pop()*
 - **Double Linked List**:
 - **Queue**:
 - **DeQueue**: *using centered array*
-- **Stack**:
 - **Binary Tree**:
-- **Geometry**: Rectangle, Circle
+- **Geometry**(*Rectangle, Circle*): *standard efficient 2D forms*
 
 #### Machine Learning
 
 ###### *(NN = Neural Network)*
 
-- **FNN**(*Feed-forward*) *first implementation using matrices, second using traditional loops*
+- **FNN**: *implemented using matrices (*default*) and without, switch:`#define CX_NO_MATRIX`*
 
 #### Algorithms
 
-- **Sorting**: QuickSort, MergeSort, Bubblesort, Bogosort, Selectionsort
-- **Search**: Binary Search *(recursive and non-recursive)*
-- **Graph Traversal**: DepthFirstSearch *(on 2d-vector as adjacency matrix)*
-- **MathFunctions**: Integral,
+- **Sorting**: *QuickSort, MergeSort, Bubblesort, Bogosort, Selectionsort*
+- **Search**: *Binary Search (recursive and non-recursive),*
+- **Graph Traversal**: *DepthFirstSearch (on 2d-vector as adjacency matrix),*
+- **MathFunctions**: *Integrals,*
 
 #### Utilities
 
@@ -86,7 +88,7 @@ Comparisons with standard library counterparts can be run using the Comparison.h
     - *`cxhelper`is used to hide helper methods or structs*
     - *`cxtests` used to hide tests*
 
-#### config.h
+#### cxconfig.h
 ```cpp
 typedef uint_fast32_t uint_32_cx;
 typedef int_fast32_t int_32_cx;
@@ -95,4 +97,4 @@ typedef int_fast32_t int_32_cx;
 #### macros
 
 - `#define CX_ALLOC` to use the custom allocator (applies globally)
-
+- `#define CX_NO_MATRIX`to use the FNN without matrix calculations

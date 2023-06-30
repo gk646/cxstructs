@@ -238,7 +238,7 @@ class DoubleLinkedList {
 
   ReverseIterator begin_re() { return ReverseIterator(end_); }
   ReverseIterator end_re() { return ReverseIterator(nullptr); }
-
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "DOUBLE LINKED LIST TESTS" << std::endl;
     DoubleLinkedList<int> list1;
@@ -436,6 +436,7 @@ class DoubleLinkedList {
     assert(list14.size() == 0);
     assert(list14.begin() == list14.end());
   }
+#endif
 };
 }  // namespace cxstructs
 

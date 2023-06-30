@@ -20,6 +20,7 @@
 #define FINISHED
 
 #include <cassert>
+#include <iostream>
 #include <vector>
 #include "../cxconfig.h"
 
@@ -52,7 +53,7 @@ int depth_first_search(std::vector<std::vector<T>>& mat, int nodeIndex,
   return count;
 }
 }  // namespace cxalgos
-
+#ifndef CX_DELETE_TESTS
 namespace cxtests {  // namespace cxtests
 using namespace cxalgos;
 static void TEST_DFS() {
@@ -70,5 +71,6 @@ static void TEST_DFS() {
   assert(reachableNodes == 5);
 }
 }  // namespace cxtests
+#endif
 
 #endif  // CXSTRUCTS_DFS_H
