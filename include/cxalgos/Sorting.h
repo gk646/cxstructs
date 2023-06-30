@@ -25,6 +25,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <numeric>
 #include <random>
 #include <vector>
@@ -89,14 +90,14 @@ void merge_sort_internal(T* arr, uint_32_cx low, uint_32_cx high) {
 }
 template <typename T>
 bool bogo_sort_internal(T* arr, uint_32_cx len, bool ascending) {
-  if(ascending){
+  if (ascending) {
     for (uint_32_cx j = 1; j < len; j++) {
       if (arr[j] < arr[j - 1]) {
         return false;
       }
     }
     return true;
-  }else{
+  } else {
     for (uint_32_cx j = 1; j < len; j++) {
       if (arr[j] > arr[j - 1]) {
         return false;
@@ -251,54 +252,4 @@ template <typename T>
 void heapSort(T* arr, uint_32_cx len, bool ascending) {}
 
 }  // namespace cxalgos
-
-namespace cxtests {
-std::vector<int> generate_shuffled_vector(int size) {
-  std::vector<int> vec(size);
-  std::iota(vec.begin(), vec.end(), 1);  // fill with increasing numbers
-  std::shuffle(vec.begin(), vec.end(), std::mt19937{std::random_device{}()});
-  return vec;
-}
-
-void assert_sorted(std::vector<int>& vec, bool ascending = true) {
-  for (size_t i = 1; i < vec.size(); i++) {
-    if (ascending) {
-      assert(vec[i - 1] <= vec[i]);
-    } else {
-      assert(vec[i - 1] >= vec[i]);
-    }
-  }
-}
-using namespace cxalgos;
-
-static void TEST_SORTING() {
-  const int SIZE = 10000;
-
-  std::cout << "TESTING BUBBLESORT" << std::endl;
-  std::vector<int> bubble_vec = generate_shuffled_vector(SIZE);
-  bubble_sort(bubble_vec.data(), SIZE);
-  assert_sorted(bubble_vec);
-
-  std::cout << "TESTING QUICKSORT" << std::endl;
-  std::vector<int> quick_vec = generate_shuffled_vector(SIZE);
-  quick_sort(quick_vec.data(), SIZE);
-  assert_sorted(quick_vec);
-
-  std::cout << "TESTING SELECTIONSORT" << std::endl;
-  std::vector<int> selection_vec = generate_shuffled_vector(SIZE);
-  selection_sort(selection_vec.data(), SIZE);
-  assert_sorted(selection_vec);
-
-  std::cout << "TESTING MERGE SORT" << std::endl;
-  std::vector<int> merge_vec = generate_shuffled_vector(SIZE);
-  merge_sort(merge_vec.data(), SIZE);
-  assert_sorted(merge_vec);
-
-  std::cout << "TESTING BOGO SORT" << std::endl;
-  std::vector<int> bogo_vec = generate_shuffled_vector(10);
-  bogo_sort(bogo_vec.data(), 10);
-  assert_sorted(bogo_vec);
-}
-}  // namespace cxtests
-
 #endif  // CXSTRUCTS_SORTING_H

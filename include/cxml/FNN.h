@@ -23,6 +23,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cassert>
+#include <iostream>
 #include <random>
 #include <vector>
 #include "../cxconfig.h"

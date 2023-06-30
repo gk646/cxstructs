@@ -20,6 +20,7 @@
 #define FINISHED
 
 #include <cassert>
+#include <iostream>
 #include <vector>
 #include "../cxconfig.h"
 
@@ -52,23 +53,5 @@ int depth_first_search(std::vector<std::vector<T>>& mat, int nodeIndex,
   return count;
 }
 }  // namespace cxalgos
-
-namespace cxtests {  // namespace cxtests
-using namespace cxalgos;
-static void TEST_DFS() {
-
-  std::cout << "TESTING DEPTH FIRST SEARCH" << std::endl;
-  std::vector<std::vector<int>> mat = {{0, 1, 0, 1, 0},
-                                       {1, 0, 1, 0, 0},
-                                       {0, 1, 0, 0, 0},
-                                       {1, 0, 0, 0, 1},
-                                       {0, 0, 0, 1, 0}};
-
-  // Perform depth_first_search from node 0
-  int reachableNodes = depth_first_search(mat, 0);
-
-  assert(reachableNodes == 5);
-}
-}  // namespace cxtests
 
 #endif  // CXSTRUCTS_DFS_H
