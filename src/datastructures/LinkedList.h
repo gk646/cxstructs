@@ -21,7 +21,7 @@
 #ifndef CXSTRUCTS_LINKEDLIST_H
 #define CXSTRUCTS_LINKEDLIST_H
 
-#include <cassert>
+
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -118,7 +118,7 @@ class LinkedList {
  * @return the element removed with this operation
   */
   inline T removeAt(const uint_32_cx& index) {
-    assert(index < size_ && "index too big");
+    CX_ASSERT(index < size_ && "index too big");
 
     Node* toDelete;
     T val;
@@ -153,7 +153,7 @@ class LinkedList {
    * so in order to delete the last it has to iterate over all nodes to update the pointers.
   */
   inline void pop() {
-    assert(sentinel_.next_ && "list is empty");
+    CX_ASSERT(sentinel_.next_ && "list is empty");
 
     Node* toDelete = end_;
 
@@ -177,7 +177,7 @@ class LinkedList {
    * @return a reference to the last element
    */
   [[nodiscard]] inline T& back() {
-    assert(end_ != &sentinel_ && "no such element");
+    CX_ASSERT(end_ != &sentinel_ && "no such element");
     return end_->get();
   }
   /**
@@ -185,7 +185,7 @@ class LinkedList {
    * @param val - the value to be matched
    */
   inline void remove(const T& val) {
-    assert(sentinel_.next_ && "list is empty");
+    CX_ASSERT(sentinel_.next_ && "list is empty");
 
     if (sentinel_.next_->val_ == val) {
       Node* toDelete = sentinel_.next_;
@@ -271,7 +271,7 @@ class LinkedList {
     // Test Copy Constructor
     LinkedList<int> list5(list1);
 
-    assert(list1.size() == list5.size());
+    CX_ASSERT(list1.size() == list5.size());
     std::cout << "  Testing assign operator..." << std::endl;
     // Test Assignment Operator
     LinkedList<int> list6;
@@ -279,23 +279,23 @@ class LinkedList {
 
     int num = 5;
     for (auto val : list1) {
-      assert(val == val);
+      CX_ASSERT(val == val);
       val += 5;
     }
     num = 5;
     for (auto val : list6) {
-      assert(val == val);
+      CX_ASSERT(val == val);
       val += 5;
     }
 
-    assert(list1.size() == list6.size());
+    CX_ASSERT(list1.size() == list6.size());
 
     LinkedList<int> list;
     list.push_back(1);
-    assert(list.size() == 1);
+    CX_ASSERT(list.size() == 1);
 
     list.push_back(2);
-    assert(list.size() == 2);
+    CX_ASSERT(list.size() == 2);
     std::cout << "  Testing copy constructor..." << std::endl;
     list1.clear();
     list1.push_back(5);
@@ -304,19 +304,19 @@ class LinkedList {
 
     num = 5;
     for (auto val : list10) {
-      assert(val == num);
+      CX_ASSERT(val == num);
       num += 5;
     }
-    // assert(list10 == list1 );
+    // CX_ASSERT(list10 == list1 );
 
     std::cout << "  Testing addition..." << std::endl;
     // Testing iterator functionality along with push_back
     auto it = list.begin();
-    assert(*it == 1);
+    CX_ASSERT(*it == 1);
     ++it;
-    assert(*it == 2);
+    CX_ASSERT(*it == 2);
     ++it;
-    assert(it == list.end());
+    CX_ASSERT(it == list.end());
 
     std::cout << "  Testing removal..." << std::endl;
     LinkedList<int> list2;
@@ -326,19 +326,19 @@ class LinkedList {
     list2.push_back(3);
 
     auto removedNode = list2.removeAt(1);
-    assert(removedNode == 2);
+    CX_ASSERT(removedNode == 2);
 
-    assert(list2.size() == 2);
-
-    removedNode = list2.removeAt(0);
-    assert(removedNode == 1);
-
-    assert(list2.size() == 1);
+    CX_ASSERT(list2.size() == 2);
 
     removedNode = list2.removeAt(0);
-    assert(removedNode == 3);
+    CX_ASSERT(removedNode == 1);
 
-    assert(list2.size() == 0);
+    CX_ASSERT(list2.size() == 1);
+
+    removedNode = list2.removeAt(0);
+    CX_ASSERT(removedNode == 3);
+
+    CX_ASSERT(list2.size() == 0);
 
     std::cout << "  Testing clear..." << std::endl;
     LinkedList<int> list3;
@@ -348,8 +348,8 @@ class LinkedList {
     list3.push_back(3);
     list3.clear();
 
-    assert(list3.size() == 0);
-    assert(list3.begin() == list3.end());
+    CX_ASSERT(list3.size() == 0);
+    CX_ASSERT(list3.begin() == list3.end());
 
     std::cout << "  Testing for memory leaks..." << std::endl;
     const int LARGE_NUMBER = 1000;  // 1 million
@@ -359,11 +359,11 @@ class LinkedList {
       for (int i = 0; i < LARGE_NUMBER; i++) {
         list4.push_back(i);
       }
-      assert(list4.size() == LARGE_NUMBER);
+      CX_ASSERT(list4.size() == LARGE_NUMBER);
       for (int i = 0; i < LARGE_NUMBER; i++) {
         list4.removeAt(0);
       }
-      assert(list4.size() == 0);
+      CX_ASSERT(list4.size() == 0);
     }
 
     std::cout << "  Testing last removal..." << std::endl;
@@ -371,18 +371,18 @@ class LinkedList {
     LinkedList<int> list4;
     list4.push_back(5);
     list4.push_back(10);
-    assert(list4.back() == 10);
+    CX_ASSERT(list4.back() == 10);
     list4.pop();
-    assert(list4.back() == 5);
+    CX_ASSERT(list4.back() == 5);
     list4.pop();
 
     std::cout << "  Testing removing from single element list..." << std::endl;
     LinkedList<int> list14;
     list14.push_back(1);
     int removedValue = list14.removeAt(0);
-    assert(removedValue == 1);
-    assert(list14.size() == 0);
-    assert(list14.begin() == list14.end());
+    CX_ASSERT(removedValue == 1);
+    CX_ASSERT(list14.size() == 0);
+    CX_ASSERT(list14.begin() == list14.end());
 
     std::cout << "  Testing removing from empty list..." << std::endl;
     LinkedList<int> list13;
@@ -390,7 +390,7 @@ class LinkedList {
     try {
      // list13.removeAt(0);
       // This block should never execute
-      //assert(false);
+      //CX_ASSERT(false);
     } catch (std::out_of_range& e) {
       // Expected behavior
     }
@@ -398,23 +398,23 @@ class LinkedList {
     std::cout << "  Testing single element list..." << std::endl;
     LinkedList<int> list12;
     list12.push_back(1);
-    assert(list12.size() == 1);
+    CX_ASSERT(list12.size() == 1);
 
     // Testing iterator over single-element list
     auto it12 = list12.begin();
-    assert(*it12 == 1);
+    CX_ASSERT(*it12 == 1);
     ++it12;
-    assert(it12 == list12.end());
+    CX_ASSERT(it12 == list12.end());
 
     std::cout << "  Testing empty list..." << std::endl;
     LinkedList<int> list30;
-    assert(list30.size() == 0);
-    assert(list30.begin() == list30.end());
+    CX_ASSERT(list30.size() == 0);
+    CX_ASSERT(list30.begin() == list30.end());
 
     // Testing iteration over empty list
     for (auto val : list30) {
       // This block should never execute
-      assert(false);
+      CX_ASSERT(false);
     }
 
     std::cout << "  Testing copy constructor and assignment operator..."
@@ -427,13 +427,13 @@ class LinkedList {
     LinkedList<int> list9 = list7;  // Assignment operator
 
     // Check n_elem
-    assert(list7.size() == list8.size());
-    assert(list7.size() == list9.size());
+    CX_ASSERT(list7.size() == list8.size());
+    CX_ASSERT(list7.size() == list9.size());
 
     // Check values and correct next and previous pointers
     auto it7 = list7.begin(), it8 = list8.begin(), it9 = list9.begin();
     while (it7 != list7.end()) {
-      assert(*it7 == *it8 && *it7 == *it9);
+      CX_ASSERT(*it7 == *it8 && *it7 == *it9);
       ++it7;
       ++it8;
       ++it9;

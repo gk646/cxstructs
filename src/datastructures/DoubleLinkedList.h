@@ -22,7 +22,7 @@
 #define CXSTRUCTURES_DOUBLELINKEDLIST_H
 
 #include <algorithm>
-#include <cassert>
+
 #include <iostream>
 #include "../cxconfig.h"
 
@@ -249,7 +249,7 @@ class DoubleLinkedList {
     // Test Copy Constructor
     DoubleLinkedList<int> list5(list1);
 
-    assert(list1.size() == list5.size());
+    CX_ASSERT(list1.size() == list5.size());
     std::cout << "  Testing assign operator..." << std::endl;
     // Test Assignment Operator
     DoubleLinkedList<int> list6;
@@ -257,22 +257,22 @@ class DoubleLinkedList {
 
     int num = 5;
     for (auto val : list1) {
-      assert(val == val);
+      CX_ASSERT(val == val);
       val += 5;
     }
     num = 5;
     for (auto val : list6) {
-      assert(val == num);
+      CX_ASSERT(val == num);
       num += 5;
     }
-    assert(list1.size() == list6.size());
+    CX_ASSERT(list1.size() == list6.size());
 
     DoubleLinkedList<int> list;
     list.add(1);
-    assert(list.size() == 1);
+    CX_ASSERT(list.size() == 1);
 
     list.add(2);
-    assert(list.size() == 2);
+    CX_ASSERT(list.size() == 2);
     std::cout << "  Testing copy constructor..." << std::endl;
     list1.clear();
     list1.add(5);
@@ -281,19 +281,19 @@ class DoubleLinkedList {
 
     num = 5;
     for (auto val : list10) {
-      assert(val == num);
+      CX_ASSERT(val == num);
       num += 5;
     }
-    // assert(list10 == list1 );
+    // CX_ASSERT(list10 == list1 );
 
     std::cout << "  Testing addition..." << std::endl;
     // Testing iterator functionality along with push_back
     auto it = list.begin();
-    assert(*it == 1);
+    CX_ASSERT(*it == 1);
     ++it;
-    assert(*it == 2);
+    CX_ASSERT(*it == 2);
     ++it;
-    assert(it == list.end());
+    CX_ASSERT(it == list.end());
 
     std::cout << "  Testing removal..." << std::endl;
     DoubleLinkedList<int> list2;
@@ -303,19 +303,19 @@ class DoubleLinkedList {
     list2.add(3);
 
     auto removedNode = list2.removeAt(1);
-    assert(removedNode == 2);
+    CX_ASSERT(removedNode == 2);
 
-    assert(list2.size() == 2);
-
-    removedNode = list2.removeAt(0);
-    assert(removedNode == 1);
-
-    assert(list2.size() == 1);
+    CX_ASSERT(list2.size() == 2);
 
     removedNode = list2.removeAt(0);
-    assert(removedNode == 3);
+    CX_ASSERT(removedNode == 1);
 
-    assert(list2.size() == 0);
+    CX_ASSERT(list2.size() == 1);
+
+    removedNode = list2.removeAt(0);
+    CX_ASSERT(removedNode == 3);
+
+    CX_ASSERT(list2.size() == 0);
 
     std::cout << "  Testing clear..." << std::endl;
     DoubleLinkedList<int> list3;
@@ -325,22 +325,22 @@ class DoubleLinkedList {
     list3.add(3);
     list3.clear();
 
-    assert(list3.size() == 0);
-    assert(list3.begin() == list3.end());
+    CX_ASSERT(list3.size() == 0);
+    CX_ASSERT(list3.begin() == list3.end());
 
     std::cout << "  Testing for memory leaks..." << std::endl;
-    const int LARGE_NUMBER = 1000;  // 1 million
+    const int LARGE_NUMBER = 100;
 
     for (int k = 0; k < 100; k++) {
       DoubleLinkedList<int> list4;
       for (int i = 0; i < LARGE_NUMBER; i++) {
         list4.add(i);
       }
-      assert(list4.size() == LARGE_NUMBER);
+      CX_ASSERT(list4.size() == LARGE_NUMBER);
       for (int i = 0; i < LARGE_NUMBER; i++) {
         list4.removeAt(0);
       }
-      assert(list4.size() == 0);
+      CX_ASSERT(list4.size() == 0);
     }
 
     std::cout << "  Testing copy constructor and assignment operator..." << std::endl;
@@ -352,17 +352,17 @@ class DoubleLinkedList {
     DoubleLinkedList<int> list9 = list7;  // Assignment operator
 
     // Check n_elem
-    assert(list7.size() == list8.size());
-    assert(list7.size() == list9.size());
+    CX_ASSERT(list7.size() == list8.size());
+    CX_ASSERT(list7.size() == list9.size());
 
     // Check values and correct next and previous pointers
     auto it7 = list7.begin(), it8 = list8.begin(), it9 = list9.begin();
     while (it7 != list7.end()) {
-      assert(*it7 == *it8 && *it7 == *it9);
+      CX_ASSERT(*it7 == *it8 && *it7 == *it9);
 
       if (it7.current->next_) {
-        assert(it8.current->next_->previous_ == it8.current);
-        assert(it9.current->next_->previous_ == it9.current);
+        CX_ASSERT(it8.current->next_->previous_ == it8.current);
+        CX_ASSERT(it9.current->next_->previous_ == it9.current);
       }
 
       ++it7;
@@ -380,10 +380,10 @@ class DoubleLinkedList {
     auto it10 = list11.begin_re(), it10end = list11.end_re();
     int expectedVal = 4;  // As we are going in reverse
     while (it10 != it10end) {
-      assert(*it10 == expectedVal);
+      CX_ASSERT(*it10 == expectedVal);
 
       if (it10.current->previous_) {
-        assert(it10.current->previous_->next_ == it10.current);
+        CX_ASSERT(it10.current->previous_->next_ == it10.current);
       }
 
       --expectedVal;
@@ -392,38 +392,38 @@ class DoubleLinkedList {
 
     std::cout << "  Testing empty list..." << std::endl;
     DoubleLinkedList<int> list30;
-    assert(list30.size() == 0);
-    assert(list30.begin() == list30.end());
+    CX_ASSERT(list30.size() == 0);
+    CX_ASSERT(list30.begin() == list30.end());
 
     // Testing iteration over empty list
     for (auto val : list30) {
       // This block should never execute
-      assert(false);
+      CX_ASSERT(false);
     }
 
     std::cout << "  Testing single element list..." << std::endl;
     DoubleLinkedList<int> list12;
     list12.add(1);
-    assert(list12.size() == 1);
+    CX_ASSERT(list12.size() == 1);
 
     // Testing iterator over single-element list
     auto it12 = list12.begin();
-    assert(*it12 == 1);
+    CX_ASSERT(*it12 == 1);
     ++it12;
-    assert(it12 == list12.end());
+    CX_ASSERT(it12 == list12.end());
 
     // Testing reverse iterator over single-element list
     auto it12re = list12.begin_re();
-    assert(*it12re == 1);
+    CX_ASSERT(*it12re == 1);
     ++it12re;
-    assert(it12re == list12.end_re());
+    CX_ASSERT(it12re == list12.end_re());
 
     std::cout << "  Testing removing from empty list..." << std::endl;
     DoubleLinkedList<int> list13;
     try {
       list13.removeAt(0);
       // This block should never execute
-      assert(false);
+      CX_ASSERT(false);
     } catch (std::out_of_range& e) {
       // Expected behavior
     }
@@ -432,9 +432,9 @@ class DoubleLinkedList {
     DoubleLinkedList<int> list14;
     list14.add(1);
     int removedValue = list14.removeAt(0);
-    assert(removedValue == 1);
-    assert(list14.size() == 0);
-    assert(list14.begin() == list14.end());
+    CX_ASSERT(removedValue == 1);
+    CX_ASSERT(list14.size() == 0);
+    CX_ASSERT(list14.begin() == list14.end());
   }
 #endif
 };

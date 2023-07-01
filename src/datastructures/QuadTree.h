@@ -18,30 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define F
-#ifndef CXSTRUCTS_ASTAR_PATHFINDING_H
-#define CXSTRUCTS_ASTAR_PATHFINDING_H
+#ifndef CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
+#define CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
 
-#include <cstdint>
-#include <type_traits>
-#include "../cxconfig.h"
-
-namespace cxhelper {
-struct Node {
-  Node();
-  uint_16_cx f_cost;
-  uint_16_cx g_cost;
-};
-
-}  // namespace cxhelper
-
-namespace cxalgos {
-
-template <typename T>
-void astar_pathfinding() {
-  static_CX_ASSERT(std::is_arithmetic<T>::value,
-                "Template argument must be numeric");
-};
-
-}  // namespace cxalgos
-
-#endif  //CXSTRUCTS_ASTAR_PATHFINDING_H
+#endif  //CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_

@@ -21,16 +21,15 @@
 #ifndef CXSTRUCTS_TRIE_H
 #define CXSTRUCTS_TRIE_H
 
-#pragma message "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!"
-
+#pragma message \
+    "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!"
 
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <cstring>
+#include <deque>
 #include <iostream>
 #include <memory>
-#include <stack>
 #include <string>
 #include <vector>
 #include "../cxconfig.h"
@@ -46,7 +45,6 @@ struct TrieNode {
   }
 };
 }  // namespace cxhelper
-
 
 namespace cxstructs {
 using namespace cxhelper;
@@ -86,16 +84,16 @@ class Trie {
     root = temp;
   }
   ~Trie() {
-    std::stack<TrieNode*> nodesToDelete;
-    nodesToDelete.push(root);
+    std::deque<TrieNode*> nodesToDelete;
+    nodesToDelete.push_back(root);
 
     while (!nodesToDelete.empty()) {
-      TrieNode* node = nodesToDelete.top();
-      nodesToDelete.pop();
+      TrieNode* node = nodesToDelete.back();
+      nodesToDelete.pop_back();
 
       for (auto child : node->children) {
         if (child != nullptr) {
-          nodesToDelete.push(child);
+          nodesToDelete.push_back(child);
         }
       }
 
@@ -215,10 +213,10 @@ class Trie {
     trie.insert("hello");
 
     std::cout << "   Testing contains..." << std::endl;
-    assert(trie.contains("hello") == true);
-    assert(trie.contains("helloh") == false);
+    CX_ASSERT(trie.contains("hello") == true);
+    CX_ASSERT(trie.contains("helloh") == false);
     std::cout << "   Testing startsWith..." << std::endl;
-    assert(trie.startsWith("he")[0] == "hello");
+    CX_ASSERT(trie.startsWith("he")[0] == "hello");
   }
 #endif
 };

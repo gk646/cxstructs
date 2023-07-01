@@ -22,7 +22,7 @@
 #define CXSTRUCTS_QUEUE_H
 
 #include "../cxconfig.h"
-#include <cassert>
+
 #include <cstdint>
 #include <exception>
 #include <iostream>
@@ -200,24 +200,24 @@ class Queue {
     // Test default constructor
     std::cout << "  Testing default constructor..." << std::endl;
     Queue<int> q1;
-    assert(q1.size() == 0);
-    assert(q1.isEmpty());
-    assert(q1.isFull() == false);
+    CX_ASSERT(q1.size() == 0);
+    CX_ASSERT(q1.isEmpty());
+    CX_ASSERT(q1.isFull() == false);
 
     // Test push_back
     std::cout << "  Testing push_back..." << std::endl;
     q1.add(5);
-    assert(q1.size() == 1);
-    assert(q1.isEmpty() == false);
-    assert(q1.front() == 5);
-    assert(q1.back() == 5);
+    CX_ASSERT(q1.size() == 1);
+    CX_ASSERT(q1.isEmpty() == false);
+    CX_ASSERT(q1.front() == 5);
+    CX_ASSERT(q1.back() == 5);
 
     // Test pop
     std::cout << "  Testing pop..." << std::endl;
     int val = q1.pop();
-    assert(val == 5);
-    assert(q1.size() == 0);
-    assert(q1.isEmpty());
+    CX_ASSERT(val == 5);
+    CX_ASSERT(q1.size() == 0);
+    CX_ASSERT(q1.isEmpty());
 
     // Test non-empty constructor
     std::cout << "  Testing non-empty constructor..." << std::endl;
@@ -225,59 +225,59 @@ class Queue {
     for (int i = 0; i < 5; i++) {
       q2.add(10);
     }
-    assert(q2.size() == 5);
-    assert(q2.isEmpty() == false);
-    assert(q2.front() == 10);
-    assert(q2.back() == 10);
+    CX_ASSERT(q2.size() == 5);
+    CX_ASSERT(q2.isEmpty() == false);
+    CX_ASSERT(q2.front() == 10);
+    CX_ASSERT(q2.back() == 10);
 
     // Test copy constructor
     std::cout << "  Testing copy constructor..." << std::endl;
     Queue<int> q3(q2);
-    assert(q3.size() == q2.size());
-    assert(q3.isEmpty() == q2.isEmpty());
-    assert(q3.front() == q2.front());
-    assert(q3.back() == q2.back());
+    CX_ASSERT(q3.size() == q2.size());
+    CX_ASSERT(q3.isEmpty() == q2.isEmpty());
+    CX_ASSERT(q3.front() == q2.front());
+    CX_ASSERT(q3.back() == q2.back());
 
     // Test assignment operator
     std::cout << "  Testing assignment operator..." << std::endl;
     Queue<int> q4;
     q4 = q2;
-    assert(q4.size() == q2.size());
-    assert(q4.isEmpty() == q2.isEmpty());
-    assert(q4.front() == q2.front());
-    assert(q4.back() == q2.back());
+    CX_ASSERT(q4.size() == q2.size());
+    CX_ASSERT(q4.isEmpty() == q2.isEmpty());
+    CX_ASSERT(q4.front() == q2.front());
+    CX_ASSERT(q4.back() == q2.back());
 
     // Test multiple push_back/pop
     std::cout << "  Testing multiple push_back/pop..." << std::endl;
     for (int i = 0; i < 1000; i++) {
       q1.add(i);
     }
-    assert(q1.size() == 1000);
+    CX_ASSERT(q1.size() == 1000);
     for (int i = 0; i < 1000; i++) {
       int temp = q1.pop();
 
-      assert(temp == i);
+      CX_ASSERT(temp == i);
     }
-    assert(q1.size() == 0);
+    CX_ASSERT(q1.size() == 0);
 
     // Test clear
     std::cout << "  Testing clear..." << std::endl;
     q1.clear();
-    assert(q1.size() == 0);
-    assert(q1.isEmpty());
+    CX_ASSERT(q1.size() == 0);
+    CX_ASSERT(q1.isEmpty());
 
     // Test push_back after clear
     std::cout << "  Testing push_back after clear..." << std::endl;
     for (int i = 0; i < 10; i++) {
       q1.add(i);
     }
-    assert(q1.size() == 10);
+    CX_ASSERT(q1.size() == 10);
 
     // Test range-based for loop
     std::cout << "  Testing range-based for loop..." << std::endl;
     int check = 0;
     for (auto num : q1) {
-      assert(num == check++);
+      CX_ASSERT(num == check++);
     }
   }
 #endif

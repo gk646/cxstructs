@@ -29,9 +29,9 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 - **Documentation**
     - all *cxstructs* and *cxalgos* come with full method and class docs
 - **Testing**
-    - every has lots of tests (removed in *include*)
+    - every cxstruct has lots of tests (*removed in release*)
 - **Debug Symbols**
-    - assert *(from <cassert>) are used to show out of line access when compiling in Debug
+    - custom assert macros (*cxassert.h*) only compiled in debug mode
 - **Accessibility**
     - the source code is clean to read and nicely formatted
 

@@ -19,7 +19,7 @@
 // SOFTWARE.
 #define FINISHED
 
-#include <cassert>
+
 #include <iostream>
 #include <vector>
 #include "../cxconfig.h"
@@ -68,7 +68,7 @@ static void TEST_DFS() {
   // Perform depth_first_search from node 0
   int reachableNodes = depth_first_search(mat, 0);
 
-  assert(reachableNodes == 5);
+  CX_ASSERT(reachableNodes == 5);
 }
 }  // namespace cxtests
 #endif

@@ -23,7 +23,7 @@
 
 #include <algorithm>
 #include <array>
-#include <cassert>
+
 #include <cstdint>
 #include <iostream>
 #include <numeric>
@@ -260,12 +260,12 @@ std::vector<int> generate_shuffled_vector(int size) {
   std::shuffle(vec.begin(), vec.end(), std::mt19937{std::random_device{}()});
   return vec;
 }
-void assert_sorted(std::vector<int>& vec, bool ascending = true) {
+void CX_ASSERT_sorted(std::vector<int>& vec, bool ascending = true) {
   for (size_t i = 1; i < vec.size(); i++) {
     if (ascending) {
-      assert(vec[i - 1] <= vec[i]);
+      CX_ASSERT(vec[i - 1] <= vec[i]);
     } else {
-      assert(vec[i - 1] >= vec[i]);
+      CX_ASSERT(vec[i - 1] >= vec[i]);
     }
   }
 }
@@ -276,27 +276,27 @@ static void TEST_SORTING() {
   std::cout << "TESTING BUBBLESORT" << std::endl;
   std::vector<int> bubble_vec = generate_shuffled_vector(SIZE);
   bubble_sort(bubble_vec.data(), SIZE);
-  assert_sorted(bubble_vec);
+  CX_ASSERT_sorted(bubble_vec);
 
   std::cout << "TESTING QUICKSORT" << std::endl;
   std::vector<int> quick_vec = generate_shuffled_vector(SIZE);
   quick_sort(quick_vec.data(), SIZE);
-  assert_sorted(quick_vec);
+  CX_ASSERT_sorted(quick_vec);
 
   std::cout << "TESTING SELECTIONSORT" << std::endl;
   std::vector<int> selection_vec = generate_shuffled_vector(SIZE);
   selection_sort(selection_vec.data(), SIZE);
-  assert_sorted(selection_vec);
+  CX_ASSERT_sorted(selection_vec);
 
   std::cout << "TESTING MERGE SORT" << std::endl;
   std::vector<int> merge_vec = generate_shuffled_vector(SIZE);
   merge_sort(merge_vec.data(), SIZE);
-  assert_sorted(merge_vec);
+  CX_ASSERT_sorted(merge_vec);
 
   std::cout << "TESTING BOGO SORT" << std::endl;
   std::vector<int> bogo_vec = generate_shuffled_vector(10);
   bogo_sort(bogo_vec.data(), 10);
-  assert_sorted(bogo_vec);
+  CX_ASSERT_sorted(bogo_vec);
 }
 }  // namespace cxtests
 #endif

@@ -22,7 +22,7 @@
 #define CXSTRUCTS_ARRAYLIST_H
 
 #include <algorithm>
-#include <cassert>
+
 #include <cstdint>
 #include <initializer_list>
 #include <iostream>
@@ -223,10 +223,10 @@ class vec {
    */
   inline T& at(const int_32_cx& index) {
     if (index < 0) {
-      assert(size_ + index >= 0 && "index out of bounds");
+      CX_ASSERT(size_ + index >= 0 && "index out of bounds");
       return arr_[size_ + index];
     } else {
-      assert(index < size_ && "index out of bounds");
+      CX_ASSERT(index < size_ && "index out of bounds");
       return arr_[index];
     }
   }
@@ -267,7 +267,7 @@ class vec {
   * Reduces the size by one.
   */
   [[nodiscard]] inline T& pop_back() {
-    assert(size_ > 0 && "out of bounds");
+    CX_ASSERT(size_ > 0 && "out of bounds");
     return arr_[--size_];
   }
   /**
@@ -288,7 +288,7 @@ class vec {
    * @param index index of removal
    */
   inline void removeAt(const uint_32_cx& index) {
-    assert(index < len_ && "index out of bounds");
+    CX_ASSERT(index < len_ && "index out of bounds");
     std::move(arr_ + index + 1, arr_ + size_--, arr_ + index);
   }
   /**
@@ -431,15 +431,15 @@ class vec {
     list1.push(15);
 
     list1.remove(10);
-    assert(list1.size() == 2);
-    assert(list1[1] == 15);
+    CX_ASSERT(list1.size() == 2);
+    CX_ASSERT(list1[1] == 15);
 
     // Test: Testing List access
     std::cout << "   Testing List access...\n";
-    assert(list1[0] == 5);
-    assert(list1.at(-1) == 15);
-    assert(list1.at(-2) == 5);
-    assert(list1[1] == 15);
+    CX_ASSERT(list1[0] == 5);
+    CX_ASSERT(list1.at(-1) == 15);
+    CX_ASSERT(list1.at(-2) == 5);
+    CX_ASSERT(list1[1] == 15);
 
     // Test: Testing iterator
     std::cout << "   Testing iterator...\n";
@@ -451,9 +451,9 @@ class vec {
     int checkNum = 0;
     for (auto& num : list1) {
       checkNum += 5;
-      assert(num == checkNum);
+      CX_ASSERT(num == checkNum);
     }
-    assert(checkNum == 15);
+    CX_ASSERT(checkNum == 15);
 
     // Test: Testing resizing and shrink_to_fit
     std::cout << "   Testing resizing and shrink_to_fit...\n";
@@ -462,19 +462,19 @@ class vec {
       list1.push(i);
     }
     list1.shrink_to_fit();
-    assert(list1.capacity() == list1.size() * 1.5);
+    CX_ASSERT(list1.capacity() == list1.size() * 1.5);
 
     for (int i = 0; i < 10000; i++) {
       list1.remove(i);
     }
-    assert(list1.size() == 0);
+    CX_ASSERT(list1.size() == 0);
 
     // Test: Testing contains
     std::cout << "   Testing contains...\n";
     list1.clear();
     list1.push(5);
-    assert(list1.contains(5) == true);
-    assert(list1.contains(5, false) == true);
+    CX_ASSERT(list1.contains(5) == true);
+    CX_ASSERT(list1.contains(5, false) == true);
 
     // Test: Testing append
     std::cout << "   Testing append...\n";
@@ -486,20 +486,20 @@ class vec {
     for (int i = 0; i < 1000000; i++) {
       list2.push(i);
     }
-    assert(list2.size() == 1000000);
+    CX_ASSERT(list2.size() == 1000000);
 
     list1.append(list2);
-    assert(list1.size() == 1000002);
-    assert(list2[10] == 10);
+    CX_ASSERT(list1.size() == 1000002);
+    CX_ASSERT(list2[10] == 10);
 
     list1.clear();
 
     list1.append(list2, 10, 1);
     int check = 1;
     for (auto num : list1) {
-      assert(check++ == num);
+      CX_ASSERT(check++ == num);
     }
-    assert(list1.size() == 9);
+    CX_ASSERT(list1.size() == 9);
 
     // Test: Testing copy constructor
     std::cout << "   Testing copy constructor...\n";
@@ -509,7 +509,7 @@ class vec {
     }
     vec<int> list6 = list5;  // copy constructor
     for (uint_32_cx i = 0; i < 10; i++) {
-      assert(list6[i] == i);
+      CX_ASSERT(list6[i] == i);
     }
 
     // Test: Testing copy assignment
@@ -517,14 +517,14 @@ class vec {
     vec<int> list7(10);
     list7 = list5;  // copy assignment
     for (uint_32_cx i = 0; i < 10; i++) {
-      assert(list7[i] == i);
+      CX_ASSERT(list7[i] == i);
     }
 
     // Test: Testing move constructor
     std::cout << "   Testing move constructor...\n";
     vec<int> list8 = std::move(list5);  // move constructor
     for (uint_32_cx i = 0; i < 10; i++) {
-      assert(list8[i] == i);
+      CX_ASSERT(list8[i] == i);
     }
 
     // Test: Testing move assignment
@@ -532,14 +532,14 @@ class vec {
     vec<int> list9(10);
     list9 = std::move(list6);  // move assignment
     for (uint_32_cx i = 0; i < 10; i++) {
-      assert(list9[i] == i);
+      CX_ASSERT(list9[i] == i);
     }
 
     // Test: Testing pop_back()
     std::cout << "   Testing pop_back()...\n";
     list9.push(100);
-    assert(list9.pop_back() == 100);
-    assert(list9.size() == 10);
+    CX_ASSERT(list9.pop_back() == 100);
+    CX_ASSERT(list9.size() == 10);
 
     // Test: Checking for memory leaks
     std::cout << "   Checking for memory leaks...\n";

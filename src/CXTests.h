@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <cassert>
 #include "cxio.h"
 
 #include "datastructures/BinaryTree.h"
@@ -42,12 +41,12 @@
 #include "algorithms/Sorting.h"
 
 namespace cxtests {
+
 using namespace cxstructs;
 using namespace cxalgos;
 using namespace cxml;
 using namespace cxutil;
 static void test_cxstructs() {
-
 
   mat::TEST();
   LinkedList<int>::TEST();
@@ -57,8 +56,8 @@ static void test_cxstructs() {
   Trie::TEST();
   DoubleLinkedList<int>::TEST();
   DeQueue<int>::TEST();
-  //BinaryTree<int>::TEST();
   HashMap<int, int>::TEST();
+  BinaryTree<int>::TEST();
 
   std::cout << "\nAll tests passed!" << std::endl;
 }
@@ -70,7 +69,6 @@ static void test_cxalgos() {
   TEST_MATH();
 
   std::cout << "TESTING PATTERN MATCHING" << std::endl;
-
 
   std::cout << "\nAll tests passed!" << std::endl;
 }

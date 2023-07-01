@@ -21,7 +21,7 @@
 #ifndef CXSTRUCTS_BINARYSEARCH_H
 #define CXSTRUCTS_BINARYSEARCH_H
 
-#include <cassert>
+
 #include <cstdint>
 #include <iostream>
 #include "../cxconfig.h"
@@ -96,12 +96,12 @@ using namespace cxalgos;
 static void TEST_SEARCH() {
   std::cout << "TESTING BINARY SEARCH" << std::endl;
   int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  assert(binarySearch(arr, 5, 9) == true);
-  assert(binarySearch(arr, -1, 9) == false);
+  CX_ASSERT(binarySearch(arr, 5, 9) == true);
+  CX_ASSERT(binarySearch(arr, -1, 9) == false);
 
   std::cout << "TESTING BINARY SEARCH RECURSIVE" << std::endl;
-  assert(binarySearch_recursive(arr, 5, 9) == true);
-  assert(binarySearch_recursive(arr, -1, 9) == false);
+  CX_ASSERT(binarySearch_recursive(arr, 5, 9) == true);
+  CX_ASSERT(binarySearch_recursive(arr, -1, 9) == false);
 }
 } // namespace cxtests
 #endif

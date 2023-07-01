@@ -22,7 +22,7 @@
 #define CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
 
 #include <algorithm>
-#include <cassert>
+
 #include <iostream>
 #include <cstdint>
 #include "../cxconfig.h"
@@ -261,27 +261,27 @@ class DeQueue {
 
     for (uint_32_cx i = 0; i < 100; i++) {
       de_queue.add_front(i);
-      assert(de_queue.front() == i);
+      CX_ASSERT(de_queue.front() == i);
     }
 
     // Testing add_back
     std::cout << "   Testing add_back..." << std::endl;
     for (uint_32_cx i = 100; i < 200; i++) {
       de_queue.add_back(i);
-      assert(de_queue.back() == i);
+      CX_ASSERT(de_queue.back() == i);
     }
 
     // Testing pop_front
     std::cout << "   Testing pop_front..." << std::endl;
     for (int i = 99; i >= 0; i--) {
-      assert(de_queue.front() == i);
+      CX_ASSERT(de_queue.front() == i);
       de_queue.pop_front();
     }
 
     // Testing pop_back
     std::cout << "   Testing pop_back..." << std::endl;
     for (uint_32_cx i = 199; i >= 100; i--) {
-      assert(de_queue.back() == i);
+      CX_ASSERT(de_queue.back() == i);
       de_queue.pop_back();
     }
 
@@ -295,30 +295,30 @@ class DeQueue {
     }
 
     for (uint_32_cx i = 0; i < 100000; i++) {
-      assert(de_queue.size() == 100000 - i);
-      assert(de_queue.pop_front() == i);
+      CX_ASSERT(de_queue.size() == 100000 - i);
+      CX_ASSERT(de_queue.pop_front() == i);
     }
-    assert(de_queue.size() == 0);
+    CX_ASSERT(de_queue.size() == 0);
 
     std::cout << "   Testing clear..." << std::endl;
     de_queue.clear();
-    assert(de_queue.size() == 0);
+    CX_ASSERT(de_queue.size() == 0);
     for (int i = 0; i < 1000; i++) {
       de_queue.add_back(i);
     }
     for (int i = 0; i < 1000; i++) {
-      assert(de_queue.pop_back() == 999 - i);
+      CX_ASSERT(de_queue.pop_back() == 999 - i);
     }
 
     std::cout << "   Testing iterator..." << std::endl;
     de_queue.clear();
-    assert(de_queue.size() == 0);
+    CX_ASSERT(de_queue.size() == 0);
     for (int i = 0; i < 1000; i++) {
       de_queue.add_back(i);
     }
     int check = 0;
     for (const auto& num : de_queue) {
-      assert(num == check++);
+      CX_ASSERT(num == check++);
     }
   }
 #endif
