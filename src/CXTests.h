@@ -18,27 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "cxio.h"
-
-#include "datastructures/BinaryTree.h"
-#include "datastructures/DeQueue.h"
-#include "datastructures/DoubleLinkedList.h"
-#include "datastructures/Geometry.h"
-#include "datastructures/HashMap.h"
-#include "datastructures/LinkedList.h"
-#include "datastructures/Queue.h"
-#include "datastructures/Stack.h"
-#include "datastructures/Trie.h"
-#include "datastructures/mat.h"
-#include "datastructures/vec.h"
-
-#include "machinelearning/FNN.h"
-
-#include "algorithms/GraphTraversal.h"
-#include "algorithms/MathFunctions.h"
-#include "algorithms/PatternMatching.h"
-#include "algorithms/Search.h"
-#include "algorithms/Sorting.h"
+#include "CXStructs.h"
 
 namespace cxtests {
 
@@ -48,6 +28,7 @@ using namespace cxml;
 using namespace cxutil;
 static void test_cxstructs() {
 
+  GEOMETRY_TEST();
   mat::TEST();
   LinkedList<int>::TEST();
   Queue<int>::TEST();

@@ -21,7 +21,6 @@
 #ifndef CXSTRUCTS_LINKEDLIST_H
 #define CXSTRUCTS_LINKEDLIST_H
 
-
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -68,8 +67,7 @@ class LinkedList {
   //Node* prev_end_; // to allow for quick pop_back()
 
  public:
-  LinkedList()
-      : sentinel_(T()), end_(&sentinel_), size_(0){};
+  LinkedList() : sentinel_(T()), end_(&sentinel_), size_(0){};
   LinkedList(const LinkedList<T>& o)
       : sentinel_(T()), end_(&sentinel_), size_(0) {
     Node* current_old = o.sentinel_.next_;
@@ -117,7 +115,7 @@ class LinkedList {
  * @param index  - the index at which to erase the element
  * @return the element removed with this operation
   */
-  inline T removeAt(const uint_32_cx& index) {
+  inline T erase_at(const uint_32_cx& index) {
     CX_ASSERT(index < size_ && "index too big");
 
     Node* toDelete;
@@ -184,7 +182,7 @@ class LinkedList {
    * Removes the first node with the given value
    * @param val - the value to be matched
    */
-  inline void remove(const T& val) {
+  inline void erase(const T& val) {
     CX_ASSERT(sentinel_.next_ && "list is empty");
 
     if (sentinel_.next_->val_ == val) {
@@ -248,7 +246,6 @@ class LinkedList {
       return current != other.current;
     }
   };
-
   Iterator begin() { return Iterator(sentinel_.next_); }
   Iterator end() { return Iterator(nullptr); }
 
@@ -325,17 +322,17 @@ class LinkedList {
     list2.push_back(2);
     list2.push_back(3);
 
-    auto removedNode = list2.removeAt(1);
+    auto removedNode = list2.erase_at(1);
     CX_ASSERT(removedNode == 2);
 
     CX_ASSERT(list2.size() == 2);
 
-    removedNode = list2.removeAt(0);
+    removedNode = list2.erase_at(0);
     CX_ASSERT(removedNode == 1);
 
     CX_ASSERT(list2.size() == 1);
 
-    removedNode = list2.removeAt(0);
+    removedNode = list2.erase_at(0);
     CX_ASSERT(removedNode == 3);
 
     CX_ASSERT(list2.size() == 0);
@@ -361,7 +358,7 @@ class LinkedList {
       }
       CX_ASSERT(list4.size() == LARGE_NUMBER);
       for (int i = 0; i < LARGE_NUMBER; i++) {
-        list4.removeAt(0);
+        list4.erase_at(0);
       }
       CX_ASSERT(list4.size() == 0);
     }
@@ -379,7 +376,7 @@ class LinkedList {
     std::cout << "  Testing removing from single element list..." << std::endl;
     LinkedList<int> list14;
     list14.push_back(1);
-    int removedValue = list14.removeAt(0);
+    int removedValue = list14.erase_at(0);
     CX_ASSERT(removedValue == 1);
     CX_ASSERT(list14.size() == 0);
     CX_ASSERT(list14.begin() == list14.end());
@@ -388,7 +385,7 @@ class LinkedList {
     LinkedList<int> list13;
 
     try {
-     // list13.removeAt(0);
+      // list13.erase_at(0);
       // This block should never execute
       //CX_ASSERT(false);
     } catch (std::out_of_range& e) {

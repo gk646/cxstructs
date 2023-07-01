@@ -26,6 +26,9 @@
 #include <cstdint>
 #include <exception>
 #include <iostream>
+
+namespace cxstructs {
+
 /**
  * A queue is a datastructure that defaults to appending elements to the end but retrieving them from the beginning.<p>
  * 1,2,3,4 -> push_back(5) -> 1,2,3,4,5 <p>
@@ -45,7 +48,7 @@ class Queue {
 
   uint_32_cx minlen_;
 
-  void resize() {
+  inline void resize() {
     len_ *= 2;
     auto narr = new T[len_];
     std::copy(arr_ + front_, arr_ + back_, narr);
@@ -55,7 +58,7 @@ class Queue {
     front_ = 0;
     minlen_ = size() / 4 < 32 ? 0 : size() / 4;
   }
-  void shrink() {
+  inline void shrink() {
     len_ /= 2;
     auto narr = new T[len_];
     std::copy(arr_ + front_, arr_ + back_, narr);
@@ -72,7 +75,6 @@ class Queue {
     back_ = 0;
     front_ = 0;
   }
-  ~Queue() { delete[] arr_; }
   Queue(const Queue& o)
       : back_(o.back_), len_(o.len_), front_(o.front_), minlen_(o.minlen_) {
     arr_ = new T[len_];
@@ -91,6 +93,7 @@ class Queue {
     }
     return *this;
   }
+  ~Queue() { delete[] arr_; }
   /**
    *
    * @return the current n_elem of the queue
@@ -100,7 +103,7 @@ class Queue {
    * Adds a element to the back of the queue
    * @param e the element to be added
    */
-  inline void add(T e) {
+  inline void push(const T& e) {
     if (back_ == len_) {
       resize();
     }
@@ -112,38 +115,30 @@ class Queue {
    * @param args T constructor arguments
    */
   template <typename... Args>
-  inline void emplace_back(Args&&... args) {
+  inline void emplace(Args&&... args) {
     if (back_ == len_) {
       resize();
     }
     arr_[back_++] = T(std::forward<Args>(args)...);
   }
   /**
-   * Removes and returns the element at the front of the queue
-   * @return the removed element
+   * Removes the element at the front of the queue
    */
-  inline T pop() {
-    if (back_ - front_ < minlen_) {
-      shrink();
-    }
-    return arr_[front_++];
-  }
+  inline void pop() { front_++; }
   /**
-   * Lets you peek at the front most element <p>
-   * The position at which elements at removed
+   * Returns a read/write reference to the data at the first element of the queue.
+   *  The position at which elements are removed
    * @return a reference to the front element
    */
   [[nodiscard]] inline T& front() const { return arr_[front_]; }
   /**
-   * Lets you peek at the last element <p>
+   *Returns a read/write reference to the data at the first element of the %queue.
    * The position at which elements at added
    * @return a reference to the last element
    */
   [[nodiscard]] inline T& back() const {
-    if (back_ > 0) {
-      return arr_[back_ - 1];
-    }
-    throw std::out_of_range("no such element");
+    CX_ASSERT(back_ > 0, "no such element");
+    return arr_[back_ - 1];
   }
   /**
    *
@@ -206,7 +201,7 @@ class Queue {
 
     // Test push_back
     std::cout << "  Testing push_back..." << std::endl;
-    q1.add(5);
+    q1.push(5);
     CX_ASSERT(q1.size() == 1);
     CX_ASSERT(q1.isEmpty() == false);
     CX_ASSERT(q1.front() == 5);
@@ -214,7 +209,8 @@ class Queue {
 
     // Test pop
     std::cout << "  Testing pop..." << std::endl;
-    int val = q1.pop();
+    int val = q1.back();
+    q1.pop();
     CX_ASSERT(val == 5);
     CX_ASSERT(q1.size() == 0);
     CX_ASSERT(q1.isEmpty());
@@ -223,7 +219,7 @@ class Queue {
     std::cout << "  Testing non-empty constructor..." << std::endl;
     Queue<int> q2(5);
     for (int i = 0; i < 5; i++) {
-      q2.add(10);
+      q2.push(10);
     }
     CX_ASSERT(q2.size() == 5);
     CX_ASSERT(q2.isEmpty() == false);
@@ -250,11 +246,12 @@ class Queue {
     // Test multiple push_back/pop
     std::cout << "  Testing multiple push_back/pop..." << std::endl;
     for (int i = 0; i < 1000; i++) {
-      q1.add(i);
+      q1.push(i);
     }
     CX_ASSERT(q1.size() == 1000);
     for (int i = 0; i < 1000; i++) {
-      int temp = q1.pop();
+      int temp = q1.back();
+      q1.pop();
 
       CX_ASSERT(temp == i);
     }
@@ -269,7 +266,7 @@ class Queue {
     // Test push_back after clear
     std::cout << "  Testing push_back after clear..." << std::endl;
     for (int i = 0; i < 10; i++) {
-      q1.add(i);
+      q1.push(i);
     }
     CX_ASSERT(q1.size() == 10);
 
@@ -282,4 +279,6 @@ class Queue {
   }
 #endif
 };
+
+}  // namespace cxstructs
 #endif  // CXSTRUCTS_QUEUE_H

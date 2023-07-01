@@ -4,7 +4,7 @@ A medium-sized header only library of selected datastructures, algorithms, machi
 
 While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of efficiency and interface.
 
-**To use these, simply include the *include directory*, which contains only finalized and tested headers.**
+**To use these, simply include the *include directory*, and `#include "CXStructs.h"` to include all headers.**
 
 **Comparisons with standard library counterparts can be run using the Comparison.h header**
 
@@ -12,10 +12,10 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 
 *Relative to the fastest*
 
-|                 |  vector  |  Stack   | HashMap  | LinkedList |
-|:----------------|:--------:|:--------:|:--------:|:----------:|
-| **std::**       |  *0.81*  |  *0.52*  |  *0.49*  |  **1.00**  |
-| **cxstructs::** | **1.00** | **1.00** | **1.00** |   *0.92*   |
+|                 |  vector  |  Stack   | HashMap  | LinkedList |  Queue   |
+|:----------------|:--------:|:--------:|:--------:|:----------:|:--------:|
+| **std::**       |  *0.81*  |  *0.52*  |  *0.49*  |  **1.00**  |  *0.86*  |
+| **cxstructs::** | **1.00** | **1.00** | **1.00** |   *0.98*   | **1.00** |
 
 ### Features
 

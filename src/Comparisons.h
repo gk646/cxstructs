@@ -185,7 +185,7 @@ void compareWithSTL()  {
   cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
-      queue.emplace_back();
+      queue.emplace();
     }
     for (int i = 0; i < innerCount; i++) {
       queue.front();

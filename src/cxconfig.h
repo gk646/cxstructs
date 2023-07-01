@@ -22,8 +22,18 @@
 
 #ifndef CXSTRUCTS_SRC_CONFIG_H_
 #define CXSTRUCTS_SRC_CONFIG_H_
-
-
+/**
+ * namespace for all utility related headers
+ */
+namespace cxutil{}
+/**
+ * namespace for all machinelearning related headers
+ */
+namespace cxml{}
+/**
+ * namespace for all datastructure related headers
+ */
+namespace cxstructs{}
 #include <cstdint>
 #include "cxassert.h"
 

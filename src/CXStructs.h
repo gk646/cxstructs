@@ -17,31 +17,37 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
-#ifndef CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
+#define FINISHED
+#ifndef CXSTRUCTS_SRC_CXSTRUCTS_H_
+#define CXSTRUCTS_SRC_CXSTRUCTS_H_
+#include "cxconfig.h"
 
-#include "../cxconfig.h"
-#include "Geometry.h"
+#include "cxio.h"
+#include "cxtime.h"
 
-namespace cxstructs {
-class QuadTree {
+#include "datastructures/BinaryTree.h"
+#include "datastructures/DeQueue.h"
+#include "datastructures/DoubleLinkedList.h"
+#include "datastructures/Geometry.h"
+#include "datastructures/HashMap.h"
+#include "datastructures/HashSet.h"
+#include "datastructures/LinkedList.h"
+#include "datastructures/QuadTree.h"
+#include "datastructures/Queue.h"
+#include "datastructures/Stack.h"
+#include "datastructures/Trie.h"
+#include "datastructures/mat.h"
+#include "datastructures/pair.h"
+#include "datastructures/row.h"
+#include "datastructures/vec.h"
 
-  QuadTree* top_left_;
-  QuadTree* top_right;
-  QuadTree* bottom_left_;
-  QuadTree* bottom_right_;
+#include "machinelearning/FNN.h"
 
- public:
-  QuadTree();
+#include "algorithms/GraphTraversal.h"
+#include "algorithms/MathFunctions.h"
+#include "algorithms/PathFinding.h"
+#include "algorithms/PatternMatching.h"
+#include "algorithms/Search.h"
+#include "algorithms/Sorting.h"
 
-  void insert();
-  bool contains();
-  void erase();
-  [[nodiscard]] inline uint_32_cx size();
-  bool collide();
-
-  class Iterator {};
-};
-}  // namespace cxstructs
-#endif  //CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
+#endif  //CXSTRUCTS_SRC_CXSTRUCTS_H_
