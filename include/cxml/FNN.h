@@ -23,7 +23,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cassert>
+
 #include <iostream>
 #include <random>
 #include <vector>
@@ -368,7 +368,7 @@ class FNN {
       for (size_t j = 0; j < inputs.size(); ++j) {
         double output = fnn.forward(inputs[j])[0];
         double expected = expected_outputs[j][0];
-        assert(output - expected < 0.1);
+        CX_ASSERT(output - expected < 0.1);
       }
     }
   }

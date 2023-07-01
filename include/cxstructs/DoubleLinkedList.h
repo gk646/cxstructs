@@ -22,7 +22,7 @@
 #define CXSTRUCTURES_DOUBLELINKEDLIST_H
 
 #include <algorithm>
-#include <cassert>
+
 #include <iostream>
 #include "../cxconfig.h"
 

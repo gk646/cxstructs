@@ -21,7 +21,7 @@
 #ifndef CXSTRUCTS_LINKEDLIST_H
 #define CXSTRUCTS_LINKEDLIST_H
 
-#include <cassert>
+
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -118,7 +118,7 @@ class LinkedList {
  * @return the element removed with this operation
   */
   inline T removeAt(const uint_32_cx& index) {
-    assert(index < size_ && "index too big");
+    CX_ASSERT(index < size_ && "index too big");
 
     Node* toDelete;
     T val;
@@ -153,7 +153,7 @@ class LinkedList {
    * so in order to delete the last it has to iterate over all nodes to update the pointers.
   */
   inline void pop() {
-    assert(sentinel_.next_ && "list is empty");
+    CX_ASSERT(sentinel_.next_ && "list is empty");
 
     Node* toDelete = end_;
 
@@ -177,7 +177,7 @@ class LinkedList {
    * @return a reference to the last element
    */
   [[nodiscard]] inline T& back() {
-    assert(end_ != &sentinel_ && "no such element");
+    CX_ASSERT(end_ != &sentinel_ && "no such element");
     return end_->get();
   }
   /**
@@ -185,7 +185,7 @@ class LinkedList {
    * @param val - the value to be matched
    */
   inline void remove(const T& val) {
-    assert(sentinel_.next_ && "list is empty");
+    CX_ASSERT(sentinel_.next_ && "list is empty");
 
     if (sentinel_.next_->val_ == val) {
       Node* toDelete = sentinel_.next_;

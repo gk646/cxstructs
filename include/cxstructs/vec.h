@@ -22,7 +22,7 @@
 #define CXSTRUCTS_ARRAYLIST_H
 
 #include <algorithm>
-#include <cassert>
+
 #include <cstdint>
 #include <initializer_list>
 #include <iostream>
@@ -223,10 +223,10 @@ class vec {
    */
   inline T& at(const int_32_cx& index) {
     if (index < 0) {
-      assert(size_ + index >= 0 && "index out of bounds");
+      CX_ASSERT(size_ + index >= 0 && "index out of bounds");
       return arr_[size_ + index];
     } else {
-      assert(index < size_ && "index out of bounds");
+      CX_ASSERT(index < size_ && "index out of bounds");
       return arr_[index];
     }
   }
@@ -267,7 +267,7 @@ class vec {
   * Reduces the size by one.
   */
   [[nodiscard]] inline T& pop_back() {
-    assert(size_ > 0 && "out of bounds");
+    CX_ASSERT(size_ > 0 && "out of bounds");
     return arr_[--size_];
   }
   /**
@@ -288,7 +288,7 @@ class vec {
    * @param index index of removal
    */
   inline void removeAt(const uint_32_cx& index) {
-    assert(index < len_ && "index out of bounds");
+    CX_ASSERT(index < len_ && "index out of bounds");
     std::move(arr_ + index + 1, arr_ + size_--, arr_ + index);
   }
   /**

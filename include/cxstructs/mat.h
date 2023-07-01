@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#include <cassert>
+
 #include <cstdint>
 #include <iostream>
 #include <ostream>
@@ -30,11 +30,19 @@
 
 namespace cxstructs {
 /**
- * <h2>Matrix</h2>
- *
- * A 2d Matrix implementation with a flattened array for more cache efficiency.
- * Datatype is set at float and access is 0-based.
- */
+    <h2>2D Matrix</h2>
+    This data structure is an efficient representation of a two-dimensional matrix, using a flattened array for cache efficiency and faster access times.
+    <br><br>
+    <b>Datatype:</b> The elements of the matrix are of type float.
+    <br><br>
+    <b>Indexing:</b> The matrix uses 0-based indexing.
+    <br><br>
+    <b>Initialization:</b> The default constructor initializes all elements to 0.
+    <br><br>
+    A 2D Matrix is essential in various applications such as graphics transformations, solving systems of linear equations, and data analysis. The flattened array representation ensures that the elements are stored in a contiguous block of memory, which is beneficial for cache performance.<p>
+
+    <b>Use Cases:</b> 2D Matrices are widely used in linear algebra, image processing, computer graphics, and scientific computing.
+    */
 class mat {
   float* arr;
   uint_32_cx n_rows;
@@ -330,10 +338,38 @@ class mat {
     return re;
   }
   /**
+   * A matrix unit is a matrix with only one nonzero entry with value 1.
+   * This 1 is at position M(row,col)
+   * @param n_rows the amount of row of the matrix unit
+   * @param n_cols the amount of cols of the matrix unit
+   * @param row row of 1
+   * @param col col of 1
+   * @return a new matrix with these properties
+   */
+  static inline mat unit_matrix(uint_32_cx n_rows, uint_32_cx n_cols,
+                                uint_32_cx row, uint_32_cx col) {
+    mat re(n_rows, n_cols);
+    re(row, col) = 1;
+    return re;
+  }
+  /**
+   *A square matrix with ones on the main diagonal and zeros elsewhere.<p>
+   * Has the property that when multiplied with any matrix M returns exactly M
+   * @param size side length
+   * @return a new identity matrix
+   */
+  static inline mat eye(uint_32_cx size) {
+    mat eye(size, size);
+    for (uint_fast32_t i = 0; i < size; i++) {
+      eye.arr[i* size +i] = 1;
+    }
+    return eye;
+  }
+  /**
    * Multiplies the whole matrix with the given scalar in-place
    * @param s the scalar
    */
-  inline void scalar(const float& s) {
+  inline void scale(const float& s) {
     for (int i = 0; i < n_rows; i++) {
       for (int j = 0; j < n_cols; j++) {
         arr[i * n_cols + j] = arr[i * n_cols + j] * s;
@@ -374,8 +410,9 @@ class mat {
     }
     return os;
   }
+
   [[nodiscard]] inline uint_32_cx getRows() const { return n_rows; };
   [[nodiscard]] inline uint_32_cx getCols() const { return n_cols; };
-  inline
+
 };
 }  // namespace cxstructs

@@ -22,7 +22,7 @@
 #define CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
 
 #include <algorithm>
-#include <cassert>
+
 #include <iostream>
 #include <cstdint>
 #include "../cxconfig.h"
