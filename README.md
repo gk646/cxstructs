@@ -1,6 +1,6 @@
 ## Datastructures, Algorithms and Utilities library in C++
 
-A medium-sized header only library of selected datastructures, algorithms, machinelearning topics and utilities. This collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read and well documented
+A medium-sized header only library of selected datastructures, algorithms, machinelearning topics and utilities. This collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read and well documented.
 
 While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of efficiency and interface.
 
@@ -73,6 +73,7 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 
 - **cxtime** *easily measure the time from `now()` to `printTime()`*
 - **cxio** *load files*
+- **cxassert** *custom assertions with optional test*
 
 ---
 
@@ -98,3 +99,5 @@ typedef int_fast32_t int_32_cx;
 
 - `#define CX_ALLOC` to use the custom allocator (applies globally)
 - `#define CX_NO_MATRIX`to use the FNN without matrix calculations
+- `CX_ASSERT` enhanced assertion with optional text
+- `CX_WARNING` similar to *CX_ASSERT* but doesn't abort
