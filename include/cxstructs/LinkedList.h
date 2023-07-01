@@ -21,7 +21,6 @@
 #ifndef CXSTRUCTS_LINKEDLIST_H
 #define CXSTRUCTS_LINKEDLIST_H
 
-
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -68,8 +67,7 @@ class LinkedList {
   //Node* prev_end_; // to allow for quick pop_back()
 
  public:
-  LinkedList()
-      : sentinel_(T()), end_(&sentinel_), size_(0){};
+  LinkedList() : sentinel_(T()), end_(&sentinel_), size_(0){};
   LinkedList(const LinkedList<T>& o)
       : sentinel_(T()), end_(&sentinel_), size_(0) {
     Node* current_old = o.sentinel_.next_;
@@ -117,7 +115,7 @@ class LinkedList {
  * @param index  - the index at which to erase the element
  * @return the element removed with this operation
   */
-  inline T removeAt(const uint_32_cx& index) {
+  inline T erase_at(const uint_32_cx& index) {
     CX_ASSERT(index < size_ && "index too big");
 
     Node* toDelete;
@@ -184,7 +182,7 @@ class LinkedList {
    * Removes the first node with the given value
    * @param val - the value to be matched
    */
-  inline void remove(const T& val) {
+  inline void erase(const T& val) {
     CX_ASSERT(sentinel_.next_ && "list is empty");
 
     if (sentinel_.next_->val_ == val) {
@@ -248,7 +246,6 @@ class LinkedList {
       return current != other.current;
     }
   };
-
   Iterator begin() { return Iterator(sentinel_.next_); }
   Iterator end() { return Iterator(nullptr); }
 

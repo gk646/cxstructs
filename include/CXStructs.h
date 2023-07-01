@@ -18,31 +18,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
+#ifndef CXSTRUCTS_SRC_CXSTRUCTS_H_
+#define CXSTRUCTS_SRC_CXSTRUCTS_H_
+#include "cxconfig.h"
 
+#include "cxio.h"
+#include "cxtime.h"
 
-#ifndef CXSTRUCTS_SRC_CONFIG_H_
-#define CXSTRUCTS_SRC_CONFIG_H_
-/**
- * namespace for all utility related headers
- */
-namespace cxutil{}
-/**
- * namespace for all machinelearning related headers
- */
-namespace cxml{}
-/**
- * namespace for all datastructure related headers
- */
-namespace cxstructs{}
-#include <cstdint>
-#include "cxassert.h"
+#include "datastructures/BinaryTree.h"
+#include "datastructures/DeQueue.h"
+#include "datastructures/DoubleLinkedList.h"
+#include "datastructures/Geometry.h"
+#include "datastructures/HashMap.h"
+#include "datastructures/HashSet.h"
+#include "datastructures/LinkedList.h"
+#include "datastructures/QuadTree.h"
+#include "datastructures/Queue.h"
+#include "datastructures/Stack.h"
+#include "datastructures/Trie.h"
+#include "datastructures/mat.h"
+#include "datastructures/pair.h"
+#include "datastructures/row.h"
+#include "datastructures/vec.h"
 
-typedef uint_fast32_t uint_32_cx;
-typedef uint_fast16_t uint_16_cx;
-typedef int_fast32_t int_32_cx;
+#include "machinelearning/FNN.h"
 
-#ifdef CX_ALLOC
-#include "CXAllocator.h"
-#endif
+#include "algorithms/GraphTraversal.h"
+#include "algorithms/MathFunctions.h"
+#include "algorithms/PathFinding.h"
+#include "algorithms/PatternMatching.h"
+#include "algorithms/Search.h"
+#include "algorithms/Sorting.h"
 
-#endif  //CXSTRUCTS_SRC_CONFIG_H_
+#endif  //CXSTRUCTS_SRC_CXSTRUCTS_H_
