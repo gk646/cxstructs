@@ -18,10 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
+
+
 #ifndef CXSTRUCTS_SRC_CONFIG_H_
 #define CXSTRUCTS_SRC_CONFIG_H_
 
+
 #include <cstdint>
+#include "cxassert.h"
 
 typedef uint_fast32_t uint_32_cx;
 typedef uint_fast16_t uint_16_cx;
@@ -30,8 +34,5 @@ typedef int_fast32_t int_32_cx;
 #ifdef CX_ALLOC
 #include "CXAllocator.h"
 #endif
-
-
-
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_

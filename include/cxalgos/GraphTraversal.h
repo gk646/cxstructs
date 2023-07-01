@@ -19,7 +19,7 @@
 // SOFTWARE.
 #define FINISHED
 
-#include <cassert>
+
 #include <iostream>
 #include <vector>
 #include "../cxconfig.h"

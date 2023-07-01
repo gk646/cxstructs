@@ -22,7 +22,7 @@
 #define CXSTRUCTS_QUEUE_H
 
 #include "../cxconfig.h"
-#include <cassert>
+
 #include <cstdint>
 #include <exception>
 #include <iostream>

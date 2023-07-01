@@ -21,7 +21,7 @@
 #ifndef CXSTRUCTS_BINARYSEARCH_H
 #define CXSTRUCTS_BINARYSEARCH_H
 
-#include <cassert>
+
 #include <cstdint>
 #include <iostream>
 #include "../cxconfig.h"

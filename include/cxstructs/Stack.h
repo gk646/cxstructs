@@ -22,12 +22,11 @@
 #define CXSTRUCTURES_STACK_H
 
 #include <algorithm>
-#include <cassert>
+
 #include <cstdint>
 #include <initializer_list>
 #include <iostream>
 #include <stdexcept>
-#include <vector>
 #include "../cxconfig.h"
 
 //this stack is very fast and implemented natively (std::stack is using the std::vector)
@@ -99,14 +98,10 @@ class Stack {
    * @param n_elem number of starting elements
    */
   explicit Stack(uint_32_cx n_elems = 32)
-      : len_(n_elems),
-        size_(0),
-        arr_(alloc.allocate(n_elems)) {}
+      : len_(n_elems), size_(0), arr_(alloc.allocate(n_elems)) {}
 
   explicit Stack(uint_32_cx n_elems, T fillval)
-      : len_(n_elems),
-        size_(n_elems),
-        arr_(alloc.allocate(n_elems)) {
+      : len_(n_elems), size_(n_elems), arr_(alloc.allocate(n_elems)) {
     std::fill_n(arr_, len_, fillval);
   }
   /**
@@ -118,8 +113,7 @@ class Stack {
   Stack(std::initializer_list<T> init_list)
       : size_(init_list.size()),
         len_(init_list.size() * 10),
-        arr_(alloc.allocate(init_list.size() * 10))
-        {
+        arr_(alloc.allocate(init_list.size() * 10)) {
     std::copy(init_list.begin(), init_list.end(), arr_);
   }
   /**
@@ -133,16 +127,13 @@ class Stack {
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
   Stack(uint_32_cx n_elem, fill_form form)
-      : len_(n_elem),
-        size_(n_elem),
-        arr_(alloc.allocate(n_elem)) {
+      : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
     }
   }
   //copy constructor
-  explicit Stack(const Stack<T>& o)
-      : size_(o.size_), len_(o.len_) {
+  explicit Stack(const Stack<T>& o) : size_(o.size_), len_(o.len_) {
     arr_ = alloc.allocate(len_);
     std::copy(o.arr_, o.arr_ + size_, arr_);
   }
@@ -167,8 +158,7 @@ class Stack {
     return *this;
   }
   //move constructor
-  Stack(Stack&& o) noexcept
-      : arr_(o.arr_), size_(o.size_), len_(o.len_) {
+  Stack(Stack&& o) noexcept : arr_(o.arr_), size_(o.size_), len_(o.len_) {
     //leve other in previous state
     o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
   }
@@ -241,7 +231,7 @@ class Stack {
      * Calling this function on an empty Stack causes undefined behavior.
      */
   inline void pop() {
-    assert(size_>0 &&"out of bounds");
+    CX_ASSERT(size_ > 0 && "out of bounds");
     size_--;
   }
   /**
@@ -252,8 +242,9 @@ class Stack {
      * @return Reference to the topmost element in the Stack.
      */
   [[nodiscard]] inline T& top() const {
-    assert(size_>0 &&"out of bounds");
-    return arr_[size_ - 1]; }
+    CX_ASSERT(size_ > 0 && "out of bounds");
+    return arr_[size_ - 1];
+  }
   /**
      * @brief Checks if the Stack is empty.
      *

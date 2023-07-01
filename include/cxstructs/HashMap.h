@@ -21,7 +21,7 @@
 #ifndef CXSTRUCTS_HASHMAP_H
 #define CXSTRUCTS_HASHMAP_H
 
-#include <cassert>
+
 #include <cstdint>
 #include <deque>
 #include <functional>
@@ -32,6 +32,7 @@
 
 // HashMap implementation using constant stack arrays as buffer and linked lists
 //already medium well optimized, should perform faster than the std:unordered_map in a lot of scenarios
+//But is uses about 2-3 times as much memory!
 // See Comparison.h
 
 namespace cxhelper {  // namespace to hide the classes
@@ -42,7 +43,7 @@ namespace cxhelper {  // namespace to hide the classes
  */
 template <typename K, typename V>
 struct HashListNode {
-  HashListNode(const K& key, const V& val)
+  inline HashListNode(const K& key, const V& val)
       : key_(key), value_(val), next_(nullptr) {}
   inline explicit HashListNode(HashListNode<K, V>* o)
       : key_(o->key_), value_(o->value_), next_(nullptr){};
@@ -66,8 +67,8 @@ struct HashLinkedList {
   HListNode* head_;
   HListNode* end_;
 
-  HashLinkedList() : head_(nullptr), end_(nullptr){};
-  HashLinkedList& operator=(const HashLinkedList& o) {
+  inline HashLinkedList() : head_(nullptr), end_(nullptr){};
+  inline HashLinkedList& operator=(const HashLinkedList& o) {
     if (this != &o) {
       std::copy(o.data_, o.data_ + ArrayLength, data_);
 
@@ -89,7 +90,7 @@ struct HashLinkedList {
     }
     return *this;
   }
-  ~HashLinkedList() {
+  inline ~HashLinkedList() {
     HListNode* current = head_;
     while (current != nullptr) {
       HListNode* next = current->next_;
@@ -213,38 +214,6 @@ struct HashLinkedList {
     return false;
   }
 };
-
-template <typename K>
-struct KeyHash {
-  size_t operator()(const K& key) const {
-    return static_cast<size_t>(key);
-  }
-};
-
-template <>
-struct KeyHash<std::string> {
-  size_t operator()(const std::string& key) const {
-    std::hash<std::string> hash_fn;
-    return hash_fn(key);
-  }
-};
-
-template <>
-struct KeyHash<float> {
-  size_t operator()(const float& key) const {
-    std::hash<float> hash_fn;
-    return hash_fn(key);
-  }
-};
-
-template <>
-struct KeyHash<double> {
-  size_t operator()(const double& key) const {
-    std::hash<double> hash_fn;
-    return hash_fn(key);
-  }
-};
-
 }  // namespace cxhelper
 
 namespace cxstructs {
@@ -260,11 +229,10 @@ using namespace cxhelper;
  * The term 'linear probing' refers to the technique used to handle hash collisions (when different keys produce the same hash). In this scenario, each array index hosts a linked list that is traversed to locate the correct key.
  */
 
-template <typename K, typename V>
+template <typename K, typename V,
+          typename Hash = std::function<size_t(const K&)>>
 class HashMap {
-
   constexpr static uint_16_cx BufferLen = 2;
-  using hash_func = std::function<int(const K&)>;
   using HList = HashLinkedList<K, V, BufferLen>;
 
   uint_32_cx initialCapacity_;
@@ -274,7 +242,7 @@ class HashMap {
   float load_factor_;
 
   HList* arr_;
-  hash_func hash_func_;
+  Hash hash_func_;
 
   inline void reHashBig() {
     // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
@@ -330,7 +298,7 @@ class HashMap {
         size_(0),
         arr_(new HList[initialCapacity]),
         maxSize(initialCapacity * 0.75),
-        hash_func_(KeyHash<K>{}),
+        hash_func_(std::hash<K>()),
         load_factor_(loadFactor) {}
   /**
    * This constructor allows the user to supply their own hash function for the key type
@@ -338,10 +306,8 @@ class HashMap {
    * @param hash_function  this function is called with any given key with type K
    * @param initialCapacity the initial size of the container and the growth size
    */
-  template <
-      typename HashFunction,
-      typename = std::enable_if_t<std::is_invocable_r_v<int, HashFunction, K>>>
-  explicit HashMap(HashFunction hash_function, uint_32_cx initialCapacity = 64,
+
+  explicit HashMap(Hash hash_function, uint_32_cx initialCapacity = 64,
                    float loadFactor = 0.75)
       : buckets_(initialCapacity),
         initialCapacity_(initialCapacity),
@@ -443,7 +409,7 @@ class HashMap {
   inline void erase(const K& key) {
     size_t hash = hash_func_(key) % buckets_;
     size_ -= arr_[hash].remove(key);
-    assert(size_ > 0 && "out of bounds");
+    CX_ASSERT(size_ >= 0, "no such element to remove");
   }
   /**
    *
