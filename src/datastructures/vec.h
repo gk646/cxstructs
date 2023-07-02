@@ -43,10 +43,10 @@ namespace cxstructs {
  * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
  * It provides the capability to index into the list, push_back elements to the end, and erase elements from the end in a time-efficient manner.</p>
  */
-template <typename T, uint_16_cx PreAllocBlocks = 1>
+template <typename T, uint_16_cx ItemsPerAllocBlock = 33>
 class vec {
 #ifdef CX_ALLOC
-  using Allocator = CXPoolAllocator<T, sizeof(T) * 33, PreAllocBlocks>;
+  using Allocator = CXPoolAllocator<T, sizeof(T) * ItemsPerAllocBlock, 1>;
 #else
   using Allocator = std::allocator<T>;
 #endif
@@ -56,6 +56,8 @@ class vec {
   uint_32_cx size_;
   uint_32_cx len_;
 
+  bool is_trivial_destr =
+      std::is_trivially_destructible<T>::value;
   inline void grow() {
     len_ *= 2;
 
@@ -64,7 +66,7 @@ class vec {
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    if (!std::is_trivially_destructible<T>::value) {
+    if (!is_trivial_destr) {
       for (size_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -74,7 +76,6 @@ class vec {
     arr_ = n_arr;
     //as array is moved no need for delete []
   }
-
   inline void shrink() {
     auto old_len = len_;
     len_ = size_ * 1.5;
@@ -84,7 +85,7 @@ class vec {
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    if (!std::is_trivially_destructible<T>::value) {
+    if (!is_trivial_destr) {
       for (size_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -100,9 +101,11 @@ class vec {
    * Recommended to leave it at 32 due to optimizations with the allocator
    * @param n_elem number of starting elements
    */
-  explicit vec(uint_32_cx n_elem = 32)
-      : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {}
-  vec(uint_32_cx n_elem, const T val)
+  inline explicit vec(uint_32_cx n_elem = 32)
+      : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {
+    CX_WARNING(ItemsPerAllocBlock > 15,"Items per Block are low -> slow allocation speed");
+  }
+  inline vec(uint_32_cx n_elem, const T val)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     std::fill(arr_, arr_ + n_elem, val);
   }
@@ -116,7 +119,7 @@ class vec {
   template <typename fill_form,
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
-  vec(uint_32_cx n_elem, fill_form form)
+  inline vec(uint_32_cx n_elem, fill_form form)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
@@ -153,12 +156,16 @@ class vec {
   }
   vec(const vec<T>& o) : size_(o.size_), len_(o.len_) {
     arr_ = alloc.allocate(len_);
-    std::copy(o.arr_, o.arr_ + size_, arr_);
+    if (is_trivial_destr) {
+      std::copy(o.arr_ , o.arr_ + o.size_, arr_);
+    } else {
+      std::uninitialized_copy(o.arr_ , o.arr_ + o.size_, arr_);
+    }
   }
   vec& operator=(const vec<T>& o) {
     if (this != &o) {
       //ugly allocator syntax but saves a lot when using e.g. vec<float>
-      if (!std::is_trivially_destructible<T>::value) {
+      if (!is_trivial_destr) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -169,8 +176,10 @@ class vec {
       len_ = o.len_;
       arr_ = alloc.allocate(len_);
 
-      for (uint_32_cx i = 0; i < size_; i++) {
-        std::allocator_traits<Allocator>::construct(alloc, &arr_[i], o.arr_[i]);
+      if (is_trivial_destr) {
+        std::copy(o.arr_ , o.arr_ + o.size_, arr_);
+      } else {
+        std::uninitialized_copy(o.arr_ , o.arr_ + o.size_, arr_);
       }
     }
     return *this;
@@ -183,7 +192,7 @@ class vec {
   //move assignment
   vec& operator=(vec&& o) noexcept {
     if (this != &o) {
-      if (!std::is_trivially_destructible<T>::value) {
+      if (!is_trivial_destr) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -199,8 +208,8 @@ class vec {
     }
     return *this;
   }
-  ~vec() {
-    if (!std::is_trivially_destructible<T>::value) {
+  inline ~vec() {
+    if (!is_trivial_destr) {
       for (uint_32_cx i = 0; i < len_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -307,7 +316,7 @@ class vec {
    * Resets the length back to its starting value
    */
   void clear() {
-    if (!std::is_trivially_destructible<T>::value) {
+    if (!is_trivial_destr) {
       for (uint_32_cx i = 0; i < len_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -315,7 +324,7 @@ class vec {
     alloc.deallocate(arr_, len_);
     size_ = 0;
     len_ = 32;
-    arr_ = alloc.allocate(len_);
+    arr_ = alloc.allocate(32);
   }
   /**
    * Provides access to the underlying array which can be used for sorting

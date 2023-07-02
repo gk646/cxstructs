@@ -20,6 +20,7 @@
 #define FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_H_
+
 #include "cxconfig.h"
 
 #include "cxio.h"

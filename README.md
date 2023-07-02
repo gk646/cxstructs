@@ -10,12 +10,12 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 
 ### Speed Comparison
 
-*Relative to the fastest*
+*Relative to the fastest / with CX_ALLOC*
 
 |                 |  vector  |  Stack   | HashMap  | LinkedList |  Queue   |
 |:----------------|:--------:|:--------:|:--------:|:----------:|:--------:|
-| **std::**       |  *0.81*  |  *0.52*  |  *0.49*  |  **1.00**  |  *0.86*  |
-| **cxstructs::** | **1.00** | **1.00** | **1.00** |   *0.98*   | **1.00** |
+| **std::**       |  *0.81*  |  *0.52*  |  *0.49*  |   *0.71*   | **1.00** |
+| **cxstructs::** | **1.00** | **1.00** | **1.00** |  **1.00**  |  *0.90*  |
 
 ### Features
 
@@ -48,13 +48,13 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 - **Trie**: *limited to ASCII (128)*
 - **Stack**:
 - **HashMap**: *linear Probing with LinkedLists but buffered with static arrays*
-- **HashSet**: *linear Probing with LinkedLists but buffered with static arrays*
-- **Linked List**: *allows for O(1) pop()*
+- **HashSet**: *linear Probing with LinkedLists but buffered with static arrays* (soon)
+- **Linked List**: 
 - **Double Linked List**:
 - **Queue**:
 - **DeQueue**: *using centered array*
 - **Binary Tree**:
-- **Geometry**(*Rectangle, Circle*): *standard efficient 2D forms*
+- **Geometry**(*Rect,Circle,Point*): *standard efficient 2D shapes*
 
 #### Machine Learning
 
@@ -68,12 +68,12 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 - **Search**: *Binary Search (recursive and non-recursive),*
 - **Graph Traversal**: *DepthFirstSearch (on 2d-vector as adjacency matrix),*
 - **MathFunctions**: *Integrals,*
-
+- **PatterMatching**: *Brute-Force, KMP, Boyer-Moore*
 #### Utilities
 
 - **cxtime** *easily measure the time from `now()` to `printTime()`*
 - **cxio** *load files*
-- **cxassert** *custom assertions with optional test*
+- **cxassert** *custom assertions with optional text*
 
 ---
 
@@ -99,5 +99,5 @@ typedef int_fast32_t int_32_cx;
 
 - `#define CX_ALLOC` to use the custom allocator (applies globally)
 - `#define CX_NO_MATRIX`to use the FNN without matrix calculations
-- `CX_ASSERT` enhanced assertion with optional text
-- `CX_WARNING` similar to *CX_ASSERT* but doesn't abort
+- `CX_ASSERT(expr,msg(optinal))` enhanced assertion with optional text
+- `CX_WARNING(expr,msg(optinal))` similar to *CX_ASSERT* but doesn't abort

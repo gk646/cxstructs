@@ -22,21 +22,21 @@
 #define CXSTRUCTS_SRC_CXALLOCATOR_H_
 //#pragma message( "|CXAllocator.h| The custom allocator will preallocate memory when constructing the datastructure to speed up general use. Don't frequently create new datastructures!")
 
+#include <deque>
 #include <iostream>
-#include <vector>
 #include <memory>
 #include <stack>
+#include <vector>
 #include "cxconfig.h"
 
 template <uint_32_cx BlockSize, uint_16_cx ReservedBlocks>
 class Pool {
   uint_32_cx size_;
-  std::vector<void*> addrs_;
+  std::deque<void*> addrs_;
   std::vector<uint8_t*> blocks_;
 
   void allocateBlock() {
     auto* block = new uint8_t[BlockSize];
-    addrs_.reserve(addrs_.capacity()+BlockSize/size_);
     for (uint_32_cx i = 0; i < BlockSize; i += size_) {
       addrs_.push_back(&block[i]);
     }
@@ -44,10 +44,9 @@ class Pool {
   }
 
  public:
-  explicit Pool(uint_32_cx size) : size_(size)  {
-    addrs_.reserve(32);
-    blocks_.reserve(2);
-    for (uint8_t i = 0; i < ReservedBlocks; i++) {
+  explicit Pool(uint_32_cx size) : size_(size) {
+    blocks_.reserve(ReservedBlocks * 2);
+    for (uint_16_cx i = 0; i < ReservedBlocks; i++) {
       allocateBlock();
     }
   }
@@ -61,7 +60,6 @@ class Pool {
     if (addrs_.empty()) {
       allocateBlock();
     }
-
     auto ptr = addrs_.back();
     addrs_.pop_back();
     return ptr;
@@ -69,7 +67,8 @@ class Pool {
   void deallocate(void* ptr) { addrs_.push_back(ptr); }
 };
 
-template <typename T, uint_32_cx BlockSize = 256, uint_16_cx ReservedBlocks = 1>
+template <typename T, size_t BlockSize,
+          uint_16_cx ReservedBlocks>
 class CXPoolAllocator {
   using PoolType = Pool<BlockSize, ReservedBlocks>;
   PoolType pool_;
@@ -82,11 +81,11 @@ class CXPoolAllocator {
   CXPoolAllocator(CXPoolAllocator&& other) noexcept = default;
   CXPoolAllocator& operator=(const CXPoolAllocator& other) = default;
   CXPoolAllocator& operator=(CXPoolAllocator&& other) noexcept = default;
-  ~CXPoolAllocator()= default;
+  ~CXPoolAllocator() = default;
   T* allocate(size_t n) {
     if (n > 1) {
       return static_cast<T*>(malloc(sizeof(T) * n));
-    }else{
+    } else {
       return (T*)pool_.allocate();
     }
   }
@@ -94,10 +93,9 @@ class CXPoolAllocator {
     if (n > 1) {
       free(ptr);
       return;
-    }else{
+    } else {
       pool_.deallocate(ptr);
     }
-
   }
 };
 

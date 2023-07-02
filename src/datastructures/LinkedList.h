@@ -57,17 +57,26 @@ using namespace cxhelper;
  * However, accessing or searching for specific elements in the list requires potentially <b> traversing the entire list,
  * which is an O(n)</b> operation. This makes it less suitable for cases where random access is frequently required.<p>
  */
-template <typename T>
+template <typename T, uint_16_cx ItemsPerAllocBlock = 20>
 class LinkedList {
   using Node = ListNode<T>;
+#ifdef CX_ALLOC
+  using Allocator = CXPoolAllocator<Node, sizeof(Node) * ItemsPerAllocBlock, 1>;
+#else
+  using Allocator = std::allocator<Node>;
+#endif
 
+  Allocator alloc;
   uint_32_cx size_;
   Node sentinel_;
   Node* end_;
-  //Node* prev_end_; // to allow for quick pop_back()
+  bool is_trivial_destr =
+      std::is_trivially_destructible<T>::value;
 
  public:
-  LinkedList() : sentinel_(T()), end_(&sentinel_), size_(0){};
+  LinkedList() : sentinel_(T()), end_(&sentinel_), size_(0){
+    CX_WARNING(ItemsPerAllocBlock > 15,"Items per Block are low -> slow allocation speed");
+                                          };
   LinkedList(const LinkedList<T>& o)
       : sentinel_(T()), end_(&sentinel_), size_(0) {
     Node* current_old = o.sentinel_.next_;
@@ -89,10 +98,19 @@ class LinkedList {
   }
   ~LinkedList() {
     Node* current = sentinel_.next_;
-    while (current != nullptr) {
-      Node* next = current->next_;
-      delete current;
-      current = next;
+    if (is_trivial_destr) {
+      while (current != nullptr) {
+        Node* next = current->next_;
+        alloc.deallocate(current, 1);
+        current = next;
+      }
+    } else {
+      while (current != nullptr) {
+        Node* next = current->next_;
+        std::allocator_traits<Allocator>::destroy(alloc, current);
+        alloc.deallocate(current, 1);
+        current = next;
+      }
     }
   }
   /**
@@ -100,13 +118,16 @@ class LinkedList {
 * @param val - the element to be added
 */
   inline void push_back(const T& val) {
-    end_->next_ = new Node(val);
+    end_->next_ = alloc.allocate(1);
+    std::allocator_traits<Allocator>::construct(alloc, end_->next_, val);
     end_ = end_->next_;
     size_++;
   }
   template <typename... Args>
   inline void emplace_back(Args&&... args) {
-    end_->next_ = new Node(std::forward<Args>(args)...);
+    end_->next_ = alloc.allocate(1);
+    std::allocator_traits<Allocator>::construct(alloc, end_->next_,
+                                                std::forward<Args>(args)...);
     end_ = end_->next_;
     size_++;
   }
@@ -139,8 +160,12 @@ class LinkedList {
     }
 
     val = toDelete->val_;
-    delete toDelete;
     size_--;
+
+    if (!is_trivial_destr) {
+      std::allocator_traits<Allocator>::destroy(alloc, toDelete);
+    }
+    alloc.deallocate(toDelete, 1);
 
     return val;
   }
@@ -150,7 +175,7 @@ class LinkedList {
    * In a Singly Linked List each node doesnt have access to the previous
    * so in order to delete the last it has to iterate over all nodes to update the pointers.
   */
-  inline void pop() {
+  inline void pop_back() {
     CX_ASSERT(sentinel_.next_ && "list is empty");
 
     Node* toDelete = end_;
@@ -169,7 +194,10 @@ class LinkedList {
       size_--;
     }
 
-    delete toDelete;
+    if (!is_trivial_destr) {
+      std::allocator_traits<Allocator>::destroy(alloc, toDelete);
+    }
+    alloc.deallocate(toDelete, 1);
   }
   /**
    * @return a reference to the last element
@@ -191,7 +219,10 @@ class LinkedList {
       if (!sentinel_.next_) {
         end_ = &sentinel_;
       }
-      delete toDelete;
+      if (!is_trivial_destr) {
+        std::allocator_traits<Allocator>::destroy(alloc, toDelete);
+      }
+      alloc.deallocate(toDelete, 1);
       size_--;
     } else {
       Node* current = sentinel_.next_;
@@ -205,7 +236,10 @@ class LinkedList {
         if (toDelete == end_) {
           end_ = current;
         }
-        delete toDelete;
+        if (!is_trivial_destr) {
+          std::allocator_traits<Allocator>::destroy(alloc, toDelete);
+        }
+        alloc.deallocate(toDelete, 1);
         size_--;
       }
     }
@@ -215,10 +249,19 @@ class LinkedList {
  */
   inline void clear() {
     Node* current = sentinel_.next_;
-    while (current != nullptr) {
-      Node* next = current->next_;
-      delete current;
-      current = next;
+    if (is_trivial_destr) {
+      while (current != nullptr) {
+        Node* next = current->next_;
+        alloc.deallocate(current, 1);
+        current = next;
+      }
+    } else {
+      while (current != nullptr) {
+        Node* next = current->next_;
+        std::allocator_traits<Allocator>::destroy(alloc, current);
+        alloc.deallocate(current, 1);
+        current = next;
+      }
     }
     sentinel_.next_ = nullptr;
     end_ = &sentinel_;
@@ -250,7 +293,7 @@ class LinkedList {
   Iterator end() { return Iterator(nullptr); }
 
   friend std::ostream& operator<<(std::ostream& os, const LinkedList<T>& q) {
-    Node* current = q.head_;
+    Node* current = q.sentinel_.next_;
     while (current != nullptr) {
       os << current->val_ << "->";
       current = current->next_;
@@ -369,9 +412,9 @@ class LinkedList {
     list4.push_back(5);
     list4.push_back(10);
     CX_ASSERT(list4.back() == 10);
-    list4.pop();
+    list4.pop_back();
     CX_ASSERT(list4.back() == 5);
-    list4.pop();
+    list4.pop_back();
 
     std::cout << "  Testing removing from single element list..." << std::endl;
     LinkedList<int> list14;
@@ -435,6 +478,21 @@ class LinkedList {
       ++it8;
       ++it9;
     }
+
+    std::cout << "  Testing element removal..."<<std::endl;
+    list9.clear();
+
+    for (uint_fast32_t i = 0; i < 10; i++) {
+      list9.push_back(i);
+    }
+
+    for (uint_fast32_t i = 5; i < 10; i++) {
+      list9.erase(i);
+    }
+    CX_ASSERT(list9.size() == 5, "size 5");
+    CX_ASSERT(list9.back() == 4);
+    list9.pop_back();
+    CX_ASSERT(list9.back() == 3);
   }
 #endif
 };

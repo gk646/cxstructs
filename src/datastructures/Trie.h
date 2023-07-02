@@ -56,7 +56,7 @@ using namespace cxhelper;
 class Trie {
 #ifdef CX_ALLOC
   using Allocator =
-      CXPoolAllocator<cxhelper::TrieNode, sizeof(cxhelper::TrieNode) * 31, 2>;
+      CXPoolAllocator<TrieNode, sizeof(TrieNode) * 31, 1>;
 #else
   using Allocator = std::allocator<cxhelper::TrieNode>;
 #endif

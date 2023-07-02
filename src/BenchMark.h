@@ -22,7 +22,25 @@
 #define CXSTRUCTS_SRC_BENCHMARK_H_
 
 
+//benchmarks are something close to this
 static void VEC(){
-
+  /*
+  cxutil::now();
+  for (uint_fast32_t i = 0; i < 100000; i++) {
+    vec.emplace_back();
+  }
+  for (uint_fast32_t i = 0; i < 100000; i++) {
+    num1 = vec.back().num;
+    //vec.pop_back();
+  }
+  for (const auto& num : vec) {
+    num1 = num.num;
+  }
+  for (uint_fast32_t i = 0; i < 1000000; i++) {
+    vec.emplace_back();
+  }
+  vec.clear();
+  cxutil::printTime<>("cxstructs::vec");
+   */
 }
 #endif  //CXSTRUCTS_SRC_BENCHMARK_H_

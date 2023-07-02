@@ -18,43 +18,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #pragma warning(disable : 4834)
-#include <iostream>
 
-#include <ctime>
+#include <iostream>
+#include "CXStructs.h"
+
 #include <deque>
+#include <list>
 #include <queue>
 #include <stack>
-#include <string>
 #include <unordered_map>
-#include <vector>
-#include "cxio.h"
-#include "cxtime.h"
-
-#include "datastructures/BinaryTree.h"
-#include "datastructures/DeQueue.h"
-#include "datastructures/DoubleLinkedList.h"
-#include "datastructures/HashMap.h"
-#include "datastructures/LinkedList.h"
-#include "datastructures/Queue.h"
-#include "datastructures/Stack.h"
-#include "datastructures/Trie.h"
-#include "datastructures/vec.h"
-#include "machinelearning/FNN.h"
-
-#include "algorithms/GraphTraversal.h"
-#include "algorithms/PatternMatching.h"
-#include "algorithms/Search.h"
-#include "algorithms/Sorting.h"
 
 using namespace cxstructs;
 using namespace cxalgos;
 
 struct Data {
-  int arr[100];
-  int num;
+  int arr[100]{};
+  int num{};
   std::string string = "aösldkfjöalksdöfklj";
+  Data() : num(0) {}
+  Data(const Data& other) {
+    std::copy_n(other.arr, 100, arr);
+    num = other.num;
+    string = other.string;
+  }
+  Data& operator=(const Data& other) {
+    if (this != &other) {
+      // Copy elements from other.arr to arr.
+      std::copy_n(other.arr, 100, arr);
+      // Copy other.num to num.
+      num = other.num;
+      // Copy other.string to string.
+      string = other.string;
+    }
+    return *this;
+  }
 };
-void compareWithSTL()  {
+void compareWithSTL() {
 
   /* |-----------------------------------------------------|
    * |                       HASHMAPS                      |
@@ -109,6 +108,20 @@ void compareWithSTL()  {
   cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
+      list.emplace_back();
+    }
+    for (int i = 0; i < innerCount; i++) {
+      list[i];
+    }
+    for (int i = 0; i < innerCount; i++) {
+      list.removeAt(0);
+    }
+    for (const auto& num : list) {}
+  }
+
+  cxutil::now();
+  for (int k = 0; k < outerCount; k++) {
+    for (int i = 0; i < innerCount; i++) {
       vector.emplace_back();
     }
     for (int i = 0; i < innerCount; i++) {
@@ -120,20 +133,6 @@ void compareWithSTL()  {
     for (const auto& num : vector) {}
   }
   cxutil::printTime<>("std::vector:");
-
-  cxutil::now();
-  for (int k = 0; k < outerCount; k++) {
-    for (int i = 0; i < innerCount; i++) {
-      list.emplace_back();
-    }
-    for (int i = 0; i < innerCount; i++) {
-      list[i];
-    }
-    for (int i = 0; i < innerCount; i++) {
-      list.removeAt(0);
-    }
-    for (const auto& num : list) {}
-  }
   cxutil::printTime<>("cxstructs vec :");
 
   /* |-----------------------------------------------------|
@@ -195,6 +194,7 @@ void compareWithSTL()  {
     }
   }
   cxutil::printTime<>("cxstructs Queue :");
+
   cxutil::now();
   for (int k = 0; k < outerCount; k++) {
     for (int i = 0; i < innerCount; i++) {
@@ -340,7 +340,4 @@ void compareWithSTL()  {
   cxutil::printTime("13.9 mil characters searched in:");
 }
 
-void VEC() {
-
-}
-
+void VEC() {}
