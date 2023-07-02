@@ -20,7 +20,7 @@
 #define FINISHED
 #ifndef CXSTRUCTS_SRC_CXASSERT_H_
 #define CXSTRUCTS_SRC_CXASSERT_H_
-
+#include <iostream>
 void CX_ASSERT_failed(const char* expr, const char* file, int line,
                    const char* message) {
   std::cerr << "Assert failed: " << expr << "\n"
@@ -57,10 +57,22 @@ void warning_failed(const char* expr, const char* file, int line,
 
 #if defined(_MSC_VER) && !defined(_DEBUG)
 #undef CX_ASSERT
-#define CX_ASSERT(expr, message) ((void)0)
+#undef CX_ASSERT_1
+#undef CX_ASSERT_2
+#define CX_ASSERT_1(expr) ((void)0)
+#define CX_ASSERT_2(expr, message) ((void)0)
+#define GET_MACRO(_1, _2, NAME, ...) NAME
+#define CX_ASSERT(...) \
+  GET_MACRO(__VA_ARGS__, CX_ASSERT_2, CX_ASSERT_1)(__VA_ARGS__)
 #elif defined(NDEBUG)
 #undef CX_ASSERT
-#define CX_ASSERT(expr, message) ((void)0)
+#undef CX_ASSERT_1
+#undef CX_ASSERT_2
+#define CX_ASSERT_1(expr) ((void)0)
+#define CX_ASSERT_2(expr, message) ((void)0)
+#define GET_MACRO(_1, _2, NAME, ...) NAME
+#define CX_ASSERT(...) \
+  GET_MACRO(__VA_ARGS__, CX_ASSERT_2, CX_ASSERT_1)(__VA_ARGS__)
 #endif
 
 #endif  //CXSTRUCTS_SRC_CXASSERT_H_

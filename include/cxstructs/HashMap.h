@@ -409,7 +409,7 @@ class HashMap {
   inline void erase(const K& key) {
     size_t hash = hash_func_(key) % buckets_;
     size_ -= arr_[hash].remove(key);
-    CX_ASSERT(size_ >= 0, "no such element to remove");
+    CX_ASSERT(size_ >= 0, "no such element to erase");
   }
   /**
    *

@@ -338,8 +338,11 @@ class mat {
     return re;
   }
   /**
-   * A matrix unit is a matrix with only one nonzero entry with value 1.
-   * This 1 is at position M(row,col)
+   *  A scaled unit matrix is a matrix with dimensions n_rows and n_cols, with only one nonzero entry with value 1 at position M(row, col). <p>
+   *
+   * ij * M -> 0 except for the i-th row which is alpha * M[j, ]<p>
+   * M * ij -> 0 except for the j-th column which is alpha * M[ ,i]
+   *
    * @param n_rows the amount of row of the matrix unit
    * @param n_cols the amount of cols of the matrix unit
    * @param row row of 1
@@ -353,6 +356,25 @@ class mat {
     return re;
   }
   /**
+   * A scaled unit matrix is a matrix with dimensions n_rows and n_cols, with only one nonzero entry with value 1 * alpha at position M(row, col). <p>
+   *
+   * ij * M -> 0 except for the i-th row which is alpha * M[j, ]<p>
+   * M * ij -> 0 except for the j-th column which is alpha * M[ ,i]
+   * @param n_rows the amount of row of the matrix unit
+   * @param n_cols the amount of cols of the matrix unit
+   * @param row row of 1
+   * @param col col of 1
+   * @param alpha the scalar value
+   * @return a new matrix with these properties
+   */
+  static inline mat unit_matrix_scaled(uint_32_cx n_rows, uint_32_cx n_cols,
+                                       uint_32_cx row, uint_32_cx col,
+                                       float alpha) {
+    mat re(n_rows, n_cols);
+    re(row, col) = 1 * alpha;
+    return re;
+  }
+  /**
    *A square matrix with ones on the main diagonal and zeros elsewhere.<p>
    * Has the property that when multiplied with any matrix M returns exactly M
    * @param size side length
@@ -361,7 +383,7 @@ class mat {
   static inline mat eye(uint_32_cx size) {
     mat eye(size, size);
     for (uint_fast32_t i = 0; i < size; i++) {
-      eye.arr[i* size +i] = 1;
+      eye.arr[i * size + i] = 1;
     }
     return eye;
   }
