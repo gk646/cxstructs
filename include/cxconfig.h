@@ -34,6 +34,19 @@ namespace cxml{}
  * namespace for all datastructure related headers
  */
 namespace cxstructs{}
+/**
+ * namespace for all algorithms related headers
+ */
+namespace cxalgos{}
+/**
+ * internal namespace for testing
+ */
+namespace cxtests{}
+/**
+ * internal namespace for helper methods or structs
+ */
+namespace cxhelper{}
+
 #include <cstdint>
 #include "cxassert.h"
 
@@ -43,6 +56,8 @@ typedef int_fast32_t int_32_cx;
 
 #ifdef CX_ALLOC
 #include "CXAllocator.h"
+#else
+#pragma message"|cxconfig.h| To use the custom allocator for increased performance use '#define CX_ALLOC'"
 #endif
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_

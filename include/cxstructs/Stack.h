@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include "../cxconfig.h"
 
@@ -41,10 +42,10 @@ namespace cxstructs {
  * <br><br>
  * The Stack is highly efficient and simple to use, primarily because its LIFO structure ensures that the element to be accessed is always at the same location (the top).
  */
-template <typename T, uint_16_cx PreAllocBlocks = 1>
+template <typename T, uint_16_cx ItemsPerAllocBlock = 33>
 class Stack {
 #ifdef CX_ALLOC
-  using Allocator = CXPoolAllocator<T, sizeof(T) * 33, PreAllocBlocks>;
+  using Allocator = CXPoolAllocator<T, sizeof(T) * ItemsPerAllocBlock, 1>;
 #else
   using Allocator = std::allocator<T>;
 #endif
@@ -52,6 +53,8 @@ class Stack {
   T* arr_;
   uint_32_cx size_;
   uint_32_cx len_;
+  bool is_trivial_destr =
+      std::is_trivially_destructible<T>::value;
 
   inline void grow() {
     len_ *= 2;
@@ -61,7 +64,7 @@ class Stack {
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    if (!std::is_trivially_destructible<T>::value) {
+    if (!is_trivial_destr) {
       for (size_t i = 0; i < size_; ++i) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -71,7 +74,6 @@ class Stack {
     arr_ = n_arr;
     //as array is moved no need for delete []
   }
-
   inline void shrink() {
     auto old_len = len_;
     len_ = size_ * 1.5;
@@ -81,7 +83,7 @@ class Stack {
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    if (!std::is_trivially_destructible<T>::value) {
+    if (!is_trivial_destr) {
       for (size_t i = 0; i < size_; ++i) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -140,7 +142,7 @@ class Stack {
   Stack& operator=(const Stack<T>& o) {
     if (this != &o) {
       //ugly allocator syntax but saves a lot when using primitive types
-      if (!std::is_trivially_destructible<T>::value) {
+      if (!is_trivial_destr) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -165,7 +167,7 @@ class Stack {
   //move assignment
   Stack& operator=(Stack&& o) noexcept {
     if (this != &o) {
-      if (!std::is_trivially_destructible<T>::value) {
+      if (!is_trivial_destr) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -182,7 +184,7 @@ class Stack {
     return *this;
   }
   ~Stack() {
-    if (!std::is_trivially_destructible<T>::value) {
+    if (!is_trivial_destr) {
       for (uint_32_cx i = 0; i < len_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
