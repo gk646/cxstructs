@@ -39,13 +39,11 @@ namespace cxstructs {
  * The difference to a DeQueue (double ended queue) is the limitation of only being able to push_back to the end and pop_back from the start.
  * @tparam T the datatype
  */
-template <typename T, uint_16_cx ItemsPerAllocBlock = 33>
+template <typename T, bool UseCXPoolAllocator = true>
 class Queue {
-#ifdef CX_ALLOC
-  using Allocator = CXPoolAllocator<T, sizeof(T) * ItemsPerAllocBlock, 1>;
-#else
-  using Allocator = std::allocator<T>;
-#endif
+  using Allocator = typename std::conditional<UseCXPoolAllocator,
+                                              CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                              std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx len_;
@@ -93,7 +91,6 @@ class Queue {
       : arr_(alloc.allocate(len)), len_(len) {
     back_ = 0;
     front_ = 0;
-    CX_WARNING(ItemsPerAllocBlock > 15,"Items per Block are low -> slow allocation speed");
   }
   Queue(const Queue& o) : back_(o.back_), len_(o.len_), front_(o.front_) {
     arr_ = alloc.allocate(len_);

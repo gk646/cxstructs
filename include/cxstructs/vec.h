@@ -43,14 +43,11 @@ namespace cxstructs {
  * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
  * It provides the capability to index into the list, push_back elements to the end, and erase elements from the end in a time-efficient manner.</p>
  */
-template <typename T, uint_16_cx ItemsPerAllocBlock = 33>
+template <typename T, bool UseCXPoolAllocator = true>
 class vec {
-#ifdef CX_ALLOC
-  using Allocator = CXPoolAllocator<T, sizeof(T) * ItemsPerAllocBlock, 1>;
-#else
-  using Allocator = std::allocator<T>;
-#endif
-
+  using Allocator = typename std::conditional<UseCXPoolAllocator,
+                                              CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                              std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx size_;
@@ -66,7 +63,6 @@ class vec {
 
     // Destroy the original objects
     if (!is_trivial_destr) {
-#pragma omp simd
       for (size_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -103,8 +99,7 @@ class vec {
    */
   inline explicit vec(uint_32_cx n_elem = 32)
       : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {
-    CX_WARNING(ItemsPerAllocBlock > 15,
-               "Items per Block are low -> slow allocation speed");
+
   }
   inline vec(uint_32_cx n_elem, const T val)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
@@ -244,7 +239,7 @@ class vec {
    * Adds a element to the list
    * @param e the element to be added
    */
-  inline void push(const T& e) {
+  inline void push_back(const T& e) {
     if (size_ == len_) {
       grow();
     }

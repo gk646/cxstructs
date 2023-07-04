@@ -42,13 +42,11 @@ namespace cxstructs {
  * <br><br>
  * The Stack is highly efficient and simple to use, primarily because its LIFO structure ensures that the element to be accessed is always at the same location (the top).
  */
-template <typename T, uint_16_cx ItemsPerAllocBlock = 33>
+template <typename T, bool UseCXPoolAllocator = true>
 class Stack {
-#ifdef CX_ALLOC
-  using Allocator = CXPoolAllocator<T, sizeof(T) * ItemsPerAllocBlock, 1>;
-#else
-  using Allocator = std::allocator<T>;
-#endif
+  using Allocator = typename std::conditional<UseCXPoolAllocator,
+                                              CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                              std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx size_;
