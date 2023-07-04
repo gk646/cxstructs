@@ -19,7 +19,6 @@ jobs:
           rm -rf include/cxml
           rm -rf include/cxutil
           
-          
           mkdir -p include/cxstructs
           mkdir -p include/cxalgos
           mkdir -p include/cxml
@@ -56,7 +55,7 @@ jobs:
           for file in $(find src/cxutil -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               filename=$(basename $file)
-              cp $file ./include/cxml/$filename
+              cp $file ./include/cxutil/$filename
             fi
           done
           
