@@ -24,7 +24,6 @@ jobs:
           rm -rf include/cxutil
           
           
-          
           for file in $(find src -maxdepth 1 -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               filename=$(basename $file)
