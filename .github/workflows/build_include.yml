@@ -12,16 +12,18 @@ jobs:
 
       - name: Copy Files
         run: |
+          mkdir -p include/cxstructs
+          mkdir -p include/cxalgos
+          mkdir -p include/cxml
+          mkdir -p include/cxutil
+          
           rm -rf include/*
           rm -rf include/cxstructs
           rm -rf include/cxalgos
           rm -rf include/cxml
           rm -rf include/cxutil
           
-          mkdir -p include/cxstructs
-          mkdir -p include/cxalgos
-          mkdir -p include/cxml
-          mkdir -p include/cxutil
+          
           
           for file in $(find src -maxdepth 1 -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
