@@ -23,8 +23,8 @@
 
 #include "cxconfig.h"
 
-#include "cxio.h"
-#include "cxtime.h"
+#include "cxutil/cxio.h"
+#include "cxutil/cxtime.h"
 
 #include "cxstructs/BinaryTree.h"
 #include "cxstructs/DeQueue.h"
