@@ -16,11 +16,12 @@ jobs:
           rm -rf include/cxstructs
           rm -rf include/cxalgos
           rm -rf include/cxml
+          rm -rf include/cxutil
           
           mkdir -p include/cxstructs
           mkdir -p include/cxalgos
           mkdir -p include/cxml
-          
+          mkdir -p include/cxutil
           
           for file in $(find src -maxdepth 1 -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
@@ -50,6 +51,13 @@ jobs:
             fi
           done
           
+          for file in $(find src/cxutil -name '*.h' -or -name '*.cpp'); do
+            if sed -n '20p' $file | grep -q "#define FINISHED"; then
+              filename=$(basename $file)
+              cp $file ./include/cxml/$filename
+            fi
+          done
+          
           for file in include/cxstructs/*.h; do
             sed -i '/#ifndef CX_DELETE_TESTS/,/#endif/d' "$file"
           done
@@ -59,6 +67,10 @@ jobs:
           done
           
           for file in include/cxml/*.h; do
+            sed -i '/#ifndef CX_DELETE_TESTS/,/#endif/d' "$file"
+          done
+          
+           for file in include/cxutil/*.h; do
             sed -i '/#ifndef CX_DELETE_TESTS/,/#endif/d' "$file"
           done
 
