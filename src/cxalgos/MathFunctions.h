@@ -101,11 +101,29 @@ double integral_arc_length(Function fx, double a, double b,
   }
   return arc_length;
 }
+/**
+ * Finds the <b>next</b> closest power of two to the right of the given number
+ * @param n the start number
+ * @return the next power of two
+ */
+uint_32_cx next_power_of_2(uint_32_cx n) {
+  //black magic
+  n--;
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+  n++;
+  return n;
+}
+
 }  // namespace cxalgos
 #ifndef CX_DELETE_TESTS
 namespace cxtests {
 using namespace cxalgos;
 static void TEST_MATH() {
+  std::cout<< "TESTING MATH FUNCTIONS" << std::endl;
   auto integral = integral_aprox([](double x) { return x * x; }, 0, 5);
   CX_ASSERT(integral - std::pow(5, 3) / 3 < 0.0001);
   auto volume = integral_volume_solids_of_revolution(
@@ -115,7 +133,11 @@ static void TEST_MATH() {
   auto length = integral_arc_length(
       [](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
       0, std::sqrt(8));
-  std::cout << length << std::endl;
+
+  CX_ASSERT(next_power_of_2(3) == 4);
+  CX_ASSERT(next_power_of_2(3) != 3);
+  CX_ASSERT(next_power_of_2(10) == 16);
+  CX_ASSERT(next_power_of_2(53) == 64);
 }
 }  // namespace cxtests
 #endif

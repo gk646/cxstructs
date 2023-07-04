@@ -170,7 +170,7 @@ bool Rect::intersects(Circle& c) const {
   return (dx * dx + dy * dy) <= (c.radius() * c.radius());
 }
 
-}  // namespace cxstructs
+}  // namespace cxalgos
 
 #ifndef CX_DELETE_TESTS
 static void GEOMETRY_TEST() {

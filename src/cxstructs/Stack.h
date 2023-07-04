@@ -38,7 +38,7 @@ namespace cxstructs {
  * <h2>Stack</h2>
  * This data structure is a type of container adaptor, specifically designed to operate in a LIFO (Last In First Out) context, where elements are inserted and extracted only from the top of the container.
  * <br><br>
- * A Stack is a fundamental data structure that offers straightforward, linear data storage and retrieval. It provides functionality that is essential for numerous algorithms and applications, including parsing, tree traversal, and more.
+ * A Stack is a fundamental data structure that offers straightforward, linear data storage and retrieval. It provides functionality that is essential for numerous cxalgos and applications, including parsing, tree traversal, and more.
  * <br><br>
  * The Stack is highly efficient and simple to use, primarily because its LIFO structure ensures that the element to be accessed is always at the same location (the top).
  */
@@ -351,6 +351,6 @@ class Stack {
   }
 #endif
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 
 #endif  // CXSTRUCTURES_STACK_H

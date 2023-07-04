@@ -56,8 +56,7 @@ class vec {
   uint_32_cx size_;
   uint_32_cx len_;
 
-  bool is_trivial_destr =
-      std::is_trivially_destructible<T>::value;
+  bool is_trivial_destr = std::is_trivially_destructible<T>::value;
   inline void grow() {
     len_ *= 2;
 
@@ -67,6 +66,7 @@ class vec {
 
     // Destroy the original objects
     if (!is_trivial_destr) {
+#pragma omp simd
       for (size_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -103,7 +103,8 @@ class vec {
    */
   inline explicit vec(uint_32_cx n_elem = 32)
       : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {
-    CX_WARNING(ItemsPerAllocBlock > 15,"Items per Block are low -> slow allocation speed");
+    CX_WARNING(ItemsPerAllocBlock > 15,
+               "Items per Block are low -> slow allocation speed");
   }
   inline vec(uint_32_cx n_elem, const T val)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
@@ -157,9 +158,9 @@ class vec {
   vec(const vec<T>& o) : size_(o.size_), len_(o.len_) {
     arr_ = alloc.allocate(len_);
     if (is_trivial_destr) {
-      std::copy(o.arr_ , o.arr_ + o.size_, arr_);
+      std::copy(o.arr_, o.arr_ + o.size_, arr_);
     } else {
-      std::uninitialized_copy(o.arr_ , o.arr_ + o.size_, arr_);
+      std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
     }
   }
   vec& operator=(const vec<T>& o) {
@@ -177,9 +178,9 @@ class vec {
       arr_ = alloc.allocate(len_);
 
       if (is_trivial_destr) {
-        std::copy(o.arr_ , o.arr_ + o.size_, arr_);
+        std::copy(o.arr_, o.arr_ + o.size_, arr_);
       } else {
-        std::uninitialized_copy(o.arr_ , o.arr_ + o.size_, arr_);
+        std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
       }
     }
     return *this;
@@ -307,9 +308,7 @@ class vec {
   [[nodiscard]] inline uint_32_cx size() const { return size_; }
   [[nodiscard]] inline uint_32_cx capacity() const { return len_; }
   void reserve(uint_32_cx new_capacity) {
-    if (len_ < new_capacity) {
-
-    }
+    if (len_ < new_capacity) {}
   }
   /**
    * Clears the list of all its elements <br>

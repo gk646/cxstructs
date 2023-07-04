@@ -496,5 +496,5 @@ class LinkedList {
   }
 #endif
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  // CXSTRUCTS_LINKEDLIST_H

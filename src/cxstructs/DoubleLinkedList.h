@@ -438,6 +438,6 @@ class DoubleLinkedList {
   }
 #endif
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 
 #endif  //CXSTRUCTURES_DOUBLELINKEDLIST_H

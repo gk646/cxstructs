@@ -94,6 +94,6 @@ namespace cxstructs {
     [[nodiscard]] constexpr inline uint_32_cx size() const { return n_elem; }
   };
 
-}  // namespace cxstructs
+}  // namespace cxalgos
 
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_ROW_H_

@@ -150,7 +150,6 @@ class mat {
     }
 
     mat result(n_rows, o.n_cols);
-
     for (uint_32_cx i = 0; i < n_rows; i++) {
       for (uint_32_cx j = 0; j < o.n_cols; j++) {
         float sum = 0.0f;
@@ -586,4 +585,4 @@ class mat {
   }
 #endif
 };
-}  // namespace cxstructs
+}  // namespace cxalgos

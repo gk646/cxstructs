@@ -29,21 +29,21 @@ jobs:
             fi
           done
           
-          for file in $(find src/datastructures -name '*.h' -or -name '*.cpp'); do
+          for file in $(find src/cxstructs -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               filename=$(basename $file)
               cp $file ./include/cxstructs/$filename
             fi
           done
           
-          for file in $(find src/algorithms -name '*.h' -or -name '*.cpp'); do
+          for file in $(find src/cxalgos -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               filename=$(basename $file)
               cp $file ./include/cxalgos/$filename
             fi
           done
           
-          for file in $(find src/machinelearning -name '*.h' -or -name '*.cpp'); do
+          for file in $(find src/cxml -name '*.h' -or -name '*.cpp'); do
             if sed -n '20p' $file | grep -q "#define FINISHED"; then
               filename=$(basename $file)
               cp $file ./include/cxml/$filename

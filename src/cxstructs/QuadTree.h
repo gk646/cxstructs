@@ -43,5 +43,5 @@ class QuadTree {
 
   class Iterator {};
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_

@@ -21,14 +21,14 @@
 #ifndef CXSTRUCTS_HASHMAP_H
 #define CXSTRUCTS_HASHMAP_H
 
-
 #include <cstdint>
 #include <deque>
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include "../cxalgos/MathFunctions.h"
 #include "../cxconfig.h"
-#include "pair.h"
+#include "Pair.h"
 
 // HashMap implementation using constant stack arrays as buffer and linked lists
 //already medium well optimized, should perform faster than the std:unordered_map in a lot of scenarios
@@ -62,7 +62,7 @@ template <typename K, typename V, uint_16_cx ArrayLength>
 struct HashLinkedList {
   using HListNode = HashListNode<K, V>;
 
-  pair<K, V> data_[ArrayLength]{};
+  Pair<K, V> data_[ArrayLength]{};
 
   HListNode* head_;
   HListNode* end_;
@@ -153,10 +153,10 @@ struct HashLinkedList {
     }
 
     if (head_ == nullptr) {
-      head_ = new HashListNode<K, V>(key, val);
+      head_ = new HListNode(key, val);
       end_ = head_;
     } else {
-      end_->next_ = new HashListNode<K, V>(key, val);
+      end_->next_ = new HListNode(key, val);
       end_ = end_->next_;
     }
     return true;
@@ -171,7 +171,7 @@ struct HashLinkedList {
 
     if (head_) {
       if (head_->key_ == key) {
-        HashListNode<K, V>* toDelete = head_;
+        HListNode* toDelete = head_;
         head_ = head_->next_;
         if (!head_) {
           end_ = nullptr;
@@ -179,13 +179,13 @@ struct HashLinkedList {
         delete toDelete;
         return true;
       } else {
-        HashListNode<K, V>* current = head_;
+        HListNode* current = head_;
         while (current->next_ && current->next_->key_ != key) {
           current = current->next_;
         }
 
         if (current->next_) {
-          HashListNode<K, V>* toDelete = current->next_;
+          HListNode* toDelete = current->next_;
           current->next_ = toDelete->next_;
           if (toDelete == end_) {
             end_ = current;
@@ -196,15 +196,14 @@ struct HashLinkedList {
       }
     }
     return false;
-    // throw std::out_of_range("no such element");
   }
   inline bool contains(const K& key) {
     for (uint_fast32_t i = 0; i < ArrayLength; i++) {
-      if (data_[i].first() == key) {
+      if (data_[i].assigned() && data_[i].first() == key) {
         return true;
       }
     }
-    HashListNode<K, V>* it = head_;
+    HListNode* it = head_;
     while (it) {
       if (it->key_ == key) {
         return true;
@@ -218,6 +217,7 @@ struct HashLinkedList {
 
 namespace cxstructs {
 using namespace cxhelper;
+using namespace cxalgos;
 /**
  * <h2>Linear Probing HashMap</h2>
  * This data structure is an efficient key-value store, typically providing lookups in constant time (O(1)).
@@ -247,18 +247,20 @@ class HashMap {
   inline void reHashBig() {
     // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
     auto oldBuckets = buckets_;
-    buckets_ = buckets_ * 2;
+    buckets_ <<= 1;
     auto* newArr = new HList[buckets_];
 
     for (int i = 0; i < oldBuckets; i++) {
+      const auto data = arr_[i].data_;
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
-        size_t hash = hash_func_(arr_[i].data_[j].first()) % buckets_;
-        newArr[hash].replaceAdd(arr_[i].data_[j].first(),
-                                arr_[i].data_[j].second());
+        if (data[j].assigned()) {
+          size_t hash = hash_func_(data[j].first()) & (buckets_ - 1);
+          newArr[hash].replaceAdd(data[j].first(), data[j].second());
+        }
       }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
-        size_t hash = hash_func_(current->key_) % buckets_;
+        size_t hash = hash_func_(current->key_) & (buckets_ - 1);
         newArr[hash].replaceAdd(current->key_, current->value_);
         current = current->next_;
       }
@@ -275,13 +277,13 @@ class HashMap {
 
     for (int i = 0; i < oldBuckets; i++) {
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
-        size_t hash = hash_func_(arr_[i].data_[j].first()) % buckets_;
+        size_t hash = hash_func_(arr_[i].data_[j].first()) & (buckets_ - 1);
         newArr[hash].replaceAdd(arr_[i].data_[j].first(),
                                 arr_[i].data_[j].second());
       }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
-        size_t hash = hash_func_(current->key_) % buckets_;
+        size_t hash = hash_func_(current->key_) & (buckets_ - 1);
         newArr[hash].replaceAdd(current->key_, current->value_);
         current = current->next_;
       }
@@ -292,28 +294,28 @@ class HashMap {
   }
 
  public:
-  explicit HashMap(uint_32_cx initialCapacity = 64, float loadFactor = 0.75)
-      : buckets_(initialCapacity),
-        initialCapacity_(initialCapacity),
+  explicit HashMap(uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
+      : buckets_(next_power_of_2(initialCapacity)),
+        initialCapacity_(next_power_of_2(initialCapacity)),
         size_(0),
-        arr_(new HList[initialCapacity]),
-        maxSize(initialCapacity * 0.75),
+        arr_(new HList[next_power_of_2(initialCapacity)]),
+        maxSize(next_power_of_2(initialCapacity) * loadFactor),
         hash_func_(std::hash<K>()),
         load_factor_(loadFactor) {}
   /**
    * This constructor allows the user to supply their own hash function for the key type
-   * @tparam HashFunction callable that takes a key with type K and returns int
-   * @param hash_function  this function is called with any given key with type K
+   * @tparam HashFunction callable that takes a key with type V and returns int
+   * @param hash_function  this function is called with any given key with type V
    * @param initialCapacity the initial size of the container and the growth size
    */
 
   explicit HashMap(Hash hash_function, uint_32_cx initialCapacity = 64,
-                   float loadFactor = 0.75)
-      : buckets_(initialCapacity),
-        initialCapacity_(initialCapacity),
+                   float loadFactor = 0.9)
+      : buckets_(next_power_of_2(initialCapacity)),
+        initialCapacity_(next_power_of_2(initialCapacity)),
         size_(0),
-        arr_(new HList[initialCapacity]),
-        maxSize(initialCapacity * 0.75),
+        arr_(new HList[next_power_of_2(initialCapacity)]),
+        maxSize(next_power_of_2(initialCapacity) * loadFactor),
         hash_func_(hash_function),
         load_factor_(loadFactor) {}
   HashMap(const HashMap<K, V>& o)
@@ -380,10 +382,10 @@ class HashMap {
    * @return the value at this key
    */
   inline V& operator[](const K& key) const {
-    return arr_[hash_func_(key) % buckets_][key];
+    return arr_[hash_func_(key) & (buckets_ - 1)][key];
   }
   /**
-   * Inserts a key, value pair into the map
+   * Inserts a key, value Pair into the map
    * @param key - the key to access the stored element
    * @param val - the stored value at the given key
    */
@@ -391,7 +393,7 @@ class HashMap {
     if (size_ > maxSize) {
       reHashBig();
     }
-    size_ += arr_[hash_func_(key) % buckets_].replaceAdd(key, val);
+    size_ += arr_[hash_func_(key) & (buckets_ - 1)].replaceAdd(key, val);
   }
   /**
    * Retrieves the value for the given key <p>
@@ -399,15 +401,15 @@ class HashMap {
    * @param key - the key to the value
    * @return the value at this key
    */
-  [[nodiscard]] inline V& at(const K key) const {
-    return arr_[hash_func_(key) % buckets_].at(key);
+  [[nodiscard]] inline V& at(const K& key) const {
+    return arr_[hash_func_(key) & (buckets_ - 1)].at(key);
   }
   /**
-   * Removes this key, value pair from the hashmap
+   * Removes this key, value Pair from the hashmap
    * @param key - they key to be removed
    */
   inline void erase(const K& key) {
-    size_t hash = hash_func_(key) % buckets_;
+    size_t hash = hash_func_(key) & (buckets_ - 1);
     size_ -= arr_[hash].remove(key);
     CX_ASSERT(size_ >= 0, "no such element to erase");
   }

@@ -38,6 +38,7 @@ static void test_cxstructs() {
   DoubleLinkedList<int>::TEST();
   DeQueue<int>::TEST();
   HashMap<int, int>::TEST();
+  HashSet<int>::TEST();
   BinaryTree<int>::TEST();
 
   std::cout << "\nAll tests passed!" << std::endl;

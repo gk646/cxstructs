@@ -380,5 +380,5 @@ class BinaryTree {
   }
 #endif
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  // CXSTRUCTS_BINARYTREE_H

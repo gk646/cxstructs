@@ -1,8 +1,11 @@
 ## Datastructures, Algorithms and Utilities library in C++
 
-A medium-sized header only library of selected datastructures, algorithms, machinelearning topics and utilities. This collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read and well documented.
+A medium-sized header only library of selected datastructures, algorithms, machinelearning topics and utilities. This
+collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read
+and well documented.
 
-While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of efficiency and interface.
+While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of
+efficiency and interface.
 
 **To use these, simply include the *include directory*, and `#include "CXStructs.h"` to include all headers.**
 
@@ -12,17 +15,17 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 
 *Relative to the fastest / with CX_ALLOC*
 
-|                 |  vector  |  Stack   | HashMap  | LinkedList |  Queue   |
-|:----------------|:--------:|:--------:|:--------:|:----------:|:--------:|
-| **std::**       |  *0.81*  |  *0.52*  |  *0.49*  |   *0.71*   | **1.00** |
-| **cxstructs::** | **1.00** | **1.00** | **1.00** |  **1.00**  |  *0.90*  |
+|                 |  vector  |  Stack   | HashMap  | HashSet | LinkedList |  Queue   |
+|:----------------|:--------:|:--------:|:--------:|:-------:|:----------:|:--------:|
+| **std::**       |  *0.81*  |  *0.52*  |  *0.51*  | *0.52*  |   *0.71*   | **1.00** |
+| **cxstructs::** | **1.00** | **1.00** | **1.00** | **1.0** |  **1.00**  |  *0.90*  |
 
 ### Features
 
 - **Performance**
-  - every cxstruct is natively implemented (*no adapters*) at the *lowest* level
+    - every cxstruct is natively implemented (*no adapters*) at the *lowest* level
 - **Custom Allocator**
-  - with `#define CX_ALLOC` allows cxstructs to use the faster custom pool-allocator
+    - with `#define CX_ALLOC` allows cxstructs to use the faster custom pool-allocator
 - **Standard Interface**
     - *cxstructs* follow a similar interface to stl containers
     - but each *cxstruct* has added utility methods
@@ -44,12 +47,12 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 - **Vector**(*vec*): *standard efficient vector*
 - **Matrix**(*mat*): *flattened float array, lots of methods*
 - **Row**(*row*): *compile-time sized, non-mutable container*
-- **Pair**(*pair*): *static container for two types*
+- **Pair**: *static container for two types*
 - **Trie**: *limited to ASCII (128)*
 - **Stack**:
 - **HashMap**: *linear Probing with LinkedLists but buffered with static arrays*
 - **HashSet**: *linear Probing with LinkedLists but buffered with static arrays* (soon)
-- **Linked List**: 
+- **Linked List**:
 - **Double Linked List**:
 - **Queue**:
 - **DeQueue**: *using centered array*
@@ -69,6 +72,7 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
 - **Graph Traversal**: *DepthFirstSearch (on 2d-vector as adjacency matrix),*
 - **MathFunctions**: *Integrals,*
 - **PatterMatching**: *Brute-Force, KMP, Boyer-Moore*
+
 #### Utilities
 
 - **cxtime** *easily measure the time from `now()` to `printTime()`*
@@ -90,11 +94,13 @@ While I am not an expert in datastructures nor C++, I am still aiming for refere
     - *`cxtests` used to hide tests*
 
 #### cxconfig.h
+
 ```cpp
 typedef uint_fast32_t uint_32_cx;
 typedef int_fast32_t int_32_cx;
 typedef int_fast32_t int_32_cx;
 ```
+
 #### macros
 
 - `#define CX_ALLOC` to use the custom allocator (applies globally)

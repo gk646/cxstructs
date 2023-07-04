@@ -328,5 +328,5 @@ class Queue {
 #endif
 };
 
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  // CXSTRUCTS_QUEUE_H

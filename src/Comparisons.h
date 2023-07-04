@@ -244,7 +244,7 @@ void compareWithSTL() {
 
   quick_sort(vec1.data(), 10000000);
 
-  cxutil::printTime<>("cxalgos quicksort:");
+  cxutil::printTime<>("cxstructs quicksort:");
 
   cxutil::now();
 
@@ -340,4 +340,3 @@ void compareWithSTL() {
   cxutil::printTime("13.9 mil characters searched in:");
 }
 
-void VEC() {}

@@ -20,7 +20,7 @@
 #define FINISHED
 #ifndef CXSTRUCTS_SRC_CXALLOCATOR_H_
 #define CXSTRUCTS_SRC_CXALLOCATOR_H_
-//#pragma message( "|CXAllocator.h| The custom allocator will preallocate memory when constructing the datastructure to speed up general use. Don't frequently create new datastructures!")
+//#pragma message( "|CXAllocator.h| The custom allocator will preallocate memory when constructing the datastructure to speed up general use. Don't frequently create new cxstructs!")
 
 #include <deque>
 #include <iostream>

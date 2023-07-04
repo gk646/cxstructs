@@ -323,5 +323,5 @@ class DeQueue {
   }
 #endif
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
