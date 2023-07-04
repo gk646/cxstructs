@@ -241,5 +241,5 @@ class Queue {
   Iterator end() { return Iterator(arr_ + back_); }
 };
 
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  // CXSTRUCTS_QUEUE_H

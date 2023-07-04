@@ -301,5 +301,5 @@ class LinkedList {
     return os;
   }
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  // CXSTRUCTS_LINKEDLIST_H

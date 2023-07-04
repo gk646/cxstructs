@@ -101,5 +101,22 @@ double integral_arc_length(Function fx, double a, double b,
   }
   return arc_length;
 }
+/**
+ * Finds the <b>next</b> closest power of two to the right of the given number
+ * @param n the start number
+ * @return the next power of two
+ */
+uint_32_cx next_power_of_2(uint_32_cx n) {
+  //black magic
+  n--;
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+  n++;
+  return n;
+}
+
 }  // namespace cxalgos
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
