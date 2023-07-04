@@ -204,5 +204,5 @@ class Trie {
    */
   void remove(const std::string& s) { size_--; }
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  //CXSTRUCTS_TRIE_H

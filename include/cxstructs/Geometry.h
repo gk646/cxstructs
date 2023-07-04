@@ -170,6 +170,6 @@ bool Rect::intersects(Circle& c) const {
   return (dx * dx + dy * dy) <= (c.radius() * c.radius());
 }
 
-}  // namespace cxstructs
+}  // namespace cxalgos
 
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_

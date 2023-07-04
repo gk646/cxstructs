@@ -239,6 +239,6 @@ class DoubleLinkedList {
   ReverseIterator begin_re() { return ReverseIterator(end_); }
   ReverseIterator end_re() { return ReverseIterator(nullptr); }
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 
 #endif  //CXSTRUCTURES_DOUBLELINKEDLIST_H

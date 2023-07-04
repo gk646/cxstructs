@@ -298,5 +298,5 @@ class BinaryTree {
   InOrderIterator end() { return InOrderIterator(nullptr); }
 
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  // CXSTRUCTS_BINARYTREE_H

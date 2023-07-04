@@ -135,7 +135,7 @@ void bogo_sort(T* arr, uint_32_cx len, bool ascending = true) {
     }
   }
 }
-/** <h2>Bubble sort</h2> is the one of the simplest sorting algorithms. It works by
+/** <h2>Bubble sort</h2> is the one of the simplest sorting cxalgos. It works by
  * checking to adjacent values and swapping them if they are not in the right
  * order. <p> Best: O(n^2) <p> Average: O(n^2) <p> Worst: O(n^2)
  * @tparam T type

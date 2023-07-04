@@ -27,7 +27,7 @@
  */
 namespace cxutil{}
 /**
- * namespace for all machinelearning related headers
+ * namespace for all cxml related headers
  */
 namespace cxml{}
 /**
@@ -35,7 +35,7 @@ namespace cxml{}
  */
 namespace cxstructs{}
 /**
- * namespace for all algorithms related headers
+ * namespace for all cxalgos related headers
  */
 namespace cxalgos{}
 /**

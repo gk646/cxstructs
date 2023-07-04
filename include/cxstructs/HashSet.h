@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
-#ifndef CXSTRUCTS_HASHMAP_H
-#define CXSTRUCTS_HASHMAP_H
+#ifndef CXSTRUCTS_SRC_DATASTRUCTURES_HASHSET_H_
+#define CXSTRUCTS_SRC_DATASTRUCTURES_HASHSET_H_
 
 #include <cstdint>
 #include <deque>
@@ -28,57 +28,51 @@
 #include <string>
 #include "../cxalgos/MathFunctions.h"
 #include "../cxconfig.h"
-#include "Pair.h"
-
-// HashMap implementation using constant stack arrays as buffer and linked lists
-//already medium well optimized, should perform faster than the std:unordered_map in a lot of scenarios
-//But is uses about 2-3 times as much memory!
-// See Comparison.h
+#include "row.h"
 
 namespace cxhelper {  // namespace to hide the classes
 /**
- * HashListNode used in the HashLinkedList
- * @tparam K - key type
+ * HashSetListNode used in the HashSetLinkedList
  * @tparam V - value type
  */
-template <typename K, typename V>
-struct HashListNode {
-  inline HashListNode(const K& key, const V& val)
-      : key_(key), value_(val), next_(nullptr) {}
-  inline explicit HashListNode(HashListNode<K, V>* o)
-      : key_(o->key_), value_(o->value_), next_(nullptr){};
-  inline HashListNode(HashListNode<K, V>* o, HashListNode<K, V>* next)
-      : key_(o->key_), value_(o->value_), next_(next) {}
-  K key_;
+template <typename V>
+struct HashSetListNode {
+  inline explicit HashSetListNode(const V& key) : value_(key), next_(nullptr) {}
+  inline HashSetListNode(const V& val, HashSetListNode<V>* next)
+      : value_(val), next_(next) {}
   V value_;
-  HashListNode* next_;
+  HashSetListNode* next_;
+};
+template <typename V>
+struct ValueContainer {
+  V value_;
+  bool assigned_;
 };
 /**
- * HashLinkedList used in the buckets of the HashMap
- *@tparam K - key type
+ * HashSetLinkedList used in the buckets of the HashSet
  * @tparam V - value type
  */
-template <typename K, typename V, uint_16_cx ArrayLength>
-struct HashLinkedList {
-  using HListNode = HashListNode<K, V>;
+template <typename V, uint_16_cx ArrayLength>
+struct HashSetLinkedList {
+  using HSListNode = HashSetListNode<V>;
 
-  Pair<K, V> data_[ArrayLength]{};
+  ValueContainer<V> data_[ArrayLength]{};
 
-  HListNode* head_;
-  HListNode* end_;
+  HSListNode* head_;
+  HSListNode* end_;
 
-  inline HashLinkedList() : head_(nullptr), end_(nullptr){};
-  inline HashLinkedList& operator=(const HashLinkedList& o) {
+  inline HashSetLinkedList() : head_(nullptr), end_(nullptr){};
+  inline HashSetLinkedList& operator=(const HashSetLinkedList& o) {
     if (this != &o) {
       std::copy(o.data_, o.data_ + ArrayLength, data_);
 
       if (o.head_) {
-        head_ = new HashListNode<K, V>(o.head_, o.head_->next_);
-        HashListNode<K, V>* current_new = head_;
-        HashListNode<K, V>* current_old = o.head_->next_;
+        head_ = new HSListNode(o.head_->value_, o.head_->next_);
+        HSListNode* current_new = head_;
+        HSListNode* current_old = o.head_->next_;
 
         while (current_old != nullptr) {
-          current_new->next_ = new HashListNode<K, V>(current_old);
+          current_new->next_ = new HSListNode(current_old->value_);
 
           current_new = current_new->next_;
           current_old = current_old->next_;
@@ -90,88 +84,55 @@ struct HashLinkedList {
     }
     return *this;
   }
-  inline ~HashLinkedList() {
-    HListNode* current = head_;
+  inline ~HashSetLinkedList() {
+    HSListNode* current = head_;
     while (current != nullptr) {
-      HListNode* next = current->next_;
+      HSListNode* next = current->next_;
       delete current;
       current = next;
     }
   }
-  inline V& operator[](const K& key) {
-    for (uint_16_cx i = 0; i < ArrayLength; i++) {
-      if (data_[i].assigned() && data_[i].first() == key) {
-        return data_[i].second();
-      }
-    }
+  inline bool replaceAdd(const V& value) {
 
-    HListNode* current = head_;
-    while (current != nullptr) {
-      if (current->key_ == key) {
-        return current->value_;
-      }
-      current = current->next_;
-    }
-    return data_[0].second();
-  }
-  inline V& at(const K& key) {
     for (uint_16_cx i = 0; i < ArrayLength; i++) {
-      if (data_[i].assigned() && data_[i].first() == key) {
-        return data_[i].second();
-      }
-    }
-
-    HListNode* current = head_;
-    while (current != nullptr) {
-      if (current->key_ == key) {
-        return current->value_;
-      }
-      current = current->next_;
-    }
-    throw std::out_of_range("no such key");
-  }
-  inline bool replaceAdd(const K& key, const V& val) {
-    for (int i = 0; i < ArrayLength; i++) {
-      if (data_[i].assigned() && data_[i].first() == key) {
-        data_[i].second() = val;
+      if (data_[i].assigned_ && data_[i].value_ == value) {
         return false;
-      } else if (!data_[i].assigned()) {
-        data_[i].assigned() = true;
-        data_[i].first() = key;
-        data_[i].second() = val;
+      } else if (!data_[i].assigned_) {
+        data_[i].assigned_ = true;
+        data_[i].value_ = value;
         return true;
       }
     }
 
-    HListNode* current = head_;
-    while (current != nullptr) {
-      if (current->key_ == key) {
-        current->value_ = val;
+    HSListNode* current = head_;
+    while (current) {
+      if (current->value_ == value) {
         return false;
       }
       current = current->next_;
     }
 
     if (head_ == nullptr) {
-      head_ = new HListNode(key, val);
+      head_ = new HSListNode(value);
       end_ = head_;
     } else {
-      end_->next_ = new HListNode(key, val);
+      end_->next_ = new HSListNode(value);
       end_ = end_->next_;
     }
     return true;
   }
-  inline bool remove(const K& key) {
+  inline bool remove(const V& value) {
     for (uint_16_cx i = 0; i < ArrayLength; i++) {
-      if (data_[i].assigned() && data_[i].first() == key) {
-        data_[i].assigned() = false;
+      if (data_[i].assigned_ && data_[i].value_ == value) {
+        data_[i].assigned_ = false;
         return true;
       }
     }
 
     if (head_) {
-      if (head_->key_ == key) {
-        HListNode* toDelete = head_;
+      if (head_->value_ == value) {
+
+        HSListNode* toDelete = head_;
         head_ = head_->next_;
         if (!head_) {
           end_ = nullptr;
@@ -179,13 +140,13 @@ struct HashLinkedList {
         delete toDelete;
         return true;
       } else {
-        HListNode* current = head_;
-        while (current->next_ && current->next_->key_ != key) {
+        HSListNode* current = head_;
+        while (current->next_ && current->next_->value_ != value) {
           current = current->next_;
         }
 
         if (current->next_) {
-          HListNode* toDelete = current->next_;
+          HSListNode* toDelete = current->next_;
           current->next_ = toDelete->next_;
           if (toDelete == end_) {
             end_ = current;
@@ -197,15 +158,15 @@ struct HashLinkedList {
     }
     return false;
   }
-  inline bool contains(const K& key) {
+  inline bool contains(const V& key) {
     for (uint_fast32_t i = 0; i < ArrayLength; i++) {
-      if (data_[i].assigned() && data_[i].first() == key) {
+      if (data_[i].assigned_ && data_[i].value_ == key) {
         return true;
       }
     }
-    HListNode* it = head_;
+    HSListNode* it = head_;
     while (it) {
-      if (it->key_ == key) {
+      if (it->value_ == key) {
         return true;
       }
       it = it->next_;
@@ -216,25 +177,12 @@ struct HashLinkedList {
 }  // namespace cxhelper
 
 namespace cxstructs {
-using namespace cxhelper;
 using namespace cxalgos;
-/**
- * <h2>Linear Probing HashMap</h2>
- * This data structure is an efficient key-value store, typically providing lookups in constant time (O(1)).
- * <br><br>
- * <b>Important:</b> For non-primitive and non-string types, a custom hash function is required.
- * <br><br>
- * A HashMap is notably beneficial due to its speed and ease of use. Hashing keys to numerical indices allows for quick value retrieval from the underlying array.
- * <br><br>
- * The term 'linear probing' refers to the technique used to handle hash collisions (when different keys produce the same hash). In this scenario, each array index hosts a linked list that is traversed to locate the correct key.
- */
+template <typename V, typename Hash = std::function<size_t(const V&)>>
+class HashSet {
 
-template <typename K, typename V,
-          typename Hash = std::function<size_t(const K&)>>
-class HashMap {
-  constexpr static uint_16_cx BufferLen = 2;
-  using HList = HashLinkedList<K, V, BufferLen>;
-
+  constexpr inline static uint_16_cx BufferLen = 2;
+  using HList = cxhelper::HashSetLinkedList<V, BufferLen>;
   uint_32_cx initialCapacity_;
   uint_32_cx size_;
   uint_32_cx buckets_;
@@ -247,21 +195,22 @@ class HashMap {
   inline void reHashBig() {
     // once the n_elem limit is reached all values needs to be rehashed to fit to the keys with the new bucket n_elem
     auto oldBuckets = buckets_;
-    buckets_ <<= 1;
+    buckets_ = buckets_ * 2;
     auto* newArr = new HList[buckets_];
 
+#pragma omp simd  //single instruction multiple d?
     for (int i = 0; i < oldBuckets; i++) {
-      const auto data = arr_[i].data_;
+      const auto& data = arr_[i].data_;
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
-        if (data[j].assigned()) {
-          size_t hash = hash_func_(data[j].first()) & (buckets_ - 1);
-          newArr[hash].replaceAdd(data[j].first(), data[j].second());
+        if (data[j].assigned_) {
+          size_t hash = hash_func_(data[j].value_) & (buckets_ - 1);
+          newArr[hash].replaceAdd(data[j].value_);
         }
       }
-      HashListNode<K, V>* current = arr_[i].head_;
+      HashSetListNode<V>* current = arr_[i].head_;
       while (current) {
-        size_t hash = hash_func_(current->key_) & (buckets_ - 1);
-        newArr[hash].replaceAdd(current->key_, current->value_);
+        size_t hash = hash_func_(current->value_) & (buckets_ - 1);
+        newArr[hash].replaceAdd(current->value_);
         current = current->next_;
       }
     }
@@ -277,13 +226,13 @@ class HashMap {
 
     for (int i = 0; i < oldBuckets; i++) {
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
-        size_t hash = hash_func_(arr_[i].data_[j].first()) & (buckets_ - 1);
+        size_t hash = hash_func_(arr_[i].data_[j].first()) % buckets_;
         newArr[hash].replaceAdd(arr_[i].data_[j].first(),
                                 arr_[i].data_[j].second());
       }
-      HashListNode<K, V>* current = arr_[i].head_;
+      HList* current = arr_[i].head_;
       while (current) {
-        size_t hash = hash_func_(current->key_) & (buckets_ - 1);
+        size_t hash = hash_func_(current->key_) % buckets_;
         newArr[hash].replaceAdd(current->key_, current->value_);
         current = current->next_;
       }
@@ -294,13 +243,13 @@ class HashMap {
   }
 
  public:
-  explicit HashMap(uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
+  explicit HashSet(uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
         initialCapacity_(next_power_of_2(initialCapacity)),
         size_(0),
         arr_(new HList[next_power_of_2(initialCapacity)]),
         maxSize(next_power_of_2(initialCapacity) * loadFactor),
-        hash_func_(std::hash<K>()),
+        hash_func_(std::hash<V>()),
         load_factor_(loadFactor) {}
   /**
    * This constructor allows the user to supply their own hash function for the key type
@@ -309,7 +258,7 @@ class HashMap {
    * @param initialCapacity the initial size of the container and the growth size
    */
 
-  explicit HashMap(Hash hash_function, uint_32_cx initialCapacity = 64,
+  explicit HashSet(Hash hash_function, uint_32_cx initialCapacity = 32,
                    float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
         initialCapacity_(next_power_of_2(initialCapacity)),
@@ -318,7 +267,7 @@ class HashMap {
         maxSize(next_power_of_2(initialCapacity) * loadFactor),
         hash_func_(hash_function),
         load_factor_(loadFactor) {}
-  HashMap(const HashMap<K, V>& o)
+  HashSet(const HashSet& o)
       : initialCapacity_(o.initialCapacity_),
         size_(o.size_),
         buckets_(o.buckets_),
@@ -330,7 +279,7 @@ class HashMap {
       arr_[i] = o.arr_[i];
     }
   }
-  HashMap(HashMap<K, V>&& o) noexcept
+  HashSet(HashSet&& o) noexcept
       : initialCapacity_(o.initialCapacity_),
         size_(o.size_),
         buckets_(o.buckets_),
@@ -341,7 +290,7 @@ class HashMap {
     o.arr_ = nullptr;
     o.size_ = 0;
   }
-  HashMap& operator=(const HashMap<K, V>& o) {
+  HashSet& operator=(const HashSet& o) {
     if (this != &o) {
       delete[] arr_;
 
@@ -358,7 +307,7 @@ class HashMap {
     }
     return *this;
   }
-  HashMap& operator=(HashMap<K, V>&& o) noexcept {
+  HashSet& operator=(HashSet&& o) noexcept {
     if (this != &o) {
       delete[] arr_;
 
@@ -374,57 +323,38 @@ class HashMap {
     }
     return *this;
   }
-  ~HashMap() { delete[] arr_; };
-  /**
-   * Retrieves the value for the given key<p>
-   * If the key doesnt exist will return a dummy value
-   * @param key - the key to the value
-   * @return the value at this key
-   */
-  inline V& operator[](const K& key) const {
-    return arr_[hash_func_(key) & (buckets_ - 1)][key];
-  }
+  ~HashSet() { delete[] arr_; };
   /**
    * Inserts a key, value Pair into the map
    * @param key - the key to access the stored element
    * @param val - the stored value at the given key
    */
-  inline void insert(const K& key, const V& val) {
+  inline void insert(const V& val) {
     if (size_ > maxSize) {
       reHashBig();
     }
-    size_ += arr_[hash_func_(key) & (buckets_ - 1)].replaceAdd(key, val);
+    size_ += arr_[hash_func_(val) & (buckets_ - 1)].replaceAdd(val);
   }
   /**
-   * Retrieves the value for the given key <p>
-   * <b>Throws an std::out_of_range if the key doesnt exist</b>
-   * @param key - the key to the value
-   * @return the value at this key
+   * Removes this val, value Pair from the HashSet
+   * @param val - they val to be removed
    */
-  [[nodiscard]] inline V& at(const K& key) const {
-    return arr_[hash_func_(key) & (buckets_ - 1)].at(key);
-  }
-  /**
-   * Removes this key, value Pair from the hashmap
-   * @param key - they key to be removed
-   */
-  inline void erase(const K& key) {
-    size_t hash = hash_func_(key) & (buckets_ - 1);
-    size_ -= arr_[hash].remove(key);
+  inline void erase(const V& val) {
+    size_ -= arr_[hash_func_(val) & (buckets_ - 1)].remove(val);
     CX_ASSERT(size_ >= 0, "no such element to erase");
   }
   /**
    *
-   * @return the current n_elem of the hashMap
+   * @return the current n_elem of the HashSet
    */
   [[nodiscard]] inline uint_32_cx size() const { return size_; }
   /**
-   * The initialCapacity the hashmaps started with and expands along
+   * The initialCapacity the HashSets started with and expands along
    * @return the initial capacity
    */
   [[nodiscard]] inline uint_32_cx capacity() const { return buckets_; }
   /**
-   * Clears the hashMap of all its contents
+   * Clears the HashSet of all its contents
    */
   inline void clear() {
     delete[] arr_;
@@ -434,12 +364,12 @@ class HashMap {
     maxSize = buckets_ * load_factor_;
   }
   /**
- * @brief Checks if the HashMap contains a specific key.
+ * @brief Checks if the HashSet contains a specific key.
  *
- * @param key The key to search for in the HashMap.
- * @return true if the key is present in the HashMap, false otherwise.
+ * @param key The key to search for in the HashSet.
+ * @return true if the key is present in the HashSet, false otherwise.
  */
-  inline bool contains(const K& key) {
+  inline bool contains(const V& key) {
     return arr_[hash_func_(key) % buckets_].contains(key);
   }
   /**
@@ -451,13 +381,6 @@ class HashMap {
       reHashSmall();
     }
   }
-  class ValueIterator {
-    std::deque<V> values_;
-    explicit ValueIterator(HList* h_list, uint_32_cx size)
-        : values_(){
-
-          };
-  };
 };
 }  // namespace cxstructs
-#endif  // CXSTRUCTS_HASHMAP_H
+#endif  //CXSTRUCTS_SRC_DATASTRUCTURES_HASHSET_H_

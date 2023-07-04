@@ -252,5 +252,5 @@ class DeQueue {
   Iterator begin() { return Iterator(arr_ + mid_ - front_ + 1); }
   Iterator end() { return Iterator(arr_+ mid_ + back_); }
 };
-}  // namespace cxstructs
+}  // namespace cxalgos
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
