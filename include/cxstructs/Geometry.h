@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include "../cxalgos/MathFunctions.h"
 #include "../cxconfig.h"
 
 namespace cxstructs {
@@ -30,7 +31,7 @@ namespace cxstructs {
 class Circle;
 class Point;
 
-struct Rect {
+class Rect {
   float x_;
   float y_;
   float w_;
@@ -42,29 +43,62 @@ struct Rect {
       : x_(x), y_(y), w_(width), h_(height) {}
   inline Rect(float x, float y) : x_(x), y_(y), w_(0), h_(0) {}
   /**
-   * @brief Checks if this rectangle intersects with another rectangle.
+   * @brief Checks if this rectangle contained with another rectangle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two rectangles.
    *
    * @param r The other rectangle to check for intersection.
-   * @return `true` if this rectangle intersects with the other rectangle, `false` otherwise.
+   * @return `true` if this rectangle contained with the other rectangle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Rect& r) const {
     return !(x_ > r.x_ + r.w_ || x_ + w_ < r.x_ || y_ > r.y_ + r.h_ ||
              y_ + h_ < r.y_);
   }
   /**
-   * @brief Checks if this rectangle intersects with a circle.
+   * @brief Checks if this rectangle contained with a circle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param c The circle check for intersection.
-   * @return `true` if this rectangle intersects with the circle, `false` otherwise.
+   * @return `true` if this rectangle contained with the circle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(Circle& c) const;
-
+  [[nodiscard]] inline bool intersects(const Circle& c) const;
+  /**
+   * Checks if the given rect is fully contained inside this rectangle.<p>
+   * Contained means non-touching
+   * @param r the other rect
+   * @return true only if r is fully contained
+   */
+  [[nodiscard]] inline bool contains(const Rect& r) const {
+    return (x_ < r.x_ && y_ < r.y_ && x_ + w_ > r.x_ + r.w_ &&
+            y_ + h_ > r.y_ + r.h_);
+  }
+  [[nodiscard]] inline bool contains(const Point& p) const;
+  /**
+ * @brief Getter method for the x position.
+ * @return A readable/writable reference to the x position.
+ */
   [[nodiscard]] inline float& x() { return x_; }
+
+  /**
+ * @brief Getter method for the y position.
+ * @return A readable/writable reference to the y position.
+ */
   [[nodiscard]] inline float& y() { return y_; }
+
+  /**
+ * @brief Const getter method for the x position.
+ * @return The x position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float x() const { return x_; }
+
+  /**
+ * @brief Const getter method for the y position.
+ * @return The y position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float y() const { return y_; }
+  [[nodiscard]] inline float width() const{ return w_; }
+  [[nodiscard]] inline float height() const { return h_; }
   [[nodiscard]] inline float& width() { return w_; }
   [[nodiscard]] inline float& height() { return h_; }
 };
@@ -79,12 +113,12 @@ class Circle {
   inline Circle(float x_pos, float y_pos, float radius)
       : x_(x_pos), y_(y_pos), r_(radius) {}
   /**
-   * @brief Checks if this circle intersects with a rectangle.
+   * @brief Checks if this circle contained with a rectangle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param r The rect check for intersection.
-   * @return `true` if this circle intersects with the rectangle, `false` otherwise.
+   * @return `true` if this circle contained with the rectangle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(Rect& r) const {
     float closestX = std::clamp(x_, r.x(), r.x() + r.width());
@@ -96,27 +130,60 @@ class Circle {
     return (dx * dx + dy * dy) <= (r_ * r_);
   }
   /**
-   * @brief Checks if this circle intersects with a circle.
+   * @brief Checks if this circle contained with a circle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param c The circle check for intersection.
-   * @return `true` if this circle intersects with the circle, `false` otherwise.
+   * @return `true` if this circle contained with the circle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Circle& c) const {
     return !(((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) >
              (r_ * c.r_ + r_ * c.r_));
   }
   /**
-   *
-   * @return  the x position
+   * Checks if the given circle is fully contained inside this circle.<p>
+   * Contained means non-touching
+   * @param c the other circle
+   * @return true only if c is fully contained
    */
-  [[nodiscard]] inline float& x() { return x_; }
+  [[nodiscard]] inline bool contains(const Circle& c) const {
+    return ((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) <
+           (r_ - c.r_) * (r_ - c.r_);
+  }
+  inline bool contains(const Point& p) const;
   /**
-   *
-   * @return  the y position
-   */
+ * @brief Getter method for the x position.
+ * @return A readable/writable reference to the x position.
+ */
+  [[nodiscard]] inline float& x() { return x_; }
+
+  /**
+ * @brief Getter method for the y position.
+ * @return A readable/writable reference to the y position.
+ */
   [[nodiscard]] inline float& y() { return y_; }
+
+  /**
+ * @brief Const getter method for the x position.
+ * @return The x position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float x() const { return x_; }
+
+  /**
+ * @brief Const getter method for the y position.
+ * @return The y position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float y() const { return y_; }
+  /**
+ * @brief Const getter method for the radius.
+ * @return The radius. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float radius() const { return r_; }
+  /**
+ * @brief getter method for the radius.
+ * @return A readable/writable reference to the radius.
+ */
   [[nodiscard]] inline float& radius() { return r_; }
 };
 
@@ -133,8 +200,8 @@ class Point {
    * @param r the rectangle
    * @return true if the point is inside or touches the rectangle
    */
-  [[nodiscard]] inline bool intersects(Rect& r) const {
-    return !(x_ < r.x_ || y_ < r.y_ || x_ > r.x_ + r.w_ || y_ > r.y_ + r.w_);
+  [[nodiscard]] inline bool contained(Rect& r) const {
+    return (x_ > r.x() && y_ > r.y() && x_ < r.x() + r.width() && y_ < r.y() + r.height());
   }
   /**
    * Checks if the point is either inside or touches the circle
@@ -142,34 +209,69 @@ class Point {
    * @param r the rectangle
    * @return true if the point is inside or touches the circle
    */
-  [[nodiscard]] inline bool intersects(Circle& c) const {
+  [[nodiscard]] inline bool contained(Circle& c) const {
     return (x_ - c.x()) * (x_ - c.x()) + (y_ - c.y()) * (y_ - c.y()) <=
            (c.radius() * c.radius());
   }
+  bool operator==(const Rect& r) const { return (x_ == r.x() && y_ == r.y()); }
   /**
-   *
-   * @return  the x position
+   * Calculates the squared distance from this to the given point
+   * @param p to other point
+   * @return the squared distance
    */
+  [[nodiscard]] float dist_sqr(const Point& p) const {
+    return (p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_);
+  }
+  /**
+   * Calculates the distance from this to the given point
+   * @param p to other point
+   * @return the  distance
+   */
+  [[nodiscard]] float dist(const Point& p) const {
+    return cxalgos::fast_sqrt((p.x_ - x_) * (p.x_ - x_) +
+                              (p.y_ - y_) * (p.y_ - y_));
+  }
+
+  /**
+ * @brief Getter method for the x position.
+ * @return A readable/writable reference to the x position.
+ */
   [[nodiscard]] inline float& x() { return x_; }
+
   /**
-   *
-   * @return  the y position
-   */
+ * @brief Getter method for the y position.
+ * @return A readable/writable reference to the y position.
+ */
   [[nodiscard]] inline float& y() { return y_; }
+
+  /**
+ * @brief Const getter method for the x position.
+ * @return The x position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float x() const { return x_; }
+
+  /**
+ * @brief Const getter method for the y position.
+ * @return The y position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float y() const { return y_; }
 };
 
 // Definitions of member functions
+bool Rect::intersects(const Circle& c) const {
+  const float closestX = std::clamp(c.x(), x_, x_ + w_);
+  const float closestY = std::clamp(c.y(), y_, y_ + h_);
 
-bool Rect::intersects(Circle& c) const {
-  float closestX = std::clamp(c.x(), x_, x_ + w_);
-  float closestY = std::clamp(c.y(), y_, y_ + h_);
-
-  float dx = closestX - c.x();
-  float dy = closestY - c.y();
-
-  return (dx * dx + dy * dy) <= (c.radius() * c.radius());
+  return ((closestX - c.x()) * (closestX - c.x()) +
+          (closestY - c.y()) * (closestY - c.y())) <= (c.radius() * c.radius());
+}
+bool Rect::contains(const Point& p) const {
+  return !(x_ > p.x() && y_ > p.y() && x_ + w_ < p.x() && y_ + h_ < p.y());
+}
+bool Circle::contains(const Point& p) const {
+  return ((x_ - p.x()) * (x_ - p.x()) + (y_ - p.y()) * (y_ - p.y())) < r_ * r_;
 }
 
-}  // namespace cxalgos
+}  // namespace cxstructs
 
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
