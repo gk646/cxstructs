@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include "../cxalgos/MathFunctions.h"
 #include "../cxconfig.h"
 
 namespace cxstructs {
@@ -30,7 +31,7 @@ namespace cxstructs {
 class Circle;
 class Point;
 
-struct Rect {
+class Rect {
   float x_;
   float y_;
   float w_;
@@ -42,29 +43,62 @@ struct Rect {
       : x_(x), y_(y), w_(width), h_(height) {}
   inline Rect(float x, float y) : x_(x), y_(y), w_(0), h_(0) {}
   /**
-   * @brief Checks if this rectangle intersects with another rectangle.
+   * @brief Checks if this rectangle contained with another rectangle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two rectangles.
    *
    * @param r The other rectangle to check for intersection.
-   * @return `true` if this rectangle intersects with the other rectangle, `false` otherwise.
+   * @return `true` if this rectangle contained with the other rectangle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Rect& r) const {
     return !(x_ > r.x_ + r.w_ || x_ + w_ < r.x_ || y_ > r.y_ + r.h_ ||
              y_ + h_ < r.y_);
   }
   /**
-   * @brief Checks if this rectangle intersects with a circle.
+   * @brief Checks if this rectangle contained with a circle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param c The circle check for intersection.
-   * @return `true` if this rectangle intersects with the circle, `false` otherwise.
+   * @return `true` if this rectangle contained with the circle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(Circle& c) const;
-
+  [[nodiscard]] inline bool intersects(const Circle& c) const;
+  /**
+   * Checks if the given rect is fully contained inside this rectangle.<p>
+   * Contained means non-touching
+   * @param r the other rect
+   * @return true only if r is fully contained
+   */
+  [[nodiscard]] inline bool contains(const Rect& r) const {
+    return (x_ < r.x_ && y_ < r.y_ && x_ + w_ > r.x_ + r.w_ &&
+            y_ + h_ > r.y_ + r.h_);
+  }
+  [[nodiscard]] inline bool contains(const Point& p) const;
+  /**
+ * @brief Getter method for the x position.
+ * @return A readable/writable reference to the x position.
+ */
   [[nodiscard]] inline float& x() { return x_; }
+
+  /**
+ * @brief Getter method for the y position.
+ * @return A readable/writable reference to the y position.
+ */
   [[nodiscard]] inline float& y() { return y_; }
+
+  /**
+ * @brief Const getter method for the x position.
+ * @return The x position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float x() const { return x_; }
+
+  /**
+ * @brief Const getter method for the y position.
+ * @return The y position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float y() const { return y_; }
+  [[nodiscard]] inline float width() const{ return w_; }
+  [[nodiscard]] inline float height() const { return h_; }
   [[nodiscard]] inline float& width() { return w_; }
   [[nodiscard]] inline float& height() { return h_; }
 };
@@ -79,12 +113,12 @@ class Circle {
   inline Circle(float x_pos, float y_pos, float radius)
       : x_(x_pos), y_(y_pos), r_(radius) {}
   /**
-   * @brief Checks if this circle intersects with a rectangle.
+   * @brief Checks if this circle contained with a rectangle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param r The rect check for intersection.
-   * @return `true` if this circle intersects with the rectangle, `false` otherwise.
+   * @return `true` if this circle contained with the rectangle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(Rect& r) const {
     float closestX = std::clamp(x_, r.x(), r.x() + r.width());
@@ -96,27 +130,60 @@ class Circle {
     return (dx * dx + dy * dy) <= (r_ * r_);
   }
   /**
-   * @brief Checks if this circle intersects with a circle.
+   * @brief Checks if this circle contained with a circle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param c The circle check for intersection.
-   * @return `true` if this circle intersects with the circle, `false` otherwise.
+   * @return `true` if this circle contained with the circle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Circle& c) const {
     return !(((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) >
              (r_ * c.r_ + r_ * c.r_));
   }
   /**
-   *
-   * @return  the x position
+   * Checks if the given circle is fully contained inside this circle.<p>
+   * Contained means non-touching
+   * @param c the other circle
+   * @return true only if c is fully contained
    */
-  [[nodiscard]] inline float& x() { return x_; }
+  [[nodiscard]] inline bool contains(const Circle& c) const {
+    return ((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) <
+           (r_ - c.r_) * (r_ - c.r_);
+  }
+  inline bool contains(const Point& p) const;
   /**
-   *
-   * @return  the y position
-   */
+ * @brief Getter method for the x position.
+ * @return A readable/writable reference to the x position.
+ */
+  [[nodiscard]] inline float& x() { return x_; }
+
+  /**
+ * @brief Getter method for the y position.
+ * @return A readable/writable reference to the y position.
+ */
   [[nodiscard]] inline float& y() { return y_; }
+
+  /**
+ * @brief Const getter method for the x position.
+ * @return The x position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float x() const { return x_; }
+
+  /**
+ * @brief Const getter method for the y position.
+ * @return The y position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float y() const { return y_; }
+  /**
+ * @brief Const getter method for the radius.
+ * @return The radius. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float radius() const { return r_; }
+  /**
+ * @brief getter method for the radius.
+ * @return A readable/writable reference to the radius.
+ */
   [[nodiscard]] inline float& radius() { return r_; }
 };
 
@@ -133,8 +200,8 @@ class Point {
    * @param r the rectangle
    * @return true if the point is inside or touches the rectangle
    */
-  [[nodiscard]] inline bool intersects(Rect& r) const {
-    return !(x_ < r.x_ || y_ < r.y_ || x_ > r.x_ + r.w_ || y_ > r.y_ + r.w_);
+  [[nodiscard]] inline bool contained(Rect& r) const {
+    return (x_ > r.x() && y_ > r.y() && x_ < r.x() + r.width() && y_ < r.y() + r.height());
   }
   /**
    * Checks if the point is either inside or touches the circle
@@ -142,168 +209,205 @@ class Point {
    * @param r the rectangle
    * @return true if the point is inside or touches the circle
    */
-  [[nodiscard]] inline bool intersects(Circle& c) const {
+  [[nodiscard]] inline bool contained(Circle& c) const {
     return (x_ - c.x()) * (x_ - c.x()) + (y_ - c.y()) * (y_ - c.y()) <=
            (c.radius() * c.radius());
   }
+  bool operator==(const Rect& r) const { return (x_ == r.x() && y_ == r.y()); }
   /**
-   *
-   * @return  the x position
+   * Calculates the squared distance from this to the given point
+   * @param p to other point
+   * @return the squared distance
    */
+  [[nodiscard]] float dist_sqr(const Point& p) const {
+    return (p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_);
+  }
+  /**
+   * Calculates the distance from this to the given point
+   * @param p to other point
+   * @return the  distance
+   */
+  [[nodiscard]] float dist(const Point& p) const {
+    return cxalgos::fast_sqrt((p.x_ - x_) * (p.x_ - x_) +
+                              (p.y_ - y_) * (p.y_ - y_));
+  }
+
+  /**
+ * @brief Getter method for the x position.
+ * @return A readable/writable reference to the x position.
+ */
   [[nodiscard]] inline float& x() { return x_; }
+
   /**
-   *
-   * @return  the y position
-   */
+ * @brief Getter method for the y position.
+ * @return A readable/writable reference to the y position.
+ */
   [[nodiscard]] inline float& y() { return y_; }
+
+  /**
+ * @brief Const getter method for the x position.
+ * @return The x position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float x() const { return x_; }
+
+  /**
+ * @brief Const getter method for the y position.
+ * @return The y position. Used when object is const, and does not allow modification.
+ */
+  [[nodiscard]] inline float y() const { return y_; }
 };
 
 // Definitions of member functions
+bool Rect::intersects(const Circle& c) const {
+  const float closestX = std::clamp(c.x(), x_, x_ + w_);
+  const float closestY = std::clamp(c.y(), y_, y_ + h_);
 
-bool Rect::intersects(Circle& c) const {
-  float closestX = std::clamp(c.x(), x_, x_ + w_);
-  float closestY = std::clamp(c.y(), y_, y_ + h_);
-
-  float dx = closestX - c.x();
-  float dy = closestY - c.y();
-
-  return (dx * dx + dy * dy) <= (c.radius() * c.radius());
+  return ((closestX - c.x()) * (closestX - c.x()) +
+          (closestY - c.y()) * (closestY - c.y())) <= (c.radius() * c.radius());
+}
+bool Rect::contains(const Point& p) const {
+  return !(x_ > p.x() && y_ > p.y() && x_ + w_ < p.x() && y_ + h_ < p.y());
+}
+bool Circle::contains(const Point& p) const {
+  return ((x_ - p.x()) * (x_ - p.x()) + (y_ - p.y()) * (y_ - p.y())) < r_ * r_;
 }
 
-}  // namespace cxalgos
+}  // namespace cxstructs
 
 #ifndef CX_DELETE_TESTS
 static void GEOMETRY_TEST() {
   using namespace cxstructs;
+
   std::cout << "RECTANGLE TESTS" << std::endl;
+
   // Rectangles that are the same
+  std::cout << "  Testing rectangles that are the same..." << std::endl;
   Rect r1(10, 10, 50, 50);
   Rect r2(10, 10, 50, 50);
-  CX_ASSERT(r1.intersects(r2), "Test 1: Same rectangles should intersect");
 
+  CX_ASSERT(r1.intersects(r2), "Same rectangles should intersect");
+  CX_ASSERT(!r1.contains(r2));
   // Rectangles that share an edge
+  std::cout << "  Testing rectangles that share an edge..." << std::endl;
   Rect r3(10, 10, 50, 50);
   Rect r4(60, 10, 50, 50);
-  CX_ASSERT(r3.intersects(r4), "both intersection and collision counts");
+  CX_ASSERT(r3.intersects(r4),
+            "Rectangles that share an edge should intersect");
 
   // Rectangle inside another rectangle
+  std::cout << "  Testing rectangle inside another rectangle..." << std::endl;
   Rect r5(10, 10, 50, 50);
   Rect r6(20, 20, 10, 10);
   CX_ASSERT(r5.intersects(r6),
-            "Test 3: Rectangle inside another rectangle should intersect");
+            "Rectangle inside another rectangle should intersect");
 
   // Rectangles with intersecting area
+  std::cout << "  Testing rectangles with intersecting area..." << std::endl;
   Rect r7(10, 10, 50, 50);
   Rect r8(40, 40, 50, 50);
-  CX_ASSERT(r7.intersects(r8),
-            "Test 4: Overlapping rectangles should intersect");
+  CX_ASSERT(r7.intersects(r8), "Overlapping rectangles should intersect");
 
   // Non-intersecting rectangles
+  std::cout << "  Testing non-intersecting rectangles..." << std::endl;
   Rect r9(10, 10, 50, 50);
   Rect r10(100, 100, 50, 50);
   CX_ASSERT(!r9.intersects(r10),
-            "Test 5: Non-overlapping rectangles should not intersect");
-  // Test 1: Circle inside rectangle
-  std::cout << "  Testing circle inside rectangle..." << std::endl;
+            "Non-overlapping rectangles should not intersect");
+
+  std::cout << "  Testing circle and rectangle intersection...\n";
+
+  // Circle inside rectangle
   Circle c1(5, 5, 1);
   Rect r11(0, 0, 10, 10);
   CX_ASSERT(r11.intersects(c1), "Circle inside rectangle should intersect");
 
-  // Test 2: Circle intersecting rectangle at edge
-  std::cout << "  Testing circle intersecting rectangle at edge..."
-            << std::endl;
+  // Circle intersecting rectangle at edge
   Circle c2(10, 5, 5);
   Rect r12(0, 0, 10, 10);
   CX_ASSERT(r12.intersects(c2),
             "Circle intersecting rectangle at edge should intersect");
 
-  // Test 3: Circle not intersecting rectangle
-  std::cout << "  Testing circle not intersecting rectangle..." << std::endl;
+  // Circle not intersecting rectangle
   Circle c3(15, 15, 1);
   Rect r13(0, 0, 10, 10);
   CX_ASSERT(!r13.intersects(c3),
             "Circle not intersecting rectangle should not intersect");
 
-  // Test 4: Circle intersecting rectangle at corner
-  std::cout << "  Testing circle intersecting rectangle at corner..."
-            << std::endl;
+  // Circle intersecting rectangle at corner
   Circle c4(10, 10, 5);
   Rect r14(0, 0, 10, 10);
   CX_ASSERT(r14.intersects(c4),
             "Circle intersecting rectangle at corner should intersect");
 
+  std::cout << "  Testing rectangle contains...\n";
+  Rect r16(1, 1, 8, 8);
+  Point p10(5, 5);
+  Point p11(9, 9);
+  CX_ASSERT(r14.contains(r16), "Rectangle should contain smaller rectangle");
+  CX_ASSERT(!r14.contains(r14), "Rectangle should not contain itself");
+  CX_ASSERT(r16.contains(p10), "Rectangle should contain point inside it");
+  CX_ASSERT(r14.contains(p11), "Rectangle should contain point on its edge");
+  CX_ASSERT(r16.contains(p11));
 
-  std::cout << "CIRCLE TESTS:" << std::endl;
+  std::cout << "  Testing circle contains circle...\n";
+  Circle c5(0.0, 0.0, 10.0);
+  Circle c6(8.0, 0.0, 5.0);   // Circle contained within c5
+  Circle c7(20.0, 0.0, 5.0);  // Circle outside c5
+  Circle c10(0.0, 0.0, 5.0);
+  Circle c11(0.0, 0.0, 10.0);
 
-  // Circle-Rectangle Intersection Tests
-  {
-    std::cout << "  Circle-Rectangle Intersection Tests:" << std::endl;
+  // Circle c6 contained within Circle c5
+  CX_ASSERT(c6.intersects(c5),
+            "Circle contained within another circle should intersect");
 
-    // Define some rectangles
-    Rect r1(0.0, 0.0, 10.0, 10.0);
+  // Circle c7 does not intersect with Circle c5
+  CX_ASSERT(!c7.intersects(c5),
+            "Circle not intersecting another circle should not intersect");
 
-    // Define some circles
-    Circle c1(5.0, 5.0, 5.0);  // Circle inside the Rectangle
-    Circle c2(15.0, 5.0, 5.0); // Circle inside the Rectangle
-    Circle c3(16.0, 5.0, 5.0); // Circle outside the Rectangle
+  // Circle c10 contained within Circle c5
+  CX_ASSERT(c5.contains(c10),
+            "Circle c10 should be contained within Circle c5");
 
-    // Circle c1 intersects with Rectangle r1
-    CX_ASSERT(c1.intersects(r1), "Circle-Rectangle Intersection Test 1 Failed");
-    // Circle c2 does  intersect with Rectangle r1
-    CX_ASSERT(c2.intersects(r1), "Circle-Rectangle Intersection Test 2 Failed");
-    CX_ASSERT(!c3.intersects(r1), "Circle-Rectangle Intersection Test 3 Failed");
-  }
+  // Circle c7 not contained within Circle c5
+  CX_ASSERT(!c5.contains(c7),
+            "Circle c7 should not be contained within Circle c5");
 
-  // Circle-Circle Intersection Tests
-  {
-    std::cout << "  Circle-Circle Intersection Tests:" << std::endl;
-
-    // Define some circles
-    Circle c1(0.0, 0.0, 10.0);
-    Circle c2(8.0, 0.0, 5.0);   // Circle intersects with c1
-    Circle c3(20.0, 0.0, 5.0);  // Circle outside c1
-
-    // Circle c2 intersects with Circle c1
-    CX_ASSERT(c2.intersects(c1), "Circle-Circle Intersection Test 1 Failed");
-    // Circle c3 does not intersect with Circle c1
-    CX_ASSERT(!c3.intersects(c1), "Circle-Circle Intersection Test 2 Failed");
-  }
+  // Circle c11 not contained within Circle c5
+  CX_ASSERT(!c5.contains(c11),
+            "Circle c11 should not be contained within Circle c5");
 
   std::cout << "POINT TESTS:" << std::endl;
 
-  // Point-Rectangle Intersection Tests
-  {
-    std::cout << "  Point-Rectangle Intersection Tests:" << std::endl;
+  // Define some rectangles
+  Rect r15(0.0, 0.0, 10.0, 10.0);
 
-    // Define some rectangles
-    Rect r1(0.0, 0.0, 10.0, 10.0);
+  // Define some points
+  Point p1(5.0, 5.0);
+  Point p2(15.0, 5.0);
 
-    // Define some points
-    Point p1(5.0, 5.0);
-    Point p2(15.0, 5.0);
+  // Point p1 is inside Rectangle r15
+  std::cout << "  Testing point inside rectangle..." << std::endl;
+  CX_ASSERT(p1.contained(r15), "Point inside rectangle should be contained");
 
-    // Point p1 is inside Rectangle r1
-    CX_ASSERT(p1.intersects(r1), "Point-Rectangle Intersection Test 1 Failed");
-    // Point p2 is outside Rectangle r1
-    CX_ASSERT(!p2.intersects(r1), "Point-Rectangle Intersection Test 2 Failed");
-  }
+  // Point p2 is outside Rectangle r15
+  std::cout << "  Testing point outside rectangle..." << std::endl;
+  CX_ASSERT(!p2.contained(r15),
+            "Point outside rectangle should not be contained");
 
-  // Point-Circle Intersection Tests
-  {
-    std::cout << "  Point-Circle Intersection Tests:" << std::endl;
+  // Define some circles
+  Circle c8(0.0, 0.0, 10.0);
 
-    // Define some circles
-    Circle c1(0.0, 0.0, 10.0);
+  // Define some points
+  Point p3(5.0, 5.0);
+  Point p4(15.0, 5.0);
 
-    // Define some points
-    Point p1(5.0, 5.0);
-    Point p2(15.0, 5.0);
+  // Point p3 is inside Circle c8
+  std::cout << "  Testing point inside circle..." << std::endl;
+  CX_ASSERT(p3.contained(c8), "Point inside circle should be contained");
 
-    // Point p1 is inside Circle c1
-    CX_ASSERT(p1.intersects(c1), "Point-Circle Intersection Test 1 Failed");
-    // Point p2 is outside Circle c1
-    CX_ASSERT(!p2.intersects(c1), "Point-Circle Intersection Test 2 Failed");
-  }
+  // Point p4 is outside Circle c8
+  std::cout << "  Testing point outside circle..." << std::endl;
+  CX_ASSERT(!p4.contained(c8), "Point outside circle should not be contained");
 }
 #endif
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_

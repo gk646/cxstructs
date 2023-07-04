@@ -81,5 +81,6 @@ jobs:
           git add include/*
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git commit -am "Auto commit copied files" || exit 0
+          branch_name=$(git branch --show-current)
+          git commit -am "Built include [${branch_name}](https://github.com/username/repo/tree/${branch_name})" || exit 0
           git push

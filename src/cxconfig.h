@@ -19,44 +19,39 @@
 // SOFTWARE.
 #define FINISHED
 
-
 #ifndef CXSTRUCTS_SRC_CONFIG_H_
 #define CXSTRUCTS_SRC_CONFIG_H_
 /**
  * namespace for all utility related headers
  */
-namespace cxutil{}
+namespace cxutil {}
 /**
  * namespace for all cxml related headers
  */
-namespace cxml{}
+namespace cxml {}
 /**
  * namespace for all datastructure related headers
  */
-namespace cxstructs{}
+namespace cxstructs {}
 /**
  * namespace for all cxalgos related headers
  */
-namespace cxalgos{}
+namespace cxalgos {}
 /**
  * internal namespace for testing
  */
-namespace cxtests{}
+namespace cxtests {}
 /**
  * internal namespace for helper methods or structs
  */
-namespace cxhelper{}
+namespace cxhelper {}
 
 #include <cstdint>
+
 #include "cxutil/cxassert.h"
 typedef uint_fast32_t uint_32_cx;
 typedef uint_fast16_t uint_16_cx;
 typedef int_fast32_t int_32_cx;
-
-#ifdef CX_ALLOC
 #include "CXAllocator.h"
-#else
-#pragma message"|cxconfig.h| To use the custom allocator for increased performance use '#define CX_ALLOC'"
-#endif
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_

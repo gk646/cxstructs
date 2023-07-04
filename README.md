@@ -25,7 +25,8 @@ efficiency and interface.
 - **Performance**
     - every cxstruct is natively implemented (*no adapters*) at the *lowest* level
 - **Custom Allocator**
-    - with `#define CX_ALLOC` allows cxstructs to use the faster custom pool-allocator
+    - per default uses the faster CXPoolAllocator
+    - can be disabled individually via the last template option `cstruct<int,false>`
 - **Standard Interface**
     - *cxstructs* follow a similar interface to stl containers
     - but each *cxstruct* has added utility methods
@@ -44,19 +45,20 @@ efficiency and interface.
 
 #### Data Structures
 
-- **Vector**(*vec*): *standard efficient vector*
+- **Vector**(*vec*):
 - **Matrix**(*mat*): *flattened float array, lots of methods*
 - **Row**(*row*): *compile-time sized, non-mutable container*
 - **Pair**: *static container for two types*
 - **Trie**: *limited to ASCII (128)*
 - **Stack**:
 - **HashMap**: *linear Probing with LinkedLists but buffered with static arrays*
-- **HashSet**: *linear Probing with LinkedLists but buffered with static arrays* (soon)
+- **HashSet**: *linear Probing with LinkedLists but buffered with static arrays*
 - **Linked List**:
 - **Double Linked List**:
 - **Queue**:
 - **DeQueue**: *using centered array*
 - **Binary Tree**:
+- **QuadTree**: *(soon)*
 - **Geometry**(*Rect,Circle,Point*): *standard efficient 2D shapes*
 
 #### Machine Learning
@@ -70,7 +72,7 @@ efficiency and interface.
 - **Sorting**: *QuickSort, MergeSort, Bubblesort, Bogosort, Selectionsort*
 - **Search**: *Binary Search (recursive and non-recursive),*
 - **Graph Traversal**: *DepthFirstSearch (on 2d-vector as adjacency matrix),*
-- **MathFunctions**: *Integrals,*
+- **MathFunctions**: *Integrals,next_power_of_2,*
 - **PatterMatching**: *Brute-Force, KMP, Boyer-Moore*
 
 #### Utilities
@@ -102,8 +104,6 @@ typedef int_fast32_t int_32_cx;
 ```
 
 #### macros
-
-- `#define CX_ALLOC` to use the custom allocator (applies globally)
 - `#define CX_NO_MATRIX`to use the FNN without matrix calculations
 - `CX_ASSERT(expr,msg(optinal))` enhanced assertion with optional text
 - `CX_WARNING(expr,msg(optinal))` similar to *CX_ASSERT* but doesn't abort

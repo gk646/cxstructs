@@ -57,26 +57,21 @@ using namespace cxhelper;
  * However, accessing or searching for specific elements in the list requires potentially <b> traversing the entire list,
  * which is an O(n)</b> operation. This makes it less suitable for cases where random access is frequently required.<p>
  */
-template <typename T, uint_16_cx ItemsPerAllocBlock = 20>
+template <typename T, bool UseCXPoolAllocator = true>
 class LinkedList {
+  using Allocator =
+      typename std::conditional<UseCXPoolAllocator,
+                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                std::allocator<T>>::type;
   using Node = ListNode<T>;
-#ifdef CX_ALLOC
-  using Allocator = CXPoolAllocator<Node, sizeof(Node) * ItemsPerAllocBlock, 1>;
-#else
-  using Allocator = std::allocator<Node>;
-#endif
-
   Allocator alloc;
   uint_32_cx size_;
   Node sentinel_;
   Node* end_;
-  bool is_trivial_destr =
-      std::is_trivially_destructible<T>::value;
+  bool is_trivial_destr = std::is_trivially_destructible<T>::value;
 
  public:
-  LinkedList() : sentinel_(T()), end_(&sentinel_), size_(0){
-    CX_WARNING(ItemsPerAllocBlock > 15,"Items per Block are low -> slow allocation speed");
-                                          };
+  LinkedList() : sentinel_(T()), end_(&sentinel_), size_(0){};
   LinkedList(const LinkedList<T>& o)
       : sentinel_(T()), end_(&sentinel_), size_(0) {
     Node* current_old = o.sentinel_.next_;
@@ -479,7 +474,7 @@ class LinkedList {
       ++it9;
     }
 
-    std::cout << "  Testing element removal..."<<std::endl;
+    std::cout << "  Testing element removal..." << std::endl;
     list9.clear();
 
     for (uint_fast32_t i = 0; i < 10; i++) {
@@ -496,5 +491,5 @@ class LinkedList {
   }
 #endif
 };
-}  // namespace cxalgos
+}  // namespace cxstructs
 #endif  // CXSTRUCTS_LINKEDLIST_H

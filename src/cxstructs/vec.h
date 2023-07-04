@@ -43,14 +43,11 @@ namespace cxstructs {
  * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
  * It provides the capability to index into the list, push_back elements to the end, and erase elements from the end in a time-efficient manner.</p>
  */
-template <typename T, uint_16_cx ItemsPerAllocBlock = 33>
+template <typename T, bool UseCXPoolAllocator = true>
 class vec {
-#ifdef CX_ALLOC
-  using Allocator = CXPoolAllocator<T, sizeof(T) * ItemsPerAllocBlock, 1>;
-#else
-  using Allocator = std::allocator<T>;
-#endif
-
+  using Allocator = typename std::conditional<UseCXPoolAllocator,
+                                              CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                              std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx size_;
@@ -66,7 +63,6 @@ class vec {
 
     // Destroy the original objects
     if (!is_trivial_destr) {
-#pragma omp simd
       for (size_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -103,8 +99,7 @@ class vec {
    */
   inline explicit vec(uint_32_cx n_elem = 32)
       : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {
-    CX_WARNING(ItemsPerAllocBlock > 15,
-               "Items per Block are low -> slow allocation speed");
+
   }
   inline vec(uint_32_cx n_elem, const T val)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
@@ -244,7 +239,7 @@ class vec {
    * Adds a element to the list
    * @param e the element to be added
    */
-  inline void push(const T& e) {
+  inline void push_back(const T& e) {
     if (size_ == len_) {
       grow();
     }
@@ -434,9 +429,9 @@ class vec {
     // Test: Testing push_back and erase
     std::cout << "   Testing push_back and erase...\n";
     vec<int> list1;
-    list1.push(5);
-    list1.push(10);
-    list1.push(15);
+    list1.push_back(5);
+    list1.push_back(10);
+    list1.push_back(15);
 
     list1.remove(10);
     CX_ASSERT(list1.size() == 2);
@@ -452,9 +447,9 @@ class vec {
     // Test: Testing iterator
     std::cout << "   Testing iterator...\n";
     list1.clear();
-    list1.push(5);
-    list1.push(10);
-    list1.push(15);
+    list1.push_back(5);
+    list1.push_back(10);
+    list1.push_back(15);
 
     int checkNum = 0;
     for (auto& num : list1) {
@@ -467,7 +462,7 @@ class vec {
     std::cout << "   Testing resizing and shrink_to_fit...\n";
     list1.clear();
     for (int i = 0; i < 10000; i++) {
-      list1.push(i);
+      list1.push_back(i);
     }
     list1.shrink_to_fit();
     CX_ASSERT(list1.capacity() == list1.size() * 1.5);
@@ -480,7 +475,7 @@ class vec {
     // Test: Testing contains
     std::cout << "   Testing contains...\n";
     list1.clear();
-    list1.push(5);
+    list1.push_back(5);
     CX_ASSERT(list1.contains(5) == true);
     CX_ASSERT(list1.contains(5, false) == true);
 
@@ -488,11 +483,11 @@ class vec {
     std::cout << "   Testing append...\n";
     list1.clear();
 
-    list1.push(5);
-    list1.push(10);
+    list1.push_back(5);
+    list1.push_back(10);
     vec<int> list2;
     for (int i = 0; i < 1000000; i++) {
-      list2.push(i);
+      list2.push_back(i);
     }
     CX_ASSERT(list2.size() == 1000000);
 
@@ -513,7 +508,7 @@ class vec {
     std::cout << "   Testing copy constructor...\n";
     vec<int> list5(10);
     for (uint_32_cx i = 0; i < 10; i++) {
-      list5.push(i);
+      list5.push_back(i);
     }
     vec<int> list6 = list5;  // copy constructor
     for (uint_32_cx i = 0; i < 10; i++) {
@@ -545,7 +540,7 @@ class vec {
 
     // Test: Testing pop_back()
     std::cout << "   Testing pop_back()...\n";
-    list9.push(100);
+    list9.push_back(100);
     CX_ASSERT(list9.pop_back() == 100);
     CX_ASSERT(list9.size() == 10);
 
@@ -553,7 +548,7 @@ class vec {
     std::cout << "   Checking for memory leaks...\n";
     list1.clear();
     for (int i = 0; i < 10000000; i++) {
-      list1.push(i);
+      list1.push_back(i);
     }
   }
 #endif
