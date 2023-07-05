@@ -36,7 +36,7 @@ class Shape {
 
  public:
   [[nodiscard]] virtual bool contains(const Shape& s) const {};
-  [[nodiscard]] virtual bool intersects(const Shape& r) const{} ;
+  [[nodiscard]] virtual bool intersects(const Shape& r) const {};
 };
 
 class Rect : public Shape {
@@ -58,7 +58,7 @@ class Rect : public Shape {
    * @param r The other rectangle to check for intersection.
    * @return `true` if this rectangle contains with the other rectangle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(const Rect& r) const  {
+  [[nodiscard]] inline bool intersects(const Rect& r) const {
     return !(x_ > r.x_ + r.w_ || x_ + w_ < r.x_ || y_ > r.y_ + r.h_ ||
              y_ + h_ < r.y_);
   }
@@ -70,18 +70,18 @@ class Rect : public Shape {
    * @param c The circle check for intersection.
    * @return `true` if this rectangle contains with the circle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(const Circle& c) const ;
+  [[nodiscard]] inline bool intersects(const Circle& c) const;
   /**
    * Checks if the given rect is fully contains inside this rectangle.<p>
    * Contained means non-touching
    * @param r the other rect
    * @return true only if r is fully contains
    */
-  [[nodiscard]] inline bool contains(const Rect& r) const  {
+  [[nodiscard]] inline bool contains(const Rect& r) const {
     return (x_ < r.x_ && y_ < r.y_ && x_ + w_ > r.x_ + r.w_ &&
             y_ + h_ > r.y_ + r.h_);
   }
-  [[nodiscard]] inline bool contains(const Circle& p) const ;
+  [[nodiscard]] inline bool contains(const Circle& p) const;
   [[nodiscard]] inline bool contains(const Point& p) const;
   /**
  * @brief Getter method for the x position.
@@ -129,7 +129,7 @@ class Circle : public Shape {
    * @param r The rect check for intersection.
    * @return `true` if this circle contains with the rectangle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(const Rect& r) const  {
+  [[nodiscard]] inline bool intersects(const Rect& r) const {
     float closestX = std::clamp(x_, r.x(), r.x() + r.width());
     float closestY = std::clamp(y_, r.y(), r.y() + r.height());
 
@@ -146,7 +146,7 @@ class Circle : public Shape {
    * @param c The circle check for intersection.
    * @return `true` if this circle contains with the circle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(const Circle& c) const  {
+  [[nodiscard]] inline bool intersects(const Circle& c) const {
     return !(((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) >
              (r_ * c.r_ + r_ * c.r_));
   }
@@ -156,11 +156,11 @@ class Circle : public Shape {
    * @param c the other circle
    * @return true only if c is fully contains
    */
-  [[nodiscard]] inline bool contains(const Circle& c) const  {
+  [[nodiscard]] inline bool contains(const Circle& c) const {
     return ((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) <
            (r_ - c.r_) * (r_ - c.r_);
   }
-  [[nodiscard]] bool contains(const Rect& r) const  {
+  [[nodiscard]] bool contains(const Rect& r) const {
     float dx = std::max(0.0f, std::max(r.x() - x_, x_ - (r.x() + r.width())));
     float dy = std::max(0.0f, std::max(r.y() - y_, y_ - (r.y() + r.height())));
 
@@ -209,6 +209,20 @@ class Point {
  public:
   inline Point() : x_(0), y_(0) {}
   inline Point(float x_pos, float y_pos) : x_(x_pos), y_(y_pos) {}
+  inline Point& operator=(const Point& o) {
+    if(this!= &o){
+      x_ = o.x_;
+      y_ = o.y_;
+    }
+    return *this;
+  }
+  inline Point(const Point& o) : x_(o.x_), y_(o.y_) {}
+  inline bool operator==(const Point& o) const {
+    return (x_ == o.x_ && y_ == o.y_);
+  }
+  friend std::ostream& operator<<(std::ostream& os, const Point& p){
+    return os<<"Point:["<<p.x_<<" ,"<<p.y_<<"]";
+  }
   /**
    * Checks if the point is either inside or touches the rectangle
    *
@@ -247,7 +261,9 @@ class Point {
     return cxalgos::fast_sqrt((p.x_ - x_) * (p.x_ - x_) +
                               (p.y_ - y_) * (p.y_ - y_));
   }
-
+  [[nodiscard]] float dist(const float& x, const float& y) const {
+    return cxalgos::fast_sqrt((x - x_) * (x - x_) + (y - y_) * (y - y_));
+  }
   /**
  * @brief Getter method for the x position.
  * @return A readable/writable reference to the x position.

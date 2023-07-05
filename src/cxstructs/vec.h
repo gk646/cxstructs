@@ -34,6 +34,7 @@
 
 /*This implementation is well optimized and should generally be a bit faster than the std::vector in a lot of use cases
  * Its using explicit allocator syntax to switch between the default and a custom one
+ * Used in QuadTree.h
 */
 namespace cxstructs {
 /**
@@ -47,7 +48,7 @@ template <typename T, bool UseCXPoolAllocator = true>
 class vec {
   using Allocator = typename std::conditional<UseCXPoolAllocator,
                                               CXPoolAllocator<T, sizeof(T) * 33, 1>,
-                                              std::allocator<T>>::type;
+                                               std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx size_;

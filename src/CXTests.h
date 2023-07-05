@@ -50,9 +50,7 @@ static void test_cxalgos() {
   TEST_DFS();
   TEST_SEARCH();
   TEST_MATH();
-
-  std::cout << "TESTING PATTERN MATCHING" << std::endl;
-
+  TEST_PATH_FINDING();
   std::cout << "\nAll tests passed!" << std::endl;
 }
 
