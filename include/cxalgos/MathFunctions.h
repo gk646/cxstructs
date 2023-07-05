@@ -101,6 +101,7 @@ double integral_arc_length(Function fx, double a, double b,
   }
   return arc_length;
 }
+
 /**
  * Finds the <b>next</b> closest power of two to the right of the given number
  * @param n the start number
