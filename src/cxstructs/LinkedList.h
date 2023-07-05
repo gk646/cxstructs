@@ -59,11 +59,12 @@ using namespace cxhelper;
  */
 template <typename T, bool UseCXPoolAllocator = true>
 class LinkedList {
+  using Node = ListNode<T>;
   using Allocator =
       typename std::conditional<UseCXPoolAllocator,
-                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
-                                std::allocator<T>>::type;
-  using Node = ListNode<T>;
+                                CXPoolAllocator<Node , sizeof(Node) * 33, 1>,
+                                std::allocator<Node>>::type;
+
   Allocator alloc;
   uint_32_cx size_;
   Node sentinel_;
