@@ -46,16 +46,26 @@ namespace cxstructs {
  */
 template <typename T, bool UseCXPoolAllocator = true>
 class vec {
-  using Allocator = typename std::conditional<UseCXPoolAllocator,
-                                              CXPoolAllocator<T, sizeof(T) * 33, 1>,
-                                               std::allocator<T>>::type;
+ public:
+  using value_type = T;
+  using reference = T&;
+  using const_reference = const T&;
+  using size_type = uint_32_cx;
+  using iterator = T*;
+  using const_iterator = const T*;
+
+ private:
+  using Allocator =
+      typename std::conditional<UseCXPoolAllocator,
+                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
-  uint_32_cx size_;
-  uint_32_cx len_;
+  size_type size_;
+  size_type len_;
 
   bool is_trivial_destr = std::is_trivially_destructible<T>::value;
-  inline void grow() {
+  constexpr inline void grow() {
     len_ *= 2;
 
     T* n_arr = alloc.allocate(len_);
@@ -73,7 +83,7 @@ class vec {
     arr_ = n_arr;
     //as array is moved no need for delete []
   }
-  inline void shrink() {
+  constexpr inline void shrink() {
     auto old_len = len_;
     len_ = size_ * 1.5;
 
@@ -98,11 +108,9 @@ class vec {
    * Recommended to leave it at 32 due to optimizations with the allocator
    * @param n_elem number of starting elements
    */
-  inline explicit vec(uint_32_cx n_elem = 32)
-      : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {
-
-  }
-  inline vec(uint_32_cx n_elem, const T val)
+  constexpr inline explicit vec(uint_32_cx n_elem = 32)
+      : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {}
+  constexpr inline vec(uint_32_cx n_elem, const T val)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     std::fill(arr_, arr_ + n_elem, val);
   }
@@ -116,7 +124,7 @@ class vec {
   template <typename fill_form,
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
-  inline vec(uint_32_cx n_elem, fill_form form)
+  constexpr inline vec(uint_32_cx n_elem, fill_form form)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
@@ -127,13 +135,13 @@ class vec {
    * vec vec1({1,2,3});<p>
    * @param vector
    */
-  explicit vec(const std::vector<T>& vector)
+  constexpr explicit vec(const std::vector<T>& vector)
       : len_(vector.size() * 1.5),
         size_(vector.size()),
         arr_(alloc.allocate(vector.size() * 1.5)) {
     std::copy(vector.begin(), vector.end(), arr_);
   }
-  explicit vec(const std::vector<T>&& move_vector)
+  constexpr explicit vec(const std::vector<T>&& move_vector)
       : len_(move_vector.size() * 1.5),
         size_(move_vector.size()),
         arr_(alloc.allocate(move_vector.size() * 1.5)) {
@@ -145,13 +153,13 @@ class vec {
    * vec vec2{1,2,3};
    * @param init_list init list elements
    */
-  vec(std::initializer_list<T> init_list)
+  inline vec(std::initializer_list<T> init_list)
       : size_(init_list.size()),
         len_(init_list.size() * 10),
         arr_(alloc.allocate(init_list.size() * 10)) {
     std::copy(init_list.begin(), init_list.end(), arr_);
   }
-  vec(const vec<T>& o) : size_(o.size_), len_(o.len_) {
+  inline vec(const vec<T>& o) : size_(o.size_), len_(o.len_) {
     arr_ = alloc.allocate(len_);
     if (is_trivial_destr) {
       std::copy(o.arr_, o.arr_ + o.size_, arr_);
@@ -159,7 +167,7 @@ class vec {
       std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
     }
   }
-  vec& operator=(const vec<T>& o) {
+  inline vec& operator=(const vec<T>& o) {
     if (this != &o) {
       //ugly allocator syntax but saves a lot when using e.g. vec<float>
       if (!is_trivial_destr) {
@@ -182,7 +190,7 @@ class vec {
     return *this;
   }
   //move constructor
-  vec(vec&& o) noexcept : arr_(o.arr_), size_(o.size_), len_(o.len_) {
+  inline vec(vec&& o) noexcept : arr_(o.arr_), size_(o.size_), len_(o.len_) {
     //leve other in previous state
     o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
   }
@@ -218,7 +226,8 @@ class vec {
    * @param index the accessed index
    * @return a reference to the value
    */
-  [[nodiscard]] inline T& operator[](const uint_32_cx& index) const {
+  [[nodiscard]] constexpr inline T& operator[](
+      const uint_32_cx& index) const noexcept {
     return arr_[index];
   }
   /**
@@ -227,7 +236,7 @@ class vec {
    * Throws std::out_of_range on invalid index
    * @param T a reference to the value at the given index
    */
-  inline T& at(const int_32_cx& index) {
+  [[nodiscard]] inline T& at(const int_32_cx& index) const noexcept {
     if (index < 0) {
       CX_ASSERT(size_ + index >= 0 && "index out of bounds");
       return arr_[size_ + index];
@@ -240,18 +249,20 @@ class vec {
    * Adds a element to the list
    * @param e the element to be added
    */
-  inline void push_back(const T& e) {
+  constexpr inline void push_back(const T& e) noexcept {
     if (size_ == len_) {
       grow();
     }
     arr_[size_++] = e;
   }
+  [[nodiscard]] inline T& front() const noexcept{ return arr_[0]; }
+  [[nodiscard]] inline T& back() const noexcept{ return arr_[size_ - 1]; }
   /**
    * Construct a new T element at the end of the list
    * @param args T constructor arguments
    */
   template <typename... Args>
-  inline void emplace_back(Args&&... args) {
+  inline void emplace_back(Args&&... args)noexcept {
     if (size_ == len_) {
       grow();
     }
@@ -301,16 +312,16 @@ class vec {
  *
  * @return the current n_elem of the list
  */
-  [[nodiscard]] inline uint_32_cx size() const { return size_; }
-  [[nodiscard]] inline uint_32_cx capacity() const { return len_; }
-  void reserve(uint_32_cx new_capacity) {
+  [[nodiscard]] inline uint_32_cx size() const noexcept { return size_; }
+  [[nodiscard]] inline uint_32_cx capacity() const noexcept { return len_; }
+  inline void reserve(uint_32_cx new_capacity) noexcept {
     if (len_ < new_capacity) {}
   }
   /**
    * Clears the list of all its elements <br>
    * Resets the length back to its starting value
    */
-  void clear() {
+  inline void clear() noexcept {
     if (!is_trivial_destr) {
       for (uint_32_cx i = 0; i < len_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
@@ -326,14 +337,15 @@ class vec {
    * Use with caution! Valid data is only guaranteed from 0 up to n_elem
    * @return a pointer to the data array
    */
-  T* get_raw() { return arr_; }
+  inline T* get_raw() const noexcept { return arr_; }
   /**
    * Searches the whole vector starting from the beginning (default)
    * @param val value to search for
    * @param startFront whether to start from the front
    * @return true if the value was found
    */
-  bool contains(const T& val, bool startFront = true) {
+  [[nodiscard]] inline bool contains(const T& val,
+                                     bool startFront = true) const noexcept {
     if (startFront) {
       for (int i = 0; i < size_; i++) {
         if (arr_[i] == val) {
@@ -385,7 +397,7 @@ class vec {
   * Attempts to print the complete list to std::cout
   * @param prefix optional prefix
   */
-  void print(const std::string& prefix) {
+  inline void print(const std::string& prefix) {
     if (!prefix.empty()) {
       std::cout << prefix << std::endl;
       std::cout << "   ";
@@ -401,16 +413,79 @@ class vec {
     T* ptr;
 
    public:
-    explicit Iterator(T* p) : ptr(p) {}
-    T& operator*() { return *ptr; }
-    Iterator& operator++() {
+    using value_type = T;
+    using difference_type = std::ptrdiff_t;
+    using pointer = T*;
+    using reference = T&;
+    using iterator_category = std::random_access_iterator_tag;
+
+    inline explicit Iterator(T* p) noexcept : ptr(p) {}
+
+    inline reference operator*() const noexcept { return *ptr; }
+    inline pointer operator->() const noexcept { return ptr; }
+
+    inline Iterator& operator++() noexcept {
       ++ptr;
       return *this;
     }
-    bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+    inline Iterator operator++(int) const noexcept {
+      Iterator temp = *this;
+      ++ptr;
+      return temp;
+    }
+    inline Iterator& operator--() noexcept {
+      --ptr;
+      return *this;
+    }
+    inline Iterator operator--(int) noexcept {
+      Iterator temp = *this;
+      --ptr;
+      return temp;
+    }
+    constexpr inline Iterator operator+(difference_type n) const noexcept {
+      return Iterator(ptr + n);
+    }
+    constexpr inline Iterator operator-(difference_type n) const noexcept {
+      return Iterator(ptr - n);
+    }
+    constexpr inline difference_type operator-(
+        const Iterator& other) const noexcept {
+      return ptr - other.ptr;
+    }
+    inline Iterator& operator+=(difference_type n) noexcept {
+      ptr += n;
+      return *this;
+    }
+    inline Iterator& operator-=(difference_type n) noexcept {
+      ptr -= n;
+      return *this;
+    }
+
+    constexpr inline reference operator[](difference_type n) const noexcept {
+      return ptr[n];
+    }
+
+    constexpr inline bool operator==(const Iterator& other) const noexcept {
+      return ptr == other.ptr;
+    }
+    constexpr inline bool operator!=(const Iterator& other) const noexcept {
+      return ptr != other.ptr;
+    }
+    constexpr inline bool operator<(const Iterator& other) const noexcept {
+      return ptr < other.ptr;
+    }
+    constexpr inline bool operator>(const Iterator& other) const noexcept {
+      return ptr > other.ptr;
+    }
+    constexpr inline bool operator<=(const Iterator& other) const noexcept {
+      return ptr <= other.ptr;
+    }
+    constexpr inline bool operator>=(const Iterator& other) const noexcept {
+      return ptr >= other.ptr;
+    }
   };
-  Iterator begin() { return Iterator(arr_); }
-  Iterator end() { return Iterator(arr_ + size_); }
+  inline Iterator begin() { return Iterator(arr_); }
+  inline Iterator end() { return Iterator(arr_ + size_); }
   friend std::ostream& operator<<(std::ostream& os, const vec<T>& list) {
     if (list.size_ == 0) {
       return os << "[]";
