@@ -26,7 +26,7 @@
 #include <type_traits>
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
-
+#include "../cxstructs/Pair.h"
 namespace cxhelper {
 using namespace cxstructs;
 struct Node {
@@ -54,14 +54,13 @@ struct Node {
   inline bool operator==(const Node& o) const { return f_cost == o.f_cost; }
 };
 
-std::vector<Point> reconstruct_path(Node* target_node) {
+inline std::vector<Point> reconstruct_path(Node* target_node) {
   std::vector<Point> path;
   Node* node = target_node;
   while (node) {
     path.push_back(node->position);
     node = node->parent;
   }
-
   std::reverse(path.begin(), path.end());
   return path;
 }
@@ -74,20 +73,14 @@ template <typename S, typename B>
 std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field,
                                      const B& blocked_val, const Point& start,
                                      const Point& target) {
-  std::priority_queue<Node, std::vector<Node>, std::greater<>> frontier;
-  struct PointHash {
-    std::size_t operator()(const Point& p) const {
-      return std::hash<int>()(p.x()) ^ std::hash<int>()(p.y());
-    }
-  };
-  std::unordered_set<Point, PointHash> closedSet;
-  std::vector<std::pair<int, int>> directions = {
-      {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+  std::priority_queue<Node, vec<Node, false>, std::greater<>> frontier;
 
+  HashSet<Point> closedSet;
+  vec<row<2, int>, false> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
   frontier.emplace(start, 0, start.dist(target), nullptr);
 
   while (!frontier.empty()) {
-    Node* current = new Node(frontier.top()); //yeah i know...
+    Node* current = new Node(frontier.top());  //yeah i know...
     frontier.pop();
 
     if (current->position == target) {
@@ -97,19 +90,18 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field,
     closedSet.insert(current->position);
 
     for (const auto& dir : directions) {
-      int newX = current->position.x() + dir.first;
-      int newY = current->position.y() + dir.second;
-      Point newPos(newX, newY);
-
-      if (newX >= 0 && newX < field.size() && newY >= 0 &&
-          newY < field[0].size() && field[newY][newX] != blocked_val &&
-          closedSet.find(newPos) == closedSet.end()) {
+      int newX = static_cast<int>(current->position.x()) + dir[0];
+      int newY = static_cast<int>(current->position.y()) + dir[1];
+      Point new_pos(newX, newY);
+      if (newX >= 0 && newY < field.size() && newY >= 0 &&
+          newX < field[0].size() && field[newY][newX] != blocked_val &&
+          !closedSet.contains(new_pos)) {
 
         uint16_t tentative_g_cost = current->g_cost + 1;
-        uint16_t h_cost = abs(newX - target.x()) + abs(newY - target.y());
-        uint16_t f_cost = tentative_g_cost + h_cost;
+        uint16_t h_cost = abs(newX - static_cast<int>(target.x())) +
+                          abs(newY - static_cast<int>(target.y()));
 
-        frontier.emplace(newPos, tentative_g_cost, h_cost, current);
+        frontier.emplace(new_pos, tentative_g_cost, h_cost, current);
       }
     }
   }

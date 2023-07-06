@@ -41,8 +41,8 @@
 template <typename T1_, typename T2_>
 class Pair {
   bool assigned_;
-  T1_ first_{};
-  T2_ second_{};
+  T1_ first_;
+  T2_ second_;
 
  public:
   /**
@@ -75,6 +75,19 @@ class Pair {
      * @return A reference to the second element.
      */
   inline T2_& second()  { return second_; }
+  /**
+     * @brief Returns a reference to the first element.
+     *
+     * @return A reference to the first element.
+     */
+  inline const T1_& first() const { return first_; }
+
+  /**
+     * @brief Returns a reference to the second element.
+     *
+     * @return A reference to the second element.
+     */
+  inline const T2_& second()  const{ return second_; }
   /**
      * @brief Checks if the Pair has been assigned values.
      *

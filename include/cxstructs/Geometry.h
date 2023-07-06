@@ -210,7 +210,7 @@ class Point {
   inline Point() : x_(0), y_(0) {}
   inline Point(float x_pos, float y_pos) : x_(x_pos), y_(y_pos) {}
   inline Point& operator=(const Point& o) {
-    if(this!= &o){
+    if (this != &o) {
       x_ = o.x_;
       y_ = o.y_;
     }
@@ -220,8 +220,8 @@ class Point {
   inline bool operator==(const Point& o) const {
     return (x_ == o.x_ && y_ == o.y_);
   }
-  friend std::ostream& operator<<(std::ostream& os, const Point& p){
-    return os<<"Point:["<<p.x_<<" ,"<<p.y_<<"]";
+  friend std::ostream& operator<<(std::ostream& os, const Point& p) {
+    return os << "Point:[" << p.x_ << " ," << p.y_ << "]";
   }
   /**
    * Checks if the point is either inside or touches the rectangle
@@ -311,5 +311,26 @@ bool Circle::contains(const Point& p) const {
 }
 
 }  // namespace cxstructs
-
+namespace std {
+template <>
+struct hash<cxstructs::Point> {
+  std::size_t operator()(const cxstructs::Point& p) const {
+    return static_cast<int>(p.x()) ^ (static_cast<int>(p.y()) << 1);
+  }
+};
+template <>
+struct hash<cxstructs::Rect> {
+  std::size_t operator()(const cxstructs::Rect& r) const {
+    return static_cast<int>(r.x()) ^ (static_cast<int>(r.y()) << 1) ^
+           static_cast<int>(r.width()) ^ (static_cast<int>(r.height()) << 1);
+  }
+};
+template <>
+struct hash<cxstructs::Circle> {
+  std::size_t operator()(const cxstructs::Circle& c) const {
+    return static_cast<int>(c.x()) ^ (static_cast<int>(c.y()) << 1) ^
+           static_cast<int>(c.radius());
+  }
+};
+}  // namespace std
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
