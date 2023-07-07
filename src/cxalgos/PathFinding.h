@@ -24,9 +24,11 @@
 #include <cstdint>
 #include <deque>
 #include <type_traits>
+#include <queue>
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
 #include "../cxstructs/Pair.h"
+
 namespace cxhelper {
 using namespace cxstructs;
 struct Node {

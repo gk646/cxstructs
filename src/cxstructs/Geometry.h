@@ -33,8 +33,8 @@ class Circle;
 class Rect;
 
 class Shape {
-
  public:
+  [[nodiscard]] virtual bool contains(const Point& s) const {};
   [[nodiscard]] virtual bool contains(const Shape& s) const {};
   [[nodiscard]] virtual bool intersects(const Shape& r) const {};
 };
@@ -337,7 +337,6 @@ struct hash<cxstructs::Circle> {
 static void GEOMETRY_TEST() {
   using namespace cxstructs;
   std::cout << "RECTANGLE TESTS" << std::endl;
-
   // Rectangles that are the same
   std::cout << "  Testing rectangles that are the same..." << std::endl;
   Rect r1(10, 10, 50, 50);
