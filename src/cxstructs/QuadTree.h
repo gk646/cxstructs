@@ -21,6 +21,8 @@
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
 #define CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
 
+#include <utility>
+
 #include "../cxconfig.h"
 #include "Geometry.h"
 #include "vec.h"
@@ -37,7 +39,7 @@ class QuadTree {
   QuadTree* bottom_left_;
   QuadTree* bottom_right_;
 
-  inline void split() {
+  inline void split() noexcept {
     top_left_ = new QuadTree(
         {bounds_.x(), bounds_.y(), bounds_.width() / 2, bounds_.height() / 2},
         max_depth_ - 1, max_points_);
@@ -87,7 +89,7 @@ class QuadTree {
                     uint_32_cx max_points = 100)
       : max_depth_(max_depth),
         max_points_(max_points),
-        bounds_(initial_bounds),
+        bounds_(std::move(initial_bounds)),
         top_left_(nullptr),
         top_right_(nullptr),
         bottom_left_(nullptr),
@@ -120,6 +122,9 @@ class QuadTree {
     }
 
     insert_subtrees(p);
+  }
+  uint_32_cx contained_in_rect(const Rect& space){
+
   }
   void clear() {
     delete top_right_;
