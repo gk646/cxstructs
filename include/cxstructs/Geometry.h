@@ -33,8 +33,8 @@ class Circle;
 class Rect;
 
 class Shape {
-
  public:
+  [[nodiscard]] virtual bool contains(const Point& s) const {};
   [[nodiscard]] virtual bool contains(const Shape& s) const {};
   [[nodiscard]] virtual bool intersects(const Shape& r) const {};
 };
