@@ -1,13 +1,7 @@
 cmake_minimum_required(VERSION 3.25.2)
-project(cxstructs CXX)
+project(cxstructs  CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 
-file(GLOB_RECURSE SRC_FILES
-        "include/*.cpp"
-        "include/*.h"
-        "include/*.hpp")
-
-
-add_library(cxstructs ${SRC_FILES})
-set_target_properties(cxstructs PROPERTIES LINKER_LANGUAGE CXX)
+add_library(cxstructs INTERFACE)
+target_include_directories(cxstructs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
