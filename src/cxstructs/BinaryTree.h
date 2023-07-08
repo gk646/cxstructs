@@ -205,7 +205,7 @@ class BinaryTree {
   /**
    * Recursively searches the tree for the given value
    * @param val - the value to search for
-   * @return - true if the tree contains the given value, false otherwise
+   * @return - true if the tree contained the given value, false otherwise
    */
   [[nodiscard]] inline bool contains(const T& val) const {
     return contains(val, root_);
@@ -301,8 +301,8 @@ class BinaryTree {
   static void TEST() {
     std::cout << "BINARY SEARCH TREE TESTS" << std::endl;
 
-    // Test insert and contains
-    std::cout << "  Testing insertion and contains method..." << std::endl;
+    // Test insert and contained
+    std::cout << "  Testing insertion and contained method..." << std::endl;
     BinaryTree<int> bt1;
     bt1.insert(1);
     bt1.insert(2);
@@ -330,8 +330,8 @@ class BinaryTree {
     CX_ASSERT(bt2.empty());
     CX_ASSERT(bt2.size() == 0);
 
-    // Test insert and contains
-    std::cout << "  Testing insertion and contains method..." << std::endl;
+    // Test insert and contained
+    std::cout << "  Testing insertion and contained method..." << std::endl;
     bt2.insert(10);
     CX_ASSERT(bt2.contains(10));
     CX_ASSERT(!bt2.empty());

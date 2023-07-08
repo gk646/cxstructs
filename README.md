@@ -7,9 +7,10 @@ and well documented.
 While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of
 efficiency and interface.
 
-**To use these, simply include the *include directory*, and `#include "CXStructs.h"` to include all headers.**
-
-**Comparisons with standard library counterparts can be run using the Comparison.h header**
+**1.** [Contents](#contents)   
+**2.** [Installation](#installation)  
+**3.** [Library Notes](#library-notes)
+**4.** [Contributing](#contributing)
 
 ### Speed Comparison
 
@@ -26,7 +27,7 @@ efficiency and interface.
     - every cxstruct is natively implemented (*no adapters*) at the *lowest* level
 - **Custom Allocator**
     - per default uses the faster CXPoolAllocator
-    - can be disabled individually via the last template option `cstruct<int,false>`
+    - can be disabled individually via the last template option `cxstruct<int,false>`
 - **Standard Interface**
     - *cxstructs* follow a similar interface to stl containers
     - but each *cxstruct* has added utility methods
@@ -57,8 +58,9 @@ efficiency and interface.
 - **Double Linked List**:
 - **Queue**:
 - **DeQueue**: *using centered array*
+- **PriorityQueue**: *using max-heap(soon)*
 - **Binary Tree**:
-- **QuadTree**: *(soon)*
+- **QuadTree**: *allows for templated elements with x() and y() getters*
 - **Geometry**(*Rect,Circle,Point*): *standard efficient 2D shapes*
 
 #### Machine Learning
@@ -74,6 +76,7 @@ efficiency and interface.
 - **Graph Traversal**: *DepthFirstSearch (on 2d-vector as adjacency matrix),*
 - **MathFunctions**: *Integrals,next_power_of_2,*
 - **PatterMatching**: *Brute-Force, KMP, Boyer-Moore*
+- **Misc**: *Maze generator(simple)*
 
 #### Utilities
 
@@ -82,6 +85,29 @@ efficiency and interface.
 - **cxassert** *custom assertions with optional text*
 
 ---
+
+### Installation
+
+#### CMake
+
+Simply add this line to your CMakeLists.txt.  This will automatically download the newest version and add them to your *includes*.
+```cmake
+include(FetchContent)
+FetchContent_Declare(cxstructs GIT_REPOSITORY https://github.com/gk646/CXStructures.git)
+FetchContent_MakeAvailable(cxstructs)
+
+#add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE cxstructs)
+```
+
+Or manually download the source and include the *include* directory.
+```cmake
+include_directories("cxstructs/download/folder/include")
+```
+#### Manual
+
+Download the source and add the *include* directory to your build system include path.
 
 ### Library Notes
 
@@ -104,6 +130,18 @@ typedef int_fast32_t int_32_cx;
 ```
 
 #### macros
+
 - `#define CX_NO_MATRIX`to use the FNN without matrix calculations
 - `CX_ASSERT(expr,msg(optinal))` enhanced assertion with optional text
 - `CX_WARNING(expr,msg(optinal))` similar to *CX_ASSERT* but doesn't abort
+
+### Contributing
+
+Add `DBUILD_TESTS=ON` to your CMake options to build an executable target. 
+You can then add a main.cpp and test any changes. 
+
+Run tests by `#include "CXTests.h"` and calling the test methods.
+
+### Misc
+
+

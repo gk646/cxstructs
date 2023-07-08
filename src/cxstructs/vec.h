@@ -255,14 +255,14 @@ class vec {
     }
     arr_[size_++] = e;
   }
-  [[nodiscard]] inline T& front() const noexcept{ return arr_[0]; }
-  [[nodiscard]] inline T& back() const noexcept{ return arr_[size_ - 1]; }
+  [[nodiscard]] inline T& front() const noexcept { return arr_[0]; }
+  [[nodiscard]] inline T& back() const noexcept { return arr_[size_ - 1]; }
   /**
    * Construct a new T element at the end of the list
    * @param args T constructor arguments
    */
   template <typename... Args>
-  inline void emplace_back(Args&&... args)noexcept {
+  inline void emplace_back(Args&&... args) noexcept {
     if (size_ == len_) {
       grow();
     }
@@ -291,7 +291,7 @@ class vec {
    * Removes the first occurrence of the given element from the list
    * @param e element to be removed
    */
-  inline void remove(const T& e) {
+  inline void erase(const T& e) {
     for (uint_32_cx i = 0; i < len_; i++) {
       if (arr_[i] == e) {
         std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
@@ -315,7 +315,23 @@ class vec {
   [[nodiscard]] inline uint_32_cx size() const noexcept { return size_; }
   [[nodiscard]] inline uint_32_cx capacity() const noexcept { return len_; }
   inline void reserve(uint_32_cx new_capacity) noexcept {
-    if (len_ < new_capacity) {}
+    if (len_ < new_capacity) {
+      len_ = new_capacity;
+
+      T* n_arr = alloc.allocate(len_);
+
+      std::uninitialized_move(arr_, arr_ + size_, n_arr);
+
+      // Destroy the original objects
+      if (!is_trivial_destr) {
+        for (size_t i = 0; i < size_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+      alloc.deallocate(arr_, size_);
+
+      arr_ = n_arr;
+    }
   }
   /**
    * Clears the list of all its elements <br>
@@ -337,7 +353,7 @@ class vec {
    * Use with caution! Valid data is only guaranteed from 0 up to n_elem
    * @return a pointer to the data array
    */
-  inline T* get_raw() const noexcept { return arr_; }
+  [[nodiscard]] inline T* get_raw() const noexcept { return arr_; }
   /**
    * Searches the whole vector starting from the beginning (default)
    * @param val value to search for
@@ -367,7 +383,7 @@ class vec {
  * If necessary, the capacity of this vec is expanded
  * @param vec  the vec to append
  */
-  void append(vec<T>& vec) {
+  void append(const vec<T>& vec) {
     while (len_ - size_ < vec.size_) {
       grow();
     }
@@ -383,10 +399,9 @@ class vec {
  * @param end index of the last element (exclusive)
  * @param start the index of the first element (inclusive)
  */
-  void append(vec<T>& list, uint_32_cx endIndex, uint_32_cx startIndex = 0) {
-    if (startIndex >= endIndex || endIndex > list.size_) {
-      throw std::out_of_range("index out of bounds");
-    }
+  void append(const vec<T>& list, uint_32_cx endIndex,
+              uint_32_cx startIndex = 0) {
+    CX_ASSERT(startIndex < endIndex || endIndex <= list.size_,"index out of bounds");
     while (len_ - size_ < endIndex - startIndex) {
       grow();
     }
@@ -486,14 +501,14 @@ class vec {
   };
   inline Iterator begin() { return Iterator(arr_); }
   inline Iterator end() { return Iterator(arr_ + size_); }
-  friend std::ostream& operator<<(std::ostream& os, const vec<T>& list) {
-    if (list.size_ == 0) {
+   std::ostream& operator<<(std::ostream& os) {
+    if (size_ == 0) {
       return os << "[]";
     }
-    os << "[" << list.arr_[0];
+    os << "[" <<arr_[0];
 
-    for (int i = 1; i < list.size_; i++) {
-      os << "," << list.arr_[i];
+    for (int i = 1; i < size_; i++) {
+      os << "," << arr_[i];
     }
     return os << "]";
   }
@@ -509,7 +524,7 @@ class vec {
     list1.push_back(10);
     list1.push_back(15);
 
-    list1.remove(10);
+    list1.erase(10);
     CX_ASSERT(list1.size() == 2);
     CX_ASSERT(list1[1] == 15);
 
@@ -544,12 +559,12 @@ class vec {
     CX_ASSERT(list1.capacity() == list1.size() * 1.5);
 
     for (int i = 0; i < 10000; i++) {
-      list1.remove(i);
+      list1.erase(i);
     }
     CX_ASSERT(list1.size() == 0);
 
-    // Test: Testing contains
-    std::cout << "   Testing contains...\n";
+    // Test: Testing contained
+    std::cout << "   Testing contained...\n";
     list1.clear();
     list1.push_back(5);
     CX_ASSERT(list1.contains(5) == true);

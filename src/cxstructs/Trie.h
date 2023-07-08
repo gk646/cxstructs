@@ -153,9 +153,9 @@ class Trie {
       }
     }
     if (iterator) {
-      std::vector<std::string> re{};
-      getAllSubChildren(iterator, re);
-      return re;
+      std::vector<std::string> retval{};
+      getAllSubChildren(iterator, retval);
+      return retval;
     } else {
       return {};
     }
@@ -167,7 +167,7 @@ class Trie {
   [[nodiscard]] uint_32_cx size() const { return size_; }
   /**
    * Empty check on the trie
-   * @return true if the trie contains no words
+   * @return true if the trie contained no words
    */
   [[nodiscard]] bool empty() const { return size_ == 0; }
   /**
@@ -208,7 +208,7 @@ class Trie {
     Trie trie;
     trie.insert("hello");
 
-    std::cout << "   Testing contains..." << std::endl;
+    std::cout << "   Testing contained..." << std::endl;
     CX_ASSERT(trie.contains("hello") == true);
     CX_ASSERT(trie.contains("helloh") == false);
     std::cout << "   Testing startsWith..." << std::endl;

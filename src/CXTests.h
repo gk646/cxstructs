@@ -40,7 +40,8 @@ static void test_cxstructs() {
   HashMap<int, int>::TEST();
   HashSet<int>::TEST();
   BinaryTree<int>::TEST();
-  QuadTree::TEST();
+  QuadTree<Point>::TEST();
+  //PriorityQueue<int>::TEST();
 
   std::cout << "\nAll tests passed!" << std::endl;
 }

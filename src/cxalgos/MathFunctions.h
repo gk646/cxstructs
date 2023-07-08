@@ -138,7 +138,7 @@ namespace cxtests {
 using namespace cxalgos;
 static void TEST_MATH() {
   std::cout<< "TESTING MATH FUNCTIONS" << std::endl;
-  auto integral = integral_aprox([](double x) { return x * x; }, 0, 5);
+  auto integral = integral_aprox([](double x) { return x * x; }, 0, 5,100000);
   CX_ASSERT(integral - std::pow(5, 3) / 3 < 0.0001);
   auto volume = integral_volume_solids_of_revolution(
       [](double x) { return std::sqrt(x); }, 0, 4);
@@ -146,7 +146,7 @@ static void TEST_MATH() {
   CX_ASSERT(volume - std::numbers::pi * 8 < 0.001);
   auto length = integral_arc_length(
       [](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
-      0, std::sqrt(8));
+      0, std::sqrt(8),100000);
 
   CX_ASSERT(next_power_of_2(3) == 4);
   CX_ASSERT(next_power_of_2(3) != 3);

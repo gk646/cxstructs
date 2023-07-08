@@ -328,13 +328,13 @@ class mat {
  * @return a new row with each index being the result of the vector-matrix dot product
  */
   [[nodiscard]] inline vec<float> dotProduct(const vec<float>& vec) const {
-    cxstructs::vec<float> re(n_rows, 0);
+    cxstructs::vec<float> retval(n_rows, 0);
     for (int i = 0; i < n_rows; ++i) {
       for (int j = 0; j < n_cols; ++j) {
-        re[i] += arr[i * n_cols + j] * vec[j];
+        retval[i] += arr[i * n_cols + j] * vec[j];
       }
     }
-    return re;
+    return retval;
   }
   /**
    *  A scaled unit matrix is a matrix with dimensions n_rows and n_cols, with only one nonzero entry with value 1 at position M(row, col). <p>
@@ -350,9 +350,9 @@ class mat {
    */
   static inline mat unit_matrix(uint_32_cx n_rows, uint_32_cx n_cols,
                                 uint_32_cx row, uint_32_cx col) {
-    mat re(n_rows, n_cols);
-    re(row, col) = 1;
-    return re;
+    mat retval(n_rows, n_cols);
+    retval(row, col) = 1;
+    return retval;
   }
   /**
    * A scaled unit matrix is a matrix with dimensions n_rows and n_cols, with only one nonzero entry with value 1 * alpha at position M(row, col). <p>
@@ -369,9 +369,9 @@ class mat {
   static inline mat unit_matrix_scaled(uint_32_cx n_rows, uint_32_cx n_cols,
                                        uint_32_cx row, uint_32_cx col,
                                        float alpha) {
-    mat re(n_rows, n_cols);
-    re(row, col) = 1 * alpha;
-    return re;
+    mat retval(n_rows, n_cols);
+    retval(row, col) = 1 * alpha;
+    return retval;
   }
   /**
    *A square matrix with ones on the main diagonal and zeros elsewhere.<p>

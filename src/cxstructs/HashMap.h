@@ -434,7 +434,7 @@ class HashMap {
     maxSize = buckets_ * load_factor_;
   }
   /**
- * @brief Checks if the HashMap contains a specific key.
+ * @brief Checks if the HashMap contained a specific key.
  *
  * @param key The key to search for in the HashMap.
  * @return true if the key is present in the HashMap, false otherwise.
@@ -517,7 +517,7 @@ class HashMap {
     for (int i = 0; i < 10000; i++) {
       CX_ASSERT(map4[i] == i * 2);
     }
-    std::cout << "  Testing contains method..." << std::endl;
+    std::cout << "  Testing contained method..." << std::endl;
     HashMap<int, std::string> map5;
     map5.insert(1, "One");
     map5.insert(2, "Two");

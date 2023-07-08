@@ -312,24 +312,24 @@ class FNN {
   }
   ~FNN() { delete[] layers_; }
   std::vector<float> forward(const std::vector<float>& in) {
-    std::vector<float> re = in;
+    std::vector<float> retval = in;
     for (int i = 0; i < len_; i++) {
-      re = layers_[i].forward(re);
+      retval = layers_[i].forward(retval);
     }
-    return re;
+    return retval;
   }
 
   void train(const std::vector<float>& in, const std::vector<float>& out,
              uint_16_cx n = 10) {
     for (int k = 0; k < n; k++) {
-      std::vector<float> re = forward(in);
+      std::vector<float> retval = forward(in);
 
-      for (int i = 0; i < re.size(); i++) {
-        re[i] = (re[i] - out[i]);
+      for (int i = 0; i < retval.size(); i++) {
+        retval[i] = (retval[i] - out[i]);
       }
 
       for (int i = len_ - 1; i > -1; i--) {
-        re = layers_[i].backward(re);
+        retval = layers_[i].backward(retval);
       }
     }
   }
@@ -339,14 +339,14 @@ class FNN {
     for (int k = 0; k < n; k++) {
 
       for (int l = 0; l < in.size(); l++) {
-        std::vector<float> re = forward(in[l]);
+        std::vector<float> retval = forward(in[l]);
 
-        for (int i = 0; i < re.size(); i++) {
-          re[i] = 2 * (re[i] - out[l][i]);
+        for (int i = 0; i < retval.size(); i++) {
+          retval[i] = 2 * (retval[i] - out[l][i]);
         }
 
         for (int i = len_ - 1; i > -1; i--) {
-          re = layers_[i].backward(re);
+          retval = layers_[i].backward(retval);
         }
       }
     }

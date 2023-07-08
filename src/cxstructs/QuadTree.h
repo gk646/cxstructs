@@ -28,11 +28,12 @@
 #include "vec.h"
 
 namespace cxstructs {
+template <typename T>
 class QuadTree {
   uint_16_cx max_depth_;
   uint_16_cx max_points_;
   Rect bounds_;
-  vec<Point, false> vec_;
+  vec<T> vec_;
 
   QuadTree* top_left_;
   QuadTree* top_right_;
@@ -40,47 +41,92 @@ class QuadTree {
   QuadTree* bottom_right_;
 
   inline void split() noexcept {
-    top_left_ = new QuadTree(
-        {bounds_.x(), bounds_.y(), bounds_.width() / 2, bounds_.height() / 2},
-        max_depth_ - 1, max_points_);
-    top_right_ = new QuadTree({bounds_.x() + bounds_.width() / 2, bounds_.y(),
-                               bounds_.width() / 2, bounds_.height() / 2},
-                              max_depth_ - 1, max_points_);
-    bottom_left_ =
-        new QuadTree({bounds_.x(), bounds_.y() + bounds_.height() / 2,
-                      bounds_.width() / 2, bounds_.height() / 2},
+    const auto half_width = bounds_.width() / 2;
+    auto half_height = bounds_.height() / 2;
+    top_left_ =
+        new QuadTree({bounds_.x(), bounds_.y(), half_width, half_height},
                      max_depth_ - 1, max_points_);
-    bottom_right_ = new QuadTree(
-        {bounds_.x() + bounds_.width() / 2, bounds_.y() + bounds_.height() / 2,
-         bounds_.width() / 2, bounds_.height() / 2},
+    top_right_ = new QuadTree(
+        {bounds_.x() + half_width, bounds_.y(), half_width, half_height},
         max_depth_ - 1, max_points_);
-    for (const auto& p : vec_) {
-      insert_subtrees(p);
+    bottom_left_ = new QuadTree(
+        {bounds_.x(), bounds_.y() + half_height, half_width, half_height},
+        max_depth_ - 1, max_points_);
+    bottom_right_ =
+        new QuadTree({bounds_.x() + half_width, bounds_.y() + half_height,
+                      half_width, half_height},
+                     max_depth_ - 1, max_points_);
+
+    for (const auto& e : vec_) {
+      insert_subtrees(e);
     }
     vec_.clear();
   };
-  inline void insert_subtrees(const Point& p) const {
-    if (p.x() > bounds_.x() + bounds_.width() / 2) {
-      if (p.y() > bounds_.y() + bounds_.height() / 2) {
-        bottom_right_->insert(p);
+  inline void insert_subtrees(const T& e) const noexcept {
+    if (e.x() > bounds_.x() + bounds_.width() / 2) {
+      if (e.y() > bounds_.y() + bounds_.height() / 2) {
+        bottom_right_->insert(e);
       } else {
-        top_right_->insert(p);
+        top_right_->insert(e);
       }
     } else {
-      if (p.y() > bounds_.y() + bounds_.height() / 2) {
-        bottom_left_->insert(p);
+      if (e.y() > bounds_.y() + bounds_.height() / 2) {
+        bottom_left_->insert(e);
       } else {
-        top_left_->insert(p);
+        top_left_->insert(e);
       }
     }
   }
-  inline void get_subtree_size(uint_32_cx& current) const {
+  inline void size_subtrees(uint_32_cx& current) const noexcept {
     current += vec_.size();
     if (top_right_) {
-      top_right_->get_subtree_size(current);
-      top_left_->get_subtree_size(current);
-      bottom_right_->get_subtree_size(current);
-      bottom_left_->get_subtree_size(current);
+      top_right_->size_subtrees(current);
+      top_left_->size_subtrees(current);
+      bottom_right_->size_subtrees(current);
+      bottom_left_->size_subtrees(current);
+    }
+  }
+  inline void count_subtrees(const Rect& bound,
+                             uint_32_cx& count) const noexcept {
+    if (bound.contains(bounds_)) {
+      count += vec_.size();
+      if (top_right_) {
+        top_right_->count_subtrees(bound, count);
+        top_left_->count_subtrees(bound, count);
+        bottom_left_->count_subtrees(bound, count);
+        bottom_right_->count_subtrees(bound, count);
+      }
+    }
+  }
+  inline void accumulate_subtrees(const Rect& bound,
+                                  vec<T*>& list) const noexcept {
+    if (bound.contains(bounds_)) {
+      auto arr = vec_.get_raw();
+      for (uint_fast32_t i = 0; i < vec_.size(); i++) {
+        list.push_back(&arr[i]);
+      }
+
+      if (top_right_) {
+        top_right_->accumulate_subtrees(bound, list);
+        top_left_->accumulate_subtrees(bound, list);
+        bottom_left_->accumulate_subtrees(bound, list);
+        bottom_right_->accumulate_subtrees(bound, list);
+      }
+    }
+  }
+  inline void erase_point(const T& e) const noexcept {
+    if (e.x() > bounds_.x() + bounds_.width() / 2) {
+      if (e.y() > bounds_.y() + bounds_.height() / 2) {
+        bottom_right_->erase(e);
+      } else {
+        top_right_->erase(e);
+      }
+    } else {
+      if (e.y() > bounds_.y() + bounds_.height() / 2) {
+        bottom_left_->erase(e);
+      } else {
+        top_left_->erase(e);
+      }
     }
   }
 
@@ -100,33 +146,73 @@ class QuadTree {
     delete bottom_right_;
     delete bottom_left_;
   }
-  void insert(const Point& p) {
-    if (!bounds_.contains(p)) {
+  inline void insert(const T& e) {
+    if (!bounds_.contains(e)) {
       return;
     }
-
     if (!top_right_) {
       if (vec_.size() < max_points_) {
-        vec_.push_back(p);
+        vec_.push_back(e);
         return;
       } else {
         if (max_depth_ > 0) {
           split();
         } else {
-          vec_.push_back(p);
+          vec_.push_back(e);
           CX_WARNING(
               "|QuadTree.h| Reached max depth | large insertions now will slow "
               "down the tree");
+          return;
         }
       }
     }
 
-    insert_subtrees(p);
+    insert_subtrees(e);
   }
-  uint_32_cx contained_in_rect(const Rect& space){
-
+  /**
+   * Number of points contained in the given rectangle bound
+   * @param bound the rectangle to search in
+   * @return number of points
+   */
+  inline uint_32_cx count_subrect(const Rect& bound) {
+    uint_32_cx count = 0;
+    if (bound.contains(bounds_)) {
+      count += vec_.size();
+      if (top_right_) {
+        top_right_->count_subtrees(bound, count);
+        top_left_->count_subtrees(bound, count);
+        bottom_left_->count_subtrees(bound, count);
+        bottom_right_->count_subtrees(bound, count);
+      }
+    }
+    return count;
   }
-  void clear() {
+  /**
+   * Retrieves all elements that are contained in the given bound as a iterable list of pointers
+   * @param bound the rectangle to search in
+   * @return a list of pointers to the objects
+   */
+  inline vec<T*> get_subrect(const Rect& bound) {
+    vec<T*> retval;
+    accumulate_subtrees(bound, retval);
+    return retval;
+  }
+  /**
+   * Removes the first occurence of that object from the quadtree<p>
+   * Uses operator== to check for equality
+   * @param e the element to erase
+   */
+  inline void erase(const T& e) {
+    if (!top_right_) {
+      vec_.erase(e);
+    } else {
+      erase_point(e);
+    }
+  }
+  /**
+   * Clears the QuadTree of all elements
+   */
+  inline void clear() {
     delete top_right_;
     delete top_left_;
     delete bottom_right_;
@@ -137,8 +223,6 @@ class QuadTree {
     bottom_right_ = nullptr;
     vec_.clear();
   };
-  bool contains();
-  void erase();
   /**
    * Actively iterates down the tree summing all subtree sizes<p>
    * <b>This is rather slow </b>
@@ -146,7 +230,7 @@ class QuadTree {
    */
   [[nodiscard]] inline uint_32_cx size() const {
     uint_32_cx size = vec_.size();
-    get_subtree_size(size);
+    size_subtrees(size);
     return size;
   }
   /**
@@ -172,12 +256,31 @@ class QuadTree {
     std::cout << "TESTING QUAD TREE" << std::endl;
 
     std::cout << "   Testing insert..." << std::endl;
-    QuadTree tree({0, 0, 200, 200});
+    QuadTree<Point> tree({0, 0, 200, 200});
     for (uint_fast32_t i = 0; i < 1000; i++) {
       tree.insert({distr(gen), distr(gen)});
     }
     CX_ASSERT(tree.depth() == 2);
     CX_ASSERT(tree.size() == 1000);
+
+    CX_ASSERT(tree.count_subrect({0, 0, 200, 200}) == 1000);
+    tree.insert({2, 2});
+    CX_ASSERT(tree.size() == 1001);
+    tree.erase({2, 2});
+    CX_ASSERT(tree.size() == 1000);
+
+    std::cout << "   Testing max capacity..." << std::endl;
+    QuadTree<Point> tree1({0, 0, 200, 200}, 2, 10);
+    for (uint_fast32_t i = 0; i < 100000; i++) {
+      tree.insert({distr(gen), distr(gen)});
+    }
+
+    std::cout << "   Testing object retrieval..." << std::endl;
+    tree1.clear();
+    tree1.insert({2, 2});
+    for (auto ptr : tree1.get_subrect({0, 0, 2, 2})) {
+      CX_ASSERT(*ptr == Point(2, 2));
+    }
   }
 #endif
 };
