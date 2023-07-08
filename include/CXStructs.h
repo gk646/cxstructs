@@ -46,6 +46,7 @@
 
 #include "cxalgos/GraphTraversal.h"
 #include "cxalgos/MathFunctions.h"
+#include "cxalgos/Misc.h"
 #include "cxalgos/PathFinding.h"
 #include "cxalgos/PatternMatching.h"
 #include "cxalgos/Search.h"

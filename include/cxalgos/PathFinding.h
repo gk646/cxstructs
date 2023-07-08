@@ -22,11 +22,12 @@
 #define CXSTRUCTS_ASTAR_PATHFINDING_H
 
 #include <cstdint>
-#include <deque>
 #include <type_traits>
+#include <queue>
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
 #include "../cxstructs/Pair.h"
+
 namespace cxhelper {
 using namespace cxstructs;
 struct Node {
@@ -69,11 +70,26 @@ inline std::vector<Point> reconstruct_path(Node* target_node) {
 
 namespace cxalgos {
 using namespace cxstructs;
+/**
+ * <h2>A star</h2> is a pathfinding algorithm using clever heuristics to find the shortest path.<p>
+ * It generally works by having a field of nodes which is the search space and then giving each node
+ * a g_cost ( the distance form the start) and a h_cost ( mostly the distance form the target).<p>
+ * These are then added to generate a score for the nodes quality. Each step the node with the best score is removed and check for being the end position. If not up 4 new nodes ( the ones around the node without diagonals)
+ * are added. This repeats until either all nodes are visited or the end was found.
+ *
+ * @tparam S field type
+ * @tparam B  blocked value type (can be same type as S)
+ * @param field the 2D search space
+ * @param blocked_val a arbitrary value to represent an obstacle
+ * @param start the starting point
+ * @param target the target point
+ * @return the shortest path from start to target in Points
+ */
 template <typename S, typename B>
 std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field,
                                      const B& blocked_val, const Point& start,
                                      const Point& target) {
-  std::priority_queue<Node, vec<Node, false>, std::greater<>> frontier;
+  std::priority_queue<Node, vec<Node>, std::greater<>> frontier;
 
   HashSet<Point> closedSet;
   vec<row<2, int>, false> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
