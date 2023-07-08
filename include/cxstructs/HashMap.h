@@ -434,7 +434,7 @@ class HashMap {
     maxSize = buckets_ * load_factor_;
   }
   /**
- * @brief Checks if the HashMap contains a specific key.
+ * @brief Checks if the HashMap contained a specific key.
  *
  * @param key The key to search for in the HashMap.
  * @return true if the key is present in the HashMap, false otherwise.

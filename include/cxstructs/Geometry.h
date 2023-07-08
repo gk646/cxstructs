@@ -47,42 +47,43 @@ class Rect : public Shape {
 
  public:
   inline Rect() : x_(0), y_(0), w_(0), h_(0) {}
-  inline Rect(float x, float y, float width, float height)
+  inline Rect(const float& x, const float& y, const float& width,
+              const float& height)
       : x_(x), y_(y), w_(width), h_(height) {}
-  inline Rect(float x, float y) : x_(x), y_(y), w_(0), h_(0) {}
+  inline Rect(const float& x, const float& y) : x_(x), y_(y), w_(0), h_(0) {}
   /**
-   * @brief Checks if this rectangle contains with another rectangle.
+   * @brief Checks if this rectangle intersects with another rectangle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two rectangles.
    *
    * @param r The other rectangle to check for intersection.
-   * @return `true` if this rectangle contains with the other rectangle, `false` otherwise.
+   * @return `true` if this rectangle contained with the other rectangle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Rect& r) const {
     return !(x_ > r.x_ + r.w_ || x_ + w_ < r.x_ || y_ > r.y_ + r.h_ ||
              y_ + h_ < r.y_);
   }
   /**
-   * @brief Checks if this rectangle contains with a circle.
+   * @brief Checks if this rectangle intersects with a circle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param c The circle check for intersection.
-   * @return `true` if this rectangle contains with the circle, `false` otherwise.
+   * @return `true` if this rectangle contained with the circle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Circle& c) const;
   /**
-   * Checks if the given rect is fully contains inside this rectangle.<p>
+   * Checks if the given rect is fully contained inside this rectangle.<p>
    * Contained means non-touching
    * @param r the other rect
-   * @return true only if r is fully contains
+   * @return true only if r is fully contained
    */
   [[nodiscard]] inline bool contains(const Rect& r) const {
-    return (x_ < r.x_ && y_ < r.y_ && x_ + w_ > r.x_ + r.w_ &&
-            y_ + h_ > r.y_ + r.h_);
+    return !(x_ > r.x_ && y_ > r.y_ && x_ + w_ < r.x_ + r.w_ &&
+            y_ + h_ < r.y_ + r.h_);
   }
   [[nodiscard]] inline bool contains(const Circle& p) const;
-  [[nodiscard]] inline bool contains(const Point& p) const;
+  [[nodiscard]] inline bool contains(const Point& p) const final;
   /**
  * @brief Getter method for the x position.
  * @return A readable/writable reference to the x position.
@@ -110,6 +111,11 @@ class Rect : public Shape {
   [[nodiscard]] inline float height() const { return h_; }
   [[nodiscard]] inline float& width() { return w_; }
   [[nodiscard]] inline float& height() { return h_; }
+  friend std::ostream& operator<<(std::ostream& os, const Rect& r) {
+    os << "Rect: [x: " << r.x_ << ", y: " << r.y_ << ", width: " << r.w_
+       << ", height: " << r.h_ << "]";
+    return os;
+  }
 };
 
 class Circle : public Shape {
@@ -122,12 +128,12 @@ class Circle : public Shape {
   inline Circle(float x_pos, float y_pos, float radius)
       : x_(x_pos), y_(y_pos), r_(radius) {}
   /**
-   * @brief Checks if this circle contains with a rectangle.
+   * @brief Checks if this circle contained with a rectangle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param r The rect check for intersection.
-   * @return `true` if this circle contains with the rectangle, `false` otherwise.
+   * @return `true` if this circle contained with the rectangle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Rect& r) const {
     float closestX = std::clamp(x_, r.x(), r.x() + r.width());
@@ -139,22 +145,22 @@ class Circle : public Shape {
     return (dx * dx + dy * dy) <= (r_ * r_);
   }
   /**
-   * @brief Checks if this circle contains with a circle.
+   * @brief Checks if this circle contained with a circle.
    *
    * An intersection is considered to occur if there is any overlap in the areas of the two shapes.
    *
    * @param c The circle check for intersection.
-   * @return `true` if this circle contains with the circle, `false` otherwise.
+   * @return `true` if this circle contained with the circle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Circle& c) const {
     return !(((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) >
              (r_ * c.r_ + r_ * c.r_));
   }
   /**
-   * Checks if the given circle is fully contains inside this circle.<p>
+   * Checks if the given circle is fully contained inside this circle.<p>
    * Contained means non-touching
    * @param c the other circle
-   * @return true only if c is fully contains
+   * @return true only if c is fully contained
    */
   [[nodiscard]] inline bool contains(const Circle& c) const {
     return ((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) <
@@ -208,7 +214,7 @@ class Point {
 
  public:
   inline Point() : x_(0), y_(0) {}
-  inline Point(float x_pos, float y_pos) : x_(x_pos), y_(y_pos) {}
+  inline Point(const float& x_pos, const float& y_pos) : x_(x_pos), y_(y_pos) {}
   inline Point& operator=(const Point& o) {
     if (this != &o) {
       x_ = o.x_;
@@ -222,26 +228,6 @@ class Point {
   }
   friend std::ostream& operator<<(std::ostream& os, const Point& p) {
     return os << "Point:[" << p.x_ << " ," << p.y_ << "]";
-  }
-  /**
-   * Checks if the point is either inside or touches the rectangle
-   *
-   * @param r the rectangle
-   * @return true if the point is inside or touches the rectangle
-   */
-  [[nodiscard]] inline bool contains(Rect& r) const {
-    return (x_ > r.x() && y_ > r.y() && x_ < r.x() + r.width() &&
-            y_ < r.y() + r.height());
-  }
-  /**
-   * Checks if the point is either inside or touches the circle
-   *
-   * @param r the rectangle
-   * @return true if the point is inside or touches the circle
-   */
-  [[nodiscard]] inline bool contains(Circle& c) const {
-    return (x_ - c.x()) * (x_ - c.x()) + (y_ - c.y()) * (y_ - c.y()) <=
-           (c.radius() * c.radius());
   }
   bool operator==(const Rect& r) const { return (x_ == r.x() && y_ == r.y()); }
   /**
@@ -298,7 +284,7 @@ bool Rect::intersects(const Circle& c) const {
           (closestY - c.y()) * (closestY - c.y())) <= (c.radius() * c.radius());
 }
 bool Rect::contains(const Point& p) const {
-  return !(x_ > p.x() && y_ > p.y() && x_ + w_ < p.x() && y_ + h_ < p.y());
+  return !(x_ > p.x() || y_ > p.y() || x_ + w_ < p.x() || y_ + h_ < p.y());
 }
 bool Rect::contains(const Circle& p) const {
   float dx = std::max(0.0f, std::max(x_ - p.x(), p.x() - (x_ + w_)));
@@ -307,7 +293,7 @@ bool Rect::contains(const Circle& p) const {
   return (dx * dx + dy * dy) > (p.radius() * p.radius());
 }
 bool Circle::contains(const Point& p) const {
-  return ((x_ - p.x()) * (x_ - p.x()) + (y_ - p.y()) * (y_ - p.y())) < r_ * r_;
+  return ((x_ - p.x()) * (x_ - p.x()) + (y_ - p.y()) * (y_ - p.y()) < r_ * r_);
 }
 
 }  // namespace cxstructs

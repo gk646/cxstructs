@@ -205,7 +205,7 @@ class BinaryTree {
   /**
    * Recursively searches the tree for the given value
    * @param val - the value to search for
-   * @return - true if the tree contains the given value, false otherwise
+   * @return - true if the tree contained the given value, false otherwise
    */
   [[nodiscard]] inline bool contains(const T& val) const {
     return contains(val, root_);

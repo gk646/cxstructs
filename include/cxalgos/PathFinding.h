@@ -27,6 +27,7 @@
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
 #include "../cxstructs/Pair.h"
+#include "../cxstructs/PriorityQueue.h"
 
 namespace cxhelper {
 using namespace cxstructs;
@@ -53,6 +54,7 @@ struct Node {
   inline bool operator<(const Node& o) const { return f_cost < o.f_cost; }
   inline bool operator>(const Node& o) const { return f_cost > o.f_cost; }
   inline bool operator==(const Node& o) const { return f_cost == o.f_cost; }
+  inline bool operator<=(const Node& o) const { return f_cost <= o.f_cost; }
 };
 
 inline std::vector<Point> reconstruct_path(Node* target_node) {
@@ -89,15 +91,17 @@ template <typename S, typename B>
 std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field,
                                      const B& blocked_val, const Point& start,
                                      const Point& target) {
-  std::priority_queue<Node, vec<Node>, std::greater<>> frontier;
-
+  std::priority_queue<Node, std::vector<Node>, std::greater<>> frontier;
+  PriorityQueue<Node> priority_queue;
   HashSet<Point> closedSet;
   vec<row<2, int>, false> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
   frontier.emplace(start, 0, start.dist(target), nullptr);
-
+  priority_queue.emplace(start, 0, start.dist(target), nullptr);
   while (!frontier.empty()) {
     Node* current = new Node(frontier.top());  //yeah i know...
+    CX_ASSERT(*current == priority_queue.top());
     frontier.pop();
+    priority_queue.pop();
 
     if (current->position == target) {
       return reconstruct_path(current);
@@ -117,6 +121,7 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field,
         uint16_t h_cost = abs(newX - static_cast<int>(target.x())) +
                           abs(newY - static_cast<int>(target.y()));
 
+        priority_queue.emplace(new_pos, tentative_g_cost, h_cost, current);
         frontier.emplace(new_pos, tentative_g_cost, h_cost, current);
       }
     }

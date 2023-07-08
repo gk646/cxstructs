@@ -364,7 +364,7 @@ class HashSet {
     maxSize = buckets_ * load_factor_;
   }
   /**
- * @brief Checks if the HashSet contains a specific key.
+ * @brief Checks if the HashSet contained a specific key.
  *
  * @param key The key to search for in the HashSet.
  * @return true if the key is present in the HashSet, false otherwise.
