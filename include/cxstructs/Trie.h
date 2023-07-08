@@ -153,9 +153,9 @@ class Trie {
       }
     }
     if (iterator) {
-      std::vector<std::string> re{};
-      getAllSubChildren(iterator, re);
-      return re;
+      std::vector<std::string> retval{};
+      getAllSubChildren(iterator, retval);
+      return retval;
     } else {
       return {};
     }
@@ -167,7 +167,7 @@ class Trie {
   [[nodiscard]] uint_32_cx size() const { return size_; }
   /**
    * Empty check on the trie
-   * @return true if the trie contains no words
+   * @return true if the trie contained no words
    */
   [[nodiscard]] bool empty() const { return size_ == 0; }
   /**

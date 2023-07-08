@@ -48,7 +48,7 @@ using namespace cxhelper;
 /**
  * <h2>Singly Linked List</h2>
  *
- * is a fundamental data structure that consists of a sequence of nodes, where each node contains
+ * is a fundamental data structure that consists of a sequence of nodes, where each node contained
  * data and a reference (or link) to the next node in the sequence.
  * <br><br>
  * Adding nodes to the list is a <b>highly efficient O(1) operation </b, as it only requires

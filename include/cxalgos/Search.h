@@ -21,14 +21,13 @@
 #ifndef CXSTRUCTS_BINARYSEARCH_H
 #define CXSTRUCTS_BINARYSEARCH_H
 
-
 #include <cstdint>
 #include <iostream>
 #include "../cxconfig.h"
 
-namespace cxhelper { // helper methods to provide clean calling interface
+namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
-bool binarySearch_recursive_internal(T *arr, T target, int_32_cx low,
+bool binarySearch_recursive_internal(T* arr, T target, int_32_cx low,
                                      int_32_cx high) {
   if (low > high) {
     return false;
@@ -43,7 +42,7 @@ bool binarySearch_recursive_internal(T *arr, T target, int_32_cx low,
     return binarySearch_recursive_internal(arr, target, low, mid - 1);
   }
 }
-} // namespace cxhelper
+}  // namespace cxhelper
 
 namespace cxalgos {
 /**
@@ -55,7 +54,8 @@ namespace cxalgos {
  * @param len the length of the given array
  * @return true if the target was found inside arr_
  */
-template <typename T> bool binarySearch(T *arr, T target, int_32_cx len) {
+template <typename T>
+bool binary_search(T* arr, T target, int_32_cx len) {
   int_32_cx low = 0;
   int_32_cx high = len - 1;
   int_32_cx mid;
@@ -74,7 +74,9 @@ template <typename T> bool binarySearch(T *arr, T target, int_32_cx len) {
 
 /**
  * Binary search on the specified ASCENDED SORTED array with recursion <p>
-* runtime: O(log(n))
+* runtime: O(log(n))<p>
+ *
+ * Recursion is generally slower and more memory intensive
  * @tparam T the used datatype
  * @param arr search array
  * @param target target value to search for
@@ -82,12 +84,43 @@ template <typename T> bool binarySearch(T *arr, T target, int_32_cx len) {
  * @return true if the target was found inside arr_
  */
 template <typename T>
-bool binarySearch_recursive(T *arr, T target, int_32_cx len) {
+bool binary_search_recursive(T* arr, T target, int_32_cx len) {
   if (len == 0) {
     return false;
   }
   return cxhelper::binarySearch_recursive_internal(arr, target, 0, len - 1);
 }
 
-} // namespace cxalgos
-#endif // CXSTRUCTS_BINARYSEARCH_H
+template <typename T>
+int binary_search_index(T* arr, T target, int_32_cx len, bool ascending) {
+  if (ascending) {
+    int_32_cx low = 0;
+    int_32_cx high = len;
+    while (low < high) {
+      int_32_cx mid = low + (high - low) / 2;
+      if (arr[mid] < target) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+    return low;
+  } else {
+    int_32_cx low = 0;
+    int_32_cx high = len;
+
+    while (low < high) {
+      int_32_cx mid = low + (high - low) / 2;
+      if (arr[mid] > target) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+
+    return low;
+  }
+}
+
+}  // namespace cxalgos
+#endif  // CXSTRUCTS_BINARYSEARCH_H
