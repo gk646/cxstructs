@@ -24,7 +24,6 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
-#include <numbers>
 #include <type_traits>
 #include "../cxconfig.h"
 
@@ -81,7 +80,7 @@ double integral_volume_solids_of_revolution(Function fx, double a, double b,
   double width = b - a;
   double step_size = width / steps;
   for (uint_32_cx i = 0; i < steps; i++) {
-    volume += std::numbers::pi * std::pow(fx(a), 2) * step_size;
+    volume += CX_PI * std::pow(fx(a), 2) * step_size;
     a += step_size;
   }
   return volume;
@@ -143,7 +142,7 @@ static void TEST_MATH() {
   auto volume = integral_volume_solids_of_revolution(
       [](double x) { return std::sqrt(x); }, 0, 4);
 
-  CX_ASSERT(volume - std::numbers::pi * 8 < 0.001);
+  CX_ASSERT(volume - CX_PI * 8 < 0.001);
   auto length = integral_arc_length(
       [](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
       0, std::sqrt(8),100000);
