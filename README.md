@@ -9,7 +9,7 @@ efficiency and interface.
 
 **1.** [Contents](#contents)   
 **2.** [Installation](#installation)  
-**3.** [Library Notes](#library-notes)
+**3.** [Library Notes](#library-notes)  
 **4.** [Contributing](#contributing)
 
 ### Speed Comparison
@@ -65,9 +65,9 @@ efficiency and interface.
 
 #### Machine Learning
 
-###### *(NN = Neural Network)*
 
-- **FNN**: *implemented using matrices (*default*) and without, switch:`#define CX_NO_MATRIX`*
+
+- **FeedForwardNeuralNetwork**(*FNN*): *implemented using matrices (*default*) and without, switch:`#define CX_NO_MATRIX`*
 
 #### Algorithms
 
@@ -90,7 +90,7 @@ efficiency and interface.
 
 #### CMake
 
-Simply add this line to your CMakeLists.txt.  This will automatically download the newest version and add them to your *includes*.
+Simply add these lines around your build target in your CMakeLists.txt.  This will automatically download the newest version and add them to your *includes*.
 ```cmake
 include(FetchContent)
 FetchContent_Declare(cxstructs GIT_REPOSITORY https://github.com/gk646/CXStructures.git)
