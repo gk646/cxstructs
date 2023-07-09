@@ -4,7 +4,7 @@ A medium-sized header only library of selected datastructures, algorithms, machi
 collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read
 and well documented.
 
-While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of
+While I am not an expert in datastructures nor C++, yet I am still aiming for reference type implementations in terms of
 efficiency and interface.
 
 **1.** [Contents](#contents)   
@@ -60,7 +60,7 @@ efficiency and interface.
 - **DeQueue**: *using centered array*
 - **PriorityQueue**: *using max-heap(soon)*
 - **Binary Tree**:
-- **QuadTree**: *allows for templated elements with x() and y() getters*
+- **QuadTree**: *allows custom Types with x() and y() getters*
 - **Geometry**(*Rect,Circle,Point*): *standard efficient 2D shapes*
 
 #### Machine Learning
@@ -81,9 +81,9 @@ efficiency and interface.
 #### Utilities
 
 - **cxtime** *easily measure the time from `now()` to `printTime()`*
-- **cxio** *load files*
+- **cxio** *load_text,*
 - **cxassert** *custom assertions with optional text*
-
+- **cxmath** *activation functions,*
 ---
 
 ### Installation
@@ -143,5 +143,6 @@ You can then add a main.cpp and test any changes.
 Run tests by `#include "CXTests.h"` and calling the test methods.
 
 ### Misc
+
 
 
