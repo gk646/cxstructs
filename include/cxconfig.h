@@ -44,7 +44,9 @@ namespace cxtests {}
 /**
  * internal namespace for helper methods or structs
  */
-namespace cxhelper {}
+namespace cxhelper {
+#define CX_PI 3.14159265358979323846  // compatibility change
+}
 
 #include <cstdint>
 
