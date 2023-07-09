@@ -67,14 +67,14 @@ class Pair {
      *
      * @return A reference to the first element.
      */
-  inline T1_& first()  { return first_; }
+  inline T1_& first() { return first_; }
 
   /**
      * @brief Returns a reference to the second element.
      *
      * @return A reference to the second element.
      */
-  inline T2_& second()  { return second_; }
+  inline T2_& second() { return second_; }
   /**
      * @brief Returns a reference to the first element.
      *
@@ -87,7 +87,7 @@ class Pair {
      *
      * @return A reference to the second element.
      */
-  inline const T2_& second()  const{ return second_; }
+  inline const T2_& second() const { return second_; }
   /**
      * @brief Checks if the Pair has been assigned values.
      *

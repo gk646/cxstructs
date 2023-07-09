@@ -87,9 +87,7 @@ class row {
    * @param i The index of the element to access.
    * @return A reference to the element at the specified index.
    */
-  [[nodiscard]] inline T& operator[](const uint_32_cx& i)  {
-    return arr_[i];
-  }
+  [[nodiscard]] inline T& operator[](const uint_32_cx& i) { return arr_[i]; }
   [[nodiscard]] inline const T& operator[](const uint_32_cx& i) const {
     return arr_[i];
   }

@@ -34,9 +34,11 @@ class Rect;
 
 class Shape {
  public:
-  [[nodiscard]] virtual bool contains(const Point& s) const {};
-  [[nodiscard]] virtual bool contains(const Shape& s) const {};
-  [[nodiscard]] virtual bool intersects(const Shape& r) const {};
+  [[nodiscard]] virtual bool contains(const Point& s) const = 0;
+  [[nodiscard]] virtual bool contains(const Rect& s) const = 0;
+  [[nodiscard]] virtual bool contains(const Circle& s) const = 0;
+  [[nodiscard]] virtual bool intersects(const Rect& r) const = 0;
+  [[nodiscard]] virtual bool intersects(const Circle& r) const = 0;
 };
 
 class Rect : public Shape {
@@ -59,7 +61,7 @@ class Rect : public Shape {
    * @param r The other rectangle to check for intersection.
    * @return `true` if this rectangle contained with the other rectangle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(const Rect& r) const {
+  [[nodiscard]] inline bool intersects(const Rect& r) const final {
     return !(x_ > r.x_ + r.w_ || x_ + w_ < r.x_ || y_ > r.y_ + r.h_ ||
              y_ + h_ < r.y_);
   }
@@ -71,18 +73,18 @@ class Rect : public Shape {
    * @param c The circle check for intersection.
    * @return `true` if this rectangle contained with the circle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(const Circle& c) const;
+  [[nodiscard]] inline bool intersects(const Circle& c) const final;
   /**
    * Checks if the given rect is fully contained inside this rectangle.<p>
    * Contained means non-touching
    * @param r the other rect
    * @return true only if r is fully contained
    */
-  [[nodiscard]] inline bool contains(const Rect& r) const {
+  [[nodiscard]] inline bool contains(const Rect& r) const final {
     return !(x_ > r.x_ && y_ > r.y_ && x_ + w_ < r.x_ + r.w_ &&
-            y_ + h_ < r.y_ + r.h_);
+             y_ + h_ < r.y_ + r.h_);
   }
-  [[nodiscard]] inline bool contains(const Circle& p) const;
+  [[nodiscard]] inline bool contains(const Circle& p) const final;
   [[nodiscard]] inline bool contains(const Point& p) const final;
   /**
  * @brief Getter method for the x position.
@@ -135,7 +137,7 @@ class Circle : public Shape {
    * @param r The rect check for intersection.
    * @return `true` if this circle contained with the rectangle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(const Rect& r) const {
+  [[nodiscard]] inline bool intersects(const Rect& r) const final {
     float closestX = std::clamp(x_, r.x(), r.x() + r.width());
     float closestY = std::clamp(y_, r.y(), r.y() + r.height());
 
@@ -152,7 +154,7 @@ class Circle : public Shape {
    * @param c The circle check for intersection.
    * @return `true` if this circle contained with the circle, `false` otherwise.
    */
-  [[nodiscard]] inline bool intersects(const Circle& c) const {
+  [[nodiscard]] inline bool intersects(const Circle& c) const final {
     return !(((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) >
              (r_ * c.r_ + r_ * c.r_));
   }
@@ -162,17 +164,17 @@ class Circle : public Shape {
    * @param c the other circle
    * @return true only if c is fully contained
    */
-  [[nodiscard]] inline bool contains(const Circle& c) const {
+  [[nodiscard]] inline bool contains(const Circle& c) const final {
     return ((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) <
            (r_ - c.r_) * (r_ - c.r_);
   }
-  [[nodiscard]] bool contains(const Rect& r) const {
+  [[nodiscard]] bool contains(const Rect& r) const final {
     float dx = std::max(0.0f, std::max(r.x() - x_, x_ - (r.x() + r.width())));
     float dy = std::max(0.0f, std::max(r.y() - y_, y_ - (r.y() + r.height())));
 
     return (dx * dx + dy * dy) <= (r_ * r_);
   }
-  inline bool contains(const Point& p) const;
+  [[nodiscard]] inline bool contains(const Point& p) const final;
   /**
  * @brief Getter method for the x position.
  * @return A readable/writable reference to the x position.

@@ -62,7 +62,7 @@ class LinkedList {
   using Node = ListNode<T>;
   using Allocator =
       typename std::conditional<UseCXPoolAllocator,
-                                CXPoolAllocator<Node , sizeof(Node) * 33, 1>,
+                                CXPoolAllocator<Node, sizeof(Node) * 33, 1>,
                                 std::allocator<Node>>::type;
 
   Allocator alloc;

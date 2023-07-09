@@ -7,8 +7,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,39 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
+#ifndef CXSTRUCTS_SRC_CXUTIL_MATH_H_
+#define CXSTRUCTS_SRC_CXUTIL_MATH_H_
 
-#include <iostream>
-#include <vector>
-#include "../cxconfig.h"
+#define CX_PI 3.14159265358979323846  // for compatibility
 
-#ifndef CXSTRUCTS_DFS_H
-#define CXSTRUCTS_DFS_H
-
-namespace cxalgos {
-
-/**
- * Treats the vector as an adjacency matrix
- * @return - the number of reachable nodes from the given start node
- */
-template <typename T>
-int depth_first_search(std::vector<std::vector<T>>& mat, int nodeIndex,
-                       std::vector<bool> vis = {}) {
-  int count = 1;
-  if (mat.empty() || nodeIndex >= mat.size())
-    return 0;
-  if (vis.empty()) {
-    count++;
-    vis = std::vector(mat.size(), false);
-  }
-
-  for (int i = 0; i < mat[nodeIndex].size(); ++i) {
-    if (mat[nodeIndex][i] == 1 && !vis[i]) {
-      vis[i] = true;
-      count += depth_first_search(mat, nodeIndex, vis);
-    }
-  }
-  return count;
+namespace cxutil {
+constexpr inline float sig(float x) noexcept {
+  return 1.0 / (1.0 + std::exp(-x));
 }
-}  // namespace cxalgos
+ inline float d_sig(float x) noexcept {
+  return sig(x) * (1 - sig(x));
+}
 
-#endif  // CXSTRUCTS_DFS_H
+inline float relu(float x) noexcept {
+  return x > 0 ? x : 0;
+}
+ inline float d_relu(float x) noexcept {
+  return x > 0 ? 1 : 0;
+}
+
+}  // namespace cxutil
+#endif  //CXSTRUCTS_SRC_CXUTIL_MATH_H_

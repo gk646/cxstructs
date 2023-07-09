@@ -67,8 +67,7 @@ class Pool {
   void deallocate(void* ptr) { addrs_.push_back(ptr); }
 };
 
-template <typename T, size_t BlockSize,
-          uint_16_cx ReservedBlocks>
+template <typename T, size_t BlockSize, uint_16_cx ReservedBlocks>
 class CXPoolAllocator {
   using PoolType = Pool<BlockSize, ReservedBlocks>;
   PoolType pool_;
