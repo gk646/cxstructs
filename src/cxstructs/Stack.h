@@ -44,15 +44,15 @@ namespace cxstructs {
  */
 template <typename T, bool UseCXPoolAllocator = true>
 class Stack {
-  using Allocator = typename std::conditional<UseCXPoolAllocator,
-                                              CXPoolAllocator<T, sizeof(T) * 33, 1>,
-                                              std::allocator<T>>::type;
+  using Allocator =
+      typename std::conditional<UseCXPoolAllocator,
+                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx size_;
   uint_32_cx len_;
-  bool is_trivial_destr =
-      std::is_trivially_destructible<T>::value;
+  bool is_trivial_destr = std::is_trivially_destructible<T>::value;
 
   inline void grow() {
     len_ *= 2;
@@ -349,6 +349,6 @@ class Stack {
   }
 #endif
 };
-}  // namespace cxalgos
+}  // namespace cxstructs
 
 #endif  // CXSTRUCTURES_STACK_H

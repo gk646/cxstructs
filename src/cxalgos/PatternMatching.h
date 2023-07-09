@@ -178,7 +178,7 @@ int findString_Boyer_Moore(const std::string& text,
 
   len--;  //precalculate outside the loop
   uint_32_cx i = 0, j = 0;
-  while(i < text_len){
+  while (i < text_len) {
     for (j = len; pattern[j] == text[i]; --i, --j) {
       if (j == 0) {
         count++;

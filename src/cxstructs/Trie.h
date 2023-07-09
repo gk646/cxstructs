@@ -21,8 +21,8 @@
 #ifndef CXSTRUCTS_TRIE_H
 #define CXSTRUCTS_TRIE_H
 
-#pragma message \
-    "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!"
+#pragma message( \
+        "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!")
 
 #include <algorithm>
 #include <array>
@@ -54,8 +54,7 @@ using namespace cxhelper;
  */
 
 class Trie {
-  using Allocator =
-      CXPoolAllocator<TrieNode, sizeof(TrieNode) * 31, 1>;
+  using Allocator = CXPoolAllocator<TrieNode, sizeof(TrieNode) * 31, 1>;
   TrieNode* root;
   Allocator alloc;
   uint_32_cx size_;
@@ -216,5 +215,5 @@ class Trie {
   }
 #endif
 };
-}  // namespace cxalgos
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_TRIE_H

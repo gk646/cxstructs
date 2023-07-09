@@ -22,7 +22,7 @@
 #define CXSTRUCTS_SRC_CXASSERT_H_
 #include <iostream>
 void CX_ASSERT_failed(const char* expr, const char* file, int line,
-                   const char* message) {
+                      const char* message) {
   std::cerr << "Assert failed: " << expr << "\n"
             << "At " << file << ":" << line << "\n"
             << "Message: " << message << "\n";

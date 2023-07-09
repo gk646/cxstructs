@@ -41,9 +41,10 @@ namespace cxstructs {
  */
 template <typename T, bool UseCXPoolAllocator = true>
 class Queue {
-  using Allocator = typename std::conditional<UseCXPoolAllocator,
-                                              CXPoolAllocator<T, sizeof(T) * 33, 1>,
-                                              std::allocator<T>>::type;
+  using Allocator =
+      typename std::conditional<UseCXPoolAllocator,
+                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx len_;
@@ -325,5 +326,5 @@ class Queue {
 #endif
 };
 
-}  // namespace cxalgos
+}  // namespace cxstructs
 #endif  // CXSTRUCTS_QUEUE_H

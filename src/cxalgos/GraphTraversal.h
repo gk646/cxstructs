@@ -19,7 +19,6 @@
 // SOFTWARE.
 #define FINISHED
 
-
 #include <iostream>
 #include <vector>
 #include "../cxconfig.h"

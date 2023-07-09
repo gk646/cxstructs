@@ -18,40 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define FINISHED
+#ifndef CXSTRUCTS_SRC_CXUTIL_MATH_H_
+#define CXSTRUCTS_SRC_CXUTIL_MATH_H_
 
-#ifndef CXSTRUCTS_SRC_CONFIG_H_
-#define CXSTRUCTS_SRC_CONFIG_H_
-/**
- * namespace for all utility related headers
- */
-namespace cxutil {}
-/**
- * namespace for all cxml related headers
- */
-namespace cxml {}
-/**
- * namespace for all datastructure related headers
- */
-namespace cxstructs {}
-/**
- * namespace for all cxalgos related headers
- */
-namespace cxalgos {}
-/**
- * internal namespace for helper methods or structs
- */
-namespace cxhelper {}
+#define CX_PI 3.14159265358979323846  // for compatibility
 
-#include <cstdint>
-#include "cxutil/cxassert.h"
-#include "cxutil/cxmath.h"
+namespace cxutil {
+constexpr inline float sig(float x) noexcept {
+  return 1.0 / (1.0 + std::exp(-x));
+}
+ inline float d_sig(float x) noexcept {
+  return sig(x) * (1 - sig(x));
+}
 
+inline float relu(float x) noexcept {
+  return x > 0 ? x : 0;
+}
+ inline float d_relu(float x) noexcept {
+  return x > 0 ? 1 : 0;
+}
 
-typedef uint_fast32_t uint_32_cx;
-typedef uint_fast16_t uint_16_cx;
-typedef int_fast32_t int_32_cx;
-
-
-#include "CXAllocator.h"
-
-#endif  //CXSTRUCTS_SRC_CONFIG_H_
+}  // namespace cxutil
+#endif  //CXSTRUCTS_SRC_CXUTIL_MATH_H_

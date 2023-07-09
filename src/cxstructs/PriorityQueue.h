@@ -139,7 +139,7 @@ class PriorityQueue {
     if (back_ == len_) {
       resize();
     }
-    auto index = cxalgos::binary_search_index(arr_+front_, e, len_, true);
+    auto index = cxalgos::binary_search_index(arr_ + front_, e, len_, true);
     shift(index);
     arr_[index] = e;
     back_++;
@@ -157,7 +157,7 @@ class PriorityQueue {
     const T val;
     std::allocator_traits<Allocator>::construct(alloc, &val,
                                                 std::forward<Args>(args)...);
-    auto index = cxalgos::binary_search_index(arr_ +front_, val, len_, true);
+    auto index = cxalgos::binary_search_index(arr_ + front_, val, len_, true);
     shift(index);
     arr_[index] = std::move(val);
     back_++;
@@ -176,7 +176,7 @@ class PriorityQueue {
    */
   [[nodiscard]] inline T& top() const {
     CX_ASSERT(front_ < len_, "underflow error");
-    return arr_[back_-1];
+    return arr_[back_ - 1];
   }
   /**
    * Returns a read/write reference to the lowest priority element of the queue.
@@ -256,7 +256,7 @@ class PriorityQueue {
     q1.push(5);
     CX_ASSERT(q1.size() == 1);
     CX_ASSERT(q1.empty() == false);
-    std::cout<< q1.top() << std::endl;
+    std::cout << q1.top() << std::endl;
     CX_ASSERT(q1.top() == 5);
 
     // Test pop

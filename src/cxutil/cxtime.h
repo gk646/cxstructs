@@ -31,8 +31,7 @@ namespace cxutil {
 using namespace std;  //std:: makes this code unreadable
 
 static inline chrono::time_point<chrono::high_resolution_clock> activeTimeStamp;
-static inline chrono::time_point<chrono::high_resolution_clock>
-    checkpoints[2];
+static inline chrono::time_point<chrono::high_resolution_clock> checkpoints[2];
 /**
  * Sets the activeTimeStamp or alternatively the time of a checkpoint
  * @param checkpoint (optional, max=1) the checkpoint to set the current time

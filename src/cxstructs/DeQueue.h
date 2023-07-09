@@ -23,8 +23,8 @@
 
 #include <algorithm>
 
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 #include "../cxconfig.h"
 
 namespace cxstructs {
@@ -250,7 +250,7 @@ class DeQueue {
     bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
   };
   Iterator begin() { return Iterator(arr_ + mid_ - front_ + 1); }
-  Iterator end() { return Iterator(arr_+ mid_ + back_); }
+  Iterator end() { return Iterator(arr_ + mid_ + back_); }
 #ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "TESTING DEQUEUE" << std::endl;
@@ -323,5 +323,5 @@ class DeQueue {
   }
 #endif
 };
-}  // namespace cxalgos
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_

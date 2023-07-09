@@ -24,6 +24,7 @@
 #include <ctime>
 #include <vector>
 #include "../cxstructs/Geometry.h"
+
 namespace cxalgos {
 using namespace cxstructs;
 template <typename S, typename B>

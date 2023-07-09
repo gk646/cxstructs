@@ -302,7 +302,7 @@ void compareWithSTL() {
       {1, 0}, {1, 1}, {0, 1}, {0, 0}};
   const std::vector<std::vector<float>> expected_outputs = {{1}, {0}, {1}, {0}};
 
-  cxml::FNN fnn({2, 2, 1}, sig, 0.11);
+  cxml::FNN fnn({2, 2, 1}, cxutil::sig, 0.11);
   cxutil::now();
   for (int i = 0; i < 1000; ++i) {
     fnn.train(inputs, expected_outputs, 2000);
@@ -339,4 +339,3 @@ void compareWithSTL() {
 
   cxutil::printTime("13.9 mil characters searched in:");
 }
-

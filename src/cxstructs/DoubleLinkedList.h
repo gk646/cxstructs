@@ -343,12 +343,13 @@ class DoubleLinkedList {
       CX_ASSERT(list4.size() == 0);
     }
 
-    std::cout << "  Testing copy constructor and assignment operator..." << std::endl;
+    std::cout << "  Testing copy constructor and assignment operator..."
+              << std::endl;
     DoubleLinkedList<int> list7;
     for (int i = 0; i < 5; i++) {
       list7.add(i);
     }
-    DoubleLinkedList<int> list8(list7);  // Copy constructor
+    DoubleLinkedList<int> list8(list7);   // Copy constructor
     DoubleLinkedList<int> list9 = list7;  // Assignment operator
 
     // Check n_elem
@@ -438,6 +439,6 @@ class DoubleLinkedList {
   }
 #endif
 };
-}  // namespace cxalgos
+}  // namespace cxstructs
 
 #endif  //CXSTRUCTURES_DOUBLELINKEDLIST_H

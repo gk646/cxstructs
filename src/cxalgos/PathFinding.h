@@ -22,8 +22,8 @@
 #define CXSTRUCTS_ASTAR_PATHFINDING_H
 
 #include <cstdint>
-#include <type_traits>
 #include <queue>
+#include <type_traits>
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
 #include "../cxstructs/Pair.h"
