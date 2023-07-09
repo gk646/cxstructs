@@ -144,10 +144,7 @@ class mat {
    * @return the result of the operation
    */
   inline mat operator*(const mat& o) const {
-    if (n_cols != o.n_rows) {
-      throw std::invalid_argument(
-          "first matrix n_cols doesnt match second matrix n_rows!");
-    }
+    CX_ASSERT(n_cols == o.n_rows, "invalid dimensions");
 
     mat result(n_rows, o.n_cols);
     for (uint_32_cx i = 0; i < n_rows; i++) {
@@ -169,15 +166,10 @@ class mat {
    * @return the result of the operation
    */
   inline mat operator+(const mat& o) const {
-    if (o.n_cols != n_cols || o.n_rows != n_rows) {
-      throw std::invalid_argument("invalid dimensions");
-    }
-
+    CX_ASSERT(o.n_cols == n_cols || o.n_rows == n_rows, "invalid dimensions");
     mat res(n_rows, n_cols);
-    for (int i = 0; i < n_rows; i++) {
-      for (int j = 0; j < n_cols; j++) {
-        res.arr[i * n_cols + j] = arr[i * n_cols + j] + o.arr[i * n_cols + j];
-      }
+    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+      res.arr[i] = arr[i] + o.arr[i];
     }
     return res;
   };
@@ -189,15 +181,10 @@ class mat {
    * @return the result of the operation
    */
   inline mat operator-(const mat& o) const {
-    if (o.n_cols != n_cols || o.n_rows != n_rows) {
-      throw std::invalid_argument("invalid dimensions");
-    }
-
+    CX_ASSERT(o.n_cols == n_cols || o.n_rows == n_rows, "invalid dimensions");
     mat res(n_rows, n_cols);
-    for (int i = 0; i < n_rows; i++) {
-      for (int j = 0; j < n_cols; j++) {
-        res.arr[i * n_cols + j] = arr[i * n_cols + j] - o.arr[i * n_cols + j];
-      }
+    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+      res.arr[i] = arr[i] - o.arr[i];
     }
     return res;
   };
@@ -208,15 +195,11 @@ class mat {
 * @return the result of the operation
    */
   inline mat operator%(const mat& o) const {
-    if (o.n_cols != n_cols || o.n_rows != n_rows) {
-      throw std::invalid_argument("invalid dimensions");
-    }
+    CX_ASSERT(o.n_cols == n_cols || o.n_rows == n_rows, "invalid dimensions");
 
     mat res(n_rows, n_cols);
-    for (int i = 0; i < n_rows; i++) {
-      for (int j = 0; j < n_cols; j++) {
-        res.arr[i * n_cols + j] = arr[i * n_cols + j] * o.arr[i * n_cols + j];
-      }
+    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+      res.arr[i] = arr[i] * o.arr[i];
     }
     return res;
   }
@@ -227,15 +210,10 @@ class mat {
    * @return the result of the operation
    */
   inline mat operator/(const mat& o) const {
-    if (o.n_cols != n_cols || o.n_rows != n_rows) {
-      throw std::invalid_argument("invalid dimensions");
-    }
-
+    CX_ASSERT(o.n_cols == n_cols || o.n_rows == n_rows, "invalid dimensions");
     mat res(n_rows, n_cols);
-    for (int i = 0; i < n_rows; i++) {
-      for (int j = 0; j < n_cols; j++) {
-        res.arr[i * n_cols + j] = arr[i * n_cols + j] / o.arr[i * n_cols + j];
-      }
+    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+      res.arr[i] = arr[i] / o.arr[i];
     }
     return res;
   }
@@ -249,11 +227,9 @@ class mat {
       return true;
     }
     if (o.n_cols == n_cols && o.n_rows == n_rows) {
-      for (uint_32_cx i = 0; i < n_rows; i++) {
-        for (uint_32_cx j = 0; j < n_cols; j++) {
-          if (o.arr[i * n_cols + j] != arr[i * n_cols + j]) {
-            return false;
-          }
+      for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+        if (o.arr[i] != arr[i]) {
+          return false;
         }
       }
       return true;
@@ -270,11 +246,9 @@ class mat {
       return false;
     }
     if (o.n_cols == n_cols && o.n_rows == n_rows) {
-      for (uint_32_cx i = 0; i < n_rows; i++) {
-        for (uint_32_cx j = 0; j < n_cols; j++) {
-          if (o.arr[i * n_cols + j] != arr[i * n_cols + j]) {
-            return true;
-          }
+      for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+        if (o.arr[i] != arr[i]) {
+          return true;
         }
       }
       return false;
@@ -390,13 +364,24 @@ class mat {
    * Multiplies the whole matrix with the given scalar in-place
    * @param s the scalar
    */
-  inline void scale(const float& s) {
-    for (int i = 0; i < n_rows; i++) {
-      for (int j = 0; j < n_cols; j++) {
-        arr[i * n_cols + j] = arr[i * n_cols + j] * s;
-      }
+  inline void scale(const float& a) {
+#pragma omp simd
+    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+      arr[i] = arr[i] * a;
     }
   };
+ static void relu(mat& m)  {
+#pragma omp simd linear(i:1)
+    for (uint_fast32_t i = 0; i < m.n_rows * m.n_cols; i++) {
+      m.arr[i] = cxutil::relu(m.arr[i]);
+    }
+  }
+  static void sig(mat& m)  {
+#pragma omp simd
+    for (uint_fast32_t i = 0; i < m.n_rows * m.n_cols; i++) {
+      m.arr[i] = cxutil::sig(m.arr[i]);
+    }
+  }
   /**Prints out the matrix
    * @param header optional header
    */
@@ -436,4 +421,4 @@ class mat {
   [[nodiscard]] inline uint_32_cx getCols() const { return n_cols; };
 
 };
-}  // namespace cxalgos
+}  // namespace cxstructs

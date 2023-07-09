@@ -31,19 +31,6 @@
 
 namespace cxhelper {
 
-inline float sig(float x) {
-  return 1.0 / (1.0 + std::exp(-x));
-}
-inline float d_sig(float x) {
-  return sig(x) * (1 - sig(x));
-}
-
-inline float relu(float x) {
-  return x > 0 ? x : 0;
-}
-inline float d_relu(float x) {
-  return x > 0 ? 1 : 0;
-}
 typedef float (*a_func)(float);
 }  // namespace cxhelper
 
@@ -162,8 +149,8 @@ struct Layer {
 class FNN {};
 
 #else
-#pragma message \
-    "|FNN.h| Using FNN.h without '#define CX_MATRIX', calculations are loop based."
+#pragma message( \
+        "|FNN.h| Using FNN.h without '#define CX_MATRIX', calculations are loop based.")
 namespace cxhelper {
 struct Layer {
   float* weights_;
@@ -183,15 +170,15 @@ struct Layer {
         w_sums_(nullptr),
         in_(0),
         out_(0),
-        func(relu),
-        d_func(d_relu),
+        func(cxutil::relu),
+        d_func(cxutil::d_relu),
         learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, a_func func, float learnR)
       : in_(in), out_(out), func(func), learnR_(learnR), inputs_(in) {
-    if (func == relu) {
-      d_func = d_relu;
-    } else if (func == sig) {
-      d_func = d_sig;
+    if (func == cxutil::relu) {
+      d_func = cxutil::d_relu;
+    } else if (func == cxutil::sig) {
+      d_func = cxutil::d_sig;
     } else {
       d_func = [](float x) {
         return static_cast<float>(1.0);
@@ -352,26 +339,6 @@ class FNN {
     }
   }
 
-  static void TEST() {
-    std::cout << "TESING FNN" << std::endl;
-
-    const std::vector<std::vector<float>> inputs = {
-        {1, 0}, {1, 1}, {0, 1}, {0, 0}};
-    const std::vector<std::vector<float>> expected_outputs = {
-        {1}, {0}, {1}, {0}};
-
-    for (int i = 0; i < 10; ++i) {
-      FNN fnn({2, 2, 1}, sig, 0.16);
-
-      fnn.train(inputs, expected_outputs, 5000);
-
-      for (size_t j = 0; j < inputs.size(); ++j) {
-        double output = fnn.forward(inputs[j])[0];
-        double expected = expected_outputs[j][0];
-        CX_ASSERT(output - expected < 0.1);
-      }
-    }
-  }
 };
 }  // namespace cxml
 

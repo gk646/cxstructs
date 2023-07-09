@@ -128,7 +128,7 @@ float fast_sqrt(float number) {
   i = 0x5f3759df - (i >> 1);
   y = *(float*)&i;
   y = y * (threehalfs - (x2 * y * y));
-  return 1.0F/y;
+  return 1.0F / y;
 }
 
 }  // namespace cxalgos

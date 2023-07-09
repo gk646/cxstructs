@@ -401,7 +401,8 @@ class vec {
  */
   void append(const vec<T>& list, uint_32_cx endIndex,
               uint_32_cx startIndex = 0) {
-    CX_ASSERT(startIndex < endIndex || endIndex <= list.size_,"index out of bounds");
+    CX_ASSERT(startIndex < endIndex || endIndex <= list.size_,
+              "index out of bounds");
     while (len_ - size_ < endIndex - startIndex) {
       grow();
     }
@@ -501,11 +502,11 @@ class vec {
   };
   inline Iterator begin() { return Iterator(arr_); }
   inline Iterator end() { return Iterator(arr_ + size_); }
-   std::ostream& operator<<(std::ostream& os) {
+  std::ostream& operator<<(std::ostream& os) {
     if (size_ == 0) {
       return os << "[]";
     }
-    os << "[" <<arr_[0];
+    os << "[" << arr_[0];
 
     for (int i = 1; i < size_; i++) {
       os << "," << arr_[i];
