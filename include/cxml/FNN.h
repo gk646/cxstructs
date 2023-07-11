@@ -31,13 +31,10 @@
 
 namespace cxhelper {
 
-typedef float (*a_func)(float);
+typedef float (*func)(float);
 }  // namespace cxhelper
 
 #ifdef CX_MATRIX
-
-#include "../datastructures/mat.h"
-#include "../datastructures/row_vec.h"
 
 #pragma message("|FNN.h| Using Matrices for calculations.")
 
@@ -45,14 +42,16 @@ namespace cxhelper {
 using namespace cxstructs;
 struct Layer {
   mat weights_;
-  vec<float> bias_;
-  vec<float> w_sums_;
+  mat bias_;
+  mat w_sums_;
   mat inputs_;
+
   uint_16_cx in_;
   uint_16_cx out_;
-  a_func func;
-  a_func d_func;
   float learnR_;
+
+  func a_func;
+  func d_func;
 
  public:
   Layer()
@@ -61,92 +60,134 @@ struct Layer {
         w_sums_(0, 0),
         in_(0),
         out_(0),
-        func(relu),
-        d_func(d_relu),
+        a_func(cxutil::relu),
+        d_func(cxutil::d_relu),
         learnR_(0.5) {}
-  Layer(uint_16_cx in, uint_16_cx out, a_func func, float learnR)
-      : in_(in), out_(out), func(func), learnR_(learnR), inputs_(1, in) {
-    if (func == relu) {
-      d_func = d_relu;
-    } else if (func == sig) {
-      d_func = d_sig;
+  Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
+      : in_(in), out_(out), learnR_(learnR), inputs_(1, in), a_func(a_func) {
+    if (a_func== cxutil::relu) {
+      d_func = cxutil::d_relu;
+    } else if (a_func== cxutil::sig) {
+      d_func = cxutil::d_sig;
     } else {
       d_func = [](float x) {
         return static_cast<float>(1.0);
       };
     }
-
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(-0.3, 0.3);
 
     weights_ = mat(in, out, [&dis, &gen](int i) { return dis(gen); });
-    bias_ = vec<float>(out_, [&dis, &gen](int i) { return dis(gen); });
-    w_sums_ = vec<float>(out_, [&dis, &gen](int i) { return dis(gen); });
+    bias_ = mat(1, out, [&dis, &gen](int i) { return dis(gen); });
+    w_sums_ = mat(1, out, [&dis, &gen](int i) { return dis(gen); });
   }
-  Layer(const Layer& other)
-      : in_(other.in_),
-        out_(other.out_),
-        func(other.func),
-        learnR_(other.learnR_),
-        inputs_(other.inputs_),
-        weights_(other.weights_),
-        bias_(other.bias_),
-        w_sums_(other.w_sums_) {
-    d_func = other.d_func;
-  }
-
-  // Assignment operator
   Layer& operator=(const Layer& other) {
     if (this != &other) {
       in_ = other.in_;
       out_ = other.out_;
-      func = other.func;
+
       learnR_ = other.learnR_;
       inputs_ = other.inputs_;
-      d_func = other.d_func;
-
       weights_ = other.weights_;
       bias_ = other.bias_;
       w_sums_ = other.w_sums_;
+
+      a_func= other.a_func;
+      d_func = other.d_func;
     }
     return *this;
   }
   ~Layer() = default;
   [[nodiscard]] mat forward(mat& in) {
     inputs_ = in;
-    mat out(out_, 0);
-    float w_sum;
+
+    w_sums_ = in * weights_;
+
     for (int i = 0; i < out_; i++) {
-      w_sum = 0;
-      for (int j = 0; j < in_; j++) {
-        w_sum += in(0, j) * weights_(j, i);
-      }
-      w_sums_[i] = w_sum + bias_[i];
-      out[i] = func(w_sums_[i]);
+      w_sums_(0, i) += bias_(0, i);
     }
+
+    mat out = w_sums_;
+    out.mat_op(a_func);
     return out;
   }
-  [[nodiscard]] std::vector<float> backward(std::vector<float>& error) const {
-    std::vector<float> n_error(in_, 0);
+  [[nodiscard]] mat backward(mat& error) {
+    w_sums_.mat_op(d_func);
     for (int i = 0; i < out_; i++) {
-      error[i] *= d_func(w_sums_[i]);
-      for (int j = 0; j < in_; j++) {
-        n_error[j] += weights_[j * out_ + i] * error[i];
-        weights_[j * out_ + i] -= inputs_[j] * error[i] * learnR_;
-      }
-      bias_[i] -= learnR_ * error[i];
+      error(0, i) *= w_sums_(0, i);
     }
+
+
+    mat d_weights = inputs_.transpose() * error;
+
+    mat d_bias = error;
+
+    d_weights.scale(learnR_);
+    d_bias.scale(learnR_);
+    weights_ -= d_weights;
+    bias_ -= d_bias;
+
+    mat n_error = error * weights_.transpose();
+
     return n_error;
   }
 };
 }  // namespace cxhelper
-
+namespace cxml {
+using namespace cxhelper;
 /**
  * <h2>Feedforward Neural Network</h2>
  *
  */
-class FNN {};
+class FNN {
+
+  Layer* layers_;
+  std::vector<uint_16_cx> bounds_;
+  uint_16_cx len_;
+  float learnR_;
+
+ public:
+  explicit FNN(const std::vector<uint_16_cx>& bound, func a_func, float learnR)
+      : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
+    layers_ = new Layer[len_];
+    for (int i = 1; i < len_ + 1; i++) {
+      if (i == len_) {
+        layers_[i - 1] = Layer(
+            bounds_[i - 1], bounds_[i], [](float x) { return x; }, learnR_);
+        break;
+      }
+      layers_[i - 1] = Layer(bounds_[i - 1], bounds_[i], a_func, learnR_);
+    }
+  }
+  ~FNN() { delete[] layers_; }
+  mat forward(const mat& in) {
+   mat retval = in;
+    for (int i = 0; i < len_; i++) {
+      retval = layers_[i].forward(retval);
+    }
+    return retval;
+  }
+
+  void train(const mat& in,
+             const mat& out, uint_16_cx n = 10) {
+
+    for (int k = 0; k < n; k++) {
+
+      for (int l = 0; l < in.n_rows(); l++) {
+        mat retval = forward(in.split_row(l));
+
+        retval-=out.split_row(l);
+        retval.scale(2);
+
+        for (int i = len_ - 1; i > -1; i--) {
+          retval = layers_[i].backward(retval);
+        }
+      }
+    }
+  }
+};
+}  // namespace cxstructs
 
 #else
 #pragma message( \
@@ -159,8 +200,8 @@ struct Layer {
   std::vector<float> inputs_;
   uint_16_cx in_;
   uint_16_cx out_;
-  a_func func;
-  a_func d_func;
+  func a_func;
+  func d_func;
   float learnR_;
 
  public:
@@ -170,14 +211,14 @@ struct Layer {
         w_sums_(nullptr),
         in_(0),
         out_(0),
-        func(cxutil::relu),
+        a_func(cxutil::relu),
         d_func(cxutil::d_relu),
         learnR_(0.5) {}
-  Layer(uint_16_cx in, uint_16_cx out, a_func func, float learnR)
-      : in_(in), out_(out), func(func), learnR_(learnR), inputs_(in) {
-    if (func == cxutil::relu) {
+  Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
+      : in_(in), out_(out), a_func(a_func), learnR_(learnR), inputs_(in) {
+    if (a_func == cxutil::relu) {
       d_func = cxutil::d_relu;
-    } else if (func == cxutil::sig) {
+    } else if (a_func == cxutil::sig) {
       d_func = cxutil::d_sig;
     } else {
       d_func = [](float x) {
@@ -202,7 +243,7 @@ struct Layer {
   Layer(const Layer& other)
       : in_(other.in_),
         out_(other.out_),
-        func(other.func),
+        a_func(other.a_func),
         learnR_(other.learnR_),
         inputs_(other.inputs_) {
     weights_ = new float[in_ * out_];
@@ -223,7 +264,7 @@ struct Layer {
 
       in_ = other.in_;
       out_ = other.out_;
-      func = other.func;
+      a_func = other.a_func;
       learnR_ = other.learnR_;
       inputs_ = other.inputs_;
       d_func = other.d_func;
@@ -252,7 +293,7 @@ struct Layer {
         w_sum += in[j] * weights_[j * out_ + i];
       }
       w_sums_[i] = w_sum + bias_[i];
-      out[i] = func(w_sums_[i]);
+      out[i] = a_func(w_sums_[i]);
     }
     return out;
   }
@@ -284,7 +325,7 @@ class FNN {
   float learnR_;
 
  public:
-  explicit FNN(const std::vector<uint_16_cx>& bound, a_func a_func,
+  explicit FNN(const std::vector<uint_16_cx>& bound, func a_func,
                float learnR)
       : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
     layers_ = new Layer[len_];

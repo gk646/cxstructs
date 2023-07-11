@@ -24,19 +24,28 @@
 #define CX_PI 3.14159265358979323846  // for compatibility
 
 namespace cxutil {
-constexpr inline float sig(float x) noexcept {
+inline float sig(float x) noexcept {
   return 1.0 / (1.0 + std::exp(-x));
 }
- inline float d_sig(float x) noexcept {
+inline float d_sig(float x) noexcept {
   return sig(x) * (1 - sig(x));
 }
 
 inline float relu(float x) noexcept {
   return x > 0 ? x : 0;
 }
- inline float d_relu(float x) noexcept {
+inline float d_relu(float x) noexcept {
   return x > 0 ? 1 : 0;
 }
+inline float tanh(float x) noexcept {
+  return std::tanh(x);
+}
+inline float d_tanh(float x) noexcept {
+  float t = std::tanh(x);
+  return 1 - t * t;
+}
+
+
 
 }  // namespace cxutil
 #endif  //CXSTRUCTS_SRC_CXUTIL_MATH_H_

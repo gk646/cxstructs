@@ -108,7 +108,7 @@ class DeQueue {
     return *this;
   }
   //move copy
-  DeQueue(const DeQueue&& o)
+  DeQueue(const DeQueue&& o) noexcept
       : mid_(o.mid_),
         front_(o.front_),
         back_(o.back_),

@@ -73,6 +73,7 @@ class DoubleLinkedList {
     if (this == &o) {
       return *this;
     }
+
     clear();
     size_ = o.size_;
 
