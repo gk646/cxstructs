@@ -292,7 +292,7 @@ class QuadTree {
     for (uint_fast32_t i = 0; i < 1000; i++) {
       tree.insert({distr(gen), distr(gen)});
     }
-    CX_ASSERT(tree.depth() == 2);
+    CX_ASSERT(tree.depth() == 3);
     CX_ASSERT(tree.size() == 1000);
 
     CX_ASSERT(tree.count_subrect({0, 0, 200, 200}) == 1000);

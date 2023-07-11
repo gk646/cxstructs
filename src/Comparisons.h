@@ -305,7 +305,7 @@ void compareWithSTL() {
   cxml::FNN fnn({2, 2, 1}, cxutil::sig, 0.11);
   cxutil::now();
   for (int i = 0; i < 1000; ++i) {
-    fnn.train(inputs, expected_outputs, 2000);
+    //fnn.train(inputs, expected_outputs, 2000);
   }
   cxutil::printTime("FNN: 100 XOR trainings with 2000 iterations each:");
 

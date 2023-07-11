@@ -19,7 +19,7 @@
 // SOFTWARE.
 #define F
 
-//will be done using binary heap...
+//will be done using heap...
 
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
