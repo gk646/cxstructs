@@ -31,7 +31,7 @@
 namespace cxstructs {
 /**
     <h2>2D Matrix</h2>
-    This data structure is an efficient representation of a two-dimensional matrix, using a flattened array for cache efficiency and faster access times.
+    This data structure is an efficient representation of a two-dimensional<b> ROW-MAJOR</b> matrix, using a flattened array for cache efficiency and faster access times.
     <br><br>
     <b>Datatype:</b> The elements of the matrix are of type float.
     <br><br>
@@ -45,22 +45,22 @@ namespace cxstructs {
     */
 class mat {
   float* arr;
-  uint_32_cx n_rows;
-  uint_32_cx n_cols;
+  uint_32_cx n_rows_;
+  uint_32_cx n_cols_;
 
  public:
-  inline mat() : n_cols(0), n_rows(0), arr(nullptr){};
+  inline mat() : n_cols_(0), n_rows_(0), arr(nullptr){};
   inline mat(std::initializer_list<float> list)
-      : n_rows(1), n_cols(list.size()) {
-    arr = new float[n_cols];
+      : n_rows_(1), n_cols_(list.size()) {
+    arr = new float[n_cols_];
     uint32_t i = 0;
     for (float val : list) {
       arr[i++] = val;
     }
   }
   inline mat(std::initializer_list<std::initializer_list<float>> list)
-      : n_rows(list.size()), n_cols(list.begin()->size()) {
-    arr = new float[n_rows * n_cols];
+      : n_rows_(list.size()), n_cols_(list.begin()->size()) {
+    arr = new float[n_rows_ * n_cols_];
     uint32_t i = 0;
     for (const auto& sublist : list) {
       for (float val : sublist) {
@@ -69,23 +69,23 @@ class mat {
     }
   }
   /**
-   * Constructs a matrix object with n_rows rows and n_cols columns <p>
+   * Constructs a matrix object with n_rows_ rows and n_cols_ columns <p>
    * Initialized with 0
    * @param rows number of rows
    * @param cols number of columns
    */
   inline mat(const uint_32_cx& n_rows, const uint_32_cx& n_cols)
-      : n_rows(n_rows), n_cols(n_cols) {
+      : n_rows_(n_rows), n_cols_(n_cols) {
     arr = new float[n_rows * n_cols];
     for (int i = 0; i < n_rows * n_cols; i++) {
       arr[i] = 0;
     }
   }
   inline explicit mat(std::vector<std::vector<float>> vec)
-      : n_rows(vec.size()), n_cols(vec[0].size()) {
-    arr = new float[n_rows * n_cols];
-    for (int i = 0; i < n_rows; i++) {
-      std::copy_n(vec[i].begin(), n_cols, arr + i * n_cols);
+      : n_rows_(vec.size()), n_cols_(vec[0].size()) {
+    arr = new float[n_rows_ * n_cols_];
+    for (int i = 0; i < n_rows_; i++) {
+      std::copy_n(vec[i].begin(), n_cols_, arr + i * n_cols_);
     }
   }
   /**
@@ -101,24 +101,35 @@ class mat {
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
   inline mat(uint_32_cx n_rows, uint_32_cx n_cols, fill_form form)
-      : n_rows(n_rows), n_cols(n_cols) {
+      : n_rows_(n_rows), n_cols_(n_cols) {
     arr = new float[n_rows * n_cols];
     for (int i = 0; i < n_rows * n_cols; i++) {
       arr[i] = form(i);
     }
   }
-  inline mat(const mat& o) : n_rows(o.n_rows), n_cols(o.n_cols) {
-    arr = new float[n_rows * n_cols];
-    std::copy(o.arr, o.arr + n_rows * n_cols, arr);
+  /**
+   * Constructs a matrix with dimensions rows and cols by copy from the given float pointer
+   * A new array is allocated so the matrix doesnt take ownership of the pointer
+   * @param data a float pointer
+   * @param rows
+   * @param cols
+   */
+  inline mat(float* data, uint_32_cx rows, uint_32_cx cols)
+      : n_rows_(rows), n_cols_(cols), arr(new float[rows * cols]) {
+    std::copy(data, data + rows * cols, arr);
+  }
+  inline mat(const mat& o) : n_rows_(o.n_rows_), n_cols_(o.n_cols_) {
+    arr = new float[n_rows_ * n_cols_];
+    std::copy(o.arr, o.arr + n_rows_ * n_cols_, arr);
   }
   inline ~mat() { delete[] arr; };
   inline float& operator()(const uint_32_cx& row, const uint_32_cx& col) {
-    return arr[row * n_cols + col];
+    return arr[row * n_cols_ + col];
   }
   /**
    * The underlying array is flattened!
    * A specific row and column can be accessed with:<p>
-   * arr_[row * n_cols + column] <p>
+   * arr_[row * n_cols_ + column] <p>
    * Use with caution!
    * @return a pointer to the underlying array
    */
@@ -127,11 +138,11 @@ class mat {
     if (this != &other) {
       delete[] arr;
 
-      n_rows = other.n_rows;
-      n_cols = other.n_cols;
+      n_rows_ = other.n_rows_;
+      n_cols_ = other.n_cols_;
 
-      arr = new float[n_rows * n_cols];
-      std::copy(other.arr, other.arr + n_rows * n_cols, arr);
+      arr = new float[n_rows_ * n_cols_];
+      std::copy(other.arr, other.arr + n_rows_ * n_cols_, arr);
     }
     return *this;
   }
@@ -144,19 +155,29 @@ class mat {
    * @return the result of the operation
    */
   inline mat operator*(const mat& o) const {
-    CX_ASSERT(n_cols == o.n_rows, "invalid dimensions");
+    CX_ASSERT(n_cols_ == o.n_rows_, "invalid dimensions");
 
-    mat result(n_rows, o.n_cols);
-    for (uint_32_cx i = 0; i < n_rows; i++) {
-      for (uint_32_cx j = 0; j < o.n_cols; j++) {
+    mat result(n_rows_, o.n_cols_);
+    for (uint_32_cx i = 0; i < n_rows_; i++) {
+      for (uint_32_cx j = 0; j < o.n_cols_; j++) {
         float sum = 0.0f;
-        for (uint_32_cx k = 0; k < n_cols; k++) {
-          sum += arr[i * n_cols + k] * o.arr[k * o.n_cols + j];
+        for (uint_32_cx k = 0; k < n_cols_; k++) {
+          sum += arr[i * n_cols_ + k] * o.arr[k * o.n_cols_ + j];
         }
-        result.arr[i * result.n_cols + j] = sum;
+        result.arr[i * result.n_cols_ + j] = sum;
       }
     }
     return result;
+  }
+  /**
+   * Alternative in-place scaling with a float
+   * @param f a float scalar
+   */
+  inline void operator*=(const float& f) const {
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
+      arr[i] *= f;
+    }
   }
   /**
    * Returns a new matrix that
@@ -166,9 +187,10 @@ class mat {
    * @return the result of the operation
    */
   inline mat operator+(const mat& o) const {
-    CX_ASSERT(o.n_cols == n_cols || o.n_rows == n_rows, "invalid dimensions");
-    mat res(n_rows, n_cols);
-    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+    CX_ASSERT(o.n_cols_ == n_cols_ || o.n_rows_ == n_rows_,
+              "invalid dimensions");
+    mat res(n_rows_, n_cols_);
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       res.arr[i] = arr[i] + o.arr[i];
     }
     return res;
@@ -181,13 +203,22 @@ class mat {
    * @return the result of the operation
    */
   inline mat operator-(const mat& o) const {
-    CX_ASSERT(o.n_cols == n_cols || o.n_rows == n_rows, "invalid dimensions");
-    mat res(n_rows, n_cols);
-    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+    CX_ASSERT(o.n_cols_ == n_cols_ || o.n_rows_ == n_rows_,
+              "invalid dimensions");
+    mat res(n_rows_, n_cols_);
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       res.arr[i] = arr[i] - o.arr[i];
     }
     return res;
   };
+  inline void operator-=(const mat& o) const {
+    CX_ASSERT(o.n_cols_ == n_cols_ || o.n_rows_ == n_rows_,
+              "invalid dimensions");
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
+      arr[i] -= o.arr[i];
+    }
+  }
   /**
    * Returns a new matrix that is the matrix Hadamard product (element-wise multiplication).
    * The matrices must be of the same n_elem
@@ -195,10 +226,11 @@ class mat {
 * @return the result of the operation
    */
   inline mat operator%(const mat& o) const {
-    CX_ASSERT(o.n_cols == n_cols || o.n_rows == n_rows, "invalid dimensions");
+    CX_ASSERT(o.n_cols_ == n_cols_ || o.n_rows_ == n_rows_,
+              "invalid dimensions");
 
-    mat res(n_rows, n_cols);
-    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+    mat res(n_rows_, n_cols_);
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       res.arr[i] = arr[i] * o.arr[i];
     }
     return res;
@@ -210,9 +242,10 @@ class mat {
    * @return the result of the operation
    */
   inline mat operator/(const mat& o) const {
-    CX_ASSERT(o.n_cols == n_cols || o.n_rows == n_rows, "invalid dimensions");
-    mat res(n_rows, n_cols);
-    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+    CX_ASSERT(o.n_cols_ == n_cols_ || o.n_rows_ == n_rows_,
+              "invalid dimensions");
+    mat res(n_rows_, n_cols_);
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       res.arr[i] = arr[i] / o.arr[i];
     }
     return res;
@@ -226,8 +259,8 @@ class mat {
     if (this == &o) {
       return true;
     }
-    if (o.n_cols == n_cols && o.n_rows == n_rows) {
-      for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+    if (o.n_cols_ == n_cols_ && o.n_rows_ == n_rows_) {
+      for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
         if (o.arr[i] != arr[i]) {
           return false;
         }
@@ -245,8 +278,8 @@ class mat {
     if (this == &o) {
       return false;
     }
-    if (o.n_cols == n_cols && o.n_rows == n_rows) {
-      for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+    if (o.n_cols_ == n_cols_ && o.n_rows_ == n_rows_) {
+      for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
         if (o.arr[i] != arr[i]) {
           return true;
         }
@@ -261,14 +294,14 @@ class mat {
    * @return the transpose
    */
   [[nodiscard]] inline mat transpose() const {
-    mat res(n_cols, n_rows);
+    mat retval(n_cols_, n_rows_);
 
-    for (int i = 0; i < n_cols; i++) {
-      for (int j = 0; j < n_rows; j++) {
-        res.arr[i * n_rows + j] = arr[j * n_cols + i];
+    for (int i = 0; i < n_cols_; i++) {
+      for (int j = 0; j < n_rows_; j++) {
+        retval.arr[i * n_rows_ + j] = arr[j * n_cols_ + i];
       }
     }
-    return res;
+    return retval;
   };
   /**
    * Allows you to perform a lambda function on all values of the given row
@@ -279,8 +312,8 @@ class mat {
    */
   template <typename lambda>
   inline void row_op(uint_32_cx row, lambda l) {
-    for (int i = 0; i < n_cols; i++) {
-      arr[row * n_cols + i] = l(i, arr[row * n_cols + i]);
+    for (int i = 0; i < n_cols_; i++) {
+      arr[row * n_cols_ + i] = l(i, arr[row * n_cols_ + i]);
     }
   }
   /**
@@ -292,8 +325,28 @@ class mat {
    */
   template <typename lambda>
   inline void col_op(uint_32_cx col, lambda l) {
-    for (int i = 0; i < n_rows; i++) {
-      arr[i * n_cols + col] = l(i, arr[i * n_cols + col]);
+    for (int i = 0; i < n_rows_; i++) {
+      arr[i * n_cols_ + col] = l(i, arr[i * n_cols_ + col]);
+    }
+  }
+  template <typename lambda>
+  inline void mat_op(lambda l) {
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
+      arr[i] = l(arr[i]);
+    }
+  }
+  /**
+   * Allows you to perform a function on all values of the matrix
+   * The current value is given as input [](float mat_val){return func(mat_val);}
+   * @tparam lambda the function to perform
+   * @param row row to perform the operation on
+   * @param l the function to determine the new value
+   */
+  inline void mat_op(float (*func)(float)) {
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
+      arr[i] = func(arr[i]);
     }
   }
   /**
@@ -302,16 +355,16 @@ class mat {
  * @return a new row with each index being the result of the vector-matrix dot product
  */
   [[nodiscard]] inline vec<float> dotProduct(const vec<float>& vec) const {
-    cxstructs::vec<float> retval(n_rows, 0);
-    for (int i = 0; i < n_rows; ++i) {
-      for (int j = 0; j < n_cols; ++j) {
-        retval[i] += arr[i * n_cols + j] * vec[j];
+    cxstructs::vec<float> retval(n_rows_, 0);
+    for (int i = 0; i < n_rows_; ++i) {
+      for (int j = 0; j < n_cols_; ++j) {
+        retval[i] += arr[i * n_cols_ + j] * vec[j];
       }
     }
     return retval;
   }
   /**
-   *  A scaled unit matrix is a matrix with dimensions n_rows and n_cols, with only one nonzero entry with value 1 at position M(row, col). <p>
+   *  A scaled unit matrix is a matrix with dimensions n_rows_ and n_cols_, with only one nonzero entry with value 1 at position M(row, col). <p>
    *
    * ij * M -> 0 except for the i-th row which is alpha * M[j, ]<p>
    * M * ij -> 0 except for the j-th column which is alpha * M[ ,i]
@@ -329,7 +382,7 @@ class mat {
     return retval;
   }
   /**
-   * A scaled unit matrix is a matrix with dimensions n_rows and n_cols, with only one nonzero entry with value 1 * alpha at position M(row, col). <p>
+   * A scaled unit matrix is a matrix with dimensions n_rows_ and n_cols_, with only one nonzero entry with value 1 * alpha at position M(row, col). <p>
    *
    * ij * M -> 0 except for the i-th row which is alpha * M[j, ]<p>
    * M * ij -> 0 except for the j-th column which is alpha * M[ ,i]
@@ -365,21 +418,44 @@ class mat {
    * @param s the scalar
    */
   inline void scale(const float& a) {
-#pragma omp simd
-    for (uint_fast32_t i = 0; i < n_rows * n_cols; i++) {
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] = arr[i] * a;
     }
   };
- static void relu(mat& m)  {
-#pragma omp simd linear(i:1)
-    for (uint_fast32_t i = 0; i < m.n_rows * m.n_cols; i++) {
+  [[nodiscard]] inline mat split_row(const uint_32_cx& row) const {
+    return {arr+row*n_cols_, 1, n_cols_};
+  }
+  /**
+   * Applies the ReLu function to each value in the matrix in-place
+   * @param m the matrix
+   */
+  static void relu(mat& m) {
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
       m.arr[i] = cxutil::relu(m.arr[i]);
     }
   }
-  static void sig(mat& m)  {
-#pragma omp simd
-    for (uint_fast32_t i = 0; i < m.n_rows * m.n_cols; i++) {
+  /**
+   * Applies the sigmoid function to each value in the matrix in-place
+   * @param m the matrix
+   */
+  static void sig(mat& m) {
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
       m.arr[i] = cxutil::sig(m.arr[i]);
+    }
+  }
+  static void d_sig(mat& m) {
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
+      m.arr[i] = cxutil::d_sig(m.arr[i]);
+    }
+  }
+  static void d_relu(mat& m) {
+#pragma omp simd linear(i : 1)
+    for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
+      m.arr[i] = cxutil::d_relu(m.arr[i]);
     }
   }
   /**Prints out the matrix
@@ -388,11 +464,11 @@ class mat {
   void print(const std::string& header = "") const {
     if (!header.empty()) {
       std::cout << header << std::endl;
-      for (int i = 0; i < n_rows; i++) {
+      for (int i = 0; i < n_rows_; i++) {
         std::cout << "     [";
-        for (int j = 0; j < n_cols; j++) {
-          std::cout << arr[i * n_cols + j];
-          if (j < n_cols - 1) {
+        for (int j = 0; j < n_cols_; j++) {
+          std::cout << arr[i * n_cols_ + j];
+          if (j < n_cols_ - 1) {
             std::cout << ",";
           }
         }
@@ -403,11 +479,11 @@ class mat {
     std::cout << *this << std::endl;
   }
   friend std::ostream& operator<<(std::ostream& os, const mat& obj) {
-    for (int i = 0; i < obj.n_rows; i++) {
+    for (int i = 0; i < obj.n_rows_; i++) {
       os << "[";
-      for (int j = 0; j < obj.n_cols; j++) {
-        os << obj.arr[i * obj.n_cols + j];
-        if (j != obj.n_cols - 1) {
+      for (int j = 0; j < obj.n_cols_; j++) {
+        os << obj.arr[i * obj.n_cols_ + j];
+        if (j != obj.n_cols_ - 1) {
           os << ", ";
         }
       }
@@ -416,9 +492,8 @@ class mat {
     }
     return os;
   }
-
-  [[nodiscard]] inline uint_32_cx getRows() const { return n_rows; };
-  [[nodiscard]] inline uint_32_cx getCols() const { return n_cols; };
+  [[nodiscard]] inline uint_32_cx n_rows() const { return n_rows_; };
+  [[nodiscard]] inline uint_32_cx n_cols() const { return n_cols_; };
 
 };
 }  // namespace cxstructs
