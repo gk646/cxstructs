@@ -28,18 +28,34 @@
 #include "vec.h"
 
 namespace cxstructs {
+
+/**
+ * <h2>QuadTree</h2>
+ * is a tree data structure in which each internal node has exactly four children: north-west, north-east, south-west and south-east.<p>
+ * QuadTrees are most often used to partition a two-dimensional space by recursively subdividing it into four quadrants or regions.
+ *<p>
+ * You can then insert any custom Type with x() and y() position getters and they will be placed into the right partition.
+ * You can then for example retrieve all element in a subrectangle to quickly do operations on them.
+ */
 template <typename T>
 class QuadTree {
+
   uint_16_cx max_depth_;
   uint_16_cx max_points_;
+  // rectangle bounds
   Rect bounds_;
+
+  // the points contained in this QuadTree
   vec<T> vec_;
 
+  // the 4 children
   QuadTree* top_left_;
   QuadTree* top_right_;
   QuadTree* bottom_left_;
   QuadTree* bottom_right_;
-
+  /**
+     * @brief Subdivides the QuadTree into four smaller QuadTrees and distributing elements
+     */
   inline void split() noexcept {
     const auto half_width = bounds_.width() / 2;
     auto half_height = bounds_.height() / 2;
@@ -131,8 +147,19 @@ class QuadTree {
   }
 
  public:
+  /**
+     * @brief Constructs a new QuadTree object.
+     *
+     *When the max_points is reached the given quad tree will split up distributing all its element to the
+     * correct subtrees. <p>
+     * This can happen a total of max_depth amount of times. This balancing needs to be adjusted to the use case.
+     *
+     * @param initial_bounds A Rect object that defines the boundary of this QuadTree.
+     * @param max_depth maximum depth of the whole tree
+     * @param max_points maximum amount of points per each node
+     */
   explicit QuadTree(Rect initial_bounds, uint_16_cx max_depth = 10,
-                    uint_32_cx max_points = 100)
+                    uint_32_cx max_points = 50)
       : max_depth_(max_depth),
         max_points_(max_points),
         bounds_(std::move(initial_bounds)),
@@ -146,6 +173,11 @@ class QuadTree {
     delete bottom_right_;
     delete bottom_left_;
   }
+  /**
+     * @brief Inserts a element into the QuadTree.
+     *
+     * @param p The element to be inserted.
+     */
   inline void insert(const T& e) {
     if (!bounds_.contains(e)) {
       return;

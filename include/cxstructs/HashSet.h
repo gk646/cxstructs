@@ -178,6 +178,17 @@ struct HashSetLinkedList {
 
 namespace cxstructs {
 using namespace cxalgos;
+/**
+ * <h2>HashSet</h2>
+ * is a basically a HashMap but with only the key stored. This means the only information stored is the existence of a key to a given hash value.
+ * Inserting a element with an identical key will override the existing one, which is why its called a set.<p>
+ * A set only has unique values and the HashSet allows to look for the existence of a key to the hash value <b>in O(1) time</b>.
+ *This makes it very useful when your not required to store information besides the simple existence
+ * nce of something, for example the state of visited nodes in a path finding algorithm.
+ *
+ * @tparam V The type of the values to be stored.
+ * @tparam Hash The hash function to be used.
+ */
 template <typename V, typename Hash = std::function<size_t(const V&)>>
 class HashSet {
 
