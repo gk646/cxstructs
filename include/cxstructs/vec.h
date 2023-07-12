@@ -65,7 +65,7 @@ class vec {
   size_type len_;
 
   bool is_trivial_destr = std::is_trivially_destructible<T>::value;
-  constexpr inline void grow() {
+  inline void grow() {
     len_ *= 2;
 
     T* n_arr = alloc.allocate(len_);
@@ -83,7 +83,7 @@ class vec {
     arr_ = n_arr;
     //as array is moved no need for delete []
   }
-  constexpr inline void shrink() {
+  inline void shrink() {
     auto old_len = len_;
     len_ = size_ * 1.5;
 
@@ -108,9 +108,9 @@ class vec {
    * Recommended to leave it at 32 due to optimizations with the allocator
    * @param n_elem number of starting elements
    */
-  constexpr inline explicit vec(uint_32_cx n_elem = 32)
+  inline explicit vec(uint_32_cx n_elem = 32)
       : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {}
-  constexpr inline vec(uint_32_cx n_elem, const T val)
+  inline vec(uint_32_cx n_elem, const T val)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     std::fill(arr_, arr_ + n_elem, val);
   }
@@ -124,7 +124,7 @@ class vec {
   template <typename fill_form,
             typename = std::enable_if_t<
                 std::is_invocable_r_v<double, fill_form, double>>>
-  constexpr inline vec(uint_32_cx n_elem, fill_form form)
+  inline vec(uint_32_cx n_elem, fill_form form)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
@@ -135,17 +135,28 @@ class vec {
    * vec vec1({1,2,3});<p>
    * @param vector
    */
-  constexpr explicit vec(const std::vector<T>& vector)
+  explicit vec(const std::vector<T>& vector)
       : len_(vector.size() * 1.5),
         size_(vector.size()),
         arr_(alloc.allocate(vector.size() * 1.5)) {
     std::copy(vector.begin(), vector.end(), arr_);
   }
-  constexpr explicit vec(const std::vector<T>&& move_vector)
+  explicit vec(const std::vector<T>&& move_vector)
       : len_(move_vector.size() * 1.5),
         size_(move_vector.size()),
         arr_(alloc.allocate(move_vector.size() * 1.5)) {
     std::move(move_vector.begin(), move_vector.end(), arr_);
+  }
+  /**
+   * Constructs a new vector by copying from the given pointer
+   * Does not take ownership of the pointer
+   * @param data
+   * @param n_elem
+   */
+  inline explicit vec(T* data, uint_32_cx n_elem)
+      : size_(n_elem), len_(n_elem * 2) {
+    arr_ = new T[len_];
+    std::copy(data, data + n_elem, arr_);
   }
   /**
    * Initializer list constructor<p>
@@ -226,8 +237,7 @@ class vec {
    * @param index the accessed index
    * @return a reference to the value
    */
-  [[nodiscard]] constexpr inline T& operator[](
-      const uint_32_cx& index) const noexcept {
+  [[nodiscard]] inline T& operator[](const uint_32_cx& index) const noexcept {
     return arr_[index];
   }
   /**
@@ -249,7 +259,7 @@ class vec {
    * Adds a element to the list
    * @param e the element to be added
    */
-  constexpr inline void push_back(const T& e) noexcept {
+  inline void push_back(const T& e) noexcept {
     if (size_ == len_) {
       grow();
     }
@@ -278,20 +288,43 @@ class vec {
     if (len_ > size_ * 1.5) {
       shrink();
     }
+    CX_WARNING("trying to shrink already fitting vec");
   }
   /**
-  * Removes the last element of the stack.
+  * Removes the last element of the vec.
   * Reduces the size by one.
   */
-  [[nodiscard]] inline T& pop_back() {
+  [[nodiscard]] inline T pop_back() {
     CX_ASSERT(size_ > 0 && "out of bounds");
     return arr_[--size_];
+  }
+  /**
+   * Returns and removes the first element of the vec<p>
+   * This is rather slow method(O(n)) use a Queue if you call it frequently
+   * @return first element as value
+   */
+  [[nodiscard]] inline T pop_front() {
+    CX_ASSERT(size_ > 0 && "out of bounds");
+    T val = arr_[0];
+    std::move(arr_ + 1, arr_ + size_--, arr_);
+    return val;
+  }
+  /**
+   * Returns and removes the element at index i of the vec<p>
+   * This is rather slow method(O(n-i))
+   * @return first element as value
+   */
+  [[nodiscard]] inline T pop(const uint_32_cx& i) {
+    T val = arr_[i];
+    std::move(arr_ + i + 1, arr_ + size_--, arr_ + i);
+    return val;
   }
   /**
    * Removes the first occurrence of the given element from the list
    * @param e element to be removed
    */
   inline void erase(const T& e) {
+#pragma omp simd linear(i : 1)
     for (uint_32_cx i = 0; i < len_; i++) {
       if (arr_[i] == e) {
         std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
@@ -383,7 +416,7 @@ class vec {
  * If necessary, the capacity of this vec is expanded
  * @param vec  the vec to append
  */
-  void append(const vec<T>& vec) {
+  inline void append(const vec<T>& vec) {
     while (len_ - size_ < vec.size_) {
       grow();
     }
@@ -399,8 +432,8 @@ class vec {
  * @param end index of the last element (exclusive)
  * @param start the index of the first element (inclusive)
  */
-  void append(const vec<T>& list, uint_32_cx endIndex,
-              uint_32_cx startIndex = 0) {
+  inline void append(const vec<T>& list, uint_32_cx endIndex,
+                     uint_32_cx startIndex = 0) {
     CX_ASSERT(startIndex < endIndex || endIndex <= list.size_,
               "index out of bounds");
     while (len_ - size_ < endIndex - startIndex) {
@@ -413,12 +446,23 @@ class vec {
   * Attempts to print the complete list to std::cout
   * @param prefix optional prefix
   */
-  inline void print(const std::string& prefix) {
+  inline void print(const std::string& prefix = "") {
     if (!prefix.empty()) {
       std::cout << prefix << std::endl;
       std::cout << "   ";
     }
-    std::cout << this << std::endl;
+    std::cout << *this << std::endl;
+  }
+ friend std::ostream& operator<<(std::ostream& os, const vec& o) {
+    if (o.size_ == 0) {
+      return os << "[]";
+    }
+    os << "[" << o.arr_[0];
+
+    for (int i = 1; i < o.size_; i++) {
+      os << "," << o.arr_[i];
+    }
+    return os << "]";
   }
   /**
    * Performs an empty check
@@ -458,14 +502,13 @@ class vec {
       --ptr;
       return temp;
     }
-    constexpr inline Iterator operator+(difference_type n) const noexcept {
+    inline Iterator operator+(difference_type n) const noexcept {
       return Iterator(ptr + n);
     }
-    constexpr inline Iterator operator-(difference_type n) const noexcept {
+    inline Iterator operator-(difference_type n) const noexcept {
       return Iterator(ptr - n);
     }
-    constexpr inline difference_type operator-(
-        const Iterator& other) const noexcept {
+    inline difference_type operator-(const Iterator& other) const noexcept {
       return ptr - other.ptr;
     }
     inline Iterator& operator+=(difference_type n) noexcept {
@@ -477,42 +520,31 @@ class vec {
       return *this;
     }
 
-    constexpr inline reference operator[](difference_type n) const noexcept {
+    inline reference operator[](difference_type n) const noexcept {
       return ptr[n];
     }
 
-    constexpr inline bool operator==(const Iterator& other) const noexcept {
+    inline bool operator==(const Iterator& other) const noexcept {
       return ptr == other.ptr;
     }
-    constexpr inline bool operator!=(const Iterator& other) const noexcept {
+    inline bool operator!=(const Iterator& other) const noexcept {
       return ptr != other.ptr;
     }
-    constexpr inline bool operator<(const Iterator& other) const noexcept {
+    inline bool operator<(const Iterator& other) const noexcept {
       return ptr < other.ptr;
     }
-    constexpr inline bool operator>(const Iterator& other) const noexcept {
+    inline bool operator>(const Iterator& other) const noexcept {
       return ptr > other.ptr;
     }
-    constexpr inline bool operator<=(const Iterator& other) const noexcept {
+    inline bool operator<=(const Iterator& other) const noexcept {
       return ptr <= other.ptr;
     }
-    constexpr inline bool operator>=(const Iterator& other) const noexcept {
+    inline bool operator>=(const Iterator& other) const noexcept {
       return ptr >= other.ptr;
     }
   };
   inline Iterator begin() { return Iterator(arr_); }
   inline Iterator end() { return Iterator(arr_ + size_); }
-  std::ostream& operator<<(std::ostream& os) {
-    if (size_ == 0) {
-      return os << "[]";
-    }
-    os << "[" << arr_[0];
-
-    for (int i = 1; i < size_; i++) {
-      os << "," << arr_[i];
-    }
-    return os << "]";
-  }
 
 };
 }  // namespace cxstructs
