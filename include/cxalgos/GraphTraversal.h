@@ -58,8 +58,7 @@ int depth_first_search(std::vector<std::vector<T>>& mat, int nodeIndex,
 }
 template <typename State, typename Action>
 vec<vec<std::pair<Action, State>>> shortest_path_search(
-    State start, std::unordered_map<State, Action> (*successors)(State),
-    bool (*is_goal)(State)) {
+    State start, std::unordered_map<State, Action> (*successors)(State), bool (*is_goal)(State)) {
   if (is_goal(start)) {
     return {{Action(), start}};
   }
@@ -68,9 +67,6 @@ vec<vec<std::pair<Action, State>>> shortest_path_search(
   while (!frontier.empty()) {
     auto path = frontier.pop_front();
     auto s = path.at[-1].second;
-
-
-
   }
 }
 }  // namespace cxalgos

@@ -38,8 +38,7 @@ struct TreeNode {
   TreeNode* left_;
   TreeNode* right_;
   T data_;
-  inline explicit TreeNode(const T& val)
-      : data_(val), left_(nullptr), right_(nullptr) {}
+  inline explicit TreeNode(const T& val) : data_(val), left_(nullptr), right_(nullptr) {}
 
   inline TreeNode(const T& val, TreeNode* left, TreeNode* right)
       : data_(val), left_(left), right_(right) {}
@@ -145,8 +144,11 @@ class BinaryTree {
 
  public:
   BinaryTree() : root_(nullptr), size_(0){};
-  BinaryTree(const BinaryTree& o) = delete;
+  //no moving around yet
+  BinaryTree(const BinaryTree&) = delete;
   BinaryTree& operator=(const BinaryTree&) = delete;
+  BinaryTree(BinaryTree&&) = delete;
+  BinaryTree& operator=(BinaryTree&&) = delete;
   ~BinaryTree() {
     std::deque<TreeNode*> nodesToDelete;
     nodesToDelete.push_back(root_);
@@ -207,9 +209,7 @@ class BinaryTree {
    * @param val - the value to search for
    * @return - true if the tree contained the given value, false otherwise
    */
-  [[nodiscard]] inline bool contains(const T& val) const {
-    return contains(val, root_);
-  }
+  [[nodiscard]] inline bool contains(const T& val) const { return contains(val, root_); }
 
   /**
    * Erases the first occurrence of a node with this value

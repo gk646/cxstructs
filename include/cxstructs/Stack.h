@@ -45,8 +45,7 @@ namespace cxstructs {
 template <typename T, bool UseCXPoolAllocator = true>
 class Stack {
   using Allocator =
-      typename std::conditional<UseCXPoolAllocator,
-                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
+      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
                                 std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
@@ -124,8 +123,7 @@ class Stack {
 * @param form The callable object or function used to initialize the elements of the Stack. It is invoked for each element with the element's index as an argument.
 **/
   template <typename fill_form,
-            typename = std::enable_if_t<
-                std::is_invocable_r_v<double, fill_form, double>>>
+            typename = std::enable_if_t<std::is_invocable_r_v<double, fill_form, double>>>
   Stack(uint_32_cx n_elem, fill_form form)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
@@ -222,8 +220,7 @@ class Stack {
     if (size_ == len_) {
       grow();
     }
-    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_++],
-                                                std::forward<Args>(args)...);
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_++], std::forward<Args>(args)...);
   }
   /**
      * @brief Removes the top element from the Stack.

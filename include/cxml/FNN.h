@@ -29,14 +29,9 @@
 #include <vector>
 #include "../cxconfig.h"
 
-namespace cxhelper {
+#ifndef CX_LOOP_FNN
 
-typedef float (*func)(float);
-}  // namespace cxhelper
-
-#ifdef CX_MATRIX
-
-#pragma message("|FNN.h| Using Matrices for calculations.")
+#pragma message("|FNN.h| Using Matrices for calculations. '#define CX_LOOP_FNN' to switch")
 
 namespace cxhelper {
 using namespace cxstructs;
@@ -65,9 +60,9 @@ struct Layer {
         learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), learnR_(learnR), inputs_(1, in), a_func(a_func) {
-    if (a_func== cxutil::relu) {
+    if (a_func == cxutil::relu) {
       d_func = cxutil::d_relu;
-    } else if (a_func== cxutil::sig) {
+    } else if (a_func == cxutil::sig) {
       d_func = cxutil::d_sig;
     } else {
       d_func = [](float x) {
@@ -93,7 +88,7 @@ struct Layer {
       bias_ = other.bias_;
       w_sums_ = other.w_sums_;
 
-      a_func= other.a_func;
+      a_func = other.a_func;
       d_func = other.d_func;
     }
     return *this;
@@ -102,34 +97,44 @@ struct Layer {
   [[nodiscard]] mat forward(mat& in) {
     inputs_ = in;
 
-    w_sums_ = in * weights_;
+    w_sums_ = in * weights_;  // matrix dimensions: (batch x in) * (in x out) = batch x out
 
-    for (int i = 0; i < out_; i++) {
-      w_sums_(0, i) += bias_(0, i);
+    // Add the bias to each row of 'w_sums_'
+    for (int i = 0; i < in.n_rows(); i++) {
+      for (int j = 0; j < out_; j++) {
+        w_sums_(i, j) += bias_(0, j);
+      }
     }
 
     mat out = w_sums_;
     out.mat_op(a_func);
     return out;
   }
+
   [[nodiscard]] mat backward(mat& error) {
     w_sums_.mat_op(d_func);
-    for (int i = 0; i < out_; i++) {
-      error(0, i) *= w_sums_(0, i);
+
+    // Apply the derivative to each row of 'error'
+    for (int i = 0; i < error.n_rows(); i++) {
+      for (int j = 0; j < out_; j++) {
+        error(i, j) *= w_sums_(i, j);
+      }
     }
 
+    //compute the gradient of the weights and bias
+    mat d_weights =
+        inputs_.transpose() * error;  //matrix dimensions: (in x batch) * (batch x out) = in x out
+    mat d_bias = error.sum_cols();    //sum the error over the batch dimension
+    d_bias.scale(0.25f);
 
-    mat d_weights = inputs_.transpose() * error;
-
-    mat d_bias = error;
-
+    // Update the weights and bias
     d_weights.scale(learnR_);
     d_bias.scale(learnR_);
     weights_ -= d_weights;
     bias_ -= d_bias;
 
+    // Compute the error for the previous layer
     mat n_error = error * weights_.transpose();
-
     return n_error;
   }
 };
@@ -161,37 +166,33 @@ class FNN {
     }
   }
   ~FNN() { delete[] layers_; }
+
   mat forward(const mat& in) {
-   mat retval = in;
+    mat retval = in;
     for (int i = 0; i < len_; i++) {
       retval = layers_[i].forward(retval);
     }
     return retval;
   }
 
-  void train(const mat& in,
-             const mat& out, uint_16_cx n = 10) {
-
+  void train(const mat& in, const mat& out, uint_16_cx n = 10, uint_16_cx batchSize = 10) {
     for (int k = 0; k < n; k++) {
+      mat outputs = forward(in);  // dims: batch x last-layer-out
 
-      for (int l = 0; l < in.n_rows(); l++) {
-        mat retval = forward(in.split_row(l));
+      outputs -= out;  // out dims : batch x last-layer-out
+      outputs.scale(2);
 
-        retval-=out.split_row(l);
-        retval.scale(2);
-
-        for (int i = len_ - 1; i > -1; i--) {
-          retval = layers_[i].backward(retval);
-        }
+      for (int i = len_ - 1; i > -1; i--) {
+        outputs = layers_[i].backward(outputs);
       }
     }
   }
+
 };
-}  // namespace cxstructs
+}  // namespace cxml
 
 #else
-#pragma message( \
-        "|FNN.h| Using FNN.h without '#define CX_MATRIX', calculations are loop based.")
+#pragma message("|FNN.h| Using FNN.h without matrices, calculations are loop based.")
 namespace cxhelper {
 struct Layer {
   float* weights_;
@@ -325,8 +326,7 @@ class FNN {
   float learnR_;
 
  public:
-  explicit FNN(const std::vector<uint_16_cx>& bound, func a_func,
-               float learnR)
+  explicit FNN(const std::vector<uint_16_cx>& bound, func a_func, float learnR)
       : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
     layers_ = new Layer[len_];
     for (int i = 1; i < len_ + 1; i++) {
@@ -347,8 +347,7 @@ class FNN {
     return retval;
   }
 
-  void train(const std::vector<float>& in, const std::vector<float>& out,
-             uint_16_cx n = 10) {
+  void train(const std::vector<float>& in, const std::vector<float>& out, uint_16_cx n = 10) {
     for (int k = 0; k < n; k++) {
       std::vector<float> retval = forward(in);
 
@@ -361,8 +360,8 @@ class FNN {
       }
     }
   }
-  void train(const std::vector<std::vector<float>>& in,
-             const std::vector<std::vector<float>>& out, uint_16_cx n = 10) {
+  void train(const std::vector<std::vector<float>>& in, const std::vector<std::vector<float>>& out,
+             uint_16_cx n = 10) {
 
     for (int k = 0; k < n; k++) {
 

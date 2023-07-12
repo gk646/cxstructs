@@ -27,6 +27,8 @@
 #include "Geometry.h"
 #include "vec.h"
 
+//used in kNN 2D
+
 namespace cxstructs {
 
 /**
@@ -59,18 +61,14 @@ class QuadTree {
   inline void split() noexcept {
     const auto half_width = bounds_.width() / 2;
     auto half_height = bounds_.height() / 2;
-    top_left_ =
-        new QuadTree({bounds_.x(), bounds_.y(), half_width, half_height},
-                     max_depth_ - 1, max_points_);
-    top_right_ = new QuadTree(
-        {bounds_.x() + half_width, bounds_.y(), half_width, half_height},
-        max_depth_ - 1, max_points_);
-    bottom_left_ = new QuadTree(
-        {bounds_.x(), bounds_.y() + half_height, half_width, half_height},
-        max_depth_ - 1, max_points_);
+    top_left_ = new QuadTree({bounds_.x(), bounds_.y(), half_width, half_height}, max_depth_ - 1,
+                             max_points_);
+    top_right_ = new QuadTree({bounds_.x() + half_width, bounds_.y(), half_width, half_height},
+                              max_depth_ - 1, max_points_);
+    bottom_left_ = new QuadTree({bounds_.x(), bounds_.y() + half_height, half_width, half_height},
+                                max_depth_ - 1, max_points_);
     bottom_right_ =
-        new QuadTree({bounds_.x() + half_width, bounds_.y() + half_height,
-                      half_width, half_height},
+        new QuadTree({bounds_.x() + half_width, bounds_.y() + half_height, half_width, half_height},
                      max_depth_ - 1, max_points_);
 
     for (const auto& e : vec_) {
@@ -102,8 +100,7 @@ class QuadTree {
       bottom_left_->size_subtrees(current);
     }
   }
-  inline void count_subtrees(const Rect& bound,
-                             uint_32_cx& count) const noexcept {
+  inline void count_subtrees(const Rect& bound, uint_32_cx& count) const noexcept {
     if (bound.contains(bounds_)) {
       count += vec_.size();
       if (top_right_) {
@@ -114,8 +111,7 @@ class QuadTree {
       }
     }
   }
-  inline void accumulate_subtrees(const Rect& bound,
-                                  vec<T*>& list) const noexcept {
+  inline void accumulate_subtrees(const Rect& bound, vec<T*>& list) const noexcept {
     if (bound.contains(bounds_)) {
       auto arr = vec_.get_raw();
       for (uint_fast32_t i = 0; i < vec_.size(); i++) {
@@ -147,6 +143,10 @@ class QuadTree {
   }
 
  public:
+  /*no default constructor to prevent modifications and subtree mismatch
+   * However setting new bound invalidates the lower layers
+   * Also no moving(copying) the quad tree yet
+  */
   /**
      * @brief Constructs a new QuadTree object.
      *
@@ -158,8 +158,7 @@ class QuadTree {
      * @param max_depth maximum depth of the whole tree
      * @param max_points maximum amount of points per each node
      */
-  explicit QuadTree(Rect initial_bounds, uint_16_cx max_depth = 10,
-                    uint_32_cx max_points = 50)
+  explicit QuadTree(Rect initial_bounds, uint_16_cx max_depth = 10, uint_32_cx max_points = 50)
       : max_depth_(max_depth),
         max_points_(max_points),
         bounds_(std::move(initial_bounds)),
@@ -167,6 +166,10 @@ class QuadTree {
         top_right_(nullptr),
         bottom_left_(nullptr),
         bottom_right_(nullptr){};
+  QuadTree(const QuadTree&) = delete;
+  QuadTree& operator=(const QuadTree&) = delete;
+  QuadTree(QuadTree&&) = delete;
+  QuadTree& operator=(QuadTree&&) = delete;
   ~QuadTree() {
     delete top_right_;
     delete top_left_;
@@ -201,6 +204,30 @@ class QuadTree {
 
     insert_subtrees(e);
   }
+  inline void insert(T&& e) {
+    if (!bounds_.contains(e)) {
+      return;
+    }
+    if (!top_right_) {
+      if (vec_.size() < max_points_) {
+        vec_.push_back(std::move(e));
+        return;
+      } else {
+        if (max_depth_ > 0) {
+          split();
+        } else {
+          vec_.push_back(std::move(e));
+          CX_WARNING(
+              "|QuadTree.h| Reached max depth | large insertions now will slow "
+              "down the tree");
+          return;
+        }
+      }
+    }
+
+    insert_subtrees(std::move(e));
+  }
+
   /**
    * Number of points contained in the given rectangle bound
    * @param bound the rectangle to search in
@@ -279,6 +306,14 @@ class QuadTree {
     }
     return depth;
   }
+  /**
+   * Sets a new bound for the root tree.
+   *
+   * <b>DOES NOT</b> recalculate the bound of already existing subtrees
+   * @param new_bound
+   */
+  inline void set_bounds(const Rect& new_bound) noexcept { bounds_ = new_bound; }
+  [[nodiscard]] inline const Rect& get_bounds() const noexcept { return bounds_; }
   class Iterator {};
 };
 }  // namespace cxstructs

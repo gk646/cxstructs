@@ -49,8 +49,7 @@ class Rect : public Shape {
 
  public:
   inline Rect() : x_(0), y_(0), w_(0), h_(0) {}
-  inline Rect(const float& x, const float& y, const float& width,
-              const float& height)
+  inline Rect(const float& x, const float& y, const float& width, const float& height)
       : x_(x), y_(y), w_(width), h_(height) {}
   inline Rect(const float& x, const float& y) : x_(x), y_(y), w_(0), h_(0) {}
   /**
@@ -62,8 +61,7 @@ class Rect : public Shape {
    * @return `true` if this rectangle contained with the other rectangle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Rect& r) const final {
-    return !(x_ > r.x_ + r.w_ || x_ + w_ < r.x_ || y_ > r.y_ + r.h_ ||
-             y_ + h_ < r.y_);
+    return !(x_ > r.x_ + r.w_ || x_ + w_ < r.x_ || y_ > r.y_ + r.h_ || y_ + h_ < r.y_);
   }
   /**
    * @brief Checks if this rectangle intersects with a circle.
@@ -81,8 +79,11 @@ class Rect : public Shape {
    * @return true only if r is fully contained
    */
   [[nodiscard]] inline bool contains(const Rect& r) const final {
-    return !(x_ > r.x_ && y_ > r.y_ && x_ + w_ < r.x_ + r.w_ &&
-             y_ + h_ < r.y_ + r.h_);
+    return !(x_ > r.x_ && y_ > r.y_ && x_ + w_ < r.x_ + r.w_ && y_ + h_ < r.y_ + r.h_);
+  }
+  template <class PointType>
+  [[nodiscard]] inline bool contains(PointType& r) {
+    return !(x_ > r.x() || y_ > r.y() || x_ + w_ < r.x() || y_ + h_ < r.y());
   }
   [[nodiscard]] inline bool contains(const Circle& p) const final;
   [[nodiscard]] inline bool contains(const Point& p) const final;
@@ -114,8 +115,8 @@ class Rect : public Shape {
   [[nodiscard]] inline float& width() { return w_; }
   [[nodiscard]] inline float& height() { return h_; }
   friend std::ostream& operator<<(std::ostream& os, const Rect& r) {
-    os << "Rect: [x: " << r.x_ << ", y: " << r.y_ << ", width: " << r.w_
-       << ", height: " << r.h_ << "]";
+    os << "Rect: [x: " << r.x_ << ", y: " << r.y_ << ", width: " << r.w_ << ", height: " << r.h_
+       << "]";
     return os;
   }
 };
@@ -127,8 +128,7 @@ class Circle : public Shape {
 
  public:
   inline Circle() : x_(0), y_(0), r_(0) {}
-  inline Circle(float x_pos, float y_pos, float radius)
-      : x_(x_pos), y_(y_pos), r_(radius) {}
+  inline Circle(float x_pos, float y_pos, float radius) : x_(x_pos), y_(y_pos), r_(radius) {}
   /**
    * @brief Checks if this circle contained with a rectangle.
    *
@@ -155,8 +155,7 @@ class Circle : public Shape {
    * @return `true` if this circle contained with the circle, `false` otherwise.
    */
   [[nodiscard]] inline bool intersects(const Circle& c) const final {
-    return !(((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) >
-             (r_ * c.r_ + r_ * c.r_));
+    return !(((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) > (r_ * c.r_ + r_ * c.r_));
   }
   /**
    * Checks if the given circle is fully contained inside this circle.<p>
@@ -165,8 +164,7 @@ class Circle : public Shape {
    * @return true only if c is fully contained
    */
   [[nodiscard]] inline bool contains(const Circle& c) const final {
-    return ((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) <
-           (r_ - c.r_) * (r_ - c.r_);
+    return ((x_ - c.x_) * (x_ - c.x_) + (y_ - c.y_) * (y_ - c.y_)) < (r_ - c.r_) * (r_ - c.r_);
   }
   [[nodiscard]] bool contains(const Rect& r) const final {
     float dx = std::max(0.0f, std::max(r.x() - x_, x_ - (r.x() + r.width())));
@@ -225,15 +223,13 @@ class Point {
     return *this;
   }
   inline Point(const Point& o) : x_(o.x_), y_(o.y_) {}
-  inline bool operator==(const Point& o) const {
-    return (x_ == o.x_ && y_ == o.y_);
-  }
+  inline bool operator==(const Point& o) const { return (x_ == o.x_ && y_ == o.y_); }
   friend std::ostream& operator<<(std::ostream& os, const Point& p) {
     return os << "Point:[" << p.x_ << " ," << p.y_ << "]";
   }
   bool operator==(const Rect& r) const { return (x_ == r.x() && y_ == r.y()); }
   /**
-   * Calculates the squared distance from this to the given point
+   * Calculates the squared euclidean distance from this to the given point
    * @param p to other point
    * @return the squared distance
    */
@@ -241,17 +237,23 @@ class Point {
     return (p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_);
   }
   /**
-   * Calculates the distance from this to the given point
+   * Calculates the euclidean distance from this to the given point
    * @param p to other point
    * @return the  distance
    */
   [[nodiscard]] float dist(const Point& p) const {
-    return cxalgos::fast_sqrt((p.x_ - x_) * (p.x_ - x_) +
-                              (p.y_ - y_) * (p.y_ - y_));
+    return cxutil::fast_sqrt((p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_));
   }
+  /**
+   * Calculates the euclidean distance from this point to the given coordinates
+   * @param x
+   * @param y
+   * @return the distance
+   */
   [[nodiscard]] float dist(const float& x, const float& y) const {
-    return cxalgos::fast_sqrt((x - x_) * (x - x_) + (y - y_) * (y - y_));
+    return cxutil::fast_sqrt((x - x_) * (x - x_) + (y - y_) * (y - y_));
   }
+
   /**
  * @brief Getter method for the x position.
  * @return A readable/writable reference to the x position.
@@ -282,8 +284,8 @@ bool Rect::intersects(const Circle& c) const {
   const float closestX = std::clamp(c.x(), x_, x_ + w_);
   const float closestY = std::clamp(c.y(), y_, y_ + h_);
 
-  return ((closestX - c.x()) * (closestX - c.x()) +
-          (closestY - c.y()) * (closestY - c.y())) <= (c.radius() * c.radius());
+  return ((closestX - c.x()) * (closestX - c.x()) + (closestY - c.y()) * (closestY - c.y())) <=
+         (c.radius() * c.radius());
 }
 bool Rect::contains(const Point& p) const {
   return !(x_ > p.x() || y_ > p.y() || x_ + w_ < p.x() || y_ + h_ < p.y());
@@ -309,15 +311,14 @@ struct hash<cxstructs::Point> {
 template <>
 struct hash<cxstructs::Rect> {
   std::size_t operator()(const cxstructs::Rect& r) const {
-    return static_cast<int>(r.x()) ^ (static_cast<int>(r.y()) << 1) ^
-           static_cast<int>(r.width()) ^ (static_cast<int>(r.height()) << 1);
+    return static_cast<int>(r.x()) ^ (static_cast<int>(r.y()) << 1) ^ static_cast<int>(r.width()) ^
+           (static_cast<int>(r.height()) << 1);
   }
 };
 template <>
 struct hash<cxstructs::Circle> {
   std::size_t operator()(const cxstructs::Circle& c) const {
-    return static_cast<int>(c.x()) ^ (static_cast<int>(c.y()) << 1) ^
-           static_cast<int>(c.radius());
+    return static_cast<int>(c.x()) ^ (static_cast<int>(c.y()) << 1) ^ static_cast<int>(c.radius());
   }
 };
 }  // namespace std

@@ -47,8 +47,7 @@ class DeQueue {
     auto o_mid = mid_;
     mid_ = len_ / 2;
     auto n_arr = new T[len_];
-    std::move(arr_ + o_mid - front_, arr_ + o_mid + back_,
-              n_arr + mid_ - front_);
+    std::move(arr_ + o_mid - front_, arr_ + o_mid + back_, n_arr + mid_ - front_);
     delete[] arr_;
     arr_ = n_arr;
     minlen_ = size() / 4 < 32 ? 0 : size() / 4;
@@ -61,8 +60,7 @@ class DeQueue {
     auto n_arr = new T[len_];
 
     //recentering the array
-    std::move(arr_ + o_mid - front_, arr_ + o_mid + back_,
-              n_arr + mid_ - (front_ + back_ + 1) / 2);
+    std::move(arr_ + o_mid - front_, arr_ + o_mid + back_, n_arr + mid_ - (front_ + back_ + 1) / 2);
 
     delete[] arr_;
     arr_ = n_arr;
@@ -87,11 +85,7 @@ class DeQueue {
         arr_(new T[initialSize]) {}
 
   DeQueue(const DeQueue& o)
-      : mid_(o.mid_),
-        front_(o.front_),
-        back_(o.back_),
-        len_(o.len_),
-        minlen_(o.minlen_) {
+      : mid_(o.mid_), front_(o.front_), back_(o.back_), len_(o.len_), minlen_(o.minlen_) {
     arr_ = new T[len_];
     std::copy(o.arr_, o.arr_ + len_, arr_);
   }

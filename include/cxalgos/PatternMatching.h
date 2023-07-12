@@ -66,8 +66,7 @@ int findString_built_in(const std::string& text, const std::string& pattern) {
   return count > 0 ? count : -1;  // return -1 on not found
 }
 
-int findString_brute_force(const std::string& text,
-                           const std::string& pattern) {
+int findString_brute_force(const std::string& text, const std::string& pattern) {
   if (text.empty() || pattern.empty()) {
     return -1;  // return -1 on empty input
   }
@@ -138,8 +137,7 @@ int findString_KMP(const std::string& text, const std::string& pattern) {
   delete[] lps;                   //cleanup to prevent memory leaks
   return count > 0 ? count : -1;  // return -1 on not found
 }
-int findString_Boyer_Moore(const std::string& text,
-                           const std::string& pattern) {
+int findString_Boyer_Moore(const std::string& text, const std::string& pattern) {
   if (text.empty() || pattern.empty()) {
     return -1;  // return -1 on empty input
   }
@@ -185,8 +183,7 @@ int findString_Boyer_Moore(const std::string& text,
         break;
       }
     }
-    i += std::max(good_suffix[len - j],
-                  bad_char[static_cast<uint8_t>(text[i]) & 0x7F]);
+    i += std::max(good_suffix[len - j], bad_char[static_cast<uint8_t>(text[i]) & 0x7F]);
   }
   delete[] good_suffix;           //clean up memory
   return count > 0 ? count : -1;  // return -1 on not found
