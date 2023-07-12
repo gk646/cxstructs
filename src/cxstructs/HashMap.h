@@ -217,6 +217,7 @@ struct HashLinkedList {
 namespace cxstructs {
 using namespace cxhelper;
 using namespace cxalgos;
+using namespace cxutil;
 /**
  * <h2>Linear Probing HashMap</h2>
  * This data structure is an efficient key-value store, typically providing lookups in constant time (O(1)).

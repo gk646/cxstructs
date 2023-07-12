@@ -94,37 +94,6 @@ double integral_arc_length(Function fx, double a, double b, uint_32_cx steps = 1
   }
   return arc_length;
 }
-
-/**
- * Finds the <b>next</b> closest power of two to the right of the given number
- * @param n the start number
- * @return the next power of two
- */
-uint_32_cx next_power_of_2(uint_32_cx n) {
-  //black magic
-  n--;
-  n |= n >> 1;
-  n |= n >> 2;
-  n |= n >> 4;
-  n |= n >> 8;
-  n |= n >> 16;
-  n++;
-  return n;
-}
-float fast_sqrt(float number) {
-  long i;
-  float x2, y;
-  const float threehalfs = 1.5F;
-
-  x2 = number * 0.5F;
-  y = number;
-  i = *(long*)&y;
-  i = 0x5f3759df - (i >> 1);
-  y = *(float*)&i;
-  y = y * (threehalfs - (x2 * y * y));
-  return 1.0F / y;
-}
-
 }  // namespace cxalgos
 #ifndef CX_DELETE_TESTS
 namespace cxtests {
@@ -140,10 +109,10 @@ static void TEST_MATH() {
       integral_arc_length([](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
                           0, std::sqrt(8), 100000);
 
-  CX_ASSERT(next_power_of_2(3) == 4);
-  CX_ASSERT(next_power_of_2(3) != 3);
-  CX_ASSERT(next_power_of_2(10) == 16);
-  CX_ASSERT(next_power_of_2(53) == 64);
+  CX_ASSERT(cxutil::next_power_of_2(3) == 4);
+  CX_ASSERT(cxutil::next_power_of_2(3) != 3);
+  CX_ASSERT(cxutil::next_power_of_2(10) == 16);
+  CX_ASSERT(cxutil::next_power_of_2(53) == 64);
 }
 }  // namespace cxtests
 #endif

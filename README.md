@@ -1,4 +1,4 @@
-## Datastructures, Algorithms and Utilities library in C++
+## Datastructures, algorithms, machine-learning and utilities library in C++
 
 A medium-sized header only library of selected datastructures, algorithms, machinelearning topics and utilities. This
 collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read
@@ -8,13 +8,14 @@ While I am not an expert in datastructures nor C++, yet I am still aiming for re
 efficiency and interface.
 
 **1.** [Contents](#contents)   
-**2.** [Installation](#installation)  
-**3.** [Library Notes](#library-notes)  
-**4.** [Contributing](#contributing)
+**2.** [Usage Guide](#usage-guide)   
+**3.** [Installation](#installation)  
+**4.** [Library Notes](#library-notes)  
+**5.** [Contributing](#contributing)
 
 ### Speed Comparison
 
-*Relative to the fastest / with CX_ALLOC*
+*Relative to the fastest / with CXPoolAllocator*
 
 |                 |  vector  |  Stack   | HashMap  | HashSet | LinkedList |  Queue   |
 |:----------------|:--------:|:--------:|:--------:|:-------:|:----------:|:--------:|
@@ -82,13 +83,48 @@ efficiency and interface.
 - **cxio** *load_text,*
 - **cxassert** *custom assertions with optional text*
 - **cxmath** *activation functions,*
+
 ---
+
+### Usage Guide
+
+Short explanation of advanced use cases.
+
+#### FNN
+
+#### k-NN
+
+- The k-NN will per default not duplicate any data (or make lookup tables) and only works on references
+    - this allows for large datasets but might be slower
+
+In order to allow for a multitude of data, k-NN has a generic interface.
+There is an abstract base class which you can use but really any type for as long as it has those basic getter
+functions. You can define your categories as you like.  
+2D Example:
+
+```cpp
+ enum Category { A, B, C };
+    struct DataPoint : public DataPoint_<Category> {
+      Category category;
+      float x_;
+      float y_;
+      DataPoint(float x, float y, Category category) : x_(x), y_(y), category(category) {}
+      float x() const final { return x_; }
+      float y() const final { return y_; }
+      Category getCategory() final { return category; }
+      float getWeight() const override { return 0; }
+    };
+```
+
+Multidimensional Example:
 
 ### Installation
 
 #### CMake
 
-Simply add these lines around your build target in your CMakeLists.txt.  This will automatically download the newest version and add them to your *includes*.
+Simply add these lines around your build target in your CMakeLists.txt. This will automatically download the newest
+version and add them to your *includes*.
+
 ```cmake
 include(FetchContent)
 FetchContent_Declare(cxstructs GIT_REPOSITORY https://github.com/gk646/CXStructures.git)
@@ -100,9 +136,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE cxstructs)
 ```
 
 Or manually download the source and include the *include* directory.
+
 ```cmake
 include_directories("cxstructs/download/folder/include")
 ```
+
 #### Manual
 
 Download the source and add the *include* directory to your build system include path.
@@ -135,12 +173,20 @@ typedef int_fast32_t int_32_cx;
 
 ### Contributing
 
-Add `DBUILD_TESTS=ON` to your CMake options to build an executable target. 
-You can then add a main.cpp and test any changes. 
+Add `DBUILD_TESTS=ON` to your CMake options to build an executable target from the src/ directory.
+You can then add a main.cpp and test any changes.
 
 Run tests by `#include "CXTests.h"` and calling the test methods.
 
+Feel free to contribute!
+
 ### Misc
 
+- Initially I made all the cxstructs with automatic shrinking when reaching a min_size
+  as I thought the STL containers are in fact doing that
+    - turns out they don't, and it was the reason i didn't beat them yet in performance
 
+- The CX_ASSERT macro is inspired by the
+  video ["How i use C++;a line-by-line code review"](https://www.youtube.com/watch?v=W8-G_PL6p-0&pp=ygUYbXkgYysrIGlzIGluc2FuZSBzdHJhZ2Vy)
+  by Strager
 

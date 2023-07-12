@@ -81,6 +81,10 @@ class Rect : public Shape {
   [[nodiscard]] inline bool contains(const Rect& r) const final {
     return !(x_ > r.x_ && y_ > r.y_ && x_ + w_ < r.x_ + r.w_ && y_ + h_ < r.y_ + r.h_);
   }
+  template <class PointType>
+  [[nodiscard]] inline bool contains(PointType& r) {
+    return !(x_ > r.x() || y_ > r.y() || x_ + w_ < r.x() || y_ + h_ < r.y());
+  }
   [[nodiscard]] inline bool contains(const Circle& p) const final;
   [[nodiscard]] inline bool contains(const Point& p) const final;
   /**
@@ -225,7 +229,7 @@ class Point {
   }
   bool operator==(const Rect& r) const { return (x_ == r.x() && y_ == r.y()); }
   /**
-   * Calculates the squared distance from this to the given point
+   * Calculates the squared euclidean distance from this to the given point
    * @param p to other point
    * @return the squared distance
    */
@@ -233,16 +237,23 @@ class Point {
     return (p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_);
   }
   /**
-   * Calculates the distance from this to the given point
+   * Calculates the euclidean distance from this to the given point
    * @param p to other point
    * @return the  distance
    */
   [[nodiscard]] float dist(const Point& p) const {
-    return cxalgos::fast_sqrt((p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_));
+    return cxutil::fast_sqrt((p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_));
   }
+  /**
+   * Calculates the euclidean distance from this point to the given coordinates
+   * @param x
+   * @param y
+   * @return the distance
+   */
   [[nodiscard]] float dist(const float& x, const float& y) const {
-    return cxalgos::fast_sqrt((x - x_) * (x - x_) + (y - y_) * (y - y_));
+    return cxutil::fast_sqrt((x - x_) * (x - x_) + (y - y_) * (y - y_));
   }
+
   /**
  * @brief Getter method for the x position.
  * @return A readable/writable reference to the x position.

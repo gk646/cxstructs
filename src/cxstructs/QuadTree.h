@@ -27,6 +27,8 @@
 #include "Geometry.h"
 #include "vec.h"
 
+//used in kNN 2D
+
 namespace cxstructs {
 
 /**
@@ -141,6 +143,10 @@ class QuadTree {
   }
 
  public:
+  /*no default constructor to prevent modifications and subtree mismatch
+   * However setting new bound invalidates the lower layers
+   * Also no moving(copying) the quad tree yet
+  */
   /**
      * @brief Constructs a new QuadTree object.
      *
@@ -160,6 +166,10 @@ class QuadTree {
         top_right_(nullptr),
         bottom_left_(nullptr),
         bottom_right_(nullptr){};
+  QuadTree(const QuadTree&) = delete;
+  QuadTree& operator=(const QuadTree&) = delete;
+  QuadTree(QuadTree&&) = delete;
+  QuadTree& operator=(QuadTree&&) = delete;
   ~QuadTree() {
     delete top_right_;
     delete top_left_;
@@ -194,6 +204,30 @@ class QuadTree {
 
     insert_subtrees(e);
   }
+  inline void insert(T&& e) {
+    if (!bounds_.contains(e)) {
+      return;
+    }
+    if (!top_right_) {
+      if (vec_.size() < max_points_) {
+        vec_.push_back(std::move(e));
+        return;
+      } else {
+        if (max_depth_ > 0) {
+          split();
+        } else {
+          vec_.push_back(std::move(e));
+          CX_WARNING(
+              "|QuadTree.h| Reached max depth | large insertions now will slow "
+              "down the tree");
+          return;
+        }
+      }
+    }
+
+    insert_subtrees(std::move(e));
+  }
+
   /**
    * Number of points contained in the given rectangle bound
    * @param bound the rectangle to search in
@@ -272,6 +306,14 @@ class QuadTree {
     }
     return depth;
   }
+  /**
+   * Sets a new bound for the root tree.
+   *
+   * <b>DOES NOT</b> recalculate the bound of already existing subtrees
+   * @param new_bound
+   */
+  inline void set_bounds(const Rect& new_bound) noexcept { bounds_ = new_bound; }
+  [[nodiscard]] inline const Rect& get_bounds() const noexcept { return bounds_; }
   class Iterator {};
 #ifndef CX_DELETE_TESTS
   static void TEST() {

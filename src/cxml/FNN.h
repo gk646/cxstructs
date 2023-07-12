@@ -29,12 +29,6 @@
 #include <vector>
 #include "../cxconfig.h"
 
-namespace cxhelper {
-
-typedef float (*func)(float);
-}  // namespace cxhelper
-
-
 #ifndef CX_LOOP_FNN
 
 #pragma message("|FNN.h| Using Matrices for calculations. '#define CX_LOOP_FNN' to switch")
@@ -131,6 +125,7 @@ struct Layer {
     mat d_weights =
         inputs_.transpose() * error;  //matrix dimensions: (in x batch) * (batch x out) = in x out
     mat d_bias = error.sum_cols();    //sum the error over the batch dimension
+    d_bias.scale(0.25f);
 
     // Update the weights and bias
     d_weights.scale(learnR_);
@@ -202,13 +197,10 @@ class FNN {
     std::vector<std::vector<float>> init_vec = {{1}, {0}, {1}, {0}};
     const cxstructs::mat expected_outputs(init_vec);
 
-    for (int i = 0; i < 10; ++i) {
-      FNN fnn({2, 2, 1}, cxutil::sig, 0.06);
-      cxutil::now();
+    for (int i = 0; i < 5; ++i) {
+      FNN fnn({2, 2, 1}, cxutil::sig, 0.1);
       fnn.train(inputs, expected_outputs, 50000);
-      cxutil::printTime();
       mat output = fnn.forward(inputs);
-      output.print();
       output -= expected_outputs;
       for (size_t j = 0; j < inputs.n_rows(); ++j) {
         CX_ASSERT(output(0, j) < 0.1);

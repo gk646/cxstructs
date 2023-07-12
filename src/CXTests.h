@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 #include "CXStructs.h"
+#include "cxml/k-NN.h"
 
 namespace cxtests {
 
@@ -57,6 +58,7 @@ static void test_cxalgos() {
 
 static void test_cxml() {
   FNN::TEST();
+  kNN_2D<DataPoint_<float>>::TEST();
 }
 
 }  // namespace cxtests

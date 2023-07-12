@@ -144,8 +144,11 @@ class BinaryTree {
 
  public:
   BinaryTree() : root_(nullptr), size_(0){};
-  BinaryTree(const BinaryTree& o) = delete;
+  //no moving around yet
+  BinaryTree(const BinaryTree&) = delete;
   BinaryTree& operator=(const BinaryTree&) = delete;
+  BinaryTree(BinaryTree&&) = delete;
+  BinaryTree& operator=(BinaryTree&&) = delete;
   ~BinaryTree() {
     std::deque<TreeNode*> nodesToDelete;
     nodesToDelete.push_back(root_);
