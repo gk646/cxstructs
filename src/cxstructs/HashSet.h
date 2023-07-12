@@ -38,8 +38,7 @@ namespace cxhelper {  // namespace to hide the classes
 template <typename V>
 struct HashSetListNode {
   inline explicit HashSetListNode(const V& key) : value_(key), next_(nullptr) {}
-  inline HashSetListNode(const V& val, HashSetListNode<V>* next)
-      : value_(val), next_(next) {}
+  inline HashSetListNode(const V& val, HashSetListNode<V>* next) : value_(val), next_(next) {}
   V value_;
   HashSetListNode* next_;
 };
@@ -238,8 +237,7 @@ class HashSet {
     for (int i = 0; i < oldBuckets; i++) {
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
         size_t hash = hash_func_(arr_[i].data_[j].first()) % buckets_;
-        newArr[hash].replaceAdd(arr_[i].data_[j].first(),
-                                arr_[i].data_[j].second());
+        newArr[hash].replaceAdd(arr_[i].data_[j].first(), arr_[i].data_[j].second());
       }
       HList* current = arr_[i].head_;
       while (current) {
@@ -269,8 +267,7 @@ class HashSet {
    * @param initialCapacity the initial size of the container and the growth size
    */
 
-  explicit HashSet(Hash hash_function, uint_32_cx initialCapacity = 32,
-                   float loadFactor = 0.9)
+  explicit HashSet(Hash hash_function, uint_32_cx initialCapacity = 32, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
         initialCapacity_(next_power_of_2(initialCapacity)),
         size_(0),
@@ -380,9 +377,7 @@ class HashSet {
  * @param key The key to search for in the HashSet.
  * @return true if the key is present in the HashSet, false otherwise.
  */
-  inline bool contains(const V& key) {
-    return arr_[hash_func_(key) % buckets_].contains(key);
-  }
+  inline bool contains(const V& key) { return arr_[hash_func_(key) % buckets_].contains(key); }
   /**
    * Reduces the underlying array size to something close to the actual data size.
    * This decreases memory usage.

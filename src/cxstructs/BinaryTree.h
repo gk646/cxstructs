@@ -38,8 +38,7 @@ struct TreeNode {
   TreeNode* left_;
   TreeNode* right_;
   T data_;
-  inline explicit TreeNode(const T& val)
-      : data_(val), left_(nullptr), right_(nullptr) {}
+  inline explicit TreeNode(const T& val) : data_(val), left_(nullptr), right_(nullptr) {}
 
   inline TreeNode(const T& val, TreeNode* left, TreeNode* right)
       : data_(val), left_(left), right_(right) {}
@@ -207,9 +206,7 @@ class BinaryTree {
    * @param val - the value to search for
    * @return - true if the tree contained the given value, false otherwise
    */
-  [[nodiscard]] inline bool contains(const T& val) const {
-    return contains(val, root_);
-  }
+  [[nodiscard]] inline bool contains(const T& val) const { return contains(val, root_); }
 
   /**
    * Erases the first occurrence of a node with this value
@@ -348,8 +345,7 @@ class BinaryTree {
 
     // Test maxDepth method
     std::cout << "  Testing maxDepth method..." << std::endl;
-    CX_ASSERT(bt2.maxDepth() ==
-              2);  // Check if depth is correct after insertions
+    CX_ASSERT(bt2.maxDepth() == 2);  // Check if depth is correct after insertions
     // Test invert method
     std::cout << "  Testing invert method..." << std::endl;
     std::vector<int> normalTraversal, invertedTraversal;

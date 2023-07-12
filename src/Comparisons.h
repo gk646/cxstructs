@@ -298,8 +298,7 @@ void compareWithSTL() {
    * |-----------------------------------------------------|
    */
   std::cout << "\nTiming FNN" << std::endl;
-  const std::vector<std::vector<float>> inputs = {
-      {1, 0}, {1, 1}, {0, 1}, {0, 0}};
+  const std::vector<std::vector<float>> inputs = {{1, 0}, {1, 1}, {0, 1}, {0, 0}};
   const std::vector<std::vector<float>> expected_outputs = {{1}, {0}, {1}, {0}};
 
   cxml::FNN fnn({2, 2, 1}, cxutil::sig, 0.11);

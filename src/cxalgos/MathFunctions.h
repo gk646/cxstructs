@@ -40,10 +40,8 @@ namespace cxalgos {
  * @return The approximate value of the integral over the specified interval.
  */
 template <typename Function,
-          typename =
-              std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
-double integral_aprox(Function fx, double a, double b,
-                      uint_32_cx steps = 10000000) {
+          typename = std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
+double integral_aprox(Function fx, double a, double b, uint_32_cx steps = 10000000) {
   double width = b - a;
   double step_size = width / steps;
   double integral = 0;
@@ -72,8 +70,7 @@ double integral_aprox(Function fx, double a, double b,
  *       depends on the number of steps used.
  */
 template <typename Function,
-          typename =
-              std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
+          typename = std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
 double integral_volume_solids_of_revolution(Function fx, double a, double b,
                                             uint_32_cx steps = 10000000) {
   double volume = 0;
@@ -86,16 +83,13 @@ double integral_volume_solids_of_revolution(Function fx, double a, double b,
   return volume;
 }
 template <typename Function,
-          typename =
-              std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
-double integral_arc_length(Function fx, double a, double b,
-                           uint_32_cx steps = 10000000) {
+          typename = std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
+double integral_arc_length(Function fx, double a, double b, uint_32_cx steps = 10000000) {
   double arc_length = 0;
   double step_size = (b - a) / steps;
   double step_squared = step_size * step_size;
   for (uint_32_cx i = 0; i < steps; i++) {
-    arc_length +=
-        std::sqrt(step_squared + std::pow(fx(a + step_size) - fx(a), 2));
+    arc_length += std::sqrt(step_squared + std::pow(fx(a + step_size) - fx(a), 2));
     a += step_size;
   }
   return arc_length;
@@ -139,13 +133,12 @@ static void TEST_MATH() {
   std::cout << "TESTING MATH FUNCTIONS" << std::endl;
   auto integral = integral_aprox([](double x) { return x * x; }, 0, 5, 100000);
   CX_ASSERT(integral - std::pow(5, 3) / 3 < 0.0001);
-  auto volume = integral_volume_solids_of_revolution(
-      [](double x) { return std::sqrt(x); }, 0, 4);
+  auto volume = integral_volume_solids_of_revolution([](double x) { return std::sqrt(x); }, 0, 4);
 
   CX_ASSERT(volume - CX_PI * 8 < 0.001);
-  auto length = integral_arc_length(
-      [](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
-      0, std::sqrt(8), 100000);
+  auto length =
+      integral_arc_length([](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
+                          0, std::sqrt(8), 100000);
 
   CX_ASSERT(next_power_of_2(3) == 4);
   CX_ASSERT(next_power_of_2(3) != 3);

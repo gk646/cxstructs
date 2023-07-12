@@ -28,8 +28,7 @@
 namespace cxalgos {
 using namespace cxstructs;
 template <typename S, typename B>
-std::vector<std::vector<S>> maze_simple_generation(const B& obstacle_val,
-                                                   Point size, Point start,
+std::vector<std::vector<S>> maze_simple_generation(const B& obstacle_val, Point size, Point start,
                                                    Point end) {
   std::srand(std::time(nullptr));
 

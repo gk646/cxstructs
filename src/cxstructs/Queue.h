@@ -42,8 +42,7 @@ namespace cxstructs {
 template <typename T, bool UseCXPoolAllocator = true>
 class Queue {
   using Allocator =
-      typename std::conditional<UseCXPoolAllocator,
-                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
+      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
                                 std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
@@ -88,8 +87,7 @@ class Queue {
   }
 
  public:
-  inline explicit Queue(uint_32_cx len = 32)
-      : arr_(alloc.allocate(len)), len_(len) {
+  inline explicit Queue(uint_32_cx len = 32) : arr_(alloc.allocate(len)), len_(len) {
     back_ = 0;
     front_ = 0;
   }
@@ -156,8 +154,7 @@ class Queue {
     if (back_ == len_) {
       resize();
     }
-    std::allocator_traits<Allocator>::construct(alloc, &arr_[back_++],
-                                                std::forward<Args>(args)...);
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[back_++], std::forward<Args>(args)...);
   }
   /**
    * Removes the element at the front of the queue

@@ -88,9 +88,8 @@ using namespace cxstructs;
  * @return the shortest path from start to target in Points
  */
 template <typename S, typename B>
-std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field,
-                                     const B& blocked_val, const Point& start,
-                                     const Point& target) {
+std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, const B& blocked_val,
+                                     const Point& start, const Point& target) {
   std::priority_queue<Node, std::vector<Node>, std::greater<>> frontier;
   //PriorityQueue<Node> priority_queue;
   HashSet<Point> closedSet;
@@ -113,13 +112,12 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field,
       int newX = static_cast<int>(current->position.x()) + dir[0];
       int newY = static_cast<int>(current->position.y()) + dir[1];
       Point new_pos(newX, newY);
-      if (newX >= 0 && newY < field.size() && newY >= 0 &&
-          newX < field[0].size() && field[newY][newX] != blocked_val &&
-          !closedSet.contains(new_pos)) {
+      if (newX >= 0 && newY < field.size() && newY >= 0 && newX < field[0].size() &&
+          field[newY][newX] != blocked_val && !closedSet.contains(new_pos)) {
 
         uint16_t tentative_g_cost = current->g_cost + 1;
-        uint16_t h_cost = abs(newX - static_cast<int>(target.x())) +
-                          abs(newY - static_cast<int>(target.y()));
+        uint16_t h_cost =
+            abs(newX - static_cast<int>(target.x())) + abs(newY - static_cast<int>(target.y()));
 
         //priority_queue.emplace(new_pos, tentative_g_cost, h_cost, current);
         frontier.emplace(new_pos, tentative_g_cost, h_cost, current);

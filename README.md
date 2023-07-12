@@ -65,9 +65,7 @@ efficiency and interface.
 
 #### Machine Learning
 
-
-
-- **FeedForwardNeuralNetwork**(*FNN*): *implemented using matrices and without(*default*), switch:`#define CX_MATRIX`*
+- **FeedForwardNeuralNetwork**(*FNN*): *implemented using matrices(*default*) and without, switch:`#define CX_LOOP_FNN`*
 
 #### Algorithms
 
@@ -131,7 +129,7 @@ typedef int_fast32_t int_32_cx;
 
 #### macros
 
-- `#define CX_MATRIX` to use the FNN with matrix calculations (slower)
+- `#define CX_LOOP_FNN` to use the FNN without matrix calculations (slower)
 - `CX_ASSERT(expr,msg(optinal))` enhanced assertion with optional text
 - `CX_WARNING(expr,msg(optinal))` similar to *CX_ASSERT* but doesn't abort
 

@@ -58,9 +58,7 @@ class Trie {
   TrieNode* root;
   Allocator alloc;
   uint_32_cx size_;
-  static inline uint8_t getASCII(char c) {
-    return static_cast<uint8_t>(c) & 0x7F;
-  }
+  static inline uint8_t getASCII(char c) { return static_cast<uint8_t>(c) & 0x7F; }
   void getAllSubChildren(TrieNode* node, std::vector<std::string>& words) {
     for (auto subNode : node->children) {
       if (subNode) {

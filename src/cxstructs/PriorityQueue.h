@@ -31,8 +31,7 @@
 template <typename T, bool UseCXPoolAllocator = true>
 class PriorityQueue {
   using Allocator =
-      typename std::conditional<UseCXPoolAllocator,
-                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
+      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
                                 std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
@@ -82,13 +81,11 @@ class PriorityQueue {
   }
 
  public:
-  inline explicit PriorityQueue(uint_32_cx len = 32)
-      : arr_(alloc.allocate(len)), len_(len) {
+  inline explicit PriorityQueue(uint_32_cx len = 32) : arr_(alloc.allocate(len)), len_(len) {
     back_ = 0;
     front_ = 0;
   }
-  PriorityQueue(const PriorityQueue& o)
-      : back_(o.back_), len_(o.len_), front_(o.front_) {
+  PriorityQueue(const PriorityQueue& o) : back_(o.back_), len_(o.len_), front_(o.front_) {
     arr_ = alloc.allocate(len_);
     if (is_trivial_destr) {
       std::copy(o.arr_ + o.front_, o.arr_ + o.back_, arr_);
@@ -155,8 +152,7 @@ class PriorityQueue {
       resize();
     }
     const T val;
-    std::allocator_traits<Allocator>::construct(alloc, &val,
-                                                std::forward<Args>(args)...);
+    std::allocator_traits<Allocator>::construct(alloc, &val, std::forward<Args>(args)...);
     auto index = cxalgos::binary_search_index(arr_ + front_, val, len_, true);
     shift(index);
     arr_[index] = std::move(val);

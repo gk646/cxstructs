@@ -59,18 +59,14 @@ class QuadTree {
   inline void split() noexcept {
     const auto half_width = bounds_.width() / 2;
     auto half_height = bounds_.height() / 2;
-    top_left_ =
-        new QuadTree({bounds_.x(), bounds_.y(), half_width, half_height},
-                     max_depth_ - 1, max_points_);
-    top_right_ = new QuadTree(
-        {bounds_.x() + half_width, bounds_.y(), half_width, half_height},
-        max_depth_ - 1, max_points_);
-    bottom_left_ = new QuadTree(
-        {bounds_.x(), bounds_.y() + half_height, half_width, half_height},
-        max_depth_ - 1, max_points_);
+    top_left_ = new QuadTree({bounds_.x(), bounds_.y(), half_width, half_height}, max_depth_ - 1,
+                             max_points_);
+    top_right_ = new QuadTree({bounds_.x() + half_width, bounds_.y(), half_width, half_height},
+                              max_depth_ - 1, max_points_);
+    bottom_left_ = new QuadTree({bounds_.x(), bounds_.y() + half_height, half_width, half_height},
+                                max_depth_ - 1, max_points_);
     bottom_right_ =
-        new QuadTree({bounds_.x() + half_width, bounds_.y() + half_height,
-                      half_width, half_height},
+        new QuadTree({bounds_.x() + half_width, bounds_.y() + half_height, half_width, half_height},
                      max_depth_ - 1, max_points_);
 
     for (const auto& e : vec_) {
@@ -102,8 +98,7 @@ class QuadTree {
       bottom_left_->size_subtrees(current);
     }
   }
-  inline void count_subtrees(const Rect& bound,
-                             uint_32_cx& count) const noexcept {
+  inline void count_subtrees(const Rect& bound, uint_32_cx& count) const noexcept {
     if (bound.contains(bounds_)) {
       count += vec_.size();
       if (top_right_) {
@@ -114,8 +109,7 @@ class QuadTree {
       }
     }
   }
-  inline void accumulate_subtrees(const Rect& bound,
-                                  vec<T*>& list) const noexcept {
+  inline void accumulate_subtrees(const Rect& bound, vec<T*>& list) const noexcept {
     if (bound.contains(bounds_)) {
       auto arr = vec_.get_raw();
       for (uint_fast32_t i = 0; i < vec_.size(); i++) {
@@ -158,8 +152,7 @@ class QuadTree {
      * @param max_depth maximum depth of the whole tree
      * @param max_points maximum amount of points per each node
      */
-  explicit QuadTree(Rect initial_bounds, uint_16_cx max_depth = 10,
-                    uint_32_cx max_points = 50)
+  explicit QuadTree(Rect initial_bounds, uint_16_cx max_depth = 10, uint_32_cx max_points = 50)
       : max_depth_(max_depth),
         max_points_(max_points),
         bounds_(std::move(initial_bounds)),

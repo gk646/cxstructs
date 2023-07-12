@@ -45,7 +45,5 @@ inline float d_tanh(float x) noexcept {
   return 1 - t * t;
 }
 
-
-
 }  // namespace cxutil
 #endif  //CXSTRUCTS_SRC_CXUTIL_MATH_H_
