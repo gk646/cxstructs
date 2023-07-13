@@ -37,8 +37,7 @@ struct ListNode {
   inline ListNode(const T& val, ListNode* next) : val_(val), next_(next) {}
   inline explicit ListNode(const T& val) : val_(val), next_(nullptr) {}
   template <typename... Args>
-  inline explicit ListNode(Args&&... args)
-      : val_(std::forward<Args>(args)...), next_(nullptr) {}
+  inline explicit ListNode(Args&&... args) : val_(std::forward<Args>(args)...), next_(nullptr) {}
   [[nodiscard]] inline T& get() { return val_; }
 };
 
@@ -61,8 +60,7 @@ template <typename T, bool UseCXPoolAllocator = true>
 class LinkedList {
   using Node = ListNode<T>;
   using Allocator =
-      typename std::conditional<UseCXPoolAllocator,
-                                CXPoolAllocator<Node, sizeof(Node) * 33, 1>,
+      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<Node, sizeof(Node) * 33, 1>,
                                 std::allocator<Node>>::type;
 
   Allocator alloc;
@@ -73,8 +71,7 @@ class LinkedList {
 
  public:
   LinkedList() : sentinel_(T()), end_(&sentinel_), size_(0){};
-  LinkedList(const LinkedList<T>& o)
-      : sentinel_(T()), end_(&sentinel_), size_(0) {
+  LinkedList(const LinkedList<T>& o) : sentinel_(T()), end_(&sentinel_), size_(0) {
     Node* current_old = o.sentinel_.next_;
     while (current_old != nullptr) {
       push_back(current_old->val_);
@@ -122,8 +119,7 @@ class LinkedList {
   template <typename... Args>
   inline void emplace_back(Args&&... args) {
     end_->next_ = alloc.allocate(1);
-    std::allocator_traits<Allocator>::construct(alloc, end_->next_,
-                                                std::forward<Args>(args)...);
+    std::allocator_traits<Allocator>::construct(alloc, end_->next_, std::forward<Args>(args)...);
     end_ = end_->next_;
     size_++;
   }
@@ -278,12 +274,8 @@ class LinkedList {
       }
       return *this;
     }
-    bool operator==(const Iterator& other) const {
-      return current == other.current;
-    }
-    bool operator!=(const Iterator& other) const {
-      return current != other.current;
-    }
+    bool operator==(const Iterator& other) const { return current == other.current; }
+    bool operator!=(const Iterator& other) const { return current != other.current; }
   };
   Iterator begin() { return Iterator(sentinel_.next_); }
   Iterator end() { return Iterator(nullptr); }

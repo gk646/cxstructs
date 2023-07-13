@@ -32,8 +32,7 @@ struct DListNode {
   T val_;
   DListNode* next_;
   DListNode* previous_;
-  explicit DListNode(const T& val)
-      : val_(val), next_(nullptr), previous_(nullptr){};
+  explicit DListNode(const T& val) : val_(val), next_(nullptr), previous_(nullptr){};
   explicit DListNode(const T& val, DListNode<T>* previous)
       : val_(val), next_(nullptr), previous_(previous){};
 };
@@ -196,13 +195,9 @@ class DoubleLinkedList {
       return *this;
     }
 
-    bool operator==(const Iterator& other) const {
-      return current == other.current;
-    }
+    bool operator==(const Iterator& other) const { return current == other.current; }
 
-    bool operator!=(const Iterator& other) const {
-      return current != other.current;
-    }
+    bool operator!=(const Iterator& other) const { return current != other.current; }
   };
 
   Iterator begin() {
@@ -228,13 +223,9 @@ class DoubleLinkedList {
       return *this;
     }
 
-    bool operator==(const ReverseIterator& other) const {
-      return current == other.current;
-    }
+    bool operator==(const ReverseIterator& other) const { return current == other.current; }
 
-    bool operator!=(const ReverseIterator& other) const {
-      return current != other.current;
-    }
+    bool operator!=(const ReverseIterator& other) const { return current != other.current; }
   };
 
   ReverseIterator begin_re() { return ReverseIterator(end_); }

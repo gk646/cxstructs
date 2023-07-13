@@ -43,8 +43,7 @@ namespace cxhelper {  // namespace to hide the classes
  */
 template <typename K, typename V>
 struct HashListNode {
-  inline HashListNode(const K& key, const V& val)
-      : key_(key), value_(val), next_(nullptr) {}
+  inline HashListNode(const K& key, const V& val) : key_(key), value_(val), next_(nullptr) {}
   inline explicit HashListNode(HashListNode<K, V>* o)
       : key_(o->key_), value_(o->value_), next_(nullptr){};
   inline HashListNode(HashListNode<K, V>* o, HashListNode<K, V>* next)
@@ -218,6 +217,7 @@ struct HashLinkedList {
 namespace cxstructs {
 using namespace cxhelper;
 using namespace cxalgos;
+using namespace cxutil;
 /**
  * <h2>Linear Probing HashMap</h2>
  * This data structure is an efficient key-value store, typically providing lookups in constant time (O(1)).
@@ -229,8 +229,7 @@ using namespace cxalgos;
  * The term 'linear probing' refers to the technique used to handle hash collisions (when different keys produce the same hash). In this scenario, each array index hosts a linked list that is traversed to locate the correct key.
  */
 
-template <typename K, typename V,
-          typename Hash = std::function<size_t(const K&)>>
+template <typename K, typename V, typename Hash = std::function<size_t(const K&)>>
 class HashMap {
   constexpr static uint_16_cx BufferLen = 2;
   using HList = HashLinkedList<K, V, BufferLen>;
@@ -278,8 +277,7 @@ class HashMap {
     for (int i = 0; i < oldBuckets; i++) {
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
         size_t hash = hash_func_(arr_[i].data_[j].first()) & (buckets_ - 1);
-        newArr[hash].replaceAdd(arr_[i].data_[j].first(),
-                                arr_[i].data_[j].second());
+        newArr[hash].replaceAdd(arr_[i].data_[j].first(), arr_[i].data_[j].second());
       }
       HashListNode<K, V>* current = arr_[i].head_;
       while (current) {
@@ -309,8 +307,7 @@ class HashMap {
    * @param initialCapacity the initial size of the container and the growth size
    */
 
-  explicit HashMap(Hash hash_function, uint_32_cx initialCapacity = 64,
-                   float loadFactor = 0.9)
+  explicit HashMap(Hash hash_function, uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
         initialCapacity_(next_power_of_2(initialCapacity)),
         size_(0),
@@ -381,9 +378,7 @@ class HashMap {
    * @param key - the key to the value
    * @return the value at this key
    */
-  inline V& operator[](const K& key) const {
-    return arr_[hash_func_(key) & (buckets_ - 1)][key];
-  }
+  inline V& operator[](const K& key) const { return arr_[hash_func_(key) & (buckets_ - 1)][key]; }
   /**
    * Inserts a key, value Pair into the map
    * @param key - the key to access the stored element
@@ -439,9 +434,7 @@ class HashMap {
  * @param key The key to search for in the HashMap.
  * @return true if the key is present in the HashMap, false otherwise.
  */
-  inline bool contains(const K& key) {
-    return arr_[hash_func_(key) % buckets_].contains(key);
-  }
+  inline bool contains(const K& key) { return arr_[hash_func_(key) % buckets_].contains(key); }
   /**
    * Reduces the underlying array size to something close to the actual data size.
    * This decreases memory usage.

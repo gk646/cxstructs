@@ -70,8 +70,7 @@ class row {
    * @param form The callable object or function used to initialize the elements of the row. It is invoked for each element with the element's index as an argument.
    */
   template <typename fill_form,
-            typename = std::enable_if_t<
-                std::is_invocable_r_v<T, fill_form, uint_32_cx>>>
+            typename = std::enable_if_t<std::is_invocable_r_v<T, fill_form, uint_32_cx>>>
   inline explicit row(fill_form form) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
       arr_[i] = form(i);
@@ -88,9 +87,7 @@ class row {
    * @return A reference to the element at the specified index.
    */
   [[nodiscard]] inline T& operator[](const uint_32_cx& i) { return arr_[i]; }
-  [[nodiscard]] inline const T& operator[](const uint_32_cx& i) const {
-    return arr_[i];
-  }
+  [[nodiscard]] inline const T& operator[](const uint_32_cx& i) const { return arr_[i]; }
 
   /**
    * @brief Returns the number of elements in the row.

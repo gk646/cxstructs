@@ -56,8 +56,7 @@ class vec {
 
  private:
   using Allocator =
-      typename std::conditional<UseCXPoolAllocator,
-                                CXPoolAllocator<T, sizeof(T) * 33, 1>,
+      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
                                 std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
@@ -122,8 +121,7 @@ class vec {
 * @param form The callable object or function used to initialize the elements of the vec. It is invoked for each element with the element's index as an argument.
 **/
   template <typename fill_form,
-            typename = std::enable_if_t<
-                std::is_invocable_r_v<double, fill_form, double>>>
+            typename = std::enable_if_t<std::is_invocable_r_v<double, fill_form, double>>>
   inline vec(uint_32_cx n_elem, fill_form form)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     for (uint_32_cx i = 0; i < n_elem; i++) {
@@ -136,9 +134,7 @@ class vec {
    * @param vector
    */
   explicit vec(const std::vector<T>& vector)
-      : len_(vector.size() * 1.5),
-        size_(vector.size()),
-        arr_(alloc.allocate(vector.size() * 1.5)) {
+      : len_(vector.size() * 1.5), size_(vector.size()), arr_(alloc.allocate(vector.size() * 1.5)) {
     std::copy(vector.begin(), vector.end(), arr_);
   }
   explicit vec(const std::vector<T>&& move_vector)
@@ -153,8 +149,7 @@ class vec {
    * @param data
    * @param n_elem
    */
-  inline explicit vec(T* data, uint_32_cx n_elem)
-      : size_(n_elem), len_(n_elem * 2) {
+  inline explicit vec(T* data, uint_32_cx n_elem) : size_(n_elem), len_(n_elem * 2) {
     arr_ = new T[len_];
     std::copy(data, data + n_elem, arr_);
   }
@@ -237,9 +232,7 @@ class vec {
    * @param index the accessed index
    * @return a reference to the value
    */
-  [[nodiscard]] inline T& operator[](const uint_32_cx& index) const noexcept {
-    return arr_[index];
-  }
+  [[nodiscard]] inline T& operator[](const uint_32_cx& index) const noexcept { return arr_[index]; }
   /**
    * Allows direct access at the specified index starting with index 0 <p>
    * Negative indices can be used to access the list from the last element onwards starting with -1
@@ -276,8 +269,7 @@ class vec {
     if (size_ == len_) {
       grow();
     }
-    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_++],
-                                                std::forward<Args>(args)...);
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[size_++], std::forward<Args>(args)...);
   }
 
   /**
@@ -393,8 +385,7 @@ class vec {
    * @param startFront whether to start from the front
    * @return true if the value was found
    */
-  [[nodiscard]] inline bool contains(const T& val,
-                                     bool startFront = true) const noexcept {
+  [[nodiscard]] inline bool contains(const T& val, bool startFront = true) const noexcept {
     if (startFront) {
       for (int i = 0; i < size_; i++) {
         if (arr_[i] == val) {
@@ -432,10 +423,8 @@ class vec {
  * @param end index of the last element (exclusive)
  * @param start the index of the first element (inclusive)
  */
-  inline void append(const vec<T>& list, uint_32_cx endIndex,
-                     uint_32_cx startIndex = 0) {
-    CX_ASSERT(startIndex < endIndex || endIndex <= list.size_,
-              "index out of bounds");
+  inline void append(const vec<T>& list, uint_32_cx endIndex, uint_32_cx startIndex = 0) {
+    CX_ASSERT(startIndex < endIndex || endIndex <= list.size_, "index out of bounds");
     while (len_ - size_ < endIndex - startIndex) {
       grow();
     }
@@ -453,7 +442,7 @@ class vec {
     }
     std::cout << *this << std::endl;
   }
- friend std::ostream& operator<<(std::ostream& os, const vec& o) {
+  friend std::ostream& operator<<(std::ostream& os, const vec& o) {
     if (o.size_ == 0) {
       return os << "[]";
     }
@@ -502,12 +491,8 @@ class vec {
       --ptr;
       return temp;
     }
-    inline Iterator operator+(difference_type n) const noexcept {
-      return Iterator(ptr + n);
-    }
-    inline Iterator operator-(difference_type n) const noexcept {
-      return Iterator(ptr - n);
-    }
+    inline Iterator operator+(difference_type n) const noexcept { return Iterator(ptr + n); }
+    inline Iterator operator-(difference_type n) const noexcept { return Iterator(ptr - n); }
     inline difference_type operator-(const Iterator& other) const noexcept {
       return ptr - other.ptr;
     }
@@ -520,28 +505,14 @@ class vec {
       return *this;
     }
 
-    inline reference operator[](difference_type n) const noexcept {
-      return ptr[n];
-    }
+    inline reference operator[](difference_type n) const noexcept { return ptr[n]; }
 
-    inline bool operator==(const Iterator& other) const noexcept {
-      return ptr == other.ptr;
-    }
-    inline bool operator!=(const Iterator& other) const noexcept {
-      return ptr != other.ptr;
-    }
-    inline bool operator<(const Iterator& other) const noexcept {
-      return ptr < other.ptr;
-    }
-    inline bool operator>(const Iterator& other) const noexcept {
-      return ptr > other.ptr;
-    }
-    inline bool operator<=(const Iterator& other) const noexcept {
-      return ptr <= other.ptr;
-    }
-    inline bool operator>=(const Iterator& other) const noexcept {
-      return ptr >= other.ptr;
-    }
+    inline bool operator==(const Iterator& other) const noexcept { return ptr == other.ptr; }
+    inline bool operator!=(const Iterator& other) const noexcept { return ptr != other.ptr; }
+    inline bool operator<(const Iterator& other) const noexcept { return ptr < other.ptr; }
+    inline bool operator>(const Iterator& other) const noexcept { return ptr > other.ptr; }
+    inline bool operator<=(const Iterator& other) const noexcept { return ptr <= other.ptr; }
+    inline bool operator>=(const Iterator& other) const noexcept { return ptr >= other.ptr; }
   };
   inline Iterator begin() { return Iterator(arr_); }
   inline Iterator end() { return Iterator(arr_ + size_); }

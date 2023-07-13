@@ -27,8 +27,7 @@
 
 namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
-bool binarySearch_recursive_internal(T* arr, T target, int_32_cx low,
-                                     int_32_cx high) {
+bool binarySearch_recursive_internal(T* arr, T target, int_32_cx low, int_32_cx high) {
   if (low > high) {
     return false;
   }

@@ -40,10 +40,8 @@ namespace cxalgos {
  * @return The approximate value of the integral over the specified interval.
  */
 template <typename Function,
-          typename =
-              std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
-double integral_aprox(Function fx, double a, double b,
-                      uint_32_cx steps = 10000000) {
+          typename = std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
+double integral_aprox(Function fx, double a, double b, uint_32_cx steps = 10000000) {
   double width = b - a;
   double step_size = width / steps;
   double integral = 0;
@@ -72,8 +70,7 @@ double integral_aprox(Function fx, double a, double b,
  *       depends on the number of steps used.
  */
 template <typename Function,
-          typename =
-              std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
+          typename = std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
 double integral_volume_solids_of_revolution(Function fx, double a, double b,
                                             uint_32_cx steps = 10000000) {
   double volume = 0;
@@ -86,50 +83,16 @@ double integral_volume_solids_of_revolution(Function fx, double a, double b,
   return volume;
 }
 template <typename Function,
-          typename =
-              std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
-double integral_arc_length(Function fx, double a, double b,
-                           uint_32_cx steps = 10000000) {
+          typename = std::enable_if_t<std::is_invocable_r_v<double, Function, double>>>
+double integral_arc_length(Function fx, double a, double b, uint_32_cx steps = 10000000) {
   double arc_length = 0;
   double step_size = (b - a) / steps;
   double step_squared = step_size * step_size;
   for (uint_32_cx i = 0; i < steps; i++) {
-    arc_length +=
-        std::sqrt(step_squared + std::pow(fx(a + step_size) - fx(a), 2));
+    arc_length += std::sqrt(step_squared + std::pow(fx(a + step_size) - fx(a), 2));
     a += step_size;
   }
   return arc_length;
 }
-
-/**
- * Finds the <b>next</b> closest power of two to the right of the given number
- * @param n the start number
- * @return the next power of two
- */
-uint_32_cx next_power_of_2(uint_32_cx n) {
-  //black magic
-  n--;
-  n |= n >> 1;
-  n |= n >> 2;
-  n |= n >> 4;
-  n |= n >> 8;
-  n |= n >> 16;
-  n++;
-  return n;
-}
-float fast_sqrt(float number) {
-  long i;
-  float x2, y;
-  const float threehalfs = 1.5F;
-
-  x2 = number * 0.5F;
-  y = number;
-  i = *(long*)&y;
-  i = 0x5f3759df - (i >> 1);
-  y = *(float*)&i;
-  y = y * (threehalfs - (x2 * y * y));
-  return 1.0F / y;
-}
-
 }  // namespace cxalgos
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
