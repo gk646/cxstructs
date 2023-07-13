@@ -56,7 +56,7 @@ struct DataPoint_ {
   virtual float x() const = 0;
   virtual float y() const = 0;
   virtual float getWeight() const = 0;
-  virtual  C getCategory() = 0;
+  virtual C getCategory() = 0;
 };
 
 template <typename DP_>
@@ -102,18 +102,56 @@ class kNN_2D {
     }
   }
   inline Category classify_new(float x, float y, int k) {
-    vec<float> values;
-    std::cout<< space.get_bounds() << std::endl;
-    for(auto ptr : space.get_subrect(space.get_bounds())){
-      std::cout<< ptr->x() << std::endl;
+    vec<int> catg_values(128,0);
+    vec<DP_*> k_closest;
+    Rect search_space = {x, y, 1, 1};
+
+    while (k_closest.size() < k) {  //expanding till at least k size
+      k_closest = space.get_subrect(search_space);
+      search_space.x()--;
+      search_space.y()--;
+      search_space.height() += 2;
+      search_space.width() += 2;
     }
 
-    return Category::A;
+    if (k_closest.size() > k) {
+      std::cout<< "too  big" << std::endl;
+      //sorting with custom comparator, ascending to distance
+      k_closest.sort([this, x, y](DP_* f, DP_* s) {
+        float dist1 = dist_func(x, y, f->x(), f->y());
+        float dist2 = dist_func(x, y, s->x(), s->y());
+        return dist1 < dist2;
+      });
+
+      int diff = k_closest.size() - k;
+
+      for (uint_fast32_t i = 0; i < diff; i++) {  // erasing last elements
+        k_closest.pop_back();
+      }
+    }
+
+    for (auto& ptr : k_closest) {
+      catg_values[ptr->getCategory()]++;
+    }
+
+    int most = -1;
+    int index = 0;
+    for (uint_fast32_t i = 0; i < catg_values.size(); i++) {
+      if(catg_values[i] > most){
+        most = catg_values[i];
+        index = i;
+      }
+    }
+    if (most == -1) {
+      return Category::NONE;
+    }
+
+    return Category(index);
   }
 
 #ifndef CX_DELETE_TESTS
   static void TEST() {
-    enum Category { A, B, C };
+    enum Category { A, B, C, NONE };
     struct DataPoint : public DataPoint_<Category> {
       Category category;
       float x_;
@@ -126,13 +164,18 @@ class kNN_2D {
     };
 
     std::vector<DataPoint> data{};
-    data.emplace_back(1, 2, A);
-    data.emplace_back(10, 22, B);
-    data.emplace_back(5, 22, C);
-    data.emplace_back(5, -3, A);
+    data.emplace_back(1, 2, Category::A);
+    data.emplace_back(2, 3, Category::A);
+    data.emplace_back(3, 4, Category::A);
+    data.emplace_back(4, 5, Category::B);
+    data.emplace_back(5, 6, Category::B);
+    data.emplace_back(6, 7, Category::B);
+    data.emplace_back(7, 8, Category::C);
+    data.emplace_back(8, 9, Category::C);
+    data.emplace_back(9, 10, Category::C);
     kNN_2D<DataPoint> knn(data, DISTANCE_FUNCTION_2D::EUCLIDEAN);
-    auto cat_1 = knn.classify_new(2, 2, 10);
-    std::cout << cat_1 << std::endl;
+    auto cat_1 = knn.classify_new(0, 0, 4);
+    CX_ASSERT((int)cat_1 ==0);
   }
 #endif
 };

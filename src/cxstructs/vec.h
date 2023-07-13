@@ -30,6 +30,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <vector>
+#include "../cxalgos/Sorting.h"
 #include "../cxconfig.h"
 
 /*This implementation is well optimized and should generally be a bit faster than the std::vector in a lot of use cases
@@ -232,7 +233,10 @@ class vec {
    * @param index the accessed index
    * @return a reference to the value
    */
-  [[nodiscard]] inline T& operator[](const uint_32_cx& index) const noexcept { return arr_[index]; }
+  [[nodiscard]] inline T& operator[](const uint_32_cx& index) const noexcept {
+    CX_ASSERT(index < size_, "accessing undefined memory");
+    return arr_[index];
+  }
   /**
    * Allows direct access at the specified index starting with index 0 <p>
    * Negative indices can be used to access the list from the last element onwards starting with -1
@@ -458,6 +462,23 @@ class vec {
    * @return true if the vec is empty
    */
   [[nodiscard]] inline bool empty() const { return size_ == 0; }
+  /**
+   * Sorts the vector in the given direction<p>
+   * Uses the cxalgos::quicksort which should be slightly faster than STL sort()
+   * @param ascending true if ascending, false if descending
+   */
+  inline void sort(bool ascending = true) noexcept { quick_sort(arr_, size_, ascending); }
+  /**
+   * Sorts the vector using a custom comparator of the form: comp(T,T)(bool)
+   * If true swaps the elements
+   * @tparam Comparator callable taking two T and returning bool
+   * @param comp a callable function (lambda)
+   */
+  template <typename Comparator,
+            typename = std::enable_if_t<std::is_invocable_r_v<bool, Comparator, T, T>>>
+  inline void sort(Comparator comp) {
+    quick_sort_comparator(arr_, size_, comp);
+  }
   class Iterator {
     T* ptr;
 
@@ -469,6 +490,7 @@ class vec {
     using iterator_category = std::random_access_iterator_tag;
 
     inline explicit Iterator(T* p) noexcept : ptr(p) {}
+
 
     inline reference operator*() const noexcept { return *ptr; }
     inline pointer operator->() const noexcept { return ptr; }

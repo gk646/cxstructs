@@ -100,29 +100,34 @@ class QuadTree {
       bottom_left_->size_subtrees(current);
     }
   }
-  inline void count_subtrees(const Rect& bound, uint_32_cx& count) const noexcept {
-    if (bound.contains(bounds_)) {
-      count += vec_.size();
+  inline void count_subrect_subtrees(const Rect& bound, uint_32_cx& count) noexcept {
+    if (bound.intersects(bounds_)) {
+      for (const auto& point : vec_) {
+        if (bound.contains(point)) {
+          count++;
+        }
+      }
       if (top_right_) {
-        top_right_->count_subtrees(bound, count);
-        top_left_->count_subtrees(bound, count);
-        bottom_left_->count_subtrees(bound, count);
-        bottom_right_->count_subtrees(bound, count);
+        top_right_->count_subrect_subtrees(bound, count);
+        top_left_->count_subrect_subtrees(bound, count);
+        bottom_left_->count_subrect_subtrees(bound, count);
+        bottom_right_->count_subrect_subtrees(bound, count);
       }
     }
   }
-  inline void accumulate_subtrees(const Rect& bound, vec<T*>& list) const noexcept {
-    if (bound.contains(bounds_)) {
+  inline void accumulate_subrect_subtrees(const Rect& bound, vec<T*>& list) const noexcept {
+    if (bound.intersects(bounds_)) {
       auto arr = vec_.get_raw();
       for (uint_fast32_t i = 0; i < vec_.size(); i++) {
-        list.push_back(&arr[i]);
+        if (bound.contains(arr[i])) {
+          list.push_back(&arr[i]);
+        }
       }
-
       if (top_right_) {
-        top_right_->accumulate_subtrees(bound, list);
-        top_left_->accumulate_subtrees(bound, list);
-        bottom_left_->accumulate_subtrees(bound, list);
-        bottom_right_->accumulate_subtrees(bound, list);
+        top_right_->accumulate_subrect_subtrees(bound, list);
+        top_left_->accumulate_subrect_subtrees(bound, list);
+        bottom_left_->accumulate_subrect_subtrees(bound, list);
+        bottom_right_->accumulate_subrect_subtrees(bound, list);
       }
     }
   }
@@ -208,6 +213,7 @@ class QuadTree {
     if (!bounds_.contains(e)) {
       return;
     }
+
     if (!top_right_) {
       if (vec_.size() < max_points_) {
         vec_.push_back(std::move(e));
@@ -235,15 +241,7 @@ class QuadTree {
    */
   inline uint_32_cx count_subrect(const Rect& bound) {
     uint_32_cx count = 0;
-    if (bound.contains(bounds_)) {
-      count += vec_.size();
-      if (top_right_) {
-        top_right_->count_subtrees(bound, count);
-        top_left_->count_subtrees(bound, count);
-        bottom_left_->count_subtrees(bound, count);
-        bottom_right_->count_subtrees(bound, count);
-      }
-    }
+    count_subrect_subtrees(bound, count);
     return count;
   }
   /**
@@ -253,7 +251,7 @@ class QuadTree {
    */
   inline vec<T*> get_subrect(const Rect& bound) {
     vec<T*> retval;
-    accumulate_subtrees(bound, retval);
+    accumulate_subrect_subtrees(bound, retval);
     return retval;
   }
   /**
@@ -288,7 +286,7 @@ class QuadTree {
    * @return the max depth of the tree
    */
   [[nodiscard]] inline uint_32_cx size() const {
-    uint_32_cx size = vec_.size();
+    uint_32_cx size = 0;
     size_subtrees(size);
     return size;
   }
@@ -331,6 +329,7 @@ class QuadTree {
     CX_ASSERT(tree.size() == 1000);
 
     CX_ASSERT(tree.count_subrect({0, 0, 200, 200}) == 1000);
+    CX_ASSERT(tree.count_subrect({10, 10, 50, 50}) > 10);
     tree.insert({2, 2});
     CX_ASSERT(tree.size() == 1001);
     tree.erase({2, 2});
