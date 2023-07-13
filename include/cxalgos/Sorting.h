@@ -51,6 +51,26 @@ void quick_sort_internal(T* arr, int_32_cx low, int_32_cx high) {
     quick_sort_internal(arr, n + 1, high);
   }
 }
+template <typename T,typename Comparator,
+          typename = std::enable_if_t<std::is_invocable_r_v<bool, Comparator, T,T>>>
+void quick_sort_internal_comparator(T* arr, int_32_cx low, int_32_cx high,Comparator comp) {
+  if (low < high) {
+
+    const T& pivot = arr[high];
+    uint_32_cx n = low;
+    for (uint_32_cx i = low; i < high; i++) {
+      if (comp(arr[i], pivot)) {
+        std::swap(arr[n], arr[i]);
+        n++;
+      }
+    }
+
+    std::swap(arr[n], arr[high]);
+
+    quick_sort_internal_comparator(arr, low, n - 1,comp);
+    quick_sort_internal_comparator(arr, n + 1, high,comp);
+  }
+}
 template <typename T>
 void merge_sort_internal(T* arr, uint_32_cx low, uint_32_cx high) {
   if (low < high) {
@@ -227,6 +247,21 @@ void quick_sort(T* arr, uint_32_cx len, bool ascending = true) {
   if (!ascending) {
     std::reverse(arr, arr + len);
   }
+}
+/**
+ * Quicksorts the array according to quick_sort but allows for a custom comparator.<p>
+ * The comparator takes two values of the supplied array comp(arr[i],pivot) to determine if these should be swapped.
+ *
+ * @tparam T array type
+ * @tparam Comparator a callable taking T and return bool
+ * @param arr the array to sort
+ * @param len the length of the array
+ * @param comp custom function to compare elements
+ */
+template <typename T,typename Comparator,
+          typename = std::enable_if_t<std::is_invocable_r_v<bool, Comparator, T,T>>>
+void quick_sort_comparator(T* arr, uint_32_cx len,Comparator comp) {
+  cxhelper::quick_sort_internal_comparator(arr, 0, len - 1,comp);
 }
 template <typename T>
 T* insertionSort(T* arr, uint_32_cx len, bool ascending) {}
