@@ -35,7 +35,7 @@ namespace cxstructs {
  * @param contents A reference to a string where the contents of the file will be stored.
  * @return Returns true if the file was successfully loaded, false otherwise.
  */
-bool load_txt(const std::string& filePath, std::string& contents) {
+inline bool load_txt(const std::string& filePath, std::string& contents) {
 
   std::ifstream file(filePath, std::ios::in);
 
