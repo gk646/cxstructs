@@ -20,8 +20,9 @@
 #define FINISHED
 #ifndef CXSTRUCTS_SRC_CXASSERT_H_
 #define CXSTRUCTS_SRC_CXASSERT_H_
+
 #include <iostream>
-void CX_ASSERT_failed(const char* expr, const char* file, int line, const char* message) {
+inline void CX_ASSERT_failed(const char* expr, const char* file, int line, const char* message) {
   std::cerr << "Assert failed: " << expr << "\n"
             << "At " << file << ":" << line << "\n"
             << "Message: " << message << "\n";
@@ -34,7 +35,7 @@ void CX_ASSERT_failed(const char* expr, const char* file, int line, const char* 
 #endif
 }
 
-void warning_failed(const char* expr, const char* file, int line, const char* message) {
+inline void warning_failed(const char* expr, const char* file, int line, const char* message) {
   std::cerr << "Warning: " << expr << "\n"
             << "At " << file << ":" << line << "\n"
             << "Message: " << message << "\n";
