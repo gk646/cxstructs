@@ -25,8 +25,7 @@
 #include <vector>
 #include "../cxstructs/Geometry.h"
 
-namespace cxalgos {
-using namespace cxstructs;
+namespace cxstructs {
 template <typename S, typename B>
 std::vector<std::vector<S>> maze_simple_generation(const B& obstacle_val, Point size, Point start,
                                                    Point end) {
@@ -61,5 +60,5 @@ std::vector<std::vector<S>> maze_simple_generation(const B& obstacle_val, Point 
   return maze;
 }
 
-}  // namespace cxalgos
+}  // cxstructs
 #endif  //CXSTRUCTS_SRC_CXALGOS_MISC_H_

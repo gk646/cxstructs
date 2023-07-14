@@ -22,25 +22,17 @@
 #ifndef CXSTRUCTS_SRC_CONFIG_H_
 #define CXSTRUCTS_SRC_CONFIG_H_
 /**
- * namespace for all utility related headers
- */
-namespace cxutil {}
-/**
- * namespace for all cxml related headers
- */
-namespace cxml {}
-/**
  * namespace for all datastructure related headers
  */
 namespace cxstructs {}
 /**
- * namespace for all cxalgos related headers
- */
-namespace cxalgos {}
-/**
  * internal namespace for helper methods or structs
  */
 namespace cxhelper {}
+/**
+ * internal namespace for test methods
+ */
+namespace cxtests {}
 
 #include <cstdint>
 #include "cxutil/cxassert.h"

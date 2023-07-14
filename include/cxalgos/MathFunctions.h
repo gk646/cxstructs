@@ -27,7 +27,7 @@
 #include <type_traits>
 #include "../cxconfig.h"
 
-namespace cxalgos {
+namespace cxstructs {
 
 /**
  * @brief Approximates the definite integral of a function over a given interval.
@@ -94,5 +94,5 @@ double integral_arc_length(Function fx, double a, double b, uint_32_cx steps = 1
   }
   return arc_length;
 }
-}  // namespace cxalgos
+}  // cxstructs
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_

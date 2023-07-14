@@ -48,7 +48,7 @@ int suffix_length(const std::string& pattern, int pos) {
 
 }  // namespace cxhelper
 
-namespace cxalgos {
+namespace cxstructs {
 using namespace cxhelper;
 
 int findString_built_in(const std::string& text, const std::string& pattern) {
@@ -189,6 +189,6 @@ int findString_Boyer_Moore(const std::string& text, const std::string& pattern) 
   return count > 0 ? count : -1;  // return -1 on not found
 }
 
-}  // namespace cxalgos
+}  // cxstructs
 
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_PATTERNMATCHING_H_

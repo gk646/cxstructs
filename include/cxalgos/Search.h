@@ -43,7 +43,7 @@ bool binarySearch_recursive_internal(T* arr, T target, int_32_cx low, int_32_cx 
 }
 }  // namespace cxhelper
 
-namespace cxalgos {
+namespace cxstructs {
 /**
  * Binary search on the specified ASCENDED SORTED array without recursion <p>
  * runtime: O(log(n))
@@ -121,5 +121,5 @@ int binary_search_index(T* arr, T target, int_32_cx len, bool ascending) {
   }
 }
 
-}  // namespace cxalgos
+}  // cxstructs
 #endif  // CXSTRUCTS_BINARYSEARCH_H

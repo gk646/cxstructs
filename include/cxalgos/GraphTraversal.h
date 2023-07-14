@@ -30,7 +30,7 @@
 #include "../cxstructs/Pair.h"
 #include "../cxstructs/vec.h"
 
-namespace cxalgos {
+namespace cxstructs {
 using namespace cxstructs;
 
 /**
@@ -69,6 +69,6 @@ vec<vec<std::pair<Action, State>>> shortest_path_search(
     auto s = path.at[-1].second;
   }
 }
-}  // namespace cxalgos
+}  // cxstructs
 
 #endif  // CXSTRUCTS_DFS_H

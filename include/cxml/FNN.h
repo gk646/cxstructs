@@ -139,7 +139,7 @@ struct Layer {
   }
 };
 }  // namespace cxhelper
-namespace cxml {
+namespace cxstructs {
 using namespace cxhelper;
 /**
  * <h2>Feedforward Neural Network</h2>
@@ -189,7 +189,7 @@ class FNN {
   }
 
 };
-}  // namespace cxml
+}  // cxstructs
 
 #else
 #pragma message("|FNN.h| Using FNN.h without matrices, calculations are loop based.")
@@ -312,7 +312,7 @@ struct Layer {
   }
 };
 }  // namespace cxhelper
-namespace cxml {
+cxstructs {
 using namespace cxhelper;
 /**
  * <h2>Feedforward Neural Network</h2>
@@ -380,7 +380,7 @@ class FNN {
   }
 
 };
-}  // namespace cxml
+}  // cxstructs
 
 #endif  // CX_MATRIX
 #undef CX_MATRIX

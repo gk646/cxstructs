@@ -128,7 +128,7 @@ bool bogo_sort_internal(T* arr, uint_32_cx len, bool ascending) {
 }
 }  // namespace cxhelper
 
-namespace cxalgos {
+namespace cxstructs {
 /** <h2>Bogo Sort</h2> also known as permutation sort, stupid sort, slow sort,
  * monkey sort, shotgun sort or chaotic sort. It works by
  * swapping random indices of the array and checks after each step weather its sorted. <p>
@@ -286,5 +286,5 @@ void merge_sort(T* arr, uint_32_cx len, bool ascending = true) {
 template <typename T>
 void heapSort(T* arr, uint_32_cx len, bool ascending) {}
 
-}  // namespace cxalgos
+}  // cxstructs
 #endif  // CXSTRUCTS_SORTING_H

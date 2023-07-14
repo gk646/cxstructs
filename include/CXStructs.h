@@ -43,6 +43,7 @@
 #include "cxstructs/vec.h"
 
 #include "cxml/FNN.h"
+#include "cxml/k-NN.h"
 
 #include "cxalgos/GraphTraversal.h"
 #include "cxalgos/MathFunctions.h"
