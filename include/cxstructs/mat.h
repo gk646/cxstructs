@@ -19,6 +19,9 @@
 // SOFTWARE.
 #define FINISHED
 
+#ifndef CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
+#define CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
+
 #include <cstdint>
 #include <iostream>
 #include <ostream>
@@ -430,7 +433,7 @@ class mat {
   [[nodiscard]] inline mat sum_cols() const {
     mat ret(1, n_cols_);
     for (uint_fast32_t i = 0; i < n_cols_; i++) {
-      float sum;
+      float sum = 0;
       for (uint_fast32_t j = 0; j < n_rows_; j++) {
         sum += arr[j * n_cols_ + i];
       }
@@ -453,7 +456,7 @@ class mat {
   static void relu(mat& m) {
 #pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
-      m.arr[i] = cxutil::relu(m.arr[i]);
+      m.arr[i] = cxstructs::relu(m.arr[i]);
     }
   }
   /**
@@ -463,19 +466,19 @@ class mat {
   static void sig(mat& m) {
 #pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
-      m.arr[i] = cxutil::sig(m.arr[i]);
+      m.arr[i] = cxstructs::sig(m.arr[i]);
     }
   }
   static void d_sig(mat& m) {
 #pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
-      m.arr[i] = cxutil::d_sig(m.arr[i]);
+      m.arr[i] = cxstructs::d_sig(m.arr[i]);
     }
   }
   static void d_relu(mat& m) {
 #pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
-      m.arr[i] = cxutil::d_relu(m.arr[i]);
+      m.arr[i] = cxstructs::d_relu(m.arr[i]);
     }
   }
   /**Prints out the matrix
@@ -517,3 +520,4 @@ class mat {
 
 };
 }  // namespace cxstructs
+#endif

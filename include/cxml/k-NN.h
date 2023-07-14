@@ -36,7 +36,7 @@
  *
  */
 namespace cxstructs {
-using namespace cxutil;
+
 
 enum class DISTANCE_FUNCTION_2D { EUCLIDEAN, MANHATTAN };
 enum class DISTANCE_FUNCTION_XD { EUCLIDEAN, MANHATTAN, CHEBYSHEV, COSINE };
@@ -90,9 +90,9 @@ class kNN_2D {
   kNN_2D(std::vector<DP_>& data, DISTANCE_FUNCTION_2D distance_function, Rect bounds = {})
       : space({}), data_ptr(data.data()), n_points(data.size()) {
     if (distance_function == DISTANCE_FUNCTION_2D::EUCLIDEAN) {
-      dist_func = cxutil::euclidean;
+      dist_func = cxstructs::euclidean;
     } else {
-      dist_func = cxutil::manhattan;
+      dist_func = cxstructs::manhattan;
     }
     if (bounds.width() == 0 && bounds.height() == 0) {
       float max_x = std::numeric_limits<float>::min();

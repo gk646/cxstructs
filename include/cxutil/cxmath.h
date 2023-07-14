@@ -27,7 +27,7 @@
 #define CX_PI \
   3.14159265358979323846  // for compatibility | apparently this is only in c++ through std::numbers which is CX20 and not on all compilers equal
 
-namespace cxutil {
+namespace cxstructs {
 //function pointer typedef
 typedef float (*func)(float);
 typedef float(*D_func)(float p1x, float p1y, float p2x, float p2y);
@@ -108,5 +108,5 @@ inline float manhattan(float p1x, float p1y, float p2x, float p2y) noexcept {
 //multidimensional distance functions
 
 inline float chebyshev() noexcept {}
-}  // namespace cxutil
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXUTIL_MATH_H_
