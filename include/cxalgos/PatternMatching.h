@@ -28,7 +28,7 @@
 
 namespace cxhelper {
 
-bool is_prefix(const std::string& pattern, int pos) {
+inline bool is_prefix(const std::string& pattern, int pos) {
   for (int i = 0; i < pattern.size() - pos; ++i) {
     if (pattern[i] != pattern[i + pos]) {
       return false;
@@ -36,8 +36,7 @@ bool is_prefix(const std::string& pattern, int pos) {
   }
   return true;
 }
-
-int suffix_length(const std::string& pattern, int pos) {
+inline int suffix_length(const std::string& pattern, int pos) {
   int len = 0;
   while (pos >= 0 && pattern[pos] == pattern[pattern.size() - 1 - len]) {
     pos--;
@@ -51,7 +50,7 @@ int suffix_length(const std::string& pattern, int pos) {
 namespace cxstructs {
 using namespace cxhelper;
 
-int findString_built_in(const std::string& text, const std::string& pattern) {
+inline int findString_built_in(const std::string& text, const std::string& pattern) {
   if (text.empty() || pattern.empty()) {
     return -1;  // return -1 on empty input
   }
@@ -65,8 +64,7 @@ int findString_built_in(const std::string& text, const std::string& pattern) {
   }
   return count > 0 ? count : -1;  // return -1 on not found
 }
-
-int findString_brute_force(const std::string& text, const std::string& pattern) {
+inline int findString_brute_force(const std::string& text, const std::string& pattern) {
   if (text.empty() || pattern.empty()) {
     return -1;  // return -1 on empty input
   }
@@ -90,8 +88,7 @@ int findString_brute_force(const std::string& text, const std::string& pattern) 
   }
   return count > 0 ? count : -1;  // return -1 on not found
 }
-
-int findString_KMP(const std::string& text, const std::string& pattern) {
+inline int findString_KMP(const std::string& text, const std::string& pattern) {
   if (text.empty() || pattern.empty()) {
     return -1;  // return -1 on empty input
   }
@@ -137,7 +134,7 @@ int findString_KMP(const std::string& text, const std::string& pattern) {
   delete[] lps;                   //cleanup to prevent memory leaks
   return count > 0 ? count : -1;  // return -1 on not found
 }
-int findString_Boyer_Moore(const std::string& text, const std::string& pattern) {
+inline int findString_Boyer_Moore(const std::string& text, const std::string& pattern) {
   if (text.empty() || pattern.empty()) {
     return -1;  // return -1 on empty input
   }
@@ -188,7 +185,6 @@ int findString_Boyer_Moore(const std::string& text, const std::string& pattern) 
   delete[] good_suffix;           //clean up memory
   return count > 0 ? count : -1;  // return -1 on not found
 }
-
 }  // cxstructs
 
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_PATTERNMATCHING_H_
