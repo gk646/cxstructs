@@ -17,17 +17,17 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
+#define FINISHED
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
 #define CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
 
+#include <exception>
 #include <vector>
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
 #include "../cxstructs/HashMap.h"
 #include "../cxstructs/QuadTree.h"
 #include "../cxstructs/row.h"
-
 /**
  * <h2>k-Nearest Neighbour</h2>
  *
@@ -35,17 +35,11 @@
  * it to existing ones. Specifically to k number of closest points, hence the name.<p>
  *
  */
-namespace cxml {
+namespace cxstructs {
 using namespace cxutil;
-using namespace cxstructs;
 
 enum class DISTANCE_FUNCTION_2D { EUCLIDEAN, MANHATTAN };
 enum class DISTANCE_FUNCTION_XD { EUCLIDEAN, MANHATTAN, CHEBYSHEV, COSINE };
-enum class CLASSIFICATION_TYPE {
-  ABSOLUTE_CATEGORY,   // Classification based on absolute count of most occurring category
-  DISTANCE_WEIGHTED,   // Classification based on distance weighted with type
-  DISTANCE_AND_WEIGHT  // Classification based on distance and weight weighted with type
-};
 
 /**
  * @tparam C the categories
@@ -67,6 +61,30 @@ class kNN_2D {
 
   uint_32_cx n_points;
   DP_* data_ptr;
+
+  inline void get_k_closest(float x, float y, int k, vec<DP_*>& k_closest) {
+    Rect search_space = {x, y, 1, 1};
+
+    while (k_closest.size() < k) {  //expanding till at least k size
+      k_closest = space.get_subrect(search_space);
+      search_space.x()--;
+      search_space.y()--;
+      search_space.height() += 2;
+      search_space.width() += 2;
+    }
+
+    if (k_closest.size() > k) {
+      //rearranging with custom comparator, ascending to distance
+      std::nth_element(k_closest.begin(), k_closest.begin() + k, k_closest.end(),
+                       [this, x, y](DP_* f, DP_* s) {
+                         float dist1 = dist_func(x, y, f->x(), f->y());
+                         float dist2 = dist_func(x, y, s->x(), s->y());
+                         return dist1 < dist2;
+                       });
+
+      k_closest.resize(k);  // erasing elements after the k-th position
+    }
+  }
 
  public:
   kNN_2D(std::vector<DP_>& data, DISTANCE_FUNCTION_2D distance_function, Rect bounds = {})
@@ -101,67 +119,134 @@ class kNN_2D {
       space.insert(std::move(dp));
     }
   }
-  inline Category classify_new(float x, float y, int k) {
-    vec<int> catg_values(128,0);
+  /**
+ * Classifies a point based on the absolute count of categories in the k closest points.
+ * @param x The x-coordinate of the point.
+ * @param y The y-coordinate of the point.
+ * @param k The number of closest points to consider.
+ * @return The category of the point.
+ * @throws std::logic_error If there are not enough data points or no category is found.
+ */
+  inline Category classify_by_category_count(float x, float y, int k) {
+    if (space.size() < k) {
+      throw std::logic_error("not enough data points");
+    }
+
+    vec<int, false> catg_values(128, 0);  // max categories
     vec<DP_*> k_closest;
-    Rect search_space = {x, y, 1, 1};
 
-    while (k_closest.size() < k) {  //expanding till at least k size
-      k_closest = space.get_subrect(search_space);
-      search_space.x()--;
-      search_space.y()--;
-      search_space.height() += 2;
-      search_space.width() += 2;
-    }
-
-    if (k_closest.size() > k) {
-      std::cout<< "too  big" << std::endl;
-      //sorting with custom comparator, ascending to distance
-      k_closest.sort([this, x, y](DP_* f, DP_* s) {
-        float dist1 = dist_func(x, y, f->x(), f->y());
-        float dist2 = dist_func(x, y, s->x(), s->y());
-        return dist1 < dist2;
-      });
-
-      int diff = k_closest.size() - k;
-
-      for (uint_fast32_t i = 0; i < diff; i++) {  // erasing last elements
-        k_closest.pop_back();
-      }
-    }
+    get_k_closest(x, y, k, k_closest);  //getting pointer list of closest points
 
     for (auto& ptr : k_closest) {
       catg_values[ptr->getCategory()]++;
     }
 
-    int most = -1;
-    int index = 0;
-    for (uint_fast32_t i = 0; i < catg_values.size(); i++) {
-      if(catg_values[i] > most){
-        most = catg_values[i];
-        index = i;
-      }
-    }
-    if (most == -1) {
-      return Category::NONE;
+    int index = -1;
+    index = catg_values.max_element();
+
+    if (index == -1) {
+      throw std::logic_error("no category found!");
     }
 
     return Category(index);
   }
+  /**
+ * Classifies a point based on the sum of distances to the k closest points in each category.
+ * @param x The x-coordinate of the point.
+ * @param y The y-coordinate of the point.
+ * @param k The number of closest points to consider.
+ * @return The category of the point.
+ * @throws std::logic_error If no category is found.
+ */
+  inline Category classify_by_sum_distance(float x, float y, int k) {
+    vec<float, false> catg_values(128, 0);  // max categories
+    vec<DP_*> k_closest;
 
+    get_k_closest(x, y, k, k_closest);  //getting pointer list of closest points
+
+    for (auto& ptr : k_closest) {
+      catg_values[ptr->getCategory()] += dist_func(x, y, ptr->x(), ptr->y());
+    }
+
+    int index = -1;
+    index = catg_values.max_element();
+
+    if (index == -1) {
+      throw std::logic_error("no category found!");
+    }
+
+    return Category(index);
+  }
+  /**
+ * Classifies a point based on the sum of weights of the k closest points in each category.
+ * @param x The x-coordinate of the point.
+ * @param y The y-coordinate of the point.
+ * @param k The number of closest points to consider.
+ * @return The category of the point.
+ * @throws std::logic_error If no category is found.
+ */
+  inline Category classify_by_sum_weight(float x, float y, int k) {
+    vec<float, false> catg_values(128, 0);  // max categories
+    vec<DP_*> k_closest;
+
+    get_k_closest(x, y, k, k_closest);  //getting pointer list of closest points
+
+    for (auto& ptr : k_closest) {
+      catg_values[ptr->getCategory()] += ptr->getWeight();
+    }
+
+    int index = -1;
+    index = catg_values.max_element();
+
+    if (index == -1) {
+      throw std::logic_error("no category found!");
+    }
+
+    return Category(index);
+  }
+  /**
+ * Classifies a point based on the sum of weighted distances to the k closest points in each category.
+ * @param x The x-coordinate of the point.
+ * @param y The y-coordinate of the point.
+ * @param k The number of closest points to consider.
+ * @return The category of the point.
+ * @throws std::logic_error If no category is found.
+ */
+  inline Category classify_by_sum_weighted_distance(float x, float y, int k) {
+    vec<float, false> catg_values(128, 0);  // max categories
+    vec<DP_*> k_closest;
+
+    get_k_closest(x, y, k, k_closest);  //getting pointer list of closest points
+
+    for (auto& ptr : k_closest) {
+      catg_values[ptr->getCategory()] += dist_func(x, y, ptr->x(), ptr->y()) * ptr->getWeight();
+    }
+
+    int index = -1;
+    index = catg_values.max_element();
+
+    if (index == -1) {
+      throw std::logic_error("no category found!");
+    }
+
+    return Category(index);
+  }
 #ifndef CX_DELETE_TESTS
   static void TEST() {
-    enum Category { A, B, C, NONE };
+    enum Category { A, B, C };
     struct DataPoint : public DataPoint_<Category> {
       Category category;
       float x_;
       float y_;
+      float weight = 1;
       DataPoint(float x, float y, Category category) : x_(x), y_(y), category(category) {}
       float x() const final { return x_; }
       float y() const final { return y_; }
       Category getCategory() final { return category; }
-      float getWeight() const override { return 0; }
+      float getWeight() const final { return weight; }
     };
+
+    std::cout << "TESTING k-NN" << std::endl;
 
     std::vector<DataPoint> data{};
     data.emplace_back(1, 2, Category::A);
@@ -173,13 +258,38 @@ class kNN_2D {
     data.emplace_back(7, 8, Category::C);
     data.emplace_back(8, 9, Category::C);
     data.emplace_back(9, 10, Category::C);
+    Category cat1;
     kNN_2D<DataPoint> knn(data, DISTANCE_FUNCTION_2D::EUCLIDEAN);
-    auto cat_1 = knn.classify_new(0, 0, 4);
-    CX_ASSERT((int)cat_1 ==0);
+
+    std::cout << "   Testing absolute classification" << std::endl;
+    cat1 = knn.classify_by_category_count(0, 0, 4);
+    CX_ASSERT((int)cat1 == 0);
+    cat1 = knn.classify_by_category_count(5, 5, 4);
+    CX_ASSERT((int)cat1 == 1);
+
+    std::cout << "   Testing distance weighted classification" << std::endl;
+    cat1 = knn.classify_by_sum_distance(0, 0, 4);
+    CX_ASSERT((int)cat1 == 0);
+    cat1 = knn.classify_by_sum_distance(5, 5, 4);
+    CX_ASSERT((int)cat1 == 1);
+
+    std::cout << "   Testing weight classification" << std::endl;
+    cat1 = knn.classify_by_sum_weight(0, 0, 4);
+    CX_ASSERT((int)cat1 == 0);
+    cat1 = knn.classify_by_sum_weight(5, 5, 4);
+    CX_ASSERT((int)cat1 == 1);
+
+    std::cout << "   Testing weighted * dist classification" << std::endl;
+    cat1 = knn.classify_by_sum_weighted_distance(0, 0, 4);
+    CX_ASSERT((int)cat1 == 0);
+    cat1 = knn.classify_by_sum_weighted_distance(5, 5, 4);
+    CX_ASSERT((int)cat1 == 1);
   }
 #endif
 };
+
+
 class kNN_XD {};
 
-}  // namespace cxml
+}  // cxstructs
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_

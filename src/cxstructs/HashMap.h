@@ -216,7 +216,7 @@ struct HashLinkedList {
 
 namespace cxstructs {
 using namespace cxhelper;
-using namespace cxalgos;
+using namespace cxstructs;
 using namespace cxutil;
 /**
  * <h2>Linear Probing HashMap</h2>

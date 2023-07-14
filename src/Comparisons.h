@@ -29,7 +29,7 @@
 #include <unordered_map>
 
 using namespace cxstructs;
-using namespace cxalgos;
+using namespace cxstructs;
 
 struct Data {
   int arr[100]{};
@@ -301,7 +301,7 @@ void compareWithSTL() {
   const std::vector<std::vector<float>> inputs = {{1, 0}, {1, 1}, {0, 1}, {0, 0}};
   const std::vector<std::vector<float>> expected_outputs = {{1}, {0}, {1}, {0}};
 
-  cxml::FNN fnn({2, 2, 1}, cxutil::sig, 0.11);
+  FNN fnn({2, 2, 1}, cxutil::sig, 0.11);
   cxutil::now();
   for (int i = 0; i < 1000; ++i) {
     //fnn.train(inputs, expected_outputs, 2000);

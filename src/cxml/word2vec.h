@@ -17,31 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define FINISHED
+#define F
+#ifndef CXSTRUCTS_SRC_CXML_WORD2VEC_H_
+#define CXSTRUCTS_SRC_CXML_WORD2VEC_H_
 
-#ifndef CXSTRUCTS_SRC_CONFIG_H_
-#define CXSTRUCTS_SRC_CONFIG_H_
-/**
- * namespace for all datastructure related headers
- */
-namespace cxstructs {}
-/**
- * internal namespace for helper methods or structs
- */
-namespace cxhelper {}
-/**
- * internal namespace for test methods
- */
-namespace cxtests {}
-
-#include <cstdint>
-#include "cxutil/cxassert.h"
-
-typedef uint_fast32_t uint_32_cx;
-typedef uint_fast16_t uint_16_cx;
-typedef int_fast32_t int_32_cx;
-
-#include "CXAllocator.h"
-#include "cxutil/cxmath.h"
-
-#endif  //CXSTRUCTS_SRC_CONFIG_H_
+#endif  //CXSTRUCTS_SRC_CXML_WORD2VEC_H_

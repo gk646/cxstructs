@@ -30,7 +30,7 @@
 #include "../cxstructs/Pair.h"
 #include "../cxstructs/vec.h"
 
-namespace cxalgos {
+namespace cxstructs {
 using namespace cxstructs;
 
 /**
@@ -69,12 +69,10 @@ vec<vec<std::pair<Action, State>>> shortest_path_search(
     auto s = path.at[-1].second;
   }
 }
-}  // namespace cxalgos
+}  // cxstructs
 #ifndef CX_DELETE_TESTS
 namespace cxtests {  // namespace cxtests
-using namespace cxalgos;
 static void TEST_DFS() {
-
   std::cout << "TESTING DEPTH FIRST SEARCH" << std::endl;
   std::vector<std::vector<int>> mat = {
       {0, 1, 0, 1, 0}, {1, 0, 1, 0, 0}, {0, 1, 0, 0, 0}, {1, 0, 0, 0, 1}, {0, 0, 0, 1, 0}};

@@ -282,7 +282,7 @@ class QuadTree {
   };
   /**
    * Actively iterates down the tree summing all subtree sizes<p>
-   * <b>This is rather slow </b>
+   * <b>This can get slow on large trees </b>
    * @return the max depth of the tree
    */
   [[nodiscard]] inline uint_32_cx size() const {
@@ -292,7 +292,7 @@ class QuadTree {
   }
   /**
    * Actively iterates down the tree for its max depth<p>
-   * <b>This is rather slow </b>
+   * <b>This can get slow on large trees </b>
    * @return the max depth of the tree
    */
   [[nodiscard]] inline uint_16_cx depth() const {
@@ -328,6 +328,7 @@ class QuadTree {
     CX_ASSERT(tree.depth() == 3);
     CX_ASSERT(tree.size() == 1000);
 
+    std::cout << "   Testing count subrect..." << std::endl;
     CX_ASSERT(tree.count_subrect({0, 0, 200, 200}) == 1000);
     CX_ASSERT(tree.count_subrect({10, 10, 50, 50}) > 10);
     tree.insert({2, 2});

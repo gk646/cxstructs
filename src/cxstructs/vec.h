@@ -65,7 +65,7 @@ class vec {
   size_type len_;
 
   bool is_trivial_destr = std::is_trivially_destructible<T>::value;
-  inline void grow() {
+  inline void grow() noexcept {
     len_ *= 2;
 
     T* n_arr = alloc.allocate(len_);
@@ -83,7 +83,7 @@ class vec {
     arr_ = n_arr;
     //as array is moved no need for delete []
   }
-  inline void shrink() {
+  inline void shrink() noexcept {
     auto old_len = len_;
     len_ = size_ * 1.5;
 
@@ -280,7 +280,7 @@ class vec {
    * Reduces the underlying array size to something close to the actual data size.
    * This decreases memory usage.
    */
-  inline void shrink_to_fit() {
+  inline void shrink_to_fit() noexcept {
     if (len_ > size_ * 1.5) {
       shrink();
     }
@@ -290,7 +290,7 @@ class vec {
   * Removes the last element of the vec.
   * Reduces the size by one.
   */
-  [[nodiscard]] inline T pop_back() {
+  [[nodiscard]] inline T pop_back() noexcept {
     CX_ASSERT(size_ > 0 && "out of bounds");
     return arr_[--size_];
   }
@@ -299,7 +299,7 @@ class vec {
    * This is rather slow method(O(n)) use a Queue if you call it frequently
    * @return first element as value
    */
-  [[nodiscard]] inline T pop_front() {
+  [[nodiscard]] inline T pop_front() noexcept {
     CX_ASSERT(size_ > 0 && "out of bounds");
     T val = arr_[0];
     std::move(arr_ + 1, arr_ + size_--, arr_);
@@ -310,7 +310,7 @@ class vec {
    * This is rather slow method(O(n-i))
    * @return first element as value
    */
-  [[nodiscard]] inline T pop(const uint_32_cx& i) {
+  [[nodiscard]] inline T pop(const uint_32_cx& i) noexcept {
     T val = arr_[i];
     std::move(arr_ + i + 1, arr_ + size_--, arr_ + i);
     return val;
@@ -319,7 +319,7 @@ class vec {
    * Removes the first occurrence of the given element from the list
    * @param e element to be removed
    */
-  inline void erase(const T& e) {
+  inline void erase(const T& e) noexcept {
 #pragma omp simd linear(i : 1)
     for (uint_32_cx i = 0; i < len_; i++) {
       if (arr_[i] == e) {
@@ -333,7 +333,7 @@ class vec {
    * Removes the element at the given index
    * @param index index of removal
    */
-  inline void removeAt(const uint_32_cx& index) {
+  inline void removeAt(const uint_32_cx& index) noexcept {
     CX_ASSERT(index < len_ && "index out of bounds");
     std::move(arr_ + index + 1, arr_ + size_--, arr_ + index);
   }
@@ -411,7 +411,7 @@ class vec {
  * If necessary, the capacity of this vec is expanded
  * @param vec  the vec to append
  */
-  inline void append(const vec<T>& vec) {
+  inline void append(const vec<T>& vec) noexcept {
     while (len_ - size_ < vec.size_) {
       grow();
     }
@@ -427,7 +427,7 @@ class vec {
  * @param end index of the last element (exclusive)
  * @param start the index of the first element (inclusive)
  */
-  inline void append(const vec<T>& list, uint_32_cx endIndex, uint_32_cx startIndex = 0) {
+  inline void append(const vec<T>& list, uint_32_cx endIndex, uint_32_cx startIndex = 0) noexcept {
     CX_ASSERT(startIndex < endIndex || endIndex <= list.size_, "index out of bounds");
     while (len_ - size_ < endIndex - startIndex) {
       grow();
@@ -446,7 +446,7 @@ class vec {
     }
     std::cout << *this << std::endl;
   }
-  friend std::ostream& operator<<(std::ostream& os, const vec& o) {
+  friend std::ostream& operator<<(std::ostream& os, const vec& o) noexcept {
     if (o.size_ == 0) {
       return os << "[]";
     }
@@ -461,7 +461,7 @@ class vec {
    * Performs an empty check
    * @return true if the vec is empty
    */
-  [[nodiscard]] inline bool empty() const { return size_ == 0; }
+  [[nodiscard]] inline bool empty() const noexcept { return size_ == 0; }
   /**
    * Sorts the vector in the given direction<p>
    * Uses the cxalgos::quicksort which should be slightly faster than STL sort()
@@ -476,8 +476,49 @@ class vec {
    */
   template <typename Comparator,
             typename = std::enable_if_t<std::is_invocable_r_v<bool, Comparator, T, T>>>
-  inline void sort(Comparator comp) {
+  inline void sort(Comparator comp) noexcept {
     quick_sort_comparator(arr_, size_, comp);
+  }
+  /**
+   * Iterates through the vector finding the biggest element by ">" comparison
+   * @return the index of the biggest element
+   */
+  inline uint_32_cx max_element() const noexcept {
+    T max = arr_[0];
+    uint_32_cx index = 0;
+    for (uint_fast32_t i = 1; i < size_; i++) {
+      if (arr_[i] > max) {
+        max = arr_[i];
+        index = i;
+      }
+    }
+    return index;
+  }
+  /**
+ * Trims the vector to size new_size starting from the front
+ * @param new_size the size the vector will have after this methods
+ */
+  inline void resize(uint_32_cx new_size) noexcept {
+    CX_WARNING(!(size_ <= new_size), "calling resize for no reason");
+    if (size_ > new_size) {
+      auto old_len = len_;
+      len_ = new_size;
+
+      T* n_arr = alloc.allocate(len_);
+
+      std::uninitialized_move(arr_, arr_ + new_size, n_arr);
+
+      // Destroy the original objects
+      if (!is_trivial_destr) {
+        for (size_t i = 0; i < old_len; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+
+      alloc.deallocate(arr_, old_len);
+      arr_ = n_arr;
+      size_ = new_size;
+    }
   }
   class Iterator {
     T* ptr;
@@ -490,7 +531,6 @@ class vec {
     using iterator_category = std::random_access_iterator_tag;
 
     inline explicit Iterator(T* p) noexcept : ptr(p) {}
-
 
     inline reference operator*() const noexcept { return *ptr; }
     inline pointer operator->() const noexcept { return ptr; }

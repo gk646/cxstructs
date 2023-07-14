@@ -176,7 +176,7 @@ typedef int_fast32_t int_32_cx;
 Add `DBUILD_TESTS=ON` to your CMake options to build an executable target from the src/ directory.
 You can then add a main.cpp and test any changes.
 
-Run tests by `#include "CXTests.h"` and calling the test methods.
+Run tests by `#include "CXTests.h"` and calling `test_all`.
 
 Feel free to contribute!
 
@@ -184,9 +184,9 @@ Feel free to contribute!
 
 - Initially I made all the cxstructs with automatic shrinking when reaching a min_size
   as I thought the STL containers are in fact doing that
-    - turns out they don't, and it was the reason i didn't beat them yet in performance
+    - turns out they don't, and it was the reason I didn't beat them yet in performance
 
 - The CX_ASSERT macro is inspired by the
-  video ["How i use C++;a line-by-line code review"](https://www.youtube.com/watch?v=W8-G_PL6p-0&pp=ygUYbXkgYysrIGlzIGluc2FuZSBzdHJhZ2Vy)
+  video ["How I use C++;a line-by-line code review"](https://www.youtube.com/watch?v=W8-G_PL6p-0&pp=ygUYbXkgYysrIGlzIGluc2FuZSBzdHJhZ2Vy)
   by Strager
 

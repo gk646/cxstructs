@@ -70,8 +70,7 @@ inline std::vector<Point> reconstruct_path(Node* target_node) {
 
 }  // namespace cxhelper
 
-namespace cxalgos {
-using namespace cxstructs;
+namespace cxstructs {
 /**
  * <h2>A star</h2> is a pathfinding algorithm using clever heuristics to find the shortest path.<p>
  * It generally works by having a field of nodes which is the search space and then giving each node
@@ -127,10 +126,10 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
 
   return {};
 }
-}  // namespace cxalgos
+}  // cxstructs
 #ifndef CX_DELETE_TESTS
 namespace cxtests {  // namespace cxtests
-using namespace cxalgos;
+using namespace cxstructs;
 static void TEST_PATH_FINDING() {
   std::vector<std::vector<int>> maze = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                                         {1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1},

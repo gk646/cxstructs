@@ -24,11 +24,7 @@
 namespace cxtests {
 
 using namespace cxstructs;
-using namespace cxalgos;
-using namespace cxml;
-using namespace cxutil;
 static void test_cxstructs() {
-
   GEOMETRY_TEST();
   mat::TEST();
   LinkedList<int>::TEST();
@@ -43,8 +39,6 @@ static void test_cxstructs() {
   BinaryTree<int>::TEST();
   QuadTree<Point>::TEST();
   //PriorityQueue<int>::TEST();
-
-  std::cout << "\nAll tests passed!" << std::endl;
 }
 
 static void test_cxalgos() {
@@ -53,7 +47,6 @@ static void test_cxalgos() {
   TEST_SEARCH();
   TEST_MATH();
   TEST_PATH_FINDING();
-  std::cout << "\nAll tests passed!" << std::endl;
 }
 
 static void test_cxml() {
@@ -61,4 +54,10 @@ static void test_cxml() {
   kNN_2D<DataPoint_<float>>::TEST();
 }
 
+static void test_all(){
+  test_cxalgos();
+  test_cxstructs();
+  test_cxml();
+  std::cout << "\nAll tests passed!" << std::endl;
+}
 }  // namespace cxtests

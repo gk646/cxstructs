@@ -27,7 +27,7 @@
 #include <type_traits>
 #include "../cxconfig.h"
 
-namespace cxalgos {
+namespace cxstructs {
 
 /**
  * @brief Approximates the definite integral of a function over a given interval.
@@ -94,10 +94,10 @@ double integral_arc_length(Function fx, double a, double b, uint_32_cx steps = 1
   }
   return arc_length;
 }
-}  // namespace cxalgos
+}  // cxstructs
 #ifndef CX_DELETE_TESTS
 namespace cxtests {
-using namespace cxalgos;
+using namespace cxstructs;
 static void TEST_MATH() {
   std::cout << "TESTING MATH FUNCTIONS" << std::endl;
   auto integral = integral_aprox([](double x) { return x * x; }, 0, 5, 100000);
