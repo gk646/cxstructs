@@ -27,7 +27,7 @@
 #include <string>
 #include "../cxconfig.h"
 
-namespace cxutil {
+namespace cxstructs {
 using namespace std;  //std:: makes this code unreadable
 
 static inline chrono::time_point<chrono::high_resolution_clock> activeTimeStamp;
@@ -100,5 +100,5 @@ long long getTime() {
   return diffInMicroseconds.count();
 }
 
-}  // namespace cxutil
+}  // namespace cxstructs
 #endif  //CX_TIME_HPP

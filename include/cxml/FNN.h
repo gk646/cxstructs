@@ -55,15 +55,15 @@ struct Layer {
         w_sums_(0, 0),
         in_(0),
         out_(0),
-        a_func(cxutil::relu),
-        d_func(cxutil::d_relu),
+        a_func(cxstructs::relu),
+        d_func(cxstructs::d_relu),
         learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), learnR_(learnR), inputs_(1, in), a_func(a_func) {
-    if (a_func == cxutil::relu) {
-      d_func = cxutil::d_relu;
-    } else if (a_func == cxutil::sig) {
-      d_func = cxutil::d_sig;
+    if (a_func == cxstructs::relu) {
+      d_func = cxstructs::d_relu;
+    } else if (a_func == cxstructs::sig) {
+      d_func = cxstructs::d_sig;
     } else {
       d_func = [](float x) {
         return static_cast<float>(1.0);
@@ -212,15 +212,15 @@ struct Layer {
         w_sums_(nullptr),
         in_(0),
         out_(0),
-        a_func(cxutil::relu),
-        d_func(cxutil::d_relu),
+        a_func(cxstructs::relu),
+        d_func(cxstructs::d_relu),
         learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), a_func(a_func), learnR_(learnR), inputs_(in) {
-    if (a_func == cxutil::relu) {
-      d_func = cxutil::d_relu;
-    } else if (a_func == cxutil::sig) {
-      d_func = cxutil::d_sig;
+    if (a_func == cxstructs::relu) {
+      d_func = cxstructs::d_relu;
+    } else if (a_func == cxstructs::sig) {
+      d_func = cxstructs::d_sig;
     } else {
       d_func = [](float x) {
         return static_cast<float>(1.0);
