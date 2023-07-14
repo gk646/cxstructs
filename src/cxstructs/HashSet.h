@@ -176,7 +176,7 @@ struct HashSetLinkedList {
 }  // namespace cxhelper
 
 namespace cxstructs {
-using namespace cxstructs;
+
 /**
  * <h2>HashSet</h2>
  * is a basically a HashMap but with only the key stored. This means the only information stored is the existence of a key to a given hash value.

@@ -26,7 +26,7 @@
 #include <sstream>
 #include <string>
 
-namespace cxutil {
+namespace cxstructs {
 
 /**
  * @brief Loads the entire contents of a text file into a string.
@@ -52,5 +52,5 @@ bool load_txt(const std::string& filePath, std::string& contents) {
   return true;
 }
 
-}  // namespace cxutil
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXIO_H_

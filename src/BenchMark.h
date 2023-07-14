@@ -48,7 +48,7 @@ static void VEC() {
 
   std::uniform_int_distribution<> distr(0, 100000);
 
-  cxutil::now();
+  cxstructs::now();
   for (uint_fast32_t i = 0; i < 1000000; i++) {
     force = vec.contains(i);
     vec.insert(distr(gen), Data());
@@ -65,6 +65,6 @@ static void VEC() {
     force = vec.contains(i);
   }
   vec.clear();
-  cxutil::printTime<>("cxstructs::vec");
+  cxstructs::printTime<>("cxstructs::vec");
 }
 #endif  //CXSTRUCTS_SRC_BENCHMARK_H_

@@ -109,10 +109,10 @@ static void TEST_MATH() {
       integral_arc_length([](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
                           0, std::sqrt(8), 100000);
 
-  CX_ASSERT(cxutil::next_power_of_2(3) == 4);
-  CX_ASSERT(cxutil::next_power_of_2(3) != 3);
-  CX_ASSERT(cxutil::next_power_of_2(10) == 16);
-  CX_ASSERT(cxutil::next_power_of_2(53) == 64);
+  CX_ASSERT(cxstructs::next_power_of_2(3) == 4);
+  CX_ASSERT(cxstructs::next_power_of_2(3) != 3);
+  CX_ASSERT(cxstructs::next_power_of_2(10) == 16);
+  CX_ASSERT(cxstructs::next_power_of_2(53) == 64);
 }
 }  // namespace cxtests
 #endif

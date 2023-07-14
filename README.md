@@ -7,6 +7,8 @@ and well documented.
 While I am not an expert in datastructures nor C++, yet I am still aiming for reference type implementations in terms of
 efficiency and interface.
 
+The general namespace is `cxstructs`.
+
 **1.** [Contents](#contents)   
 **2.** [Usage Guide](#usage-guide)   
 **3.** [Installation](#installation)  
@@ -149,10 +151,7 @@ Download the source and add the *include* directory to your build system include
 
 #### namespaces
 
-- **`cxstructs` for datastructures**
-- **`cxalgos` for algorithms**
-- **`cxml` for machinelearning**
-- **`cxutil` for utilities**
+- **`cxstructs` for all headers**
 - *internal:*
     - *`cxhelper`is used to hide helper methods or structs*
     - *`cxtests` used to hide tests*

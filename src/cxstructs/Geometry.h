@@ -242,7 +242,7 @@ class Point {
    * @return the  distance
    */
   [[nodiscard]] float dist(const Point& p) const {
-    return cxutil::fast_sqrt((p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_));
+    return cxstructs::fast_sqrt((p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_));
   }
   /**
    * Calculates the euclidean distance from this point to the given coordinates
@@ -251,7 +251,7 @@ class Point {
    * @return the distance
    */
   [[nodiscard]] float dist(const float& x, const float& y) const {
-    return cxutil::fast_sqrt((x - x_) * (x - x_) + (y - y_) * (y - y_));
+    return cxstructs::fast_sqrt((x - x_) * (x - x_) + (y - y_) * (y - y_));
   }
 
   /**

@@ -31,7 +31,6 @@
 #include "../cxstructs/vec.h"
 
 namespace cxstructs {
-using namespace cxstructs;
 
 /**
  * Treats the vector as an adjacency matrix

@@ -55,15 +55,15 @@ struct Layer {
         w_sums_(0, 0),
         in_(0),
         out_(0),
-        a_func(cxutil::relu),
-        d_func(cxutil::d_relu),
+        a_func(cxstructs::relu),
+        d_func(cxstructs::d_relu),
         learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), learnR_(learnR), inputs_(1, in), a_func(a_func) {
-    if (a_func == cxutil::relu) {
-      d_func = cxutil::d_relu;
-    } else if (a_func == cxutil::sig) {
-      d_func = cxutil::d_sig;
+    if (a_func == cxstructs::relu) {
+      d_func = cxstructs::d_relu;
+    } else if (a_func == cxstructs::sig) {
+      d_func = cxstructs::d_sig;
     } else {
       d_func = [](float x) {
         return static_cast<float>(1.0);
@@ -198,7 +198,7 @@ class FNN {
     const cxstructs::mat expected_outputs(init_vec);
 
     for (int i = 0; i < 5; ++i) {
-      FNN fnn({2, 2, 1}, cxutil::sig, 0.1);
+      FNN fnn({2, 2, 1}, cxstructs::sig, 0.1);
       fnn.train(inputs, expected_outputs, 50000);
       mat output = fnn.forward(inputs);
       output -= expected_outputs;
@@ -232,15 +232,15 @@ struct Layer {
         w_sums_(nullptr),
         in_(0),
         out_(0),
-        a_func(cxutil::relu),
-        d_func(cxutil::d_relu),
+        a_func(cxstructs::relu),
+        d_func(cxstructs::d_relu),
         learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), a_func(a_func), learnR_(learnR), inputs_(in) {
-    if (a_func == cxutil::relu) {
-      d_func = cxutil::d_relu;
-    } else if (a_func == cxutil::sig) {
-      d_func = cxutil::d_sig;
+    if (a_func == cxstructs::relu) {
+      d_func = cxstructs::d_relu;
+    } else if (a_func == cxstructs::sig) {
+      d_func = cxstructs::d_sig;
     } else {
       d_func = [](float x) {
         return static_cast<float>(1.0);
@@ -408,10 +408,10 @@ class FNN {
     const std::vector<std::vector<float>> expected_outputs = {{1}, {0}, {1}, {0}};
 
     for (int i = 0; i < 10; ++i) {
-      FNN fnn({2, 2, 1}, cxutil::sig, 0.16);
-      cxutil::now();
+      FNN fnn({2, 2, 1}, cxstructs::sig, 0.16);
+      cxstructs::now();
       fnn.train(inputs, expected_outputs, 50000);
-      cxutil::printTime();
+      cxstructs::printTime();
       for (size_t j = 0; j < inputs.size(); ++j) {
         double output = fnn.forward(inputs[j])[0];
         double expected = expected_outputs[j][0];

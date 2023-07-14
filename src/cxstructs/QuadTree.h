@@ -317,7 +317,7 @@ class QuadTree {
   static void TEST() {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> distr(1, 199);
+    std::uniform_real_distribution<float> distr(0, 200);
     std::cout << "TESTING QUAD TREE" << std::endl;
 
     std::cout << "   Testing insert..." << std::endl;
@@ -325,6 +325,7 @@ class QuadTree {
     for (uint_fast32_t i = 0; i < 1000; i++) {
       tree.insert({distr(gen), distr(gen)});
     }
+
     CX_ASSERT(tree.depth() == 3);
     CX_ASSERT(tree.size() == 1000);
 
