@@ -20,5 +20,17 @@
 #define F
 #ifndef CXSTRUCTS_SRC_CXML_WORD2VEC_H_
 #define CXSTRUCTS_SRC_CXML_WORD2VEC_H_
+namespace cxstructs {
+class word2vec {
+
+ public:
+#ifndef CX_DELETE_TESTS
+  static void TEST() {
+    std::cout << "TESTING WORD2VEC" << std::endl;
+
+  }
+#endif
+};
+}  // namespace cxstructs
 
 #endif  //CXSTRUCTS_SRC_CXML_WORD2VEC_H_

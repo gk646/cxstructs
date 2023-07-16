@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 #include "../cxconfig.h"
+#include "../cxutil/cxmath.h"
 #include "vec.h"
 
 namespace cxstructs {
@@ -126,6 +127,9 @@ class mat {
   }
   inline ~mat() { delete[] arr; };
   inline float& operator()(const uint_32_cx& row, const uint_32_cx& col) {
+    return arr[row * n_cols_ + col];
+  }
+  inline float operator()(const uint_32_cx& row, const uint_32_cx& col) const {
     return arr[row * n_cols_ + col];
   }
   /**
@@ -448,38 +452,6 @@ class mat {
    */
   [[nodiscard]] inline mat split_row(const uint_32_cx& row) const {
     return {arr + row * n_cols_, 1, n_cols_};
-  }
-  /**
-   * Applies the ReLu function to each value in the matrix in-place
-   * @param m the matrix
-   */
-  static void relu(mat& m) {
-#pragma omp simd linear(i : 1)
-    for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
-      m.arr[i] = cxstructs::relu(m.arr[i]);
-    }
-  }
-  /**
-   * Applies the sigmoid function to each value in the matrix in-place
-   * @param m the matrix
-   */
-  static void sig(mat& m) {
-#pragma omp simd linear(i : 1)
-    for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
-      m.arr[i] = cxstructs::sig(m.arr[i]);
-    }
-  }
-  static void d_sig(mat& m) {
-#pragma omp simd linear(i : 1)
-    for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
-      m.arr[i] = cxstructs::d_sig(m.arr[i]);
-    }
-  }
-  static void d_relu(mat& m) {
-#pragma omp simd linear(i : 1)
-    for (uint_fast32_t i = 0; i < m.n_rows_ * m.n_cols_; i++) {
-      m.arr[i] = cxstructs::d_relu(m.arr[i]);
-    }
   }
   /**Prints out the matrix
    * @param header optional header

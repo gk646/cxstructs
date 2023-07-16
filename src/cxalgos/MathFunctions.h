@@ -26,6 +26,7 @@
 #include <iostream>
 #include <type_traits>
 #include "../cxconfig.h"
+#include "../cxutil/cxmath.h"
 
 namespace cxstructs {
 

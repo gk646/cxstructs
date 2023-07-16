@@ -24,10 +24,9 @@
 #include <list>
 #include <queue>
 #include <random>
+#include <unordered_map>
 #include <unordered_set>
 #include "CXStructs.h"
-#include "CXTests.h"
-#include "Comparisons.h"
 
 //benchmarks are something close to this
 static void VEC() {
@@ -66,5 +65,64 @@ static void VEC() {
   }
   vec.clear();
   cxstructs::printTime<>("cxstructs::vec");
+}
+
+static void UNORDERED_MAP() {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distr(0, 100000);
+  volatile int num1;
+  now();
+  std::unordered_map<int, Data> map;
+  for (uint_fast32_t i = 0; i < 10; i++) {
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      map.insert({distr(gen), Data()});
+    }
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      map.erase(j);
+    }
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      num1 = map[j].num;
+    }
+  }
+  map.clear();
+  for (uint_fast32_t i = 0; i < 100; i++) {
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      map.insert({distr(gen), Data()});
+    }
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      map.erase(j);
+    }
+  }
+  printTime("std::unordered_map");
+}
+static void HASH_MAP() {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distr(0, 100000);
+  volatile int num1;
+  now();
+  HashMap<int, Data> map;
+  for (uint_fast32_t i = 0; i < 10; i++) {
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      map.insert(distr(gen), Data());
+    }
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      map.erase(i);
+    }
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      num1 = map[j].num;
+    }
+  }
+  map.clear();
+  for (uint_fast32_t i = 0; i < 100; i++) {
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      map.insert(distr(gen), Data());
+    }
+    for (uint_fast32_t j = 0; j < 10000; j++) {
+      map.erase(j);
+    }
+  }
+  printTime("cxstructs::HashMap");
 }
 #endif  //CXSTRUCTS_SRC_BENCHMARK_H_

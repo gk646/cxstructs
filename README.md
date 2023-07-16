@@ -42,6 +42,8 @@ The general namespace is `cxstructs`.
     - custom assert macros (*cxassert.h*) only compiled in debug mode
 - **Accessibility**
     - the source code is clean to read and nicely formatted
+- **Cross-Compiler**
+    - the library is tested on Linux(*gcc*), Windows(*MSCV, mingw-gcc, zig*)
 
 ---
 
@@ -55,8 +57,8 @@ The general namespace is `cxstructs`.
 - **Pair**: *static container for two types*
 - **Trie**: *limited to ASCII (128)*
 - **Stack**:
-- **HashMap**: *linear Probing with LinkedLists but buffered with static arrays*
-- **HashSet**: *linear Probing with LinkedLists but buffered with static arrays*
+- **HashMap**: *separate chaining with LinkedLists but buffered with static arrays*
+- **HashSet**: *separate chaining with LinkedLists but buffered with static arrays*
 - **Linked List**:
 - **Double Linked List**:
 - **Queue**:
@@ -69,13 +71,14 @@ The general namespace is `cxstructs`.
 #### Machine Learning
 
 - **FeedForwardNeuralNetwork**(*FNN*): *implemented using matrices(*default*) and without, switch:`#define CX_LOOP_FNN`*
+- **k-Nearest Neighbour**(*k-NN2D,k-NNXD*): *2D works with a QuadTree,*
 
 #### Algorithms
 
 - **Sorting**: *QuickSort, MergeSort, Bubblesort, Bogosort, Selectionsort*
 - **Search**: *Binary Search (recursive and non-recursive),*
 - **Graph Traversal**: *DepthFirstSearch (on 2d-vector as adjacency matrix),*
-- **MathFunctions**: *Integrals,next_power_of_2,*
+- **MathFunctions**: *Integrals,*
 - **PatterMatching**: *Brute-Force, KMP, Boyer-Moore*
 - **Misc**: *Maze generator(simple)*
 
@@ -84,7 +87,7 @@ The general namespace is `cxstructs`.
 - **cxtime** *easily measure the time from `now()` to `printTime()`*
 - **cxio** *load_text,*
 - **cxassert** *custom assertions with optional text*
-- **cxmath** *activation functions,*
+- **cxmath** *activation functions,distance function, next_power_of_2*
 
 ---
 
@@ -92,7 +95,16 @@ The general namespace is `cxstructs`.
 
 Short explanation of advanced use cases.
 
+#### CXAllocator
+
+Use the last template option to specify wether to use the allocator or not `cxstruct<Type,false>`.
+Generally **use** the CXAllocator if you use the cxstruct for longer and as a standalone.
+In turn, generally **do not use** it if it's a temporary or fixed size structure
+In case of slower performance just switch to the other.
+
 #### FNN
+
+Takes either matrices or vectors as input. In both ways every row is interpreted as a separate input.
 
 #### k-NN
 
@@ -100,7 +112,7 @@ Short explanation of advanced use cases.
     - this allows for large datasets but might be slower
 
 In order to allow for a multitude of data, k-NN has a generic interface.
-There is an abstract base class which you can use but really any type for as long as it has those basic getter
+There is an abstract base class which you can use but really any type works for as long as it has those basic getter
 functions. You can define your categories as you like.  
 2D Example:
 

@@ -218,19 +218,21 @@ namespace cxstructs {
 using namespace cxhelper;
 
 /**
- * <h2>Linear Probing HashMap</h2>
+ * <h2>HashMap</h2>
  * This data structure is an efficient key-value store, typically providing lookups in constant time (O(1)).
  * <br><br>
- * <b>Important:</b> For non-primitive and non-string types, a custom hash function is required.
+ * <b>Important:</b> For non-primitive and non-string types, a custom hash function is recommended.
  * <br><br>
  * A HashMap is notably beneficial due to its speed and ease of use. Hashing keys to numerical indices allows for quick value retrieval from the underlying array.
  * <br><br>
- * The term 'linear probing' refers to the technique used to handle hash collisions (when different keys produce the same hash). In this scenario, each array index hosts a linked list that is traversed to locate the correct key.
+ * A hash function can sometimes create a similar output for the same input which is a collision. One way to combat this is called separate chaining.
+ * Separate chaining is a technique to handle hash collisions by using LinkedLists as buckets and simply appending the element to the end of this list.
+ * This means that each bucket-array index hosts a linked list that is traversed to locate the correct key as the key is still unique (same keys are replaced).
  */
 
 template <typename K, typename V, typename Hash = std::function<size_t(const K&)>>
 class HashMap {
-  constexpr static uint_16_cx BufferLen = 2;
+  constexpr static uint_16_cx BufferLen = 1;
   using HList = HashLinkedList<K, V, BufferLen>;
 
   uint_32_cx initialCapacity_;

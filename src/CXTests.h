@@ -19,8 +19,7 @@
 // SOFTWARE.
 
 #include "CXStructs.h"
-#include "cxml/k-NN.h"
-
+#include "cxml/word2vec.h"
 namespace cxtests {
 
 using namespace cxstructs;
@@ -52,9 +51,10 @@ static void test_cxalgos() {
 static void test_cxml() {
   FNN::TEST();
   kNN_2D<DataPoint_<float>>::TEST();
+  word2vec::TEST();
 }
 
-static void test_all(){
+static void test_all() {
   test_cxalgos();
   test_cxstructs();
   test_cxml();
