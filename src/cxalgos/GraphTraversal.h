@@ -68,7 +68,7 @@ vec<vec<std::pair<Action, State>>> shortest_path_search(
     auto s = path.at[-1].second;
   }
 }
-}  // cxstructs
+}  // namespace cxstructs
 #ifndef CX_DELETE_TESTS
 namespace cxtests {  // namespace cxtests
 static void TEST_DFS() {

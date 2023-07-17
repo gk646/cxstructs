@@ -25,10 +25,7 @@ class word2vec {
 
  public:
 #ifndef CX_DELETE_TESTS
-  static void TEST() {
-    std::cout << "TESTING WORD2VEC" << std::endl;
-
-  }
+  static void TEST() { std::cout << "TESTING WORD2VEC" << std::endl; }
 #endif
 };
 }  // namespace cxstructs

@@ -79,7 +79,7 @@ class Rect : public Shape {
    * @return true only if r is fully contained
    */
   [[nodiscard]] inline bool contains(const Rect& r) const final {
-    return !(x_ > r.x_ || y_ > r.y_ || x_ + w_ < r.x_ + r.w_|| y_ + h_ < r.y_ + r.h_);
+    return !(x_ > r.x_ || y_ > r.y_ || x_ + w_ < r.x_ + r.w_ || y_ + h_ < r.y_ + r.h_);
   }
   template <class PointType>
   [[nodiscard]] inline bool contains(PointType& r) const {

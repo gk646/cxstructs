@@ -30,7 +30,6 @@
 
 using namespace cxstructs;
 
-
 struct Data {
   int arr[100]{};
   int num{};

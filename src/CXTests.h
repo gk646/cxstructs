@@ -37,7 +37,7 @@ static void test_cxstructs() {
   HashSet<int>::TEST();
   BinaryTree<int>::TEST();
   QuadTree<Point>::TEST();
-  //PriorityQueue<int>::TEST();
+  PriorityQueue<int>::TEST();
 }
 
 static void test_cxalgos() {
@@ -55,8 +55,8 @@ static void test_cxml() {
 }
 
 static void test_all() {
-  test_cxalgos();
   test_cxstructs();
+  test_cxalgos();
   test_cxml();
   std::cout << "\nAll tests passed!" << std::endl;
 }

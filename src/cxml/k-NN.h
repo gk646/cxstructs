@@ -37,7 +37,6 @@
  */
 namespace cxstructs {
 
-
 enum class DISTANCE_FUNCTION_2D { EUCLIDEAN, MANHATTAN };
 enum class DISTANCE_FUNCTION_XD { EUCLIDEAN, MANHATTAN, CHEBYSHEV, COSINE };
 
@@ -288,8 +287,7 @@ class kNN_2D {
 #endif
 };
 
-
 class kNN_XD {};
 
-}  // cxstructs
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_

@@ -51,9 +51,9 @@ void quick_sort_internal(T* arr, int_32_cx low, int_32_cx high) {
     quick_sort_internal(arr, n + 1, high);
   }
 }
-template <typename T,typename Comparator,
-          typename = std::enable_if_t<std::is_invocable_r_v<bool, Comparator, T,T>>>
-void quick_sort_internal_comparator(T* arr, int_32_cx low, int_32_cx high,Comparator comp) {
+template <typename T, typename Comparator,
+          typename = std::enable_if_t<std::is_invocable_r_v<bool, Comparator, T, T>>>
+void quick_sort_internal_comparator(T* arr, int_32_cx low, int_32_cx high, Comparator comp) {
   if (low < high) {
 
     const T& pivot = arr[high];
@@ -67,8 +67,8 @@ void quick_sort_internal_comparator(T* arr, int_32_cx low, int_32_cx high,Compar
 
     std::swap(arr[n], arr[high]);
 
-    quick_sort_internal_comparator(arr, low, n - 1,comp);
-    quick_sort_internal_comparator(arr, n + 1, high,comp);
+    quick_sort_internal_comparator(arr, low, n - 1, comp);
+    quick_sort_internal_comparator(arr, n + 1, high, comp);
   }
 }
 template <typename T>
@@ -258,10 +258,10 @@ void quick_sort(T* arr, uint_32_cx len, bool ascending = true) {
  * @param len the length of the array
  * @param comp custom function to compare elements
  */
-template <typename T,typename Comparator,
-          typename = std::enable_if_t<std::is_invocable_r_v<bool, Comparator, T,T>>>
-void quick_sort_comparator(T* arr, uint_32_cx len,Comparator comp) {
-  cxhelper::quick_sort_internal_comparator(arr, 0, len - 1,comp);
+template <typename T, typename Comparator,
+          typename = std::enable_if_t<std::is_invocable_r_v<bool, Comparator, T, T>>>
+void quick_sort_comparator(T* arr, uint_32_cx len, Comparator comp) {
+  cxhelper::quick_sort_internal_comparator(arr, 0, len - 1, comp);
 }
 template <typename T>
 T* insertionSort(T* arr, uint_32_cx len, bool ascending) {}
@@ -286,7 +286,7 @@ void merge_sort(T* arr, uint_32_cx len, bool ascending = true) {
 template <typename T>
 void heapSort(T* arr, uint_32_cx len, bool ascending) {}
 
-}  // cxstructs
+}  // namespace cxstructs
 #ifndef CX_DELETE_TESTS
 namespace cxtests {
 std::vector<int> generate_shuffled_vector(int size) {

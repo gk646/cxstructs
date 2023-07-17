@@ -14,6 +14,7 @@ The general namespace is `cxstructs`.
 **3.** [Installation](#installation)  
 **4.** [Library Notes](#library-notes)  
 **5.** [Contributing](#contributing)
+**6.** [Resources](#resources)
 
 ### Speed Comparison
 
@@ -190,6 +191,12 @@ You can then add a main.cpp and test any changes.
 Run tests by `#include "CXTests.h"` and calling `test_all`.
 
 Feel free to contribute!
+
+### Resources
+
+
+[Inside Code Youtube Channel](https://www.youtube.com/@insidecode) provides excellent videos on datastructures. (used for PriorityQueue)
+
 
 ### Misc
 

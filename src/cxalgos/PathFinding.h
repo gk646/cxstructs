@@ -27,7 +27,7 @@
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
 #include "../cxstructs/Pair.h"
-//#include "../cxstructs/PriorityQueue.h"
+#include "../cxstructs/PriorityQueue.h"
 
 namespace cxhelper {
 using namespace cxstructs;
@@ -89,17 +89,15 @@ namespace cxstructs {
 template <typename S, typename B>
 std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, const B& blocked_val,
                                      const Point& start, const Point& target) {
-  std::priority_queue<Node, std::vector<Node>, std::greater<>> frontier;
-  //PriorityQueue<Node> priority_queue;
+  PriorityQueue<Node> frontier;
   HashSet<Point> closedSet;
   vec<row<2, int>, false> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
   frontier.emplace(start, 0, start.dist(target), nullptr);
-  //priority_queue.emplace(start, 0, start.dist(target), nullptr);
   while (!frontier.empty()) {
-    Node* current = new Node(frontier.top());  //yeah i know...
-    //CX_ASSERT(*current == priority_queue.top());
+    Node* current = new Node(
+        frontier
+            .top());  //yeah i know... // actually not that easy to solve this efficiently (it seems)
     frontier.pop();
-    //priority_queue.pop();
 
     if (current->position == target) {
       return reconstruct_path(current);
@@ -118,7 +116,6 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
         uint16_t h_cost =
             abs(newX - static_cast<int>(target.x())) + abs(newY - static_cast<int>(target.y()));
 
-        //priority_queue.emplace(new_pos, tentative_g_cost, h_cost, current);
         frontier.emplace(new_pos, tentative_g_cost, h_cost, current);
       }
     }
@@ -126,11 +123,12 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
 
   return {};
 }
-}  // cxstructs
+}  // namespace cxstructs
 #ifndef CX_DELETE_TESTS
 namespace cxtests {  // namespace cxtests
 using namespace cxstructs;
 static void TEST_PATH_FINDING() {
+  std::cout << "TESTING PATHFINDING" << std::endl;
   std::vector<std::vector<int>> maze = {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                                         {1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1},
                                         {1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1},
@@ -144,14 +142,12 @@ static void TEST_PATH_FINDING() {
 
   };
 
-  Point start(0, 0);
-  Point target(4, 4);
+  Point start(1, 1);
+  Point target(11, 8);
 
   auto path = astar_pathfinding(maze, 1, start, target);
 
-  for (auto point : path) {
-    std::cout << point << std::endl;
-  }
+  CX_ASSERT(path[path.size() - 3] == Point(11, 6));
 }
 }  // namespace cxtests
 #endif

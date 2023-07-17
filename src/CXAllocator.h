@@ -34,6 +34,7 @@ In case of slower performance just switch to the other.
 #include <stack>
 #include <vector>
 #include "cxconfig.h"
+
 namespace cxstructs {
 template <uint_32_cx BlockSize, uint_16_cx ReservedBlocks>
 class Pool {
