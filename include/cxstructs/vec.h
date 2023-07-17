@@ -93,7 +93,7 @@ class vec {
 
     // Destroy the original objects
     if (!is_trivial_destr) {
-      for (size_t i = 0; i < size_; i++) {
+      for (size_t i = 0; i < old_len; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
     }

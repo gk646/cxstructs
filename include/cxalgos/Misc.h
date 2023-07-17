@@ -60,5 +60,5 @@ std::vector<std::vector<S>> maze_simple_generation(const B& obstacle_val, Point 
   return maze;
 }
 
-}  // cxstructs
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXALGOS_MISC_H_

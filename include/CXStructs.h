@@ -34,6 +34,7 @@
 #include "cxstructs/HashSet.h"
 #include "cxstructs/LinkedList.h"
 #include "cxstructs/Pair.h"
+#include "cxstructs/PriorityQueue.h"
 #include "cxstructs/QuadTree.h"
 #include "cxstructs/Queue.h"
 #include "cxstructs/Stack.h"
