@@ -41,6 +41,5 @@ typedef uint_fast16_t uint_16_cx;
 typedef int_fast32_t int_32_cx;
 
 #include "CXAllocator.h"
-#include "cxutil/cxmath.h"
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_

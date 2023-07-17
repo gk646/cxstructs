@@ -20,7 +20,13 @@
 #define FINISHED
 #ifndef CXSTRUCTS_SRC_CXALLOCATOR_H_
 #define CXSTRUCTS_SRC_CXALLOCATOR_H_
-//#pragma message( "|CXAllocator.h| The custom allocator will preallocate memory when constructing the datastructure to speed up general use. Don't frequently create new cxstructs!")
+
+/*
+Use the last template option to specify wether to use the allocator or not cxstruct<Type,false>.
+Generally use the CXAllocator if you use the cxstruct for longer and as a standalone.
+In turn, generally do not use it if it's a temporary or fixed size structure
+In case of slower performance just switch to the other.
+ */
 
 #include <deque>
 #include <iostream>
@@ -28,7 +34,7 @@
 #include <stack>
 #include <vector>
 #include "cxconfig.h"
-
+namespace cxstructs {
 template <uint_32_cx BlockSize, uint_16_cx ReservedBlocks>
 class Pool {
   uint_32_cx size_;
@@ -97,5 +103,5 @@ class CXPoolAllocator {
     }
   }
 };
-
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXALLOCATOR_H_

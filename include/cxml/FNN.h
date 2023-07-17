@@ -189,7 +189,7 @@ class FNN {
   }
 
 };
-}  // cxstructs
+}  // namespace cxstructs
 
 #else
 #pragma message("|FNN.h| Using FNN.h without matrices, calculations are loop based.")
@@ -313,63 +313,46 @@ struct Layer {
 };
 }  // namespace cxhelper
 cxstructs {
-using namespace cxhelper;
-/**
+  using namespace cxhelper;
+  /**
  * <h2>Feedforward Neural Network</h2>
  * Simple FNN implementation using mean average error and either sigmoid or ReLu
  * The last layer is always linear (better for simple problems and regression tasks)
  */
-class FNN {
-  Layer* layers_;
-  std::vector<uint_16_cx> bounds_;
-  uint_16_cx len_;
-  float learnR_;
+  class FNN {
+    Layer* layers_;
+    std::vector<uint_16_cx> bounds_;
+    uint_16_cx len_;
+    float learnR_;
 
- public:
-  explicit FNN(const std::vector<uint_16_cx>& bound, func a_func, float learnR)
-      : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
-    layers_ = new Layer[len_];
-    for (int i = 1; i < len_ + 1; i++) {
-      if (i == len_) {
-        layers_[i - 1] = Layer(
-            bounds_[i - 1], bounds_[i], [](float x) { return x; }, learnR_);
-        break;
-      }
-      layers_[i - 1] = Layer(bounds_[i - 1], bounds_[i], a_func, learnR_);
-    }
-  }
-  ~FNN() { delete[] layers_; }
-  std::vector<float> forward(const std::vector<float>& in) {
-    std::vector<float> retval = in;
-    for (int i = 0; i < len_; i++) {
-      retval = layers_[i].forward(retval);
-    }
-    return retval;
-  }
-
-  void train(const std::vector<float>& in, const std::vector<float>& out, uint_16_cx n = 10) {
-    for (int k = 0; k < n; k++) {
-      std::vector<float> retval = forward(in);
-
-      for (int i = 0; i < retval.size(); i++) {
-        retval[i] = (retval[i] - out[i]);
-      }
-
-      for (int i = len_ - 1; i > -1; i--) {
-        retval = layers_[i].backward(retval);
+   public:
+    explicit FNN(const std::vector<uint_16_cx>& bound, func a_func, float learnR)
+        : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
+      layers_ = new Layer[len_];
+      for (int i = 1; i < len_ + 1; i++) {
+        if (i == len_) {
+          layers_[i - 1] = Layer(
+              bounds_[i - 1], bounds_[i], [](float x) { return x; }, learnR_);
+          break;
+        }
+        layers_[i - 1] = Layer(bounds_[i - 1], bounds_[i], a_func, learnR_);
       }
     }
-  }
-  void train(const std::vector<std::vector<float>>& in, const std::vector<std::vector<float>>& out,
-             uint_16_cx n = 10) {
+    ~FNN() { delete[] layers_; }
+    std::vector<float> forward(const std::vector<float>& in) {
+      std::vector<float> retval = in;
+      for (int i = 0; i < len_; i++) {
+        retval = layers_[i].forward(retval);
+      }
+      return retval;
+    }
 
-    for (int k = 0; k < n; k++) {
-
-      for (int l = 0; l < in.size(); l++) {
-        std::vector<float> retval = forward(in[l]);
+    void train(const std::vector<float>& in, const std::vector<float>& out, uint_16_cx n = 10) {
+      for (int k = 0; k < n; k++) {
+        std::vector<float> retval = forward(in);
 
         for (int i = 0; i < retval.size(); i++) {
-          retval[i] = 2 * (retval[i] - out[l][i]);
+          retval[i] = (retval[i] - out[i]);
         }
 
         for (int i = len_ - 1; i > -1; i--) {
@@ -377,11 +360,28 @@ class FNN {
         }
       }
     }
-  }
+    void train(const std::vector<std::vector<float>>& in,
+               const std::vector<std::vector<float>>& out, uint_16_cx n = 10) {
 
-};
+      for (int k = 0; k < n; k++) {
+
+        for (int l = 0; l < in.size(); l++) {
+          std::vector<float> retval = forward(in[l]);
+
+          for (int i = 0; i < retval.size(); i++) {
+            retval[i] = 2 * (retval[i] - out[l][i]);
+          }
+
+          for (int i = len_ - 1; i > -1; i--) {
+            retval = layers_[i].backward(retval);
+          }
+        }
+      }
+    }
+
+  };
 }  // cxstructs
 
-#endif  // CX_MATRIX
+#endif  // CX_LOOP_FNN
 #undef CX_MATRIX
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_

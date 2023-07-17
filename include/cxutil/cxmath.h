@@ -22,6 +22,7 @@
 #define CXSTRUCTS_SRC_CXUTIL_MATH_H_
 
 #include <cmath>
+#include "../cxstructs/mat.h"
 #include "../cxstructs/row.h"
 
 #define CX_PI \
@@ -30,14 +31,7 @@
 namespace cxstructs {
 //function pointer typedef
 typedef float (*func)(float);
-typedef float(*D_func)(float p1x, float p1y, float p2x, float p2y);
-
-struct Vector3 {
-  float x;
-  float y;
-  float z;
-  Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
-};
+typedef float (*D_func)(float p1x, float p1y, float p2x, float p2y);
 
 //activation functions
 inline float sig(float x) noexcept {
@@ -48,6 +42,13 @@ inline float tanh(float x) noexcept {
 }
 inline float relu(float x) noexcept {
   return x > 0 ? x : 0;
+}
+inline void softmax(mat& m) noexcept {
+  float sum = 0;
+  for (uint_fast32_t j = 0; j < m.n_cols(); j++) {
+    sum += std::exp(m(0, j));
+  }
+  m.mat_op([sum](float x) { return std::exp(x) / sum; });
 }
 //derivatives
 inline float d_sig(float x) noexcept {
@@ -60,12 +61,16 @@ inline float d_tanh(float x) noexcept {
   float t = std::tanh(x);
   return 1 - t * t;
 }
+//loss
+mat l_cross_entropy(const mat& pred, const mat& target) {  //with softmax activation function
+  return pred - target;
+}
 
 //utils
 /**
  * Finds the <b>next</b> closest power of two to the right of the given number
  * @param n the start number
- * @return the next power of two
+ * @return the next power of two or n, if n is a power of 2
  */
 inline uint_32_cx next_power_of_2(uint_32_cx n) noexcept {
   //black magic
@@ -80,16 +85,16 @@ inline uint_32_cx next_power_of_2(uint_32_cx n) noexcept {
 }
 /**
  * Fast inverse square root from quake (inversed)
- * @param number
- * @return
+ * @param n
+ * @return the square root of n
  */
-inline float fast_sqrt(float number) noexcept {
+inline float fast_sqrt(float n) noexcept {
   long i;
   float x2, y;
   const float threehalfs = 1.5F;
 
-  x2 = number * 0.5F;
-  y = number;
+  x2 = n * 0.5F;
+  y = n;
   i = *(long*)&y;
   i = 0x5f3759df - (i >> 1);
   y = *(float*)&i;
@@ -106,7 +111,14 @@ inline float manhattan(float p1x, float p1y, float p2x, float p2y) noexcept {
 }
 
 //multidimensional distance functions
-
-inline float chebyshev() noexcept {}
+inline float chebyshev(const vec<float, false>& p1, const vec<float, false>& p2) noexcept {
+  float max = 0;
+  for (uint_fast32_t i = 0; i < p1.size(); i++) {
+    if (p2[i] - p1[i] > max) {
+      max = p2[i] - p1[i];
+    }
+    return max;
+  }
+}
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXUTIL_MATH_H_
