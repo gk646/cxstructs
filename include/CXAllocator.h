@@ -22,7 +22,7 @@
 #define CXSTRUCTS_SRC_CXALLOCATOR_H_
 
 /*
-Use the last template option to specify wether to use the allocator or not cxstruct<Type,false>.
+Use the last template option to specify whether to use the allocator or not cxstruct<Type,false>.
 Generally use the CXAllocator if you use the cxstruct for longer and as a standalone.
 In turn, generally do not use it if it's a temporary or fixed size structure
 In case of slower performance just switch to the other.

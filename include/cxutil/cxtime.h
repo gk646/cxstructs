@@ -101,4 +101,4 @@ inline long long getTime() {
 }
 
 }  // namespace cxstructs
-#endif  //CX_TIME_HPP
+#endif  //CX_TIME_H
