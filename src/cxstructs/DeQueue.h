@@ -29,100 +29,157 @@
 
 namespace cxstructs {
 /**
- * <h2>DeQueue</h2> is a double ended queue. It functions very similar to the normal queue but is different in that it allows for retrieval and addition to both ends.
- * Like the Queue this implementation also uses an array to manage the data.
+ * <h2>DeQueue</h2> is a double ended queue. It functions very similar to the normal queue but is different in that it allows for retrieval and addition at both ends.
+ * Like the Queue this implementation also uses a circular array to manage the data.
  */
-template <typename T>
+template <typename T, bool UseCXPoolAllocator = true>
 class DeQueue {
+  using Allocator =
+      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
+                                std::allocator<T>>::type;
+  Allocator alloc;
   T* arr_;
-  uint_32_cx mid_;
+  uint_32_cx len_;
+  uint_32_cx size_;
+
   int_32_cx front_;
   int_32_cx back_;
 
-  uint_32_cx len_;
-  uint_32_cx minlen_;
+  bool is_trivial_destr = std::is_trivially_destructible<T>::value;
 
-  void grow() {
+  inline void grow() {
     len_ *= 2;
-    auto o_mid = mid_;
-    mid_ = len_ / 2;
-    auto n_arr = new T[len_];
-    std::move(arr_ + o_mid - front_, arr_ + o_mid + back_, n_arr + mid_ - front_);
-    delete[] arr_;
-    arr_ = n_arr;
-    minlen_ = size() / 4 < 32 ? 0 : size() / 4;
-  }
 
-  void shrink() {
-    len_ /= 2;
-    auto o_mid = mid_;
-    mid_ = len_ / 2;
-    auto n_arr = new T[len_];
+    T* n_arr = alloc.allocate(len_);
 
-    //recentering the array
-    std::move(arr_ + o_mid - front_, arr_ + o_mid + back_, n_arr + mid_ - (front_ + back_ + 1) / 2);
-
-    delete[] arr_;
-    arr_ = n_arr;
-    int_32_cx sum = front_ + back_;
-    if (sum % 2 == 0) {
-      front_ = back_ = sum / 2;
+    /*
+     * We cant really optimize this here
+     * Whenever grow() is called size_ == len_
+     * thus arr_ always completely filled
+     * we just use two moves to bring it in the right order again
+     */
+    if (front_ == 0) {
+      std::uninitialized_move(arr_, arr_ + size_, n_arr);
     } else {
-      front_ = back_ = (sum + 1) / 2;
-      back_--;
+      std::uninitialized_move(arr_ + front_, arr_ + size_, n_arr);
+      std::uninitialized_move(arr_, arr_ + front_, n_arr + size_ - front_);
     }
 
-    minlen_ = size() / 4 < 32 ? 0 : size() / 4;
+    if (!is_trivial_destr) {
+      for (uint_fast32_t i = 0; i < size_; i++) {
+        std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+      }
+    }
+    alloc.deallocate(arr_, len_);
+
+    arr_ = n_arr;
+    front_ = 0;
+    back_ = size_ - 1;
+  }
+  inline void shrink() {
+    auto old_len = len_;
+    len_ = size_ * 1.5;
+
+    T* n_arr = alloc.allocate(len_);
+
+    if (front_ == 0) {
+      std::uninitialized_move(arr_, arr_ + size_, n_arr);
+    } else {
+      std::uninitialized_move(arr_ + front_, arr_ + size_, n_arr);
+      std::uninitialized_move(arr_, arr_ + front_, n_arr + size_ - front_);
+    }
+
+    if (!is_trivial_destr) {
+      for (size_t i = 0; i < old_len; i++) {
+        std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+      }
+    }
+
+    alloc.deallocate(arr_, old_len);
+    arr_ = n_arr;
+    front_ = 0;
+    back_ = size_ - 1;
   }
 
  public:
-  explicit DeQueue(uint_32_cx initialSize = 32)
-      : mid_(initialSize / 2),
-        front_(1),
-        back_(0),
-        len_(initialSize),
-        minlen_(0),
-        arr_(new T[initialSize]) {}
-
-  DeQueue(const DeQueue& o)
-      : mid_(o.mid_), front_(o.front_), back_(o.back_), len_(o.len_), minlen_(o.minlen_) {
-    arr_ = new T[len_];
-    std::copy(o.arr_, o.arr_ + len_, arr_);
+  inline explicit DeQueue(uint_32_cx len = 32)
+      : arr_(alloc.allocate(len)), len_(len), back_(-1), size_(0), front_(0) {}
+  DeQueue(const DeQueue& o) : size_(o.size_), len_(o.len_), front_(o.front_), back_(o.back_) {
+    arr_ = alloc.allocate(len_);
+    if (is_trivial_destr) {
+      std::copy(o.arr_, o.arr_ + o.len_, arr_);
+    } else {
+      std::uninitialized_copy(o.arr_, o.arr_ + o.len_, arr_);
+    }
   }
-  DeQueue& operator=(const DeQueue& o) noexcept {
+  DeQueue& operator=(const DeQueue& o) {
     if (this != &o) {
-      delete[] arr_;
-      len_ = o.len_;
+      if (!is_trivial_destr) {
+        for (uint_32_cx i = 0; i < len_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+      alloc.deallocate(arr_, len_);
+
       front_ = o.front_;
-      back_ = o.back_;
-      minlen_ = o.minlen_;
-      arr_ = new T[len_];
-      std::copy(o.len_, o.len_ + len_, arr_);
+      len_ = o.len_;
+      size_ = o.size_;
+      arr_ = alloc.allocate(len_);
+
+      if (is_trivial_destr) {
+        std::copy(o.arr_, o.arr_ + o.len_, arr_);
+      } else {
+        std::uninitialized_copy(o.arr_, o.arr_ + o.len_, arr_);
+      }
     }
     return *this;
   }
   //move copy
-  DeQueue(const DeQueue&& o) noexcept
-      : mid_(o.mid_),
-        front_(o.front_),
-        back_(o.back_),
-        len_(o.len_),
-        minlen_(o.minlen_),
-        arr_(std::move(o.arr_, arr_)) {}
+  DeQueue(DeQueue&& o) noexcept
+      : front_(o.front_), len_(o.len_), arr_(o.arr_), size_(o.size_), back_(o.back_) {
+    o.arr_ = nullptr;  //avoid double deletion
+    o.size_ = 0;
+  }
   //move assign operator
   DeQueue& operator=(DeQueue&& o) noexcept {
     if (this != &o) {
-      delete[] arr_;
+      if (!is_trivial_destr) {
+        for (uint_32_cx i = 0; i < len_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+      alloc.deallocate(arr_, len_);
 
-      arr_ = std::move(o.arr_);
+      arr_ = o.arr_;
+      size_ = o.size_;
       len_ = o.len_;
       front_ = o.front_;
       back_ = o.back_;
-      minlen_ = o.minlen_;
+
+      o.size_ = 0;
+      o.arr_ = nullptr;
     }
     return *this;
   }
-  ~DeQueue() { delete[] arr_; }
+
+  inline ~DeQueue() {
+    if (!is_trivial_destr) {
+      uint_32_cx end = (front_ + size_) % len_;
+      if (end < front_) {
+        for (uint_32_cx i = front_; i < len_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+        for (uint_32_cx i = 0; i < end; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      } else {
+        for (uint_32_cx i = front_; i < front_ + size_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+    }
+    alloc.deallocate(arr_, len_);
+  }
   /**
  * Emplaces an element at the front of the deque.
  * Constructs the element in-place using the given arguments.
@@ -130,10 +187,14 @@ class DeQueue {
  */
   template <typename... Args>
   inline void emplace_front(Args&&... args) {
-    if (front_ == mid_) {
+    if (size_ == len_) {
       grow();
     }
-    arr_[mid_ - front_++] = T(std::forward<Args>(args)...);
+    if (--front_ < 0) {
+      front_ = len_ - 1;
+    }
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[front_], std::forward<Args>(args)...);
+    size_++;
   }
   /**
  * Emplaces an element at the back of the deque.
@@ -142,81 +203,118 @@ class DeQueue {
  */
   template <typename... Args>
   inline void emplace_back(Args&&... args) {
-    if (front_ == mid_) {
+    if (size_ == len_) {
       grow();
     }
-    arr_[mid_ - front_++] = T(std::forward<Args>(args)...);
+
+    if (++back_ >= len_) {
+      back_ = 0;
+    }
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[back_], std::forward<Args>(args)...);
+    size_++;
   }
   /**
  * Adds an element to the front of the deque.
  * @param e The element to be added.
  */
-  inline void add_front(const T& e) {
-    if (front_ == mid_) {
+  inline void push_front(const T& e) {
+    if (size_ == len_) {
       grow();
     }
-    arr_[mid_ - front_] = e;
-    front_++;
+    if (--front_ < 0) {
+      front_ = len_ - 1;
+    }
+    arr_[front_] = e;
+    size_++;
   }
   /**
  * Adds an element to the back of the deque.
  * @param e The element to be added.
  */
-  inline void add_back(const T& e) {
-    if (mid_ == back_) {
+  inline void push_back(const T& e) {
+    if (size_ == len_) {
       grow();
     }
-    arr_[mid_ + back_] = e;
-    back_++;
+    if (++back_ >= len_) {
+      back_ = 0;
+    }
+    arr_[back_] = e;
+    size_++;
   }
   /**
  * Removes and returns an element from the back of the deque.
  * @return The removed element.
  */
-  T pop_back() {
-    if (back_ + front_ < minlen_) {
-      shrink();
+  inline void pop_back() noexcept {
+    CX_ASSERT(size_ > 0, "no such element");
+    std::allocator_traits<Allocator>::destroy(alloc, &arr_[back_]);
+    if (--back_ < 0) {
+      back_ = len_ - 1;
     }
-    back_--;
-    return arr_[mid_ + back_];
+    size_--;
   }
   /**
  * Removes and returns an element from the front of the deque.
  * @return The removed element.
  */
-  T pop_front() {
-    if (back_ + front_ < minlen_) {
-      shrink();
+  inline void pop_front() noexcept {
+    CX_ASSERT(size_ > 0, "no such element");
+    std::allocator_traits<Allocator>::destroy(alloc, &arr_[front_]);
+    if (++front_ >= len_) {
+      front_ = 0;
     }
-    front_--;
-    return arr_[mid_ - front_];
+    size_--;
   }
   /**
  * Accesses the last element in the deque.
  * @return The reference to the last element in the deque.
  */
-  [[nodiscard]] inline T& back() const { return arr_[mid_ + back_ - 1]; }
+  [[nodiscard]] inline T& back() const { return arr_[back_]; }
   /**
  * Accesses the first element in the deque.
  * @return The reference to the first element in the deque.
  */
-  [[nodiscard]] inline T& front() const { return arr_[mid_ - front_ + 1]; }
+  [[nodiscard]] inline T& front() const { return arr_[front_]; }
   /**
  *
  * @return the current n_elem of the dequeue
  */
-  [[nodiscard]] inline uint_32_cx size() const { return back_ + front_ - 1; }
+  [[nodiscard]] inline uint_32_cx size() const { return size_; }
   /**
    * Clears the queue of all elements
    */
-  void clear() {
-    back_ = 0;
-    front_ = 1;
-    minlen_ = 0;
-    mid_ = 16;
+  inline void clear() noexcept {
+    if (!is_trivial_destr) {
+      uint_32_cx end = (front_ + size_) % len_;
+      if (end < front_) {
+        for (uint_32_cx i = front_; i < len_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+        for (uint_32_cx i = 0; i < end; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      } else {
+        for (uint_32_cx i = front_; i < front_ + size_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+    }
+    alloc.deallocate(arr_, len_);
+
+    size_ = 0;
+    front_ = 0;
     len_ = 32;
-    delete[] arr_;
-    arr_ = new T[32];
+    back_ = -1;
+    arr_ = alloc.allocate(32);
+  }
+  /**
+    * The current max capacity of the dequeue
+    * @return
+    */
+  [[nodiscard]] inline uint_32_cx capacity() const noexcept { return len_; }
+  inline void shrink_to_fit() noexcept {
+    CX_WARNING(len_ > size_ * 1.5);
+    shrink();
   }
   friend std::ostream& operator<<(std::ostream& os, DeQueue& q) {
     if (q.size() == 0) {
@@ -230,39 +328,43 @@ class DeQueue {
   }
   class Iterator {
     T* ptr;
+    uint_32_cx current;
+    uint_32_cx len;
 
    public:
-    explicit Iterator(T* p) : ptr(p) {}
-
-    T& operator*() { return *ptr; }
-
+    explicit Iterator(T* p, uint_32_cx start, uint_32_cx len) : len(len), ptr(p), current(start) {}
+    T& operator*() { return ptr[current]; }
     Iterator& operator++() {
-      ++ptr;
+      if (++current >= len) {
+        current = 0;
+      }
       return *this;
     }
-
-    bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+    bool operator!=(const Iterator& other) const { return current != other.current; }
+    bool operator==(const Iterator& other) const { return current == other.current; }
   };
-  Iterator begin() { return Iterator(arr_ + mid_ - front_ + 1); }
-  Iterator end() { return Iterator(arr_ + mid_ + back_); }
+  inline Iterator begin() { return Iterator(arr_, front_, len_); }
+  inline Iterator end() { return Iterator(arr_, (back_ + 1) % len_, len_); }
 #ifndef CX_DELETE_TESTS
+#include <deque>
   static void TEST() {
     std::cout << "TESTING DEQUEUE" << std::endl;
 
-    // Testing add_front
-    std::cout << "   Testing add_front..." << std::endl;
+    // Testing push_front and front
+    std::cout << "   Testing push_front and front..." << std::endl;
     DeQueue<int> de_queue;
-
     for (uint_32_cx i = 0; i < 100; i++) {
-      de_queue.add_front(i);
+      de_queue.push_front(i);
       CX_ASSERT(de_queue.front() == i);
+      CX_ASSERT(de_queue.size() == i + 1);
     }
 
-    // Testing add_back
-    std::cout << "   Testing add_back..." << std::endl;
+    // Testing push_back and back
+    std::cout << "   Testing push_back and back..." << std::endl;
     for (uint_32_cx i = 100; i < 200; i++) {
-      de_queue.add_back(i);
+      de_queue.push_back(i);
       CX_ASSERT(de_queue.back() == i);
+      CX_ASSERT(de_queue.size() == i + 1);
     }
 
     // Testing pop_front
@@ -270,6 +372,7 @@ class DeQueue {
     for (int i = 99; i >= 0; i--) {
       CX_ASSERT(de_queue.front() == i);
       de_queue.pop_front();
+      CX_ASSERT(de_queue.size() == i + 100);
     }
 
     // Testing pop_back
@@ -277,42 +380,139 @@ class DeQueue {
     for (uint_32_cx i = 199; i >= 100; i--) {
       CX_ASSERT(de_queue.back() == i);
       de_queue.pop_back();
+      CX_ASSERT(de_queue.size() == i - 100);
     }
 
     // Testing edge case: adding and removing a large number of elements
-    std::cout << "   Testing edge case: adding and removing a large number of "
-                 "elements..."
+    std::cout << "   Testing edge case: adding and removing a large number of elements..."
               << std::endl;
-
     for (uint_32_cx i = 0; i < 100000; i++) {
-      de_queue.add_back(i);
+      de_queue.push_back(i);
     }
-
     for (uint_32_cx i = 0; i < 100000; i++) {
       CX_ASSERT(de_queue.size() == 100000 - i);
-      CX_ASSERT(de_queue.pop_front() == i);
+      CX_ASSERT(de_queue.front() == i);
+      de_queue.pop_front();
     }
     CX_ASSERT(de_queue.size() == 0);
 
+    // Testing clear
     std::cout << "   Testing clear..." << std::endl;
+    for (int i = 0; i < 1000; i++) {
+      de_queue.push_back(i);
+    }
     de_queue.clear();
     CX_ASSERT(de_queue.size() == 0);
+
+    // Testing back and pop_back
+    std::cout << "   Testing back and pop_back..." << std::endl;
     for (int i = 0; i < 1000; i++) {
-      de_queue.add_back(i);
+      de_queue.push_back(i);
     }
+    for (int i = 999; i >= 0; i--) {
+      CX_ASSERT(de_queue.back() == i);
+      de_queue.pop_back();
+    }
+    CX_ASSERT(de_queue.size() == 0);
+
+    // Testing copy constructor and assignment
+    std::cout << "   Testing copy constructor and assignment..." << std::endl;
     for (int i = 0; i < 1000; i++) {
-      CX_ASSERT(de_queue.pop_back() == 999 - i);
+      de_queue.push_back(i);
+    }
+    DeQueue<int> de_queue_copy = de_queue;
+    DeQueue<int> de_queue_assign;
+    de_queue_assign = de_queue;
+    CX_ASSERT(de_queue.size() == de_queue_copy.size());
+    CX_ASSERT(de_queue.size() == de_queue_assign.size());
+
+    // Test constructors and assignment operators
+    std::cout << "   Testing constructors and assignment operators..." << std::endl;
+    DeQueue<int> dq1;
+    for (uint_32_cx i = 0; i < 100; i++) {
+      dq1.push_back(i);
+    }
+    // Copy constructor
+    DeQueue<int> dq2(dq1);
+    CX_ASSERT(dq2.size() == dq1.size());
+    for (uint_32_cx i = 0; i < 50; i++) {
+      CX_ASSERT(dq2.front() == dq1.front());
+      dq2.pop_front();
+      dq1.pop_front();
+    }
+    // Copy assignment operator
+    dq1 = dq2;
+    CX_ASSERT(dq2.size() == dq1.size());
+    for (uint_32_cx i = 0; i < 25; i++) {
+      CX_ASSERT(dq2.front() == dq1.front());
+      dq2.pop_front();
+      dq1.pop_front();
+    }
+    // Move constructor
+    DeQueue<int> dq3(std::move(dq2));
+    CX_ASSERT(dq3.size() == 25);
+    CX_ASSERT(dq2.size() == 0);
+    for (uint_32_cx i = 75; i < 100; i++) {
+      CX_ASSERT(dq3.front() == i);
+      dq3.pop_front();
+    }
+    for (uint_fast32_t i = 0; i < 10; i++) {
+      dq3.push_back(i);
+    }
+    // Move assignment operator
+    dq1 = std::move(dq3);
+    CX_ASSERT(dq1.size() == 10);
+    CX_ASSERT(dq3.size() == 0);
+    for (uint_32_cx i = 0; i < 10; i++) {
+      CX_ASSERT(dq1.front() == i);
+      dq1.pop_front();
     }
 
-    std::cout << "   Testing iterator..." << std::endl;
+    de_queue.clear();
+    std::cout
+        << "   Testing edge case: adding and removing a large number of elements with iterator..."
+        << std::endl;
+    for (uint_32_cx i = 0; i < 100000; i++) {
+      de_queue.push_back(i);
+    }
+
+    uint_32_cx i = 0;
+    for (auto it = de_queue.begin(); it != de_queue.end(); ++it, ++i) {
+      CX_ASSERT(*it == i);
+    }
     de_queue.clear();
     CX_ASSERT(de_queue.size() == 0);
+
+    std::cout << "   Testing clear with iterator..." << std::endl;
     for (int i = 0; i < 1000; i++) {
-      de_queue.add_back(i);
+      de_queue.push_back(i);
     }
-    int check = 0;
-    for (const auto& num : de_queue) {
-      CX_ASSERT(num == check++);
+    de_queue.clear();
+    CX_ASSERT(de_queue.size() == 0);
+    CX_ASSERT(de_queue.begin() == de_queue.end());
+
+    std::cout << "   Testing wrapping around with iterator..." << std::endl;
+    DeQueue<int> qq;
+    std::deque<int> stdqq;
+    for (uint_fast32_t j = 0; j < 10; j++) {
+      qq.push_back(j);
+      stdqq.push_back(j);
+    }
+    for (uint_fast32_t j = 0; j < 5; j++) {
+      qq.pop_front();
+      stdqq.pop_front();
+    }
+    for (uint_fast32_t j = 0; j < 25; j++) {
+      qq.push_back(j + 20);
+      stdqq.push_back(j + 20);
+    }
+    CX_ASSERT(qq.front() == stdqq.front());
+    for (uint_fast32_t j = 0; j < 5; j++) {
+      qq.pop_front();
+    }
+    int b = 20;
+    for (auto val : qq) {
+      CX_ASSERT(b++ == val);
     }
   }
 #endif

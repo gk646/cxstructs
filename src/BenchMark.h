@@ -124,7 +124,6 @@ static void HASH_MAP() {
   }
   printTime("cxstructs::HashMap");
 }
-
 static void CX_QUEUE() {
   Queue<Data> q;
   now();
@@ -180,4 +179,66 @@ static void STD_QUEUE() {
   printTime("std::Queue");
 }
 
+static void CX_DEQUEUE() {
+  DeQueue<Data> q;
+  now();
+  for (uint_fast32_t i = 0; i < 2000; i++) {
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      q.emplace_back();
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      num1 = q.back().num;
+      num1 = q.front().num;
+      q.pop_back();
+      if (j == 999) {
+        break;
+      }
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      q.emplace_front();
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      num1 = q.back().num;
+      num1 = q.front().num;
+      q.pop_front();
+    }
+    num1 = q.size();
+    for (const auto& elem : q) {
+      num1 = elem.num;
+    }
+  }
+  q.clear();
+  printTime("cxstructs::DeQueue");
+}
+static void STD_DEQUEUE() {
+  std::deque<Data> q;
+  now();
+  for (uint_fast32_t i = 0; i < 2000; i++) {
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      q.emplace_back();
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      num1 = q.back().num;
+      num1 = q.front().num;
+      q.pop_back();
+      if (j == 999) {
+        break;
+      }
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      q.emplace_front();
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      num1 = q.back().num;
+      num1 = q.front().num;
+      q.pop_front();
+    }
+    num1 = q.size();
+    for (const auto& elem : q) {
+      num1 = elem.num;
+    }
+  }
+  q.clear();
+  printTime("std::de_queue");
+}
 #endif  //CXSTRUCTS_SRC_BENCHMARK_H_

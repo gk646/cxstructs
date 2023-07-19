@@ -52,7 +52,7 @@ class Queue {
 
   bool is_trivial_destr = std::is_trivially_destructible<T>::value;
 
-  inline void resize() {
+  inline void grow() {
     len_ *= 2;
 
     T* n_arr = alloc.allocate(len_);
@@ -132,6 +132,29 @@ class Queue {
     }
     return *this;
   }
+  //move copy
+  Queue(Queue&& o) noexcept : front_(o.front_), len_(o.len_), arr_(o.arr_), size_(o.size_) {
+    o.arr_ = nullptr;  //avoid double deletion
+  }
+  //move assign operator
+  Queue& operator=(Queue&& o) noexcept {
+    if (this != &o) {
+      if (!is_trivial_destr) {
+        for (uint_32_cx i = 0; i < len_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+      alloc.deallocate(arr_, len_);
+
+      arr_ = o.arr_;
+      size_ = o.size_;
+      len_ = o.len_;
+      front_ = o.front_;
+
+      o.arr_ = nullptr;
+    }
+    return *this;
+  }
   inline ~Queue() {
     if (!is_trivial_destr) {
       for (uint_32_cx i = 0; i < len_; i++) {
@@ -151,13 +174,28 @@ class Queue {
    */
   inline void push(const T& e) noexcept {
     if (size_ == len_) {
-      resize();
+      grow();
     }
     int_32_cx index = front_ + size_;
     if (index >= len_) {
-      index %= len_;
+      index = 0;
     }
     arr_[index] = e;
+    size_++;
+  }
+  /**
+   * Adds a element to the back of the queue
+   * @param e the element to be added
+   */
+  inline void push(T&& e) noexcept {
+    if (size_ == len_) {
+      grow();
+    }
+    int_32_cx index = front_ + size_;
+    if (index >= len_) {
+      index = 0;
+    }
+    arr_[index] = std::move(e);
     size_++;
   }
   /**
@@ -168,14 +206,13 @@ class Queue {
   template <typename... Args>
   inline void emplace(Args&&... args) noexcept {
     if (size_ == len_) {
-      resize();
+      grow();
     }
     int_32_cx index = front_ + size_;
     if (index >= len_) {
-      index %= len_;
+      index = 0;
     }
-    std::allocator_traits<Allocator>::construct(alloc, &arr_[index],
-                                                std::forward<Args>(args)...);
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[index], std::forward<Args>(args)...);
     size_++;
   }
   /**
@@ -183,13 +220,9 @@ class Queue {
    */
   inline void pop() noexcept {
     CX_ASSERT(size_ > 0, "no such element");
-
-    uint_32_cx index = front_ + 1;
-    if (index >= len_) {
-      index %= len_;
+    if (++front_ >= len_) {
+      front_ = 0;
     }
-
-    front_ = index;
     size_--;
   }
   /**
@@ -220,11 +253,10 @@ class Queue {
 
     int_32_cx index = front_ + size_ - 1;
     if (index >= len_) {
-      index %= len_;
+      index = 0;
     }
     return arr_[index];
   }
-
   /**
    *Returns a read/write reference to the data at the first element of the queue.
    * The position at which elements are added
@@ -234,7 +266,7 @@ class Queue {
     CX_ASSERT(size_ > 0, "no such element");
     int_32_cx index = front_ + size_ - 1;
     if (index >= len_) {
-      index %= len_;
+      index = 0;
     }
     return arr_[index];
   }
@@ -284,22 +316,30 @@ class Queue {
   }
   class Iterator {
     T* ptr;
+    uint_32_cx current;
+    uint_32_cx len;
 
    public:
-    explicit Iterator(T* p) : ptr(p) {}
-
-    T& operator*() { return *ptr; }
-
+    explicit Iterator(T* p, uint_32_cx start, uint_32_cx len) : len(len), ptr(p), current(start) {}
+    T& operator*() { return ptr[current]; }
     Iterator& operator++() {
-      ++ptr;
+      if (++current >= len) {
+        current = 0;
+      }
       return *this;
     }
-
-    bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+    bool operator!=(const Iterator& other) const { return current != other.current; }
+    bool operator==(const Iterator& other) const { return current == other.current; }
   };
-  Iterator begin() { return Iterator(arr_ + front_); }
-  Iterator end() { return Iterator(arr_ + size_); }
+  inline Iterator begin() { return Iterator(arr_, front_, len_); }
+  inline Iterator end() {
+    int_32_cx index = front_ + size_ - 1;
+    if (index >= len_) {
+      index = 0;
+    }
+    return Iterator(arr_, index, len_); }
 #ifndef CX_DELETE_TESTS
+#include <queue>
   static void TEST() {
     std::cout << "QUEUE TESTS" << std::endl;
     // Test default constructor
@@ -385,6 +425,45 @@ class Queue {
     for (auto num : q1) {
       CX_ASSERT(num == check++);
     }
+
+    std::cout << "  Testing move-assign/move-copy constructor..." << std::endl;
+    q1.clear();
+    for (uint_fast32_t i = 0; i < 10; i++) {
+      q1.push(i);
+    }
+    Queue<int> qm1(std::move(q1));
+    CX_ASSERT(qm1.front() == 0);
+    CX_ASSERT(qm1.back() == 9);
+    Queue<int> qm2;
+    qm2 = std::move(qm1);
+    CX_ASSERT(qm2.front() == 0);
+    CX_ASSERT(qm2.back() == 9);
+
+
+    std::cout << "  Testing wrapping around with iterator..." << std::endl;
+    Queue<int> qq;
+    std::queue<int>stdqq;
+    for (uint_fast32_t j = 0; j < 10; j++) {
+      qq.push(j);
+      stdqq.push(j);
+    }
+    for (uint_fast32_t j = 0; j < 5; j++) {
+      qq.pop();
+      stdqq.pop();
+    }
+    for (uint_fast32_t j = 0; j < 25; j++) {
+      qq.push(j+20);
+      stdqq.push(j+20);
+    }
+    CX_ASSERT(qq.front() == stdqq.front());
+    for (uint_fast32_t j = 0; j < 5; j++) {
+      qq.pop();
+    }
+    int b = 20;
+    for(auto val : qq){
+     // CX_ASSERT(b++ ==val);
+    }
+
   }
 #endif
 };

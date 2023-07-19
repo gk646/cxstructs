@@ -1,6 +1,7 @@
 ## Datastructures, algorithms, machine-learning and utilities library in C++
 
-A medium-sized modern header only library of selected datastructures, algorithms, machinelearning topics and utilities. This
+A medium-sized modern header only library of selected datastructures, algorithms, machinelearning topics and utilities.
+This
 collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read
 and well documented.
 
@@ -20,10 +21,11 @@ The general namespace is `cxstructs`.
 
 *Relative to the fastest / with CXPoolAllocator*
 
-|                 |  vector  |  Stack   | HashMap  | HashSet | LinkedList |  Queue   |
-|:----------------|:--------:|:--------:|:--------:|:-------:|:----------:|:--------:|
-| **std::**       |  *0.81*  |  *0.52*  |  *0.51*  | *0.52*  |   *0.71*   |  *0.45*  |
-| **cxstructs::** | **1.00** | **1.00** | **1.00** | **1.0** |  **1.00**  | **1.00** |
+|                 |  vector  |  Stack   | HashMap  | HashSet | LinkedList |  Queue   | DeQueue  |
+|:----------------|:--------:|:--------:|:--------:|:-------:|:----------:|:--------:|:--------:|
+| **std::**       |  *0.81*  |  *0.52*  |  *0.51*  | *0.52*  |   *0.71*   |  *0.46*  |  *0.57*  |
+| **cxstructs::** | **1.00** | **1.00** | **1.00** | **1.0** |  **1.00**  | **1.00** | **1.00** |
+
 
 ### Features
 
