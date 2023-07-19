@@ -73,14 +73,14 @@ class kNN_2D {
     }
 
     if (k_closest.size() > k) {
+      auto c_dist_func = dist_func;
       //rearranging with custom comparator, ascending to distance
       std::nth_element(k_closest.begin(), k_closest.begin() + k, k_closest.end(),
-                       [this, x, y](DP_* f, DP_* s) {
-                         float dist1 = dist_func(x, y, f->x(), f->y());
-                         float dist2 = dist_func(x, y, s->x(), s->y());
+                       [c_dist_func, x, y](DP_* f, DP_* s) {
+                         float dist1 = c_dist_func(x, y, f->x(), f->y());
+                         float dist2 = c_dist_func(x, y, s->x(), s->y());
                          return dist1 < dist2;
                        });
-
       k_closest.resize(k);  // erasing elements after the k-th position
     }
   }
@@ -127,10 +127,9 @@ class kNN_2D {
  * @throws std::logic_error If there are not enough data points or no category is found.
  */
   inline Category classify_by_category_count(float x, float y, int k) {
-    if (space.size() < k) {
+    if (n_points < k) {
       throw std::logic_error("not enough data points");
     }
-
     vec<int, false> catg_values(128, 0);  // max categories
     vec<DP_*> k_closest;
 
@@ -139,7 +138,6 @@ class kNN_2D {
     for (auto& ptr : k_closest) {
       catg_values[ptr->getCategory()]++;
     }
-
     int index = -1;
     index = catg_values.max_element();
 
@@ -232,7 +230,9 @@ class kNN_2D {
   }
 };
 
-class kNN_XD {};
+class kNN_XD {
+  //will implement a k-Tree for that
+};
 
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_

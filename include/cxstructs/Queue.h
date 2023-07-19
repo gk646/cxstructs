@@ -47,7 +47,7 @@ class Queue {
   Allocator alloc;
   T* arr_;
   uint_32_cx len_;
-  uint_32_cx back_;
+  uint_32_cx size_;
   uint_32_cx front_;
 
   bool is_trivial_destr = std::is_trivially_destructible<T>::value;
@@ -56,67 +56,78 @@ class Queue {
     len_ *= 2;
 
     T* n_arr = alloc.allocate(len_);
-    std::uninitialized_move(arr_ + front_, arr_ + back_, n_arr);
+
+    if (front_ == 0) {
+      std::uninitialized_move(arr_, arr_ + size_, n_arr);
+    } else {
+      std::uninitialized_move(arr_ + front_, arr_ + size_, n_arr);
+      std::uninitialized_move(arr_, arr_ + front_, n_arr + size_ - 1);
+    }
 
     if (!is_trivial_destr) {
-      for (size_t i = 0; i < back_; i++) {
+      for (size_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
     }
-    alloc.deallocate(arr_, back_);
+
+    alloc.deallocate(arr_, size_);
     arr_ = n_arr;
-    back_ -= front_;
     front_ = 0;
   }
   inline void shrink() {
-    len_ = size() * 1.5;
+    len_ = size_ * 1.5;
 
     T* n_arr = alloc.allocate(len_);
-    std::uninitialized_move(arr_ + front_, arr_ + back_, n_arr);
+
+    if (front_ == 0) {
+      std::uninitialized_move(arr_, arr_ + size_, n_arr);
+    } else {
+      std::uninitialized_move(arr_ + front_, arr_ + size_, n_arr);
+      std::uninitialized_move(arr_, arr_ + front_, n_arr + size_);
+    }
 
     if (!is_trivial_destr) {
-      for (size_t i = 0; i < back_; i++) {
+      for (size_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
     }
-    alloc.deallocate(arr_, back_);
-    arr_ = n_arr;
 
-    back_ -= front_;
+    alloc.deallocate(arr_, size_);
+    arr_ = n_arr;
     front_ = 0;
   }
 
  public:
   inline explicit Queue(uint_32_cx len = 32) : arr_(alloc.allocate(len)), len_(len) {
-    back_ = 0;
+    size_ = 0;
     front_ = 0;
   }
-  Queue(const Queue& o) : back_(o.back_), len_(o.len_), front_(o.front_) {
+  Queue(const Queue& o) : size_(o.size_), len_(o.len_), front_(o.front_) {
     arr_ = alloc.allocate(len_);
     if (is_trivial_destr) {
-      std::copy(o.arr_ + o.front_, o.arr_ + o.back_, arr_);
+      std::copy(o.arr_, o.arr_ + o.len_, arr_);
     } else {
-      std::uninitialized_copy(o.arr_ + o.front_, o.arr_ + o.back_, arr_);
+      std::uninitialized_copy(o.arr_, o.arr_ + o.len_, arr_);
     }
   }
   Queue& operator=(const Queue& o) {
     if (this != &o) {
       if (!is_trivial_destr) {
-        for (uint_32_cx i = 0; i < back_; i++) {
+        for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
       }
       alloc.deallocate(arr_, len_);
 
-      front_ = 0;
+      front_ = o.front_;
       len_ = o.len_;
-      back_ = o.back_ - o.front_;
+      size_ = o.size_;
       arr_ = alloc.allocate(len_);
 
       if (is_trivial_destr) {
-        std::copy(o.arr_ + o.front_, o.arr_ + o.back_, arr_);
+        std::copy(o.arr_, o.arr_ + o.len_, arr_);
       } else {
-        std::uninitialized_copy(o.arr_ + o.front_, o.arr_ + o.back_, arr_);
+        std::uninitialized_copy(o.arr_, o.arr_ + o.len_, arr_);
       }
     }
     return *this;
@@ -133,16 +144,21 @@ class Queue {
    *
    * @return the current n_elem of the queue
    */
-  [[nodiscard]] inline uint_32_cx size() const { return back_ - front_; }
+  [[nodiscard]] inline uint_32_cx size() const { return size_; }
   /**
    * Adds a element to the back of the queue
    * @param e the element to be added
    */
-  inline void push(const T& e) {
-    if (back_ == len_) {
+  inline void push(const T& e) noexcept {
+    if (size_ == len_) {
       resize();
     }
-    arr_[back_++] = e;
+    int_32_cx index = front_ + size_;
+    if (index >= len_) {
+      index %= len_;
+    }
+    arr_[index] = e;
+    size_++;
   }
   /**
    * Construct a new T element at the end of the list
@@ -150,39 +166,83 @@ class Queue {
    * @param args T constructor arguments
    */
   template <typename... Args>
-  inline void emplace(Args&&... args) {
-    if (back_ == len_) {
+  inline void emplace(Args&&... args) noexcept {
+    if (size_ == len_) {
       resize();
     }
-    std::allocator_traits<Allocator>::construct(alloc, &arr_[back_++], std::forward<Args>(args)...);
+    int_32_cx index = front_ + size_;
+    if (index >= len_) {
+      index %= len_;
+    }
+    std::allocator_traits<Allocator>::construct(alloc, &arr_[index],
+                                                std::forward<Args>(args)...);
+    size_++;
   }
   /**
    * Removes the element at the front of the queue
    */
-  inline void pop() { front_++; }
+  inline void pop() noexcept {
+    CX_ASSERT(size_ > 0, "no such element");
+
+    uint_32_cx index = front_ + 1;
+    if (index >= len_) {
+      index %= len_;
+    }
+
+    front_ = index;
+    size_--;
+  }
+  /**
+   * Returns a read-only reference to the data at the first element of the queue.
+   *  The position at which elements are removed
+   * @return a reference to the front element
+   */
+  [[nodiscard]] inline T& front() const noexcept {
+    CX_ASSERT(front_ < len_, "underflow error");
+    return arr_[front_];
+  }
   /**
    * Returns a read/write reference to the data at the first element of the queue.
    *  The position at which elements are removed
    * @return a reference to the front element
    */
-  [[nodiscard]] inline T& front() const {
+  [[nodiscard]] inline T& front() noexcept {
     CX_ASSERT(front_ < len_, "underflow error");
     return arr_[front_];
   }
   /**
-   *Returns a read/write reference to the data at the first element of the %queue.
+   *Returns a read-only reference to the data at the first element of the queue.
    * The position at which elements are added
    * @return a reference to the last element
    */
-  [[nodiscard]] inline T& back() const {
-    CX_ASSERT(back_ <= len_, "overflow error");
-    return arr_[back_ - 1];
+  [[nodiscard]] inline T& back() const noexcept {
+    CX_ASSERT(size_ > 0, "no such element");
+
+    int_32_cx index = front_ + size_ - 1;
+    if (index >= len_) {
+      index %= len_;
+    }
+    return arr_[index];
+  }
+
+  /**
+   *Returns a read/write reference to the data at the first element of the queue.
+   * The position at which elements are added
+   * @return a reference to the last element
+   */
+  [[nodiscard]] inline T& back() noexcept {
+    CX_ASSERT(size_ > 0, "no such element");
+    int_32_cx index = front_ + size_ - 1;
+    if (index >= len_) {
+      index %= len_;
+    }
+    return arr_[index];
   }
   /**
    *
    * @return true if the queue is empty
    */
-  inline bool empty() { return back_ - front_ == 0; }
+  inline bool empty() { return size_ == 0; }
   /**
    * Clears the queue of all elements
    */
@@ -193,7 +253,7 @@ class Queue {
       }
     }
     alloc.deallocate(arr_, len_);
-    back_ = 0;
+    size_ = 0;
     front_ = 0;
     len_ = 32;
     arr_ = alloc.allocate(32);
@@ -207,12 +267,17 @@ class Queue {
       shrink();
     }
   }
+  /**
+   * The total capacity of the queue at this point
+   * @return
+   */
+  [[nodiscard]] inline uint_32_cx capacity() const { return len_; }
   friend std::ostream& operator<<(std::ostream& os, const Queue& q) {
     if (q.size() == 0) {
       return os << "[]";
     }
     os << "[" << q.arr_[0];
-    for (uint_32_cx i = q.front_ + 1; i < q.back_; i++) {
+    for (uint_32_cx i = q.front_ + 1; i < q.size_; i++) {
       os << "," << q.arr_[i];
     }
     return os << "]";
@@ -233,7 +298,7 @@ class Queue {
     bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
   };
   Iterator begin() { return Iterator(arr_ + front_); }
-  Iterator end() { return Iterator(arr_ + back_); }
+  Iterator end() { return Iterator(arr_ + size_); }
 };
 
 }  // namespace cxstructs
