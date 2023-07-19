@@ -121,5 +121,5 @@ int binary_search_index(T* arr, T target, int_32_cx len, bool ascending) {
   }
 }
 
-}  // cxstructs
+}  // namespace cxstructs
 #endif  // CXSTRUCTS_BINARYSEARCH_H

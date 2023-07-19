@@ -68,6 +68,6 @@ vec<vec<std::pair<Action, State>>> shortest_path_search(
     auto s = path.at[-1].second;
   }
 }
-}  // cxstructs
+}  // namespace cxstructs
 
 #endif  // CXSTRUCTS_DFS_H

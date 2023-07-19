@@ -185,6 +185,6 @@ inline int findString_Boyer_Moore(const std::string& text, const std::string& pa
   delete[] good_suffix;           //clean up memory
   return count > 0 ? count : -1;  // return -1 on not found
 }
-}  // cxstructs
+}  // namespace cxstructs
 
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_PATTERNMATCHING_H_
