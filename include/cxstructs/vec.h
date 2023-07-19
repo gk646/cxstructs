@@ -499,7 +499,7 @@ class vec {
  * @param new_size  size the vector will have after calling this method
  */
   inline void resize(uint_32_cx new_size) noexcept {
-    CX_WARNING(!(size_ <= new_size), "calling resize for no reason");
+    CX_WARNING(!(size_ <= new_size), "calling grow for no reason");
     if (size_ > new_size) {
       auto old_len = len_;
       len_ = new_size;
