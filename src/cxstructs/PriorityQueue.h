@@ -345,7 +345,6 @@ class PriorityQueue {
     for (int i = 0; i < 100; i++) {
       int temp = q10.top();
       q10.pop();
-      std::cout << temp << std::endl;
       CX_ASSERT(temp == 99 - i);
     }
     CX_ASSERT(q10.size() == 0);

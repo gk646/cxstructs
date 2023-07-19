@@ -1,6 +1,6 @@
 ## Datastructures, algorithms, machine-learning and utilities library in C++
 
-A medium-sized header only library of selected datastructures, algorithms, machinelearning topics and utilities. This
+A medium-sized modern header only library of selected datastructures, algorithms, machinelearning topics and utilities. This
 collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read
 and well documented.
 
@@ -13,7 +13,7 @@ The general namespace is `cxstructs`.
 **2.** [Usage Guide](#usage-guide)   
 **3.** [Installation](#installation)  
 **4.** [Library Notes](#library-notes)  
-**5.** [Contributing](#contributing)
+**5.** [Contributing](#contributing)  
 **6.** [Resources](#resources)
 
 ### Speed Comparison
@@ -22,8 +22,8 @@ The general namespace is `cxstructs`.
 
 |                 |  vector  |  Stack   | HashMap  | HashSet | LinkedList |  Queue   |
 |:----------------|:--------:|:--------:|:--------:|:-------:|:----------:|:--------:|
-| **std::**       |  *0.81*  |  *0.52*  |  *0.51*  | *0.52*  |   *0.71*   | **1.00** |
-| **cxstructs::** | **1.00** | **1.00** | **1.00** | **1.0** |  **1.00**  |  *0.90*  |
+| **std::**       |  *0.81*  |  *0.52*  |  *0.51*  | *0.52*  |   *0.71*   |  *0.45*  |
+| **cxstructs::** | **1.00** | **1.00** | **1.00** | **1.0** |  **1.00**  | **1.00** |
 
 ### Features
 
@@ -44,7 +44,8 @@ The general namespace is `cxstructs`.
 - **Accessibility**
     - the source code is clean to read and nicely formatted
 - **Cross-Compiler**
-    - the library is tested on Linux(*gcc*), Windows(*MSCV, mingw-gcc, zig*)
+    - C++20 >= required
+    - the library is tested on Linux(*gcc*), Windows(*MSCV 17.0 (2022), mingw-gcc(13.1), zig*)
 
 ---
 
@@ -58,13 +59,13 @@ The general namespace is `cxstructs`.
 - **Pair**: *static container for two types*
 - **Trie**: *limited to ASCII (128)*
 - **Stack**:
-- **HashMap**: *separate chaining with LinkedLists but buffered with static arrays*
-- **HashSet**: *separate chaining with LinkedLists but buffered with static arrays*
+- **HashMap**: *using separate chaining with LinkedLists with static buffer*
+- **HashSet**: *using separate chaining with LinkedLists with static buffer*
 - **Linked List**:
 - **Double Linked List**:
-- **Queue**:
+- **Queue**: *using circular array*
 - **DeQueue**: *using centered array*
-- **PriorityQueue**: *using max-heap(soon)*
+- **PriorityQueue**: *using binary heap*
 - **Binary Tree**:
 - **QuadTree**: *allows custom Types with x() and y() getters*
 - **Geometry**(*Rect,Circle,Point*): *standard efficient 2D shapes*
@@ -194,9 +195,8 @@ Feel free to contribute!
 
 ### Resources
 
-
-[Inside Code Youtube Channel](https://www.youtube.com/@insidecode) provides excellent videos on datastructures. (used for PriorityQueue)
-
+[Inside Code Youtube Channel](https://www.youtube.com/@insidecode) provides excellent videos on datastructures. (used
+for PriorityQueue)
 
 ### Misc
 

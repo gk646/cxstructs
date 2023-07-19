@@ -61,11 +61,11 @@ using namespace cxhelper;
  */
 template <typename T>
 class BinaryTree {
-  using TreeNode = TreeNode<T>;
-  TreeNode* root_;
+  using TNode = TreeNode<T>;
+  TNode* root_;
   uint_32_cx size_;
 
-  inline int subTreeDepth(TreeNode* node) {
+  inline int subTreeDepth(TNode* node) {
     if (!node) {
       return 0;
     } else {
@@ -74,20 +74,20 @@ class BinaryTree {
       return std::max(left, right) + 1;
     }
   }
-  inline void insert(const T& val, TreeNode* node) {
+  inline void insert(const T& val, TNode* node) {
     if (val < node->data_) {
       if (!node->left_) {
-        node->left_ = new TreeNode(val);
+        node->left_ = new TNode(val);
       } else
         insert(val, node->left_);
     } else {
       if (!node->right_) {
-        node->right_ = new TreeNode(val);
+        node->right_ = new TNode(val);
       } else
         insert(val, node->right_);
     }
   }
-  inline bool contains(const T& val, TreeNode* node) const {
+  inline bool contains(const T& val, TNode* node) const {
     if (node) {
       if (val < node->data_) {
         if (node->left_) {
@@ -105,7 +105,7 @@ class BinaryTree {
     }
     return false;
   }
-  inline TreeNode* erase(const T& val, TreeNode* node) {
+  inline TNode* erase(const T& val, TNode* node) {
     if (!node) {
       return node;
     }
@@ -116,25 +116,25 @@ class BinaryTree {
       node->right_ = erase(val, node->right_);
     } else {
       if (!node->left_) {
-        TreeNode* temp = node->right_;
+        TNode* temp = node->right_;
         delete node;
         size_--;
         return temp;
       } else if (!node->right_) {
-        TreeNode* temp = node->left_;
+        TNode* temp = node->left_;
         delete node;
         size_--;
         return temp;
       }
-      TreeNode* temp = minValueNode(node->right_);
+      TNode* temp = minValueNode(node->right_);
       node->data_ = temp->data_;
       node->right_ = erase(temp->data_, node->right_);
       size_--;
     }
     return node;
   }
-  inline TreeNode* minValueNode(TreeNode* node) {
-    TreeNode* current = node;
+  inline TNode* minValueNode(TNode* node) {
+    TNode* current = node;
 
     while (current && current->left_ != nullptr) {
       current = current->left_;
@@ -150,11 +150,11 @@ class BinaryTree {
   BinaryTree(BinaryTree&&) = delete;
   BinaryTree& operator=(BinaryTree&&) = delete;
   ~BinaryTree() {
-    std::deque<TreeNode*> nodesToDelete;
+    std::deque<TNode*> nodesToDelete;
     nodesToDelete.push_back(root_);
 
     while (!nodesToDelete.empty()) {
-      TreeNode* node = nodesToDelete.back();
+      TNode* node = nodesToDelete.back();
       nodesToDelete.pop_back();
 
       if (node->left_) {
@@ -171,12 +171,12 @@ class BinaryTree {
    * Gives access to the root node of the tree
    * @return the root node
    */
-  [[nodiscard]] TreeNode* get_root() const { return root_; }
+  [[nodiscard]] TNode* get_root() const { return root_; }
 
   /**
    * Inverts this BinaryTree starting from the given node
    */
-  inline void invert(TreeNode* node) {
+  inline void invert(TNode* node) {
     if (node == nullptr) {
       return;
     }
@@ -200,7 +200,7 @@ class BinaryTree {
       size_++;
     } else {
       size_++;
-      root_ = new TreeNode(val);
+      root_ = new TNode(val);
     }
   }
 
@@ -226,11 +226,11 @@ class BinaryTree {
    After the operation, the tree becomes empty and its size is 0
    **/
   inline void clear() {
-    std::deque<TreeNode*> nodesToDelete;
+    std::deque<TNode*> nodesToDelete;
     nodesToDelete.push_back(root_);
 
     while (!nodesToDelete.empty()) {
-      TreeNode* node = nodesToDelete.back();
+      TNode* node = nodesToDelete.back();
       nodesToDelete.pop_back();
 
       if (node->left_) {
@@ -262,12 +262,12 @@ class BinaryTree {
   uint_32_cx maxDepth() { return subTreeDepth(root_); }
 
   class InOrderIterator {
-    std::deque<TreeNode*> nodes;
+    std::deque<TNode*> nodes;
 
    public:
-    explicit InOrderIterator(TreeNode* root) { pushLeft(root); }
+    explicit InOrderIterator(TNode* root) { pushLeft(root); }
 
-    void pushLeft(TreeNode* node) {
+    void pushLeft(TNode* node) {
       while (node) {
         nodes.push_back(node);
         node = node->left_;
@@ -277,7 +277,7 @@ class BinaryTree {
     T& operator*() { return nodes.back()->data_; }
 
     InOrderIterator& operator++() {
-      TreeNode* node = nodes.back();
+      TNode* node = nodes.back();
       nodes.pop_back();
       pushLeft(node->right_);
       return *this;

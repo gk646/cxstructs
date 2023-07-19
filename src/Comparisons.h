@@ -36,14 +36,14 @@ struct Data {
   std::string string = "aösldkfjöalksdöfklj";
   Data() : num(0) {}
   Data(const Data& other) {
-    std::copy_n(other.arr, 100, arr);
+    std::copy(other.arr, other.arr + 100, arr);
     num = other.num;
     string = other.string;
   }
   Data& operator=(const Data& other) {
     if (this != &other) {
       // Copy elements from other.arr to arr.
-      std::copy_n(other.arr, 100, arr);
+      std::copy(other.arr, other.arr + 100, arr);
       // Copy other.num to num.
       num = other.num;
       // Copy other.string to string.

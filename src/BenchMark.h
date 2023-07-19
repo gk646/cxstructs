@@ -27,8 +27,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "CXStructs.h"
-
-//benchmarks are something close to this
+inline static volatile int num1 = 2;
+//benchmarks are this /  run separately
 static void VEC() {
   volatile int num1;
   volatile bool force;
@@ -66,7 +66,6 @@ static void VEC() {
   vec.clear();
   cxstructs::printTime<>("cxstructs::vec");
 }
-
 static void UNORDERED_MAP() {
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -125,4 +124,60 @@ static void HASH_MAP() {
   }
   printTime("cxstructs::HashMap");
 }
+
+static void CX_QUEUE() {
+  Queue<Data> q;
+  now();
+  for (uint_fast32_t i = 0; i < 1000; i++) {
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      q.emplace();
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      num1 = q.back().num;
+      num1 = q.front().num;
+      q.pop();
+      if (j == 999) {
+        break;
+      }
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      q.emplace();
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      num1 = q.back().num;
+      num1 = q.front().num;
+      q.pop();
+    }
+    num1 = q.size();
+  }
+  printTime("cxstructs::Queue");
+}
+static void STD_QUEUE() {
+  std::queue<Data> q;
+  now();
+  for (uint_fast32_t i = 0; i < 1000; i++) {
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      q.emplace();
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      num1 = q.back().num;
+      num1 = q.front().num;
+      q.pop();
+      if (j == 999) {
+        break;
+      }
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      q.emplace();
+    }
+    for (uint_fast32_t j = 0; j < 1000; j++) {
+      num1 = q.back().num;
+      num1 = q.front().num;
+      q.pop();
+    }
+    num1 = q.size();
+  }
+  printTime("std::Queue");
+}
+
 #endif  //CXSTRUCTS_SRC_BENCHMARK_H_

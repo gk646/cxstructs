@@ -495,8 +495,8 @@ class vec {
     return index;
   }
   /**
- * Trims the vector to size new_size starting from the front
- * @param new_size the size the vector will have after this methods
+ * Trims the vector to size new_size counting from the front
+ * @param new_size  size the vector will have after calling this method
  */
   inline void resize(uint_32_cx new_size) noexcept {
     CX_WARNING(!(size_ <= new_size), "calling resize for no reason");
