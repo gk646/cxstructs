@@ -138,6 +138,7 @@ class kNN_2D {
     for (auto& ptr : k_closest) {
       catg_values[ptr->getCategory()]++;
     }
+
     int index = -1;
     index = catg_values.max_element();
 

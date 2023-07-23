@@ -367,6 +367,7 @@ class vec {
    * Resets the length back to its starting value
    */
   inline void clear() noexcept {
+    int ar[3] = {2, 2, 1};
     if (!is_trivial_destr) {
       for (uint_32_cx i = 0; i < len_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
