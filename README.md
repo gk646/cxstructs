@@ -26,7 +26,6 @@ The general namespace is `cxstructs`.
 | **std::**       |  *0.81*  |  *0.52*  |  *0.51*  | *0.52*  |   *0.71*   |  *0.46*  |  *0.57*  |
 | **cxstructs::** | **1.00** | **1.00** | **1.00** | **1.0** |  **1.00**  | **1.00** | **1.00** |
 
-
 ### Features
 
 - **Performance**
@@ -66,7 +65,7 @@ The general namespace is `cxstructs`.
 - **Linked List**:
 - **Double Linked List**:
 - **Queue**: *using circular array*
-- **DeQueue**: *using centered array*
+- **DeQueue**: *using circular array*
 - **PriorityQueue**: *using binary heap*
 - **Binary Tree**:
 - **QuadTree**: *allows custom Types with x() and y() getters*
@@ -76,6 +75,7 @@ The general namespace is `cxstructs`.
 
 - **FeedForwardNeuralNetwork**(*FNN*): *implemented using matrices(*default*) and without, switch:`#define CX_LOOP_FNN`*
 - **k-Nearest Neighbour**(*k-NN2D,k-NNXD*): *2D works with a QuadTree,*
+- **Word2Vec**: *simple word to vector network (WIP)*
 
 #### Algorithms
 
@@ -88,10 +88,11 @@ The general namespace is `cxstructs`.
 
 #### Utilities
 
-- **cxtime** *easily measure the time from `now()` to `printTime()`*
-- **cxio** *load_text,*
-- **cxassert** *custom assertions with optional text*
-- **cxmath** *activation functions,distance function, next_power_of_2*
+- **cxtime**: *easily measure the time from `now()` to `printTime()`*
+- **cxio**: *load_text,*
+- **cxassert**: *custom assertions with optional text*
+- **cxmath**: *activation functions,distance function, next_power_of_2*
+- **cxgraphics**: *simple native windowing and graphics output header*
 
 ---
 

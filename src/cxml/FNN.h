@@ -28,6 +28,7 @@
 #include <random>
 #include <vector>
 #include "../cxconfig.h"
+#include "../cxutil/cxmath.h"
 
 #ifndef CX_LOOP_FNN
 
@@ -50,9 +51,9 @@ struct Layer {
 
  public:
   Layer()
-      : weights_(0, 0),
-        bias_(0, 0),
-        w_sums_(0, 0),
+      : weights_(),
+        bias_(),
+        w_sums_(),
         in_(0),
         out_(0),
         a_func(cxstructs::relu),
@@ -79,6 +80,7 @@ struct Layer {
   }
   Layer& operator=(const Layer& other) {
     if (this != &other) {
+
       in_ = other.in_;
       out_ = other.out_;
 
@@ -125,7 +127,7 @@ struct Layer {
     mat d_weights =
         inputs_.transpose() * error;  //matrix dimensions: (in x batch) * (batch x out) = in x out
     mat d_bias = error.sum_cols();    //sum the error over the batch dimension
-    d_bias.scale(0.25f);
+    d_bias.scale(1.0F/error.n_rows());
 
     // Update the weights and bias
     d_weights.scale(learnR_);
@@ -148,18 +150,20 @@ using namespace cxhelper;
 class FNN {
 
   Layer* layers_;
-  std::vector<uint_16_cx> bounds_;
+  std::vector<int> bounds_;
   uint_16_cx len_;
   float learnR_;
+  func_M loss_function_;
 
  public:
-  explicit FNN(const std::vector<uint_16_cx>& bound, func a_func, float learnR)
-      : learnR_(learnR), len_(bound.size() - 1), bounds_(bound) {
+  explicit FNN(
+      const std::vector<int>& bound, func a_func, float learnR,
+      func_M loss_function = mean_sqr_abs_err, func last_layer_func = [](float x) { return x; })
+      : learnR_(learnR), len_(bound.size() - 1), bounds_(bound), loss_function_(loss_function) {
     layers_ = new Layer[len_];
     for (int i = 1; i < len_ + 1; i++) {
       if (i == len_) {
-        layers_[i - 1] = Layer(
-            bounds_[i - 1], bounds_[i], [](float x) { return x; }, learnR_);
+        layers_[i - 1] = Layer(bounds_[i - 1], bounds_[i], last_layer_func, learnR_);
         break;
       }
       layers_[i - 1] = Layer(bounds_[i - 1], bounds_[i], a_func, learnR_);
@@ -174,28 +178,27 @@ class FNN {
     }
     return retval;
   }
-
-  void train(const mat& in, const mat& out, uint_16_cx n = 10, uint_16_cx batchSize = 10) {
+  void train(mat& in, mat& target, uint_16_cx n = 10, uint_16_cx batchSize = 10) {
     for (int k = 0; k < n; k++) {
-      mat outputs = forward(in);  // dims: batch x last-layer-out
+      mat outputs = forward(in);  // dims: batch x last-layer-target
 
-      outputs -= out;  // out dims : batch x last-layer-out
-      outputs.scale(2);
+      outputs = loss_function_(outputs, target);  // target dims : batch x last-layer-target
 
       for (int i = len_ - 1; i > -1; i--) {
         outputs = layers_[i].backward(outputs);
       }
     }
   }
+  vec<float, false> get_weights(int layer, int row) { return layers_[layer].weights_.get_row(row); }
 
 #ifndef CX_DELETE_TESTS
 #include "../cxutil/cxtime.h"
   static void TEST() {
     std::cout << "TESTING FNN" << std::endl;
 
-    const mat inputs = {{1, 0}, {1, 1}, {0, 1}, {0, 0}};
+    mat inputs = {{1, 0}, {1, 1}, {0, 1}, {0, 0}};
     std::vector<std::vector<float>> init_vec = {{1}, {0}, {1}, {0}};
-    const cxstructs::mat expected_outputs(init_vec);
+    cxstructs::mat expected_outputs(init_vec);
 
     for (int i = 0; i < 5; ++i) {
       FNN fnn({2, 2, 1}, cxstructs::sig, 0.1);

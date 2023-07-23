@@ -20,12 +20,63 @@
 #define F
 #ifndef CXSTRUCTS_SRC_CXML_WORD2VEC_H_
 #define CXSTRUCTS_SRC_CXML_WORD2VEC_H_
+
+#include "../cxconfig.h"
+#include "../cxstructs/vec.h"
+#include "FNN.h"
+
+namespace cxhelper {}
+
 namespace cxstructs {
 class word2vec {
 
+  FNN net;
+  uint8_t vec_len;
+  uint_32_cx vocab_len;
+
  public:
+  word2vec(int vocabulary_size, int numbers_per_word)
+      : net(
+            {vocabulary_size, numbers_per_word, vocabulary_size}, [](float x) { return x; }, 0.11,
+            cross_entropy),
+        vec_len(numbers_per_word),
+        vocab_len(vocabulary_size) {}
+
+  void train(const std::vector<string>& sentence, int epochs) {
+
+    mat in(sentence.size(), sentence.size());
+    mat target(sentence.size(), sentence.size());
+
+    for (uint_fast32_t i = 0; i < sentence.size(); i++) {
+      for (uint_fast32_t j = 0; j < sentence.size(); j++) {
+        if (j == i) {
+          in(i, j) = 1;
+          if (j + 1 < sentence.size()) {
+            target(i, j + 1) = 1;
+          }
+        }
+      }
+    }
+    net.train(in, target, epochs);
+  }
+  vec<float, false> predict_next(int vocab_index) {
+    mat in(1, vocab_len);
+    in(0, vocab_index) = 1;
+    mat out = net.forward(in);
+    softmax(out);
+    return out.get_row(0);
+  }
+  vec<float, false> get_vec(int vocab_index) { return net.get_weights(0, vocab_index); }
+
 #ifndef CX_DELETE_TESTS
-  static void TEST() { std::cout << "TESTING WORD2VEC" << std::endl; }
+  static void TEST() {
+    std::cout << "TESTING WORD2VEC" << std::endl;
+    word2vec word_2_vec(4, 2);
+    std::vector<string> train = {{"I"}, {"like"}, {"programming"}, {"alot"}};
+    word_2_vec.train(train, 30);
+    word_2_vec.predict_next(1).print();
+    std::cout << word_2_vec.get_vec(1) << std::endl;
+  }
 #endif
 };
 }  // namespace cxstructs

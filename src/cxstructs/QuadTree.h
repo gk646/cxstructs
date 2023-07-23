@@ -149,8 +149,8 @@ class QuadTree {
 
  public:
   /*no default constructor to prevent modifications and subtree mismatch
-   * However setting new bound invalidates the lower layers
-   * Also no moving(copying) the quad tree yet
+   * Setting new bound invalidates the lower layers!
+   * Also, no moving(copying) the quad tree yet
   */
   /**
      * @brief Constructs a new QuadTree object.

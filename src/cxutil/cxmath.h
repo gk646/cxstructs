@@ -31,6 +31,7 @@
 namespace cxstructs {
 //function pointer typedef
 typedef float (*func)(float);
+typedef mat (*func_M)(mat&, mat&);  // mat function
 typedef float (*D_func)(float p1x, float p1y, float p2x, float p2y);
 
 //activation functions
@@ -44,11 +45,16 @@ inline float relu(float x) noexcept {
   return x > 0 ? x : 0;
 }
 inline void softmax(mat& m) noexcept {
-  float sum = 0;
-  for (uint_fast32_t j = 0; j < m.n_cols(); j++) {
-    sum += std::exp(m(0, j));
+  float rowSum = 0;
+  for (uint_fast32_t i = 0; i < m.n_rows(); i++) {
+    rowSum = 0;
+    for (uint_fast32_t j = 0; j < m.n_cols(); j++) {
+      rowSum += std::exp(m(i, j));
+    }
+    for (uint_fast32_t j = 0; j < m.n_cols(); j++) {
+      m(i, j) = std::exp(m(i, j)) / rowSum;
+    }
   }
-  m.mat_op([sum](float x) { return std::exp(x) / sum; });
 }
 //derivatives
 inline float d_sig(float x) noexcept {
@@ -62,10 +68,18 @@ inline float d_tanh(float x) noexcept {
   return 1 - t * t;
 }
 //loss
-mat l_cross_entropy(const mat& pred, const mat& target) {  //with softmax activation function
+inline mat cross_entropy(mat& pred, mat& target) {  //with softmax activation function
+  softmax(pred);
   return pred - target;
 }
-
+inline mat mean_abs(mat& pred, mat& target) {
+  return pred - target;
+}
+inline mat mean_sqr_abs_err(mat& pred, mat& target) {
+  mat ret = pred - target;
+  ret.scale(2);
+  return ret;
+}
 //utils
 /**
  * Finds the <b>next</b> closest power of two to the right of the given number

@@ -17,26 +17,13 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#define F
+#ifndef CXSTRUCTS_SRC_CXSTRUCTS_K_TREE_H_
+#define CXSTRUCTS_SRC_CXSTRUCTS_K_TREE_H_
 
-#ifndef CXSTRUCTS_RBTREE_H
-#define CXSTRUCTS_RBTREE_H
+#include "../cxconfig.h"
 
-template <typename T>
-class RBTree {
-
-  enum class Color { RED, BLACK };
-
-  Color color_ = Color::BLACK;
-  RBTree* left_;
-  RBTree* right_;
-  T data;
-
- public:
-  RBTree(T data) : data(data){};
-  ~RBTree() {
-    delete right_;
-    delete left_;
-  };
-};
-
-#endif  // CXSTRUCTS_RBTREE_H
+namespace cxstructs {
+class kTree {};
+}  // namespace cxstructs
+#endif  //CXSTRUCTS_SRC_CXSTRUCTS_K_TREE_H_
