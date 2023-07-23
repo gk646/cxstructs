@@ -5,7 +5,7 @@ This
 collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read
 and well documented.
 
-While I am not an expert in datastructures nor C++, yet I am still aiming for reference type implementations in terms of
+While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of
 efficiency and interface.
 
 The general namespace is `cxstructs`.
