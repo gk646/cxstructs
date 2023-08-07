@@ -237,6 +237,7 @@ class kNN_2D {
       float x_;
       float y_;
       float weight = 1;
+      DataPoint(){}
       DataPoint(float x, float y, Category category) : x_(x), y_(y), category(category) {}
       float x() const final { return x_; }
       float y() const final { return y_; }

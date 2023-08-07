@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
+#define FINISHED
 #ifndef CXSTRUCTS_SRC_CXML_WORD2VEC_H_
 #define CXSTRUCTS_SRC_CXML_WORD2VEC_H_
 
@@ -28,14 +28,14 @@
 namespace cxhelper {}
 
 namespace cxstructs {
-class word2vec {
+class Word2Vec {
 
   FNN net;
   uint8_t vec_len;
   uint_32_cx vocab_len;
 
  public:
-  word2vec(int vocabulary_size, int numbers_per_word)
+  Word2Vec(int vocabulary_size, int numbers_per_word)
       : net(
             {vocabulary_size, numbers_per_word, vocabulary_size}, [](float x) { return x; }, 0.11,
             cross_entropy),
@@ -43,7 +43,6 @@ class word2vec {
         vocab_len(vocabulary_size) {}
 
   void train(const std::vector<string>& sentence, int epochs) {
-
     mat in(sentence.size(), sentence.size());
     mat target(sentence.size(), sentence.size());
 
@@ -59,6 +58,25 @@ class word2vec {
     }
     net.train(in, target, epochs);
   }
+  void train_bag_of_words(const std::vector<string>& vocabulary, int radius, int epochs) {
+    if (vocabulary.size() != vocab_len) {
+      throw std::logic_error("vocabulary size doesnt match the training input");
+    }
+    vec<mat, false> in(vocabulary.size(), mat(1,vocab_len));
+
+    for (int i = 0; i < in.size(); i++) {
+      int start = std::max(0, i - radius);
+      int end = std::min((int)vocabulary.size(), i + radius + 1);
+      for (int j = start; j < end; j++) {
+        if (j != i) {
+          in[i](0, j) = 1;
+        }
+      }
+      auto target = mat::unit_matrix(1, vocab_len, 0, i);
+      net.train(in[i], target, epochs);
+    }
+    in.print();
+  }
   vec<float, false> predict_next(int vocab_index) {
     mat in(1, vocab_len);
     in(0, vocab_index) = 1;
@@ -71,11 +89,16 @@ class word2vec {
 #ifndef CX_DELETE_TESTS
   static void TEST() {
     std::cout << "TESTING WORD2VEC" << std::endl;
-    word2vec word_2_vec(4, 2);
+    Word2Vec word_2_vec(4, 2);
     std::vector<string> train = {{"I"}, {"like"}, {"programming"}, {"alot"}};
-    word_2_vec.train(train, 30);
-    word_2_vec.predict_next(1).print();
-    std::cout << word_2_vec.get_vec(1) << std::endl;
+    word_2_vec.train(train, 40);
+    word_2_vec.predict_next(0).print();
+    std::cout << word_2_vec.get_vec(0) << std::endl;
+
+    Word2Vec word_3_vec(4, 2);
+    word_3_vec.train_bag_of_words(train, 2, 30);
+    word_3_vec.predict_next(0).print();
+    std::cout << word_3_vec.get_vec(0) << std::endl;
   }
 #endif
 };

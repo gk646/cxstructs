@@ -51,7 +51,7 @@ static void test_cxalgos() {
 static void test_cxml() {
   FNN::TEST();
   kNN_2D<DataPoint_<float>>::TEST();
-  word2vec::TEST();
+  Word2Vec::TEST();
 }
 
 static void test_all() {

@@ -20,6 +20,17 @@
 #define FINISHED
 #ifndef CXSTRUCTS_SRC_CONFIG_H_
 #define CXSTRUCTS_SRC_CONFIG_H_
+
+/* |-----------------------------------------------------|
+ * |                     MACROS                          |
+ * |-----------------------------------------------------|
+ */
+
+//#define CX_USE_INT            : uses type int for all custom types
+//
+//
+//
+
 /**
  * namespace for all datastructure related headers
  */
@@ -36,10 +47,18 @@ namespace cxtests {}
 #include <cstdint>
 #include "cxutil/cxassert.h"
 
+#ifndef CX_USE_INT
 typedef uint_fast32_t uint_32_cx;
 typedef uint_fast16_t uint_16_cx;
 typedef int_fast32_t int_32_cx;
+#else
+typedef int uint_32_cx;
+typedef int uint_16_cx;
+typedef int int_32_cx;
+#endif
 
 #include "CXAllocator.h"
+
+
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_
