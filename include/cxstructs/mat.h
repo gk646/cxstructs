@@ -80,9 +80,7 @@ class mat {
   inline mat(const uint_32_cx& n_rows, const uint_32_cx& n_cols)
       : n_rows_(n_rows), n_cols_(n_cols) {
     arr = new float[n_rows * n_cols];
-    for (int i = 0; i < n_rows * n_cols; i++) {
-      arr[i] = 0;
-    }
+    std::fill(arr, arr + n_rows * n_cols, 0);
   }
 
   inline explicit mat(std::vector<std::vector<float>> vec)
@@ -140,6 +138,7 @@ class mat {
    * @return a pointer to the underlying array
    */
   float* get_raw() { return arr; }
+  //assign
   inline mat& operator=(const mat& other) {
     if (this != &other) {
       delete[] arr;
@@ -365,7 +364,7 @@ class mat {
     return retval;
   }
   /**
-   *  A scaled unit matrix is a matrix with dimensions n_rows_ and n_cols_, with only one nonzero entry with value 1 at position M(row, col). <p>
+   *  A unit matrix is a matrix with dimensions n_rows_ and n_cols_, with only one nonzero entry with value 1 at position M(row, col). <p>
    *
    * ij * M -> 0 except for the i-th row which is alpha * M[j, ]<p>
    * M * ij -> 0 except for the j-th column which is alpha * M[ ,i]
@@ -474,6 +473,9 @@ class mat {
     std::cout << *this << std::endl;
   }
   friend std::ostream& operator<<(std::ostream& os, const mat& obj) {
+    if(obj.n_cols_+obj.n_rows_ == 0 ){
+      return os<<"[]";
+    }
     for (int i = 0; i < obj.n_rows_; i++) {
       os << "[";
       for (int j = 0; j < obj.n_cols_; j++) {
@@ -503,7 +505,7 @@ class mat {
    * @param row which row data to return
    * @return a vector of length n_cols with elements from the given row
    */
-  inline vec<float, false> get_row(uint_32_cx row) const noexcept {
+  [[nodiscard]] inline vec<float, false> get_row(uint_32_cx row) const noexcept {
     return vec<float, false>(arr + row * n_cols_, n_cols_);
   }
   /**

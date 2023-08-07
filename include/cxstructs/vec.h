@@ -108,11 +108,23 @@ class vec {
    * Recommended to leave it at 32 due to optimizations with the allocator
    * @param n_elem number of starting elements
    */
-  inline explicit vec(uint_32_cx n_elem = 32)
-      : len_(n_elem), size_(0), arr_(alloc.allocate(n_elem)) {}
-  inline vec(uint_32_cx n_elem, const T val)
-      : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
-    std::fill(arr_, arr_ + n_elem, val);
+  inline explicit vec(uint_32_cx n_elems = 32)
+      : len_(n_elems), size_(0), arr_(alloc.allocate(n_elems)) {
+    if (!is_trivial_destr) {
+      for (uint_fast32_t i = 0; i < n_elems; i++) {
+        std::allocator_traits<Allocator>::construct(alloc, &arr_[i]);
+      }
+    }
+  }
+  inline vec(uint_32_cx n_elems, const T fillVal)
+      : len_(n_elems), size_(n_elems), arr_(alloc.allocate(n_elems)) {
+    if (is_trivial_destr) {
+      std::fill(arr_, arr_ + n_elems, fillVal);
+    } else {
+      for (uint_fast32_t i = 0; i < n_elems; i++) {
+        std::allocator_traits<Allocator>::construct(alloc, &arr_[i], fillVal);
+      }
+    }
   }
   /**
 * @brief Constructs a vec with the specified number of elements, and initializes them using a provided function.
@@ -122,11 +134,11 @@ class vec {
 * @param form The callable object or function used to initialize the elements of the vec. It is invoked for each element with the element's index as an argument.
 **/
   template <typename fill_form,
-            typename = std::enable_if_t<std::is_invocable_r_v<double, fill_form, double>>>
+            typename = std::enable_if_t<std::is_invocable_r_v<T, fill_form, int>>>
   inline vec(uint_32_cx n_elem, fill_form form)
       : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
-    for (uint_32_cx i = 0; i < n_elem; i++) {
-      arr_[i] = form(i);
+    for (uint_fast32_t i = 0; i < n_elem; i++) {
+      std::allocator_traits<Allocator>::construct(alloc, &arr_[i], form(i));
     }
   }
   /**
@@ -164,7 +176,15 @@ class vec {
       : size_(init_list.size()),
         len_(init_list.size() * 10),
         arr_(alloc.allocate(init_list.size() * 10)) {
-    std::copy(init_list.begin(), init_list.end(), arr_);
+    if (is_trivial_destr) {
+      std::copy(init_list.begin(), init_list.end(), arr_);
+    } else {
+      auto it = init_list.begin();
+      for (uint_fast32_t i = 0; i < init_list.size(); i++) {
+        std::allocator_traits<Allocator>::construct(alloc, &arr_[i], *it);
+        ++it;
+      }
+    }
   }
   inline vec(const vec<T>& o) : size_(o.size_), len_(o.len_) {
     arr_ = alloc.allocate(len_);
@@ -222,7 +242,7 @@ class vec {
   }
   inline ~vec() {
     if (!is_trivial_destr) {
-      for (uint_32_cx i = 0; i < len_; i++) {
+      for (uint_32_cx i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
     }
@@ -290,30 +310,36 @@ class vec {
   * Removes the last element of the vec.
   * Reduces the size by one.
   */
-  [[nodiscard]] inline T pop_back() noexcept {
+  inline void pop_back() noexcept {
     CX_ASSERT(size_ > 0 && "out of bounds");
-    return arr_[--size_];
+    size_--;
+    if (!is_trivial_destr) {
+      std::allocator_traits<Allocator>::destroy(alloc, &arr_[size_]);
+    }
   }
   /**
-   * Returns and removes the first element of the vec<p>
+   * Removes the first element of the vec<p>
    * This is rather slow method(O(n)) use a Queue if you call it frequently
    * @return first element as value
    */
-  [[nodiscard]] inline T pop_front() noexcept {
-    CX_ASSERT(size_ > 0 && "out of bounds");
-    T val = arr_[0];
+  inline void pop_front() noexcept {
+    CX_ASSERT(size_ > 0, "out of bounds");
+    if (!is_trivial_destr) {
+      std::allocator_traits<Allocator>::destroy(alloc, &arr_[0]);
+    }
     std::move(arr_ + 1, arr_ + size_--, arr_);
-    return val;
   }
   /**
-   * Returns and removes the element at index i of the vec<p>
+   * Removes the element at index i of the vec<p>
    * This is rather slow method(O(n-i))
    * @return first element as value
    */
-  [[nodiscard]] inline T pop(const uint_32_cx& i) noexcept {
-    T val = arr_[i];
+  inline void pop(const uint_32_cx& i) noexcept {
+    CX_ASSERT(i < size_, "out of bounds");
+    if (!is_trivial_destr) {
+      std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+    }
     std::move(arr_ + i + 1, arr_ + size_--, arr_ + i);
-    return val;
   }
   /**
    * Removes the first occurrence of the given element from the list

@@ -96,12 +96,22 @@ class Stack {
    * Recommended to leave it at 16 due to optimizations with the allocator
    * @param n_elem number of starting elements
    */
-  explicit Stack(uint_32_cx n_elems = 32)
-      : len_(n_elems), size_(0), arr_(alloc.allocate(n_elems)) {}
-
-  explicit Stack(uint_32_cx n_elems, T fillval)
+  explicit Stack(uint_32_cx n_elems = 32) : len_(n_elems), size_(0), arr_(alloc.allocate(n_elems)) {
+    if (!is_trivial_destr) {
+      for (uint_fast32_t i = 0; i < n_elems; i++) {
+        std::allocator_traits<Allocator>::construct(alloc, &arr_[i]);
+      }
+    }
+  }
+  explicit Stack(uint_32_cx n_elems, T fillVal)
       : len_(n_elems), size_(n_elems), arr_(alloc.allocate(n_elems)) {
-    std::fill_n(arr_, len_, fillval);
+    if (is_trivial_destr) {
+      std::fill(arr_, arr_ + n_elems, fillVal);
+    } else {
+      for (uint_fast32_t i = 0; i < n_elems; i++) {
+        std::allocator_traits<Allocator>::construct(alloc, &arr_[i], fillVal);
+      }
+    }
   }
   /**
    * Initializer list constructor<p>
@@ -113,7 +123,15 @@ class Stack {
       : size_(init_list.size()),
         len_(init_list.size() * 10),
         arr_(alloc.allocate(init_list.size() * 10)) {
-    std::copy(init_list.begin(), init_list.end(), arr_);
+    if (is_trivial_destr) {
+      std::copy(init_list.begin(), init_list.end(), arr_);
+    } else {
+      auto it = init_list.begin();
+      for (uint_fast32_t i = 0; i < init_list.size(); i++) {
+        std::allocator_traits<Allocator>::construct(alloc, &arr_[i], *it);
+        ++it;
+      }
+    }
   }
   /**
 * @brief Constructs a Stack with the specified number of elements, and initializes them using a provided function.
@@ -181,7 +199,7 @@ class Stack {
   }
   ~Stack() {
     if (!is_trivial_destr) {
-      for (uint_32_cx i = 0; i < len_; i++) {
+      for (uint_32_cx i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
     }

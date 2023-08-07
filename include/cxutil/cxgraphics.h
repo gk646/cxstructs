@@ -23,13 +23,12 @@
 
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
+#include "../cxstructs/QuadTree.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-
-#include <windows.h>
-
+#include <functional>
 #include <utility>
 namespace cxstructs {
 class GraphicsWindow {
@@ -178,8 +177,8 @@ class GraphicsWindow {
     int startX = width_ * 0.1;
     int startY = height_ * 0.1;
 
-    int axisWidth = width_ -  2*startX;
-    int axisHeight = height_ - 2*startY;
+    int axisWidth = width_ - 2 * startX;
+    int axisHeight = height_ - 2 * startY;
 
     float minX = points[0].x(), maxX = minX;
     float minY = points[0].y(), maxY = minY;
@@ -199,13 +198,12 @@ class GraphicsWindow {
     MoveToEx(hdc, startX, height_ - startY, nullptr);
     LineTo(hdc, startX + axisWidth, height_ - startY);
 
-    float scaleX =  maxX-minX/(float)axisWidth;
-    float scaleY = maxY-minY/(float)axisHeight;
+    float scaleX = maxX - minX / (float)axisWidth;
+    float scaleY = maxY - minY / (float)axisHeight;
 
     for (const auto& point : points) {
       int x = startX + ((point.x() - minX) / (maxX - minX)) * axisWidth;
       int y = startY + (1 - (point.y() - minY) / (maxY - minY)) * axisHeight;
-
 
       SetPixel(hdc, x, y, RGB(255, 0, 0));
       SetPixel(hdc, x + 1, y + 1, RGB(255, 0, 0));
@@ -222,8 +220,8 @@ class GraphicsWindow {
     std::string maxXStr = std::to_string((int)maxX);
     std::string maxYStr = std::to_string((int)maxY);
 
-    TextOut(hdc, startX, height_ - startY+startY/2, minXStr.c_str(), minXStr.size());
-    TextOut(hdc, startX-startX/2, height_ - startY, minYStr.c_str(), minYStr.size());
+    TextOut(hdc, startX, height_ - startY + startY / 2, minXStr.c_str(), minXStr.size());
+    TextOut(hdc, startX - startX / 2, height_ - startY, minYStr.c_str(), minYStr.size());
 
     TextOut(hdc, startX + axisWidth - 50, startY + axisHeight + 10, maxXStr.c_str(),
             maxXStr.size());
@@ -232,10 +230,12 @@ class GraphicsWindow {
     ReleaseDC(hwnd_, hdc);
   }
 };
-
+#undef max
+#undef min
 #else
 #pragma("Graphics support only for Windows")
 //#include <X11/Xlib.h>
 #endif
+
 }
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXGRAPHICS_H_
