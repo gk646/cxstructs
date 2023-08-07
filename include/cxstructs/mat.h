@@ -487,8 +487,38 @@ class mat {
     }
     return os;
   }
+  /**
+   *
+   * @return  amount of rows of the matrix
+   */
   [[nodiscard]] inline uint_32_cx n_rows() const { return n_rows_; };
+  /**
+   *
+   * @return amount of columns of the matrix
+   */
   [[nodiscard]] inline uint_32_cx n_cols() const { return n_cols_; };
+  /**
+   * Constructs a new vector from the given row<p>
+   * This is a fast operation
+   * @param row which row data to return
+   * @return a vector of length n_cols with elements from the given row
+   */
+  inline vec<float, false> get_row(uint_32_cx row) const noexcept {
+    return vec<float, false>(arr + row * n_cols_, n_cols_);
+  }
+  /**
+   * Constructs a new vector from the given column<p>
+   * This is a rather slow operation
+   * @param col the column
+   * @return a vector of length n_rows with the data of the given column
+   */
+  inline vec<float, false> get_col(uint_32_cx col) const noexcept {
+    vec<float, false> ret(n_rows_, 0);
+    for (uint_fast32_t i = 0; i < n_rows_; i++) {
+      ret[i] = arr[i * n_cols_ + col];
+    }
+    return ret;
+  }
 
 };
 }  // namespace cxstructs

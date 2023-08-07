@@ -25,6 +25,7 @@
 
 #include "cxutil/cxio.h"
 #include "cxutil/cxtime.h"
+#include "cxutil/cxgraphics.h"
 
 #include "cxstructs/BinaryTree.h"
 #include "cxstructs/DeQueue.h"
@@ -45,6 +46,7 @@
 
 #include "cxml/FNN.h"
 #include "cxml/k-NN.h"
+#include "cxml/word2vec.h"
 
 #include "cxalgos/GraphTraversal.h"
 #include "cxalgos/MathFunctions.h"
