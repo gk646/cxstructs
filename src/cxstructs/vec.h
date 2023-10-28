@@ -81,6 +81,12 @@ class vec {
 
     alloc.deallocate(arr_, size_);
     arr_ = n_arr;
+
+    if (!is_trivial_destr) {
+      for (uint_fast32_t i = size_; i < len_; i++) {
+        std::allocator_traits<Allocator>::construct(alloc, &arr_[i]);
+      }
+    }
     //as array is moved no need for delete []
   }
   inline void shrink() noexcept {
@@ -194,7 +200,37 @@ class vec {
       std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
     }
   }
+  inline vec(const vec<T,false>& o) : size_(o.size_), len_(o.len_) {
+    arr_ = alloc.allocate(len_);
+    if (is_trivial_destr) {
+      std::copy(o.arr_, o.arr_ + o.size_, arr_);
+    } else {
+      std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
+    }
+  }
   inline vec& operator=(const vec<T>& o) {
+    if (this != &o) {
+      //ugly allocator syntax but saves a lot when using e.g. vec<float>
+      if (!is_trivial_destr) {
+        for (uint_32_cx i = 0; i < len_; i++) {
+          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
+        }
+      }
+      alloc.deallocate(arr_, len_);
+
+      size_ = o.size_;
+      len_ = o.len_;
+      arr_ = alloc.allocate(len_);
+
+      if (is_trivial_destr) {
+        std::copy(o.arr_, o.arr_ + o.size_, arr_);
+      } else {
+        std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
+      }
+    }
+    return *this;
+  }
+  inline vec& operator=(const vec<T,false>& o) {
     if (this != &o) {
       //ugly allocator syntax but saves a lot when using e.g. vec<float>
       if (!is_trivial_destr) {
@@ -349,6 +385,16 @@ class vec {
 #pragma omp simd linear(i : 1)
     for (uint_32_cx i = 0; i < len_; i++) {
       if (arr_[i] == e) {
+        std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
+        size_--;
+        return;
+      }
+    }
+  }
+  template <typename lambda>
+  inline void erase_if(lambda condition) {
+    for (uint_32_cx i = 0; i < len_; i++) {
+      if (condition(arr_[i])) {
         std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
         size_--;
         return;

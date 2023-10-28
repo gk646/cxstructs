@@ -54,7 +54,7 @@ class mat {
 
  public:
   inline mat() : n_cols_(0), n_rows_(0), arr(nullptr){};
-  inline mat(std::initializer_list<float> list) : n_rows_(1), n_cols_(list.size()) {
+  inline mat(std::initializer_list<float> list) : n_rows_(1), n_cols_((uint_32_cx)list.size()) {
     arr = new float[n_cols_];
     uint32_t i = 0;
     for (float val : list) {
@@ -62,7 +62,7 @@ class mat {
     }
   }
   inline mat(std::initializer_list<std::initializer_list<float>> list)
-      : n_rows_(list.size()), n_cols_(list.begin()->size()) {
+      : n_rows_((uint_32_cx)list.size()), n_cols_((uint_32_cx)list.begin()->size()) {
     arr = new float[n_rows_ * n_cols_];
     uint32_t i = 0;
     for (const auto& sublist : list) {
@@ -84,9 +84,9 @@ class mat {
   }
 
   inline explicit mat(std::vector<std::vector<float>> vec)
-      : n_rows_(vec.size()), n_cols_(vec[0].size()) {
+      : n_rows_(vec.size()), n_cols_((uint_32_cx)vec[0].size()) {
     arr = new float[n_rows_ * n_cols_];
-    for (int i = 0; i < n_rows_; i++) {
+    for (uint_32_cx i = 0; i < n_rows_; i++) {
       std::copy_n(vec[i].begin(), n_cols_, arr + i * n_cols_);
     }
   }
@@ -296,8 +296,8 @@ class mat {
   [[nodiscard]] inline mat transpose() const {
     mat retval(n_cols_, n_rows_);
 
-    for (int i = 0; i < n_cols_; i++) {
-      for (int j = 0; j < n_rows_; j++) {
+    for (uint_32_cx i = 0; i < n_cols_; i++) {
+      for (uint_32_cx j = 0; j < n_rows_; j++) {
         retval.arr[i * n_rows_ + j] = arr[j * n_cols_ + i];
       }
     }
@@ -458,9 +458,9 @@ class mat {
   void print(const std::string& header = "") const {
     if (!header.empty()) {
       std::cout << header << std::endl;
-      for (int i = 0; i < n_rows_; i++) {
+      for (uint_32_cx i = 0; i < n_rows_; i++) {
         std::cout << "     [";
-        for (int j = 0; j < n_cols_; j++) {
+        for (uint_32_cx j = 0; j < n_cols_; j++) {
           std::cout << arr[i * n_cols_ + j];
           if (j < n_cols_ - 1) {
             std::cout << ",";
@@ -476,9 +476,9 @@ class mat {
     if(obj.n_cols_+obj.n_rows_ == 0 ){
       return os<<"[]";
     }
-    for (int i = 0; i < obj.n_rows_; i++) {
+    for (uint_32_cx i = 0; i < obj.n_rows_; i++) {
       os << "[";
-      for (int j = 0; j < obj.n_cols_; j++) {
+      for (uint_32_cx j = 0; j < obj.n_cols_; j++) {
         os << obj.arr[i * obj.n_cols_ + j];
         if (j != obj.n_cols_ - 1) {
           os << ", ";

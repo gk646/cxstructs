@@ -176,10 +176,22 @@ class QuadTree {
   QuadTree(QuadTree&&) = delete;
   QuadTree& operator=(QuadTree&&) = delete;
   ~QuadTree() {
-    delete top_right_;
-    delete top_left_;
-    delete bottom_right_;
-    delete bottom_left_;
+    if(top_right_){
+      delete top_right_;
+      top_right_ = nullptr;
+    }
+    if(top_left_){
+      delete top_left_;
+      top_left_ = nullptr;
+    }
+    if(bottom_right_){
+      delete bottom_right_;
+      bottom_right_ = nullptr;
+    }
+    if(bottom_left_){
+      delete bottom_left_;
+      bottom_left_ = nullptr;
+    }
   }
   /**
      * @brief Inserts a element into the QuadTree.
@@ -209,30 +221,7 @@ class QuadTree {
 
     insert_subtrees(e);
   }
-  inline void insert(T&& e) {
-    if (!bounds_.contains(e)) {
-      return;
-    }
 
-    if (!top_right_) {
-      if (vec_.size() < max_points_) {
-        vec_.push_back(std::move(e));
-        return;
-      } else {
-        if (max_depth_ > 0) {
-          split();
-        } else {
-          vec_.push_back(std::move(e));
-          CX_WARNING(
-              "|QuadTree.h| Reached max depth | large insertions now will slow "
-              "down the tree");
-          return;
-        }
-      }
-    }
-
-    insert_subtrees(std::move(e));
-  }
 
   /**
    * Number of points contained in the given rectangle bound
@@ -267,17 +256,26 @@ class QuadTree {
     }
   }
   /**
-   * Clears the QuadTree of all elements
+   * Clears the QuadTree of all elements including its own subtrees
    */
   inline void clear() {
-    delete top_right_;
-    delete top_left_;
-    delete bottom_right_;
-    delete bottom_left_;
-    bottom_left_ = nullptr;
-    top_right_ = nullptr;
-    bottom_left_ = nullptr;
-    bottom_right_ = nullptr;
+    if(top_right_){
+      delete top_right_;
+      top_right_ = nullptr;
+    }
+    if(top_left_){
+      delete top_left_;
+      top_left_ = nullptr;
+    }
+    if(bottom_right_){
+      delete bottom_right_;
+      bottom_right_ = nullptr;
+    }
+    if(bottom_left_){
+      delete bottom_left_;
+      bottom_left_ = nullptr;
+    }
+
     vec_.clear();
   };
   /**
