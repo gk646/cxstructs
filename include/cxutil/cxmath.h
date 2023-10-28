@@ -36,7 +36,7 @@ typedef float (*D_func)(float p1x, float p1y, float p2x, float p2y);
 
 //activation functions
 inline float sig(float x) noexcept {
-  return 1.0 / (1.0 + std::exp(-x));
+  return 1.0F / (1.0F + std::exp(-x));
 }
 inline float tanh(float x) noexcept {
   return std::tanh(x);

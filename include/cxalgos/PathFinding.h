@@ -26,6 +26,7 @@
 #include <type_traits>
 #include "../cxconfig.h"
 #include "../cxstructs/Geometry.h"
+#include "../cxstructs/HashSet.h"
 #include "../cxstructs/Pair.h"
 #include "../cxstructs/PriorityQueue.h"
 
@@ -86,6 +87,7 @@ namespace cxstructs {
  * @param target the target point
  * @return the shortest path from start to target in Points
  */
+using namespace cxhelper;
 template <typename S, typename B>
 std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, const B& blocked_val,
                                      const Point& start, const Point& target) {
@@ -94,9 +96,7 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
   vec<row<2, int>, false> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
   frontier.emplace(start, 0, start.dist(target), nullptr);
   while (!frontier.empty()) {
-    Node* current = new Node(
-        frontier
-            .top());  //yeah i know... // actually not that easy to solve this efficiently (it seems)
+    Node* current = new Node(frontier.top());
     frontier.pop();
 
     if (current->position == target) {
@@ -120,9 +120,9 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
       }
     }
   }
-
   return {};
 }
+
 }  // namespace cxstructs
 
 #endif  //CXSTRUCTS_ASTAR_PATHFINDING_H

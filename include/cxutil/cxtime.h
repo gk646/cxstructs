@@ -31,7 +31,7 @@ namespace cxstructs {
 using namespace std;  //std:: makes this code unreadable
 
 static inline chrono::time_point<chrono::high_resolution_clock> activeTimeStamp;
-static inline chrono::time_point<chrono::high_resolution_clock> checkpoints[2];
+static inline chrono::time_point<chrono::high_resolution_clock> checkpoints[3];
 /**
  * Sets the activeTimeStamp or alternatively the time of a checkpoint
  * @param checkpoint (optional, max=1) the checkpoint to set the current time
@@ -94,7 +94,12 @@ inline void printTime(const std::string& prefix = "", const int32_t& checkpoint 
 }
 
 template <typename durationType = chrono::duration<double>>
-inline long long getTime() {
+inline long long getTime(int_32_cx checkpoint = -1) {
+  if(checkpoint> -1){
+    auto diff = std::chrono::high_resolution_clock::now() - checkpoints[checkpoint];
+    auto diffInMicroseconds = chrono::duration_cast<durationType>(diff);
+    return diffInMicroseconds.count();
+  }
   auto diff = std::chrono::high_resolution_clock::now() - activeTimeStamp;
   auto diffInMicroseconds = chrono::duration_cast<durationType>(diff);
   return diffInMicroseconds.count();
