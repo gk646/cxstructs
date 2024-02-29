@@ -28,9 +28,11 @@
 
 namespace cxstructs {
 
-class Point;
+struct Point;
 class Circle;
 class Rect;
+class Sector;
+class Triangle;
 
 class Shape {
  public:
@@ -208,7 +210,7 @@ class Circle : public Shape {
   [[nodiscard]] inline float& radius() { return r_; }
 };
 
-class Point {
+struct Point {
   float x_;
   float y_;
 
@@ -223,6 +225,7 @@ class Point {
     return *this;
   }
   inline Point(const Point& o) : x_(o.x_), y_(o.y_) {}
+  inline Point operator*(int num) noexcept { return {x_ * num, y_ * num}; }
   inline bool operator==(const Point& o) const { return (x_ == o.x_ && y_ == o.y_); }
   friend std::ostream& operator<<(std::ostream& os, const Point& p) {
     return os << "Point:[" << p.x_ << " ," << p.y_ << "]";
@@ -279,6 +282,94 @@ class Point {
   [[nodiscard]] inline float y() const { return y_; }
 };
 
+struct PointI {
+  int32_t x, y;
+  PointI() {}
+  PointI(int x, int y) : x(x), y(y) {}
+  PointI(const PointI& p) noexcept : x(p.x), y(p.y) {}
+  inline PointI& operator=(const PointI& o) {
+    if (this != &o) {
+      x = o.x;
+      y = o.y;
+    }
+    return *this;
+  }
+  inline int dist(const PointI& p) const noexcept {
+    return cxstructs::fast_sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y));
+  }
+  inline bool operator==(const PointI& p) const { return (x == p.x && y == p.y); }
+  inline bool operator!=(const PointI& p) const { return (x != p.x || y != p.y); }
+  friend std::ostream& operator<<(std::ostream& os, const PointI& p) {
+    return os << "Point:[" << p.x << " ," << p.y << "]";
+  }
+  inline bool operator>(int i) const noexcept { return x > i && y > i; }
+  inline bool operator==(int i) const noexcept { return x == i && y == i; }
+  inline bool operator!=(int i) const noexcept { return x != i || y != i; }
+  inline PointI operator*(int i) const noexcept { return {x * i, y * i}; }
+  inline static Point GetPoint(const PointI& pointI) noexcept {
+    return {(float)pointI.x, (float)pointI.y};
+  }
+};
+
+template <typename sizeType>
+struct PointT {
+  sizeType x, y;
+  PointT() {}
+  PointT(int x, int y) : x(x), y(y) {}
+  PointT(const PointI& p) noexcept : x(p.x), y(p.y) {}
+  inline PointT& operator=(const PointT& o) {
+    if (this != &o) {
+      x = o.x;
+      y = o.y;
+    }
+    return *this;
+  }
+  inline int dist(const PointT& p) const noexcept {
+    return cxstructs::fast_sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y));
+  }
+  inline bool operator==(const PointT& p) const { return (x == p.x && y == p.y); }
+  inline bool operator!=(const PointT& p) const { return (x != p.x || y != p.y); }
+  friend std::ostream& operator<<(std::ostream& os, const PointT& p) {
+    return os << "Point:[" << p.x << " ," << p.y << "]";
+  }
+  inline bool operator>(int i) const noexcept { return x > i && y > i; }
+  inline bool operator==(int i) const noexcept { return x == i && y == i; }
+  inline bool operator!=(int i) const noexcept { return x != i || y != i; }
+  inline PointT operator*(int i) const noexcept { return {x * i, y * i}; }
+  inline static Point GetPoint(const PointT& pointI) noexcept {
+    return {(float)pointI.x, (float)pointI.y};
+  }
+};
+class Sector : public Shape {
+  float radius_;
+  float start_angle_;
+  float end_angle;
+  Point center_;
+
+  Sector() : radius_(0), start_angle_(0), end_angle(0), center_({}) {}
+  Sector(float radius, float start_angle, float end_angle, const Point& center)
+      : radius_(radius), start_angle_(), end_angle(end_angle), center_(center) {}
+  bool contains(Point p) {
+    auto dist = center_.dist(p);
+    if (dist > radius_) {
+      return false;
+    }
+
+    double angle = std::atan2(p.y() - center_.y(), p.x() - center_.x());
+    if (angle < 0) {
+      angle += 2 * CX_PI;
+    }
+
+    return angle >= start_angle_ && angle <= end_angle;
+  }
+  bool intersects(const Point& p) {
+    double distance = center_.dist(p);
+
+    // If the point is on the circumference and within the angles
+    return std::abs(distance - radius_) < 1e-9 && contains(p);
+  }
+};
+
 // Definitions of member functions
 bool Rect::intersects(const Circle& c) const {
   const float closestX = std::clamp(c.x(), x_, x_ + w_);
@@ -306,6 +397,18 @@ template <>
 struct hash<cxstructs::Point> {
   std::size_t operator()(const cxstructs::Point& p) const {
     return static_cast<int>(p.x()) ^ (static_cast<int>(p.y()) << 1);
+  }
+};
+template <>
+struct hash<cxstructs::PointI> {
+  std::size_t operator()(const cxstructs::PointI& p) const {
+    return static_cast<int>(p.x) ^ (static_cast<int>(p.y) << 1);
+  }
+};
+template <>
+struct hash<cxstructs::PointT<int16_t>> {
+  std::size_t operator()(const cxstructs::PointT<int16_t>& p) const {
+    return static_cast<int>(p.x) ^ (static_cast<int>(p.y) << 1);
   }
 };
 template <>

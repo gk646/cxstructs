@@ -92,7 +92,6 @@ struct HashSetLinkedList {
     }
   }
   inline bool replaceAdd(const V& value) {
-
     for (uint_16_cx i = 0; i < ArrayLength; i++) {
       if (data_[i].assigned_ && data_[i].value_ == value) {
         return false;
@@ -176,7 +175,7 @@ struct HashSetLinkedList {
 }  // namespace cxhelper
 
 namespace cxstructs {
-
+using namespace cxhelper;
 /**
  * <h2>HashSet</h2>
  * is a basically a HashMap but with only the key stored. This means the only information stored is the existence of a key to a given hash value.
@@ -366,8 +365,7 @@ class HashSet {
    */
   inline void clear() {
     delete[] arr_;
-    arr_ = new HList[initialCapacity_];
-    buckets_ = initialCapacity_;
+    arr_ = new HList[buckets_];
     size_ = 0;
     maxSize = buckets_ * load_factor_;
   }
