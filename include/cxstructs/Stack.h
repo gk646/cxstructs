@@ -246,7 +246,7 @@ class Stack {
      * Calling this function on an empty Stack causes undefined behavior.
      */
   inline void pop() {
-    CX_ASSERT(size_ > 0 && "out of bounds");
+    CX_ASSERT(size_ > 0 && "out of bounds", "");
     size_--;
   }
   /**
@@ -257,7 +257,7 @@ class Stack {
      * @return Reference to the topmost element in the Stack.
      */
   [[nodiscard]] inline T& top() const {
-    CX_ASSERT(size_ > 0 && "out of bounds");
+    CX_ASSERT(size_ > 0 && "out of bounds", "");
     return arr_[size_ - 1];
   }
   /**

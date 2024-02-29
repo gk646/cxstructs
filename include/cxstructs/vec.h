@@ -200,7 +200,7 @@ class vec {
       std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
     }
   }
-  inline vec(const vec<T,false>& o) : size_(o.size_), len_(o.len_) {
+  inline vec(const vec<T, false>& o) : size_(o.size_), len_(o.len_) {
     arr_ = alloc.allocate(len_);
     if (is_trivial_destr) {
       std::copy(o.arr_, o.arr_ + o.size_, arr_);
@@ -230,7 +230,7 @@ class vec {
     }
     return *this;
   }
-  inline vec& operator=(const vec<T,false>& o) {
+  inline vec& operator=(const vec<T, false>& o) {
     if (this != &o) {
       //ugly allocator syntax but saves a lot when using e.g. vec<float>
       if (!is_trivial_destr) {
@@ -301,10 +301,10 @@ class vec {
    */
   [[nodiscard]] inline T& at(const int_32_cx& index) const noexcept {
     if (index < 0) {
-      CX_ASSERT(size_ + index >= 0 && "index out of bounds");
+      CX_ASSERT(size_ + index >= 0, "index out of bounds");
       return arr_[size_ + index];
     } else {
-      CX_ASSERT(index < size_ && "index out of bounds");
+      CX_ASSERT(index < size_, "index out of bounds");
       return arr_[index];
     }
   }
@@ -340,14 +340,14 @@ class vec {
     if (len_ > size_ * 1.5) {
       shrink();
     }
-    CX_WARNING("trying to shrink already fitting vec");
+    CX_WARNING(len_ < size_ * 1.5, "trying to shrink already fitting vec");
   }
   /**
   * Removes the last element of the vec.
   * Reduces the size by one.
   */
   inline void pop_back() noexcept {
-    CX_ASSERT(size_ > 0 && "out of bounds");
+    CX_ASSERT(size_ > 0 , "out of bounds");
     size_--;
     if (!is_trivial_destr) {
       std::allocator_traits<Allocator>::destroy(alloc, &arr_[size_]);
@@ -406,7 +406,7 @@ class vec {
    * @param index index of removal
    */
   inline void removeAt(const uint_32_cx& index) noexcept {
-    CX_ASSERT(index < len_ && "index out of bounds");
+    CX_ASSERT(index < len_ , "index out of bounds");
     std::move(arr_ + index + 1, arr_ + size_--, arr_ + index);
   }
   /**

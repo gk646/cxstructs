@@ -43,6 +43,7 @@
 #include "cxstructs/mat.h"
 #include "cxstructs/row.h"
 #include "cxstructs/vec.h"
+#include "cxstructs/HashGrid.h"
 
 #include "cxml/FNN.h"
 #include "cxml/k-NN.h"
@@ -55,5 +56,6 @@
 #include "cxalgos/PatternMatching.h"
 #include "cxalgos/Search.h"
 #include "cxalgos/Sorting.h"
+#include "cxalgos/Statistic.h"
 
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_H_

@@ -211,7 +211,7 @@ class QuadTree {
           split();
         } else {
           vec_.push_back(e);
-          CX_WARNING(
+          CX_WARNING(false,
               "|QuadTree.h| Reached max depth | large insertions now will slow "
               "down the tree");
           return;

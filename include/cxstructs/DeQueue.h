@@ -313,7 +313,7 @@ class DeQueue {
     */
   [[nodiscard]] inline uint_32_cx capacity() const noexcept { return len_; }
   inline void shrink_to_fit() noexcept {
-    CX_WARNING(len_ > size_ * 1.5);
+    CX_WARNING(len_ > size_ * 1.5,"");
     shrink();
   }
   friend std::ostream& operator<<(std::ostream& os, DeQueue& q) {
