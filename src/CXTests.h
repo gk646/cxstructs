@@ -20,6 +20,8 @@
 
 #include "CXStructs.h"
 #include "cxml/word2vec.h"
+
+#ifndef CX_DELETE_TESTS
 namespace cxtests {
 
 using namespace cxstructs;
@@ -60,4 +62,6 @@ static void test_all() {
   test_cxml();
   std::cout << "\nAll tests passed!" << std::endl;
 }
+
 }  // namespace cxtests
+#endif

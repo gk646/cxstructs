@@ -262,27 +262,27 @@ class kNN_2D {
 
     std::cout << "   Testing absolute classification" << std::endl;
     cat1 = knn.classify_by_category_count(0, 0, 4);
-    CX_ASSERT((int)cat1 == 0);
+    CX_ASSERT((int)cat1 == 0, "");
     cat1 = knn.classify_by_category_count(5, 5, 4);
-    CX_ASSERT((int)cat1 == 1);
+    CX_ASSERT((int)cat1 == 1, "");
 
     std::cout << "   Testing distance weighted classification" << std::endl;
     cat1 = knn.classify_by_sum_distance(0, 0, 4);
-    CX_ASSERT((int)cat1 == 0);
+    CX_ASSERT((int)cat1 == 0, "");
     cat1 = knn.classify_by_sum_distance(5, 5, 4);
-    CX_ASSERT((int)cat1 == 1);
+    CX_ASSERT((int)cat1 == 1, "");
 
     std::cout << "   Testing weight classification" << std::endl;
     cat1 = knn.classify_by_sum_weight(0, 0, 4);
-    CX_ASSERT((int)cat1 == 0);
+    CX_ASSERT((int)cat1 == 0, "");
     cat1 = knn.classify_by_sum_weight(5, 5, 4);
-    CX_ASSERT((int)cat1 == 1);
+    CX_ASSERT((int)cat1 == 1, "");
 
     std::cout << "   Testing weighted * dist classification" << std::endl;
     cat1 = knn.classify_by_sum_weighted_distance(0, 0, 4);
-    CX_ASSERT((int)cat1 == 0);
+    CX_ASSERT((int)cat1 == 0, "");
     cat1 = knn.classify_by_sum_weighted_distance(5, 5, 4);
-    CX_ASSERT((int)cat1 == 1);
+    CX_ASSERT((int)cat1 == 1, "");
   }
 #endif
 };

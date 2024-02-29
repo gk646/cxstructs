@@ -206,7 +206,8 @@ class FNN {
       mat output = fnn.forward(inputs);
       output -= expected_outputs;
       for (size_t j = 0; j < inputs.n_rows(); ++j) {
-        CX_ASSERT(output(0, j) < 0.1);
+        CX_ASSERT(output(0, j) < 0.1, "");
+
       }
     }
   }
@@ -418,7 +419,7 @@ cxstructs {
         for (size_t j = 0; j < inputs.size(); ++j) {
           double output = fnn.forward(inputs[j])[0];
           double expected = expected_outputs[j][0];
-          CX_ASSERT(output - expected < 0.1);
+          CX_ASSERT(output - expected < 0.1, "");
         }
       }
     }

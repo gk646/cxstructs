@@ -77,7 +77,7 @@ class row {
     }
   }
   row(std::initializer_list<T> init_list) {
-    CX_ASSERT(init_list.size() == n_elem);
+    CX_ASSERT(init_list.size() == n_elem, "");
     std::copy(init_list.begin(), init_list.end(), arr_);
   }
   /**

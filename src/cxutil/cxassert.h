@@ -41,25 +41,14 @@ inline void warning_failed(const char* expr, const char* file, int line, const c
             << "Message: " << message << "\n";
 }
 
-#define CX_ASSERT_1(expr) CX_ASSERT_2(expr, "Assert failed: " #expr)
-#define CX_ASSERT_2(expr, message) \
-  ((expr) ? (void)0 : CX_ASSERT_failed(#expr, __FILE__, __LINE__, message))
-#define GET_MACRO(_1, _2, NAME, ...) NAME
-#define CX_ASSERT(...) GET_MACRO(__VA_ARGS__, CX_ASSERT_2, CX_ASSERT_1)(__VA_ARGS__)
+#define CX_ASSERT(expr, message) ((expr) ? (void)0 : CX_ASSERT_failed(#expr, __FILE__, __LINE__, message))
 
-#define CX_WARNING_1(message) CX_WARNING_2(#message, "Warning: " #message)
-#define CX_WARNING_2(expr, message) \
-  ((expr) ? (void)0 : warning_failed(#expr, __FILE__, __LINE__, message))
-#define CX_WARNING(...) GET_MACRO(__VA_ARGS__, CX_WARNING_2, CX_WARNING_1)(__VA_ARGS__)
+#define CX_WARNING(expr, message) ((expr) ? (void)0 : warning_failed(#expr, __FILE__, __LINE__, message))
+
 
 #if defined(_MSC_VER) && !defined(_DEBUG)
 #undef CX_ASSERT
-#undef CX_ASSERT_1
-#undef CX_ASSERT_2
-#define CX_ASSERT_1(expr) ((void)0)
-#define CX_ASSERT_2(expr, message) ((void)0)
-#define GET_MACRO(_1, _2, NAME, ...) NAME
-#define CX_ASSERT(...) GET_MACRO(__VA_ARGS__, CX_ASSERT_2, CX_ASSERT_1)(__VA_ARGS__)
+#define CX_ASSERT(expr, message) ((void)0)
 #elif defined(NDEBUG)
 #undef CX_ASSERT
 #undef CX_ASSERT_1

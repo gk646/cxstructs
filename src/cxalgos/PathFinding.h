@@ -146,7 +146,7 @@ static void TEST_PATH_FINDING() {
 
   auto path = astar_pathfinding(maze, 1, start, target);
 
-  CX_ASSERT(path[path.size() - 3] == Point(11, 6));
+  CX_ASSERT(path[path.size() - 3] == Point(11, 6), "");
 }
 }  // namespace cxtests
 #endif

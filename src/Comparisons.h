@@ -237,17 +237,17 @@ void compareWithSTL() {
    */
   std::cout << "\nComparing Quicksort" << std::endl;
 
-  auto vec1 = cxtests::generate_shuffled_vector(10000000);
-  auto vec2 = vec1;
+  //auto vec1 = cxtests::generate_shuffled_vector(10000000);
+  //auto vec2 = vec1;
   cxstructs::now();
 
-  quick_sort(vec1.data(), 10000000);
+  //quick_sort(vec1.data(), 10000000);
 
   cxstructs::printTime<>("cxstructs quicksort:");
 
   cxstructs::now();
 
-  std::sort(vec2.begin(), vec2.end());
+  //std::sort(vec2.begin(), vec2.end());
 
   cxstructs::printTime<>("std::sort:");
 

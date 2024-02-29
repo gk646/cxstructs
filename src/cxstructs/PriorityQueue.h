@@ -277,23 +277,23 @@ class PriorityQueue {
     // Test default constructor
     std::cout << "  Testing default constructor..." << std::endl;
     PriorityQueue<int> q1;
-    CX_ASSERT(q1.size() == 0);
-    CX_ASSERT(q1.empty());
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
 
     // Test push
     std::cout << "  Testing push..." << std::endl;
     q1.push(5);
-    CX_ASSERT(q1.size() == 1);
-    CX_ASSERT(q1.empty() == false);
-    CX_ASSERT(q1.top() == 5);
+    CX_ASSERT(q1.size() == 1, "");
+    CX_ASSERT(q1.empty() == false, "");
+    CX_ASSERT(q1.top() == 5, "");
 
     // Test pop
     std::cout << "  Testing pop..." << std::endl;
     int val = q1.top();
     q1.pop();
-    CX_ASSERT(val == 5);
-    CX_ASSERT(q1.size() == 0);
-    CX_ASSERT(q1.empty());
+    CX_ASSERT(val == 5, "");
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
 
     // Test non-empty constructor
     std::cout << "  Testing non-empty constructor..." << std::endl;
@@ -301,24 +301,24 @@ class PriorityQueue {
     for (int i = 0; i < 5; i++) {
       q2.push(10);
     }
-    CX_ASSERT(q2.size() == 5);
-    CX_ASSERT(q2.empty() == false);
-    CX_ASSERT(q2.top() == 10);
+    CX_ASSERT(q2.size() == 5, "");
+    CX_ASSERT(q2.empty() == false, "");
+    CX_ASSERT(q2.top() == 10, "");
 
     // Test copy constructor
     std::cout << "  Testing copy constructor..." << std::endl;
     PriorityQueue<int> q3(q2);
-    CX_ASSERT(q3.size() == q2.size());
-    CX_ASSERT(q3.empty() == q2.empty());
-    CX_ASSERT(q3.top() == q2.top());
+    CX_ASSERT(q3.size() == q2.size(), "");
+    CX_ASSERT(q3.empty() == q2.empty(), "");
+    CX_ASSERT(q3.top() == q2.top(), "");
 
     // Test assignment operator
     std::cout << "  Testing assignment operator..." << std::endl;
     PriorityQueue<int> q4;
     q4 = q2;
-    CX_ASSERT(q4.size() == q2.size());
-    CX_ASSERT(q4.empty() == q2.empty());
-    CX_ASSERT(q4.top() == q2.top());
+    CX_ASSERT(q4.size() == q2.size(), "");
+    CX_ASSERT(q4.empty() == q2.empty(), "");
+    CX_ASSERT(q4.top() == q2.top(), "");
 
     q1.clear();
     // Test multiple push/pop
@@ -326,13 +326,13 @@ class PriorityQueue {
     for (int i = 0; i < 100; i++) {
       q1.push(i);
     }
-    CX_ASSERT(q1.size() == 100);
+    CX_ASSERT(q1.size() == 100, "");
     for (int i = 0; i < 100; i++) {
       int temp = q1.top();
       q1.pop();
-      CX_ASSERT(temp == i);
+      CX_ASSERT(temp == i, "");
     }
-    CX_ASSERT(q1.size() == 0);
+    CX_ASSERT(q1.size() == 0, "");
 
     q1.clear();
     PriorityQueue<int, std::less<>> q10;
@@ -341,19 +341,19 @@ class PriorityQueue {
     for (int i = 0; i < 100; i++) {
       q10.push(i);
     }
-    CX_ASSERT(q10.size() == 100);
+    CX_ASSERT(q10.size() == 100, "");
     for (int i = 0; i < 100; i++) {
       int temp = q10.top();
       q10.pop();
-      CX_ASSERT(temp == 99 - i);
+      CX_ASSERT(temp == 99 - i, "");
     }
-    CX_ASSERT(q10.size() == 0);
+    CX_ASSERT(q10.size() == 0, "");
 
     // Test clear
     std::cout << "  Testing clear..." << std::endl;
     q1.clear();
-    CX_ASSERT(q1.size() == 0);
-    CX_ASSERT(q1.empty());
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
 
     // Test push after clear
     std::cout << "  Testing push after clear..." << std::endl;
@@ -361,8 +361,8 @@ class PriorityQueue {
       q1.push(i);
     }
     q1.push(-1);
-    CX_ASSERT(q1.size() == 11);
-    CX_ASSERT(q1.top() == -1);
+    CX_ASSERT(q1.size() == 11, "");
+    CX_ASSERT(q1.top() == -1, "");
 
     std::cout << "  Testing similarity to std::priority_queue..." << std::endl;
     q1.clear();
@@ -373,23 +373,23 @@ class PriorityQueue {
       frontier.push(ran);
       q1.push(ran);
     }
-    CX_ASSERT(frontier.top() == q1.top());
+    CX_ASSERT(frontier.top() == q1.top(), "");
     q1.pop();
     frontier.pop();
-    CX_ASSERT(frontier.top() == q1.top());
+    CX_ASSERT(frontier.top() == q1.top(), "");
     q1.pop();
     frontier.pop();
-    CX_ASSERT(frontier.top() == q1.top());
+    CX_ASSERT(frontier.top() == q1.top(), "");
 
     std::cout << "  Testing heapify..." << std::endl;
     int nums[4] = {5, 2, 3, 1};
     PriorityQueue<int> q12(const_cast<const int*>(nums), 4);
-    CX_ASSERT(q12.top() == 5);
+    CX_ASSERT(q12.top() == 5, "");
 
     int* nums2 = new int[5]{2, 3, 54, 123};
     PriorityQueue<int, std::less<>> q13(std::move(nums2), 4);
-    CX_ASSERT(nums2 == nullptr);
-    CX_ASSERT(q13.top() == 2);
+    CX_ASSERT(nums2 == nullptr, "");
+    CX_ASSERT(q13.top() == 2, "");
   }
 #endif
 };

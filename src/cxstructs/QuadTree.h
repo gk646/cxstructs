@@ -211,7 +211,7 @@ class QuadTree {
           split();
         } else {
           vec_.push_back(e);
-          CX_WARNING(
+          CX_WARNING(false,
               "|QuadTree.h| Reached max depth | large insertions now will slow "
               "down the tree");
           return;
@@ -324,16 +324,16 @@ class QuadTree {
       tree.insert({distr(gen), distr(gen)});
     }
 
-    CX_ASSERT(tree.depth() == 3);
-    CX_ASSERT(tree.size() == 1000);
+    CX_ASSERT(tree.depth() == 3, "");
+    CX_ASSERT(tree.size() == 1000, "");
 
     std::cout << "   Testing count subrect..." << std::endl;
-    CX_ASSERT(tree.count_subrect({0, 0, 200, 200}) == 1000);
-    CX_ASSERT(tree.count_subrect({10, 10, 50, 50}) > 10);
+    CX_ASSERT(tree.count_subrect({0, 0, 200, 200}) == 1000, "");
+    CX_ASSERT(tree.count_subrect({10, 10, 50, 50}) > 10,"");
     tree.insert({2, 2});
-    CX_ASSERT(tree.size() == 1001);
+    CX_ASSERT(tree.size() == 1001,"");
     tree.erase({2, 2});
-    CX_ASSERT(tree.size() == 1000);
+    CX_ASSERT(tree.size() == 1000,"");
 
     std::cout << "   Testing max capacity..." << std::endl;
     QuadTree<Point> tree1({0, 0, 200, 200}, 2, 10);
@@ -345,7 +345,7 @@ class QuadTree {
     tree1.clear();
     tree1.insert({2, 2});
     for (auto ptr : tree1.get_subrect({0, 0, 2, 2})) {
-      CX_ASSERT(*ptr == Point(2, 2));
+      CX_ASSERT(*ptr == Point(2, 2),"");
     }
   }
 #endif

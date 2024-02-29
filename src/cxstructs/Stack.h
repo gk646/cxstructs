@@ -246,7 +246,7 @@ class Stack {
      * Calling this function on an empty Stack causes undefined behavior.
      */
   inline void pop() {
-    CX_ASSERT(size_ > 0 && "out of bounds");
+    CX_ASSERT(size_ > 0 && "out of bounds", "");
     size_--;
   }
   /**
@@ -257,7 +257,7 @@ class Stack {
      * @return Reference to the topmost element in the Stack.
      */
   [[nodiscard]] inline T& top() const {
-    CX_ASSERT(size_ > 0 && "out of bounds");
+    CX_ASSERT(size_ > 0 && "out of bounds", "");
     return arr_[size_ - 1];
   }
   /**
@@ -296,66 +296,66 @@ class Stack {
 
     std::cout << "  Testing default constructor..." << std::endl;
     Stack<int> defaultStack;
-    CX_ASSERT(defaultStack.size() == 0);
+    CX_ASSERT(defaultStack.size() == 0, "");
 
     std::cout << "  Testing fill constructor..." << std::endl;
     Stack<int> fillStack(5, 1);
-    CX_ASSERT(fillStack.size() == 5);
+    CX_ASSERT(fillStack.size() == 5, "");
     for (int i = 0; i < 5; i++) {
-      CX_ASSERT(fillStack.top() == 1);
+      CX_ASSERT(fillStack.top() == 1, "");
       fillStack.pop();
     }
 
     std::cout << "  Testing copy constructor..." << std::endl;
     Stack<int> copyStack(fillStack);
-    CX_ASSERT(copyStack.size() == fillStack.size());
+    CX_ASSERT(copyStack.size() == fillStack.size(), "");
 
     std::cout << "  Testing move constructor..." << std::endl;
     Stack<int> moveStack(std::move(fillStack));
-    CX_ASSERT(moveStack.size() == copyStack.size());
-    CX_ASSERT(fillStack.empty());
+    CX_ASSERT(moveStack.size() == copyStack.size(), "");
+    CX_ASSERT(fillStack.empty(), "");
 
     std::cout << "  Testing initializer list constructor..." << std::endl;
     Stack<int> initListStack({1, 2, 3, 4, 5});
-    CX_ASSERT(initListStack.size() == 5);
+    CX_ASSERT(initListStack.size() == 5, "");
     for (int i = 5; i > 0; i--) {
-      CX_ASSERT(initListStack.top() == i);
+      CX_ASSERT(initListStack.top() == i, "");
       initListStack.pop();
     }
 
     std::cout << "  Testing assignment operator..." << std::endl;
     Stack<int> assignStack;
     assignStack = copyStack;
-    CX_ASSERT(assignStack.size() == copyStack.size());
+    CX_ASSERT(assignStack.size() == copyStack.size(), "");
 
     std::cout << "  Testing move assignment operator..." << std::endl;
     Stack<int> moveAssignStack;
     moveAssignStack = std::move(copyStack);
-    CX_ASSERT(moveAssignStack.size() == assignStack.size());
-    CX_ASSERT(copyStack.empty());
+    CX_ASSERT(moveAssignStack.size() == assignStack.size(), "");
+    CX_ASSERT(copyStack.empty(),"");
 
     std::cout << "  Testing push_back method..." << std::endl;
     defaultStack.push(1);
-    CX_ASSERT(defaultStack.top() == 1);
-    CX_ASSERT(defaultStack.size() == 1);
+    CX_ASSERT(defaultStack.top() == 1,"");
+    CX_ASSERT(defaultStack.size() == 1,"");
 
     std::cout << "  Testing emplace method..." << std::endl;
     defaultStack.emplace(2);
-    CX_ASSERT(defaultStack.top() == 2);
-    CX_ASSERT(defaultStack.size() == 2);
+    CX_ASSERT(defaultStack.top() == 2,"");
+    CX_ASSERT(defaultStack.size() == 2,"");
 
     std::cout << "  Testing pop_back method..." << std::endl;
     defaultStack.pop();
-    CX_ASSERT(defaultStack.top() == 1);
-    CX_ASSERT(defaultStack.size() == 1);
+    CX_ASSERT(defaultStack.top() == 1,"");
+    CX_ASSERT(defaultStack.size() == 1,"");
 
     std::cout << "  Testing iterator..." << std::endl;
     for (auto it = assignStack.begin(); it != assignStack.end(); ++it) {
-      CX_ASSERT(*it == 1);  // Assuming all elements are 1
+      CX_ASSERT(*it == 1,"");  // Assuming all elements are 1
     }
 
     for (auto it : defaultStack) {
-      CX_ASSERT(it == 1);
+      CX_ASSERT(it == 1,"");
     }
 
     std::cout << "  Testing memory leak..." << std::endl;

@@ -216,69 +216,61 @@ struct Point {
 
  public:
   inline Point() : x_(0), y_(0) {}
-  inline Point(const float& x_pos, const float& y_pos) : x_(x_pos), y_(y_pos) {}
-  inline Point& operator=(const Point& o) {
-    if (this != &o) {
-      x_ = o.x_;
-      y_ = o.y_;
-    }
+  inline Point(float x_pos, float y_pos) : x_(x_pos), y_(y_pos) {}
+  inline Point(const Point& o) = default;
+  inline Point& operator=(const Point& o) = default;
+
+  // Multiplication by a scalar
+  inline Point operator*(float num) const { return {x_ * num, y_ * num}; }
+  inline Point& operator*=(float num) {
+    x_ *= num;
+    y_ *= num;
     return *this;
   }
-  inline Point(const Point& o) : x_(o.x_), y_(o.y_) {}
-  inline Point operator*(int num) noexcept { return {x_ * num, y_ * num}; }
-  inline bool operator==(const Point& o) const { return (x_ == o.x_ && y_ == o.y_); }
+
+  // Addition
+  inline Point operator+(const Point& o) const { return {x_ + o.x_, y_ + o.y_}; }
+  inline bool operator<(int num) const { return x_ < num && y_ < num; }
+
+  // Subtraction
+  inline Point operator-(const Point& o) const { return {x_ - o.x_, y_ - o.y_}; }
+
+  // Equality check
+  inline bool operator==(const Point& o) const { return x_ == o.x_ && y_ == o.y_; }
+
+  // Inequality check
+  inline bool operator!=(const Point& o) const { return !(*this == o); }
+
+  // Stream insertion
   friend std::ostream& operator<<(std::ostream& os, const Point& p) {
-    return os << "Point:[" << p.x_ << " ," << p.y_ << "]";
-  }
-  bool operator==(const Rect& r) const { return (x_ == r.x() && y_ == r.y()); }
-  /**
-   * Calculates the squared euclidean distance from this to the given point
-   * @param p to other point
-   * @return the squared distance
-   */
-  [[nodiscard]] float dist_sqr(const Point& p) const {
-    return (p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_);
-  }
-  /**
-   * Calculates the euclidean distance from this to the given point
-   * @param p to other point
-   * @return the  distance
-   */
-  [[nodiscard]] float dist(const Point& p) const {
-    return cxstructs::fast_sqrt((p.x_ - x_) * (p.x_ - x_) + (p.y_ - y_) * (p.y_ - y_));
-  }
-  /**
-   * Calculates the euclidean distance from this point to the given coordinates
-   * @param x
-   * @param y
-   * @return the distance
-   */
-  [[nodiscard]] float dist(const float& x, const float& y) const {
-    return cxstructs::fast_sqrt((x - x_) * (x - x_) + (y - y_) * (y - y_));
+    return os << "Point:[" << p.x_ << ", " << p.y_ << "]";
   }
 
-  /**
- * @brief Getter method for the x position.
- * @return A readable/writable reference to the x position.
- */
-  [[nodiscard]] inline float& x() { return x_; }
+  // Division by a scalar
+  inline Point& operator/=(float divisor) {
+    x_ /= divisor;
+    y_ /= divisor;
+    return *this;
+  }
 
-  /**
- * @brief Getter method for the y position.
- * @return A readable/writable reference to the y position.
- */
-  [[nodiscard]] inline float& y() { return y_; }
+  // Manhattan distance
+  [[nodiscard]] inline float manhattanDist(const Point& p) const {
+    return std::abs(x_ - p.x_) + std::abs(y_ - p.y_);
+  }
 
-  /**
- * @brief Const getter method for the x position.
- * @return The x position. Used when object is const, and does not allow modification.
- */
+  // Squared Euclidean distance
+  [[nodiscard]] inline float distSqr(const Point& p) const {
+    return (x_ - p.x_) * (x_ - p.x_) + (y_ - p.y_) * (y_ - p.y_);
+  }
+
+  // Euclidean distance
+  [[nodiscard]] inline float dist(const Point& p) const { return std::sqrt(distSqr(p)); }
+  [[nodiscard]] inline float dist(float x, float y) const { return std::sqrt(distSqr({x, y})); }
+
+  // Getters and setters
+  inline float& x() { return x_; }
+  inline float& y() { return y_; }
   [[nodiscard]] inline float x() const { return x_; }
-
-  /**
- * @brief Const getter method for the y position.
- * @return The y position. Used when object is const, and does not allow modification.
- */
   [[nodiscard]] inline float y() const { return y_; }
 };
 
@@ -327,12 +319,14 @@ struct PointT {
   inline int dist(const PointT& p) const noexcept {
     return cxstructs::fast_sqrt((p.x - x) * (p.x - x) + (p.y - y) * (p.y - y));
   }
+
   inline bool operator==(const PointT& p) const { return (x == p.x && y == p.y); }
   inline bool operator!=(const PointT& p) const { return (x != p.x || y != p.y); }
   friend std::ostream& operator<<(std::ostream& os, const PointT& p) {
     return os << "Point:[" << p.x << " ," << p.y << "]";
   }
   inline bool operator>(int i) const noexcept { return x > i && y > i; }
+  inline bool operator<(int num) const { return x < num && y < num; }
   inline bool operator==(int i) const noexcept { return x == i && y == i; }
   inline bool operator!=(int i) const noexcept { return x != i || y != i; }
   inline PointT operator*(int i) const noexcept { return {x * i, y * i}; }
@@ -434,7 +428,7 @@ static void GEOMETRY_TEST() {
   Rect r1(10, 10, 50, 50);
   Rect r2(10, 10, 50, 50);
   CX_ASSERT(r1.intersects(r2), "Same rectangles should intersect");
-  CX_ASSERT(r1.contains(r2));
+  CX_ASSERT(r1.contains(r2), "");
   // Rectangles that share an edge
   std::cout << "  Testing rectangles that share an edge..." << std::endl;
   Rect r3(10, 10, 50, 50);
@@ -489,7 +483,7 @@ static void GEOMETRY_TEST() {
   CX_ASSERT(r14.contains(r14), "Rectangle should not contain itself");
   CX_ASSERT(r16.contains(p10), "Rectangle should contain point inside it");
   CX_ASSERT(r14.contains(p11), "Rectangle should contain point on its edge");
-  CX_ASSERT(r16.contains(p11));
+  CX_ASSERT(r16.contains(p11),"");
 
   std::cout << "  Testing circle contained circle...\n";
   Circle c5(0.0, 0.0, 10.0);

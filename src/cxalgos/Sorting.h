@@ -211,11 +211,11 @@ void selection_sort(T* arr, uint_32_cx len, bool ascending = true) {
     }
   } else {
     for (uint_32_cx i = 0; i < len; i++) {
-      T low = arr[i];
+      T high = arr[i];
       index = i;
       for (uint_32_cx j = i + 1; j < len; j++) {
-        if (arr[j] < low) {
-          low = arr[j];
+        if (arr[j] > high) {
+          high = arr[j];
           index = j;
         }
       }
@@ -298,9 +298,9 @@ std::vector<int> generate_shuffled_vector(int size) {
 void CX_ASSERT_sorted(std::vector<int>& vec, bool ascending = true) {
   for (size_t i = 1; i < vec.size(); i++) {
     if (ascending) {
-      CX_ASSERT(vec[i - 1] <= vec[i]);
+      CX_ASSERT(vec[i - 1] <= vec[i],"");
     } else {
-      CX_ASSERT(vec[i - 1] >= vec[i]);
+      CX_ASSERT(vec[i - 1] >= vec[i],"");
     }
   }
 }

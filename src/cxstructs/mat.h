@@ -528,30 +528,30 @@ class mat {
     // Test default constructor
     std::cout << "  Testing default constructor...\n";
     mat m1;
-    CX_ASSERT(m1.arr == nullptr && m1.n_rows_ == 0 && m1.n_cols_ == 0);
+    CX_ASSERT(m1.arr == nullptr && m1.n_rows_ == 0 && m1.n_cols_ == 0, "");
 
     // Test parameterized constructor
     std::cout << "  Testing parameterized constructor...\n";
     mat m2(2, 3);
-    CX_ASSERT(m2.n_rows_ == 2 && m2.n_cols_ == 3);
+    CX_ASSERT(m2.n_rows_ == 2 && m2.n_cols_ == 3, "");
 
     // Test copy constructor
     std::cout << "  Testing copy constructor...\n";
     mat m3 = m2;
-    CX_ASSERT(m3.n_rows_ == m2.n_rows_ && m3.n_cols_ == m2.n_cols_);
+    CX_ASSERT(m3.n_rows_ == m2.n_rows_ && m3.n_cols_ == m2.n_cols_, "");
 
     // Test multiplication and assignment operators
     std::cout << "  Testing multiplication and assignment operators...\n";
     mat m4(3, 2);
     m2 = m2 * m4;
-    CX_ASSERT(m2.n_rows_ == 2 && m2.n_cols_ == 2);
+    CX_ASSERT(m2.n_rows_ == 2 && m2.n_cols_ == 2, "");
 
     // Test constructor from vector of vectors
     std::cout << "  Testing constructor from vector of vectors...\n";
     std::vector<std::vector<float>> data = {{1.0f, 2.0f}, {3.0f, 4.0f}};
     mat m5(data);
-    CX_ASSERT(m5.n_rows_ == 2 && m5.n_cols_ == 2);
-    CX_ASSERT(m5(0, 0) - 1.0f < 1e-6);  // Comparing floats with a tolerance
+    CX_ASSERT(m5.n_rows_ == 2 && m5.n_cols_ == 2, "");
+    CX_ASSERT(m5(0, 0) - 1.0f < 1e-6, "");  // Comparing floats with a tolerance
 
     // Test specific multiplication
     std::cout << "  Testing specific multiplication...\n";
@@ -560,21 +560,21 @@ class mat {
     mat m6(data1);
     mat m7(data2);
     mat m8 = m6 * m7;
-    CX_ASSERT(m8(0, 0) - 19.0f < 1e-6);
-    CX_ASSERT(m8(0, 1) - 22.0f < 1e-6);
-    CX_ASSERT(m8(1, 0) - 43.0f < 1e-6);
-    CX_ASSERT(m8(1, 1) - 50.0f < 1e-6);
+    CX_ASSERT(m8(0, 0) - 19.0f < 1e-6, "");
+    CX_ASSERT(m8(0, 1) - 22.0f < 1e-6, "");
+    CX_ASSERT(m8(1, 0) - 43.0f < 1e-6, "");
+    CX_ASSERT(m8(1, 1) - 50.0f < 1e-6, "");
 
     std::cout << "  Testing equals operator...\n";
 
     mat m9({{2, 3}, {2, 3}});
     mat m10({{2, 3}, {2, 3}});
 
-    CX_ASSERT(m9 == m10);
-    CX_ASSERT(!(m9 != m10));
+    CX_ASSERT(m9 == m10, "");
+    CX_ASSERT(!(m9 != m10), "");
     m9(1, 1) = 5;
-    CX_ASSERT(m9 != m10);
-    CX_ASSERT(!(m9 == m10));
+    CX_ASSERT(m9 != m10, "");
+    CX_ASSERT(!(m9 == m10), "");
 
     std::cout << "  Testing transpose...\n";
     m10 = mat(2, 3);
@@ -587,13 +587,13 @@ class mat {
 
     mat m1_transpose = m10.transpose();
 
-    CX_ASSERT(m1_transpose.n_rows_ == m10.n_cols_);
-    CX_ASSERT(m1_transpose.n_cols_ == m10.n_rows_);
-    CX_ASSERT(m1_transpose(0, 0) == m10(0, 0));
-    CX_ASSERT(m1_transpose(0, 1) == m10(1, 0));
-    CX_ASSERT(m1_transpose(1, 0) == m10(0, 1));
-    CX_ASSERT(m1_transpose(2, 0) == m10(0, 2));
-    CX_ASSERT(m1_transpose(2, 1) == m10(1, 2));
+    CX_ASSERT(m1_transpose.n_rows_ == m10.n_cols_, "");
+    CX_ASSERT(m1_transpose.n_cols_ == m10.n_rows_, "");
+    CX_ASSERT(m1_transpose(0, 0) == m10(0, 0), "");
+    CX_ASSERT(m1_transpose(0, 1) == m10(1, 0), "");
+    CX_ASSERT(m1_transpose(1, 0) == m10(0, 1), "");
+    CX_ASSERT(m1_transpose(2, 0) == m10(0, 2), "");
+    CX_ASSERT(m1_transpose(2, 1) == m10(1, 2), "");
 
     std::cout << "  Testing assignment and equality...\n";
     mat m11(2, 2);
@@ -604,8 +604,8 @@ class mat {
 
     mat m12 = m11;
 
-    CX_ASSERT(m11 == m12);
-    CX_ASSERT(!(m11 != m12));
+    CX_ASSERT(m11 == m12, "");
+    CX_ASSERT(!(m11 != m12), "");
 
     std::cout << "  Testing addition and subtraction...\n";
     mat m13(2, 2);
@@ -621,13 +621,13 @@ class mat {
     m14(1, 1) = 8;
 
     mat m15 = m13 + m14;
-    CX_ASSERT(m15(0, 0) == 6);
-    CX_ASSERT(m15(0, 1) == 8);
-    CX_ASSERT(m15(1, 0) == 10);
-    CX_ASSERT(m15(1, 1) == 12);
+    CX_ASSERT(m15(0, 0) == 6, "");
+    CX_ASSERT(m15(0, 1) == 8, "");
+    CX_ASSERT(m15(1, 0) == 10, "");
+    CX_ASSERT(m15(1, 1) == 12, "");
 
     mat m16 = m15 - m14;
-    CX_ASSERT(m16 == m13);
+    CX_ASSERT(m16 == m13, "");
 
     std::cout << "  Testing multiplication...\n";
 
@@ -644,10 +644,10 @@ class mat {
     m18(1, 1) = 8;
 
     mat m19 = m17 * m18;
-    CX_ASSERT(m19(0, 0) == 19);
-    CX_ASSERT(m19(0, 1) == 22);
-    CX_ASSERT(m19(1, 0) == 43);
-    CX_ASSERT(m19(1, 1) == 50);
+    CX_ASSERT(m19(0, 0) == 19, "");
+    CX_ASSERT(m19(0, 1) == 22, "");
+    CX_ASSERT(m19(1, 0) == 43, "");
+    CX_ASSERT(m19(1, 1) == 50, "");
 
     std::cout << "  Testing row and col operations...\n";
 
@@ -658,12 +658,12 @@ class mat {
     m20(1, 1) = 4;
 
     m20.row_op(1, [](uint_32_cx col, float val) { return val * 2; });
-    CX_ASSERT(m20(1, 0) == 6);
-    CX_ASSERT(m20(1, 1) == 8);
+    CX_ASSERT(m20(1, 0) == 6, "");
+    CX_ASSERT(m20(1, 1) == 8, "");
 
     m20.col_op(0, [](uint_32_cx row, float val) { return val + 1; });
-    CX_ASSERT(m20(0, 0) == 2);
-    CX_ASSERT(m20(1, 0) == 7);
+    CX_ASSERT(m20(0, 0) == 2, "");
+    CX_ASSERT(m20(1, 0) == 7, "");
 
     std::cout << "  Testing print...\n";
     m20.print();

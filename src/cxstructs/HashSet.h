@@ -394,35 +394,35 @@ class HashSet {
     HashSet<int> set1;
     set1.insert(1);
     set1.insert(2);
-    CX_ASSERT(set1.contains(1));
-    CX_ASSERT(set1.contains(2));
+    CX_ASSERT(set1.contains(1), "");
+    CX_ASSERT(set1.contains(2), "");
 
     // Test erase
     std::cout << "  Testing erase method..." << std::endl;
     set1.erase(1);
-    CX_ASSERT(!set1.contains(1));
+    CX_ASSERT(!set1.contains(1), "");
 
     // Test copy constructor
     std::cout << "  Testing copy constructor..." << std::endl;
     HashSet<int> set2(set1);
-    CX_ASSERT(set2.contains(2));
+    CX_ASSERT(set2.contains(2), "");
 
     // Test assignment operator
     std::cout << "  Testing assignment operator..." << std::endl;
     HashSet<int> set3;
     set3 = set1;
-    CX_ASSERT(set3.contains(2));
+    CX_ASSERT(set3.contains(2), "");
 
     // Test size
     std::cout << "  Testing size()..." << std::endl;
-    CX_ASSERT(set1.size() == 1);
-    CX_ASSERT(set2.size() == 1);
-    CX_ASSERT(set3.size() == 1);
+    CX_ASSERT(set1.size() == 1, "");
+    CX_ASSERT(set2.size() == 1, "");
+    CX_ASSERT(set3.size() == 1, "");
 
     // Test clear
     std::cout << "  Testing clear method..." << std::endl;
     set1.clear();
-    CX_ASSERT(set1.size() == 0);
+    CX_ASSERT(set1.size() == 0, "");
 
     // Test large additions
     std::cout << "  Testing large additions..." << std::endl;
@@ -431,21 +431,21 @@ class HashSet {
       set4.insert(i);
     }
     for (int i = 0; i < 10000; i++) {
-      CX_ASSERT(set4.contains(i));
+      CX_ASSERT(set4.contains(i), "");
     }
 
     // Test move constructor
     std::cout << "  Testing move constructor..." << std::endl;
     HashSet<int> set5(std::move(set3));
-    CX_ASSERT(set5.contains(2));
-    CX_ASSERT(set3.size() == 0);
+    CX_ASSERT(set5.contains(2), "");
+    CX_ASSERT(set3.size() == 0, "");
 
     // Test move assignment operator
     std::cout << "  Testing move assignment operator..." << std::endl;
     HashSet<int> set6;
     set6 = std::move(set2);
-    CX_ASSERT(set6.contains(2));
-    CX_ASSERT(set2.size() == 0);
+    CX_ASSERT(set6.contains(2), "");
+    CX_ASSERT(set2.size() == 0, "");
 
     // Test destructor
     std::cout << "  Testing destructor indirectly..." << std::endl;
@@ -464,7 +464,7 @@ class HashSet {
       set8.erase(i);
     }
     for (int i = 1; i < 100000; i += 2) {
-      CX_ASSERT(set8.contains(i));
+      CX_ASSERT(set8.contains(i), "");
     }
   };
 #endif

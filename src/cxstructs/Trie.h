@@ -206,10 +206,10 @@ class Trie {
     trie.insert("hello");
 
     std::cout << "   Testing contained..." << std::endl;
-    CX_ASSERT(trie.contains("hello") == true);
-    CX_ASSERT(trie.contains("helloh") == false);
+    CX_ASSERT(trie.contains("hello") == true, "");
+    CX_ASSERT(trie.contains("helloh") == false, "");
     std::cout << "   Testing startsWith..." << std::endl;
-    CX_ASSERT(trie.startsWith("he")[0] == "hello");
+    CX_ASSERT(trie.startsWith("he")[0] == "hello", "");
   }
 #endif
 };

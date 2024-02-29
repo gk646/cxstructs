@@ -62,6 +62,7 @@ The general namespace is `cxstructs`.
 - **Stack**:
 - **HashMap**: *using separate chaining with LinkedLists with static buffer*
 - **HashSet**: *using separate chaining with LinkedLists with static buffer*
+- **HashGrid**: *uses STL containers / 2D spatial lookups*
 - **Linked List**:
 - **Double Linked List**:
 - **Queue**: *using circular array*

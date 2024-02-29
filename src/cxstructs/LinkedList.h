@@ -129,7 +129,7 @@ class LinkedList {
  * @return the element removed with this operation
   */
   inline T erase_at(const uint_32_cx& index) {
-    CX_ASSERT(index < size_ && "index too big");
+    CX_ASSERT(index < size_ && "index too big", "");
 
     Node* toDelete;
     T val;
@@ -168,7 +168,7 @@ class LinkedList {
    * so in order to delete the last it has to iterate over all nodes to update the pointers.
   */
   inline void pop_back() {
-    CX_ASSERT(sentinel_.next_ && "list is empty");
+    CX_ASSERT(sentinel_.next_ && "list is empty", "");
 
     Node* toDelete = end_;
 
@@ -195,7 +195,7 @@ class LinkedList {
    * @return a reference to the last element
    */
   [[nodiscard]] inline T& back() {
-    CX_ASSERT(end_ != &sentinel_ && "no such element");
+    CX_ASSERT(end_ != &sentinel_ , "no such element");
     return end_->get();
   }
   /**
@@ -203,7 +203,7 @@ class LinkedList {
    * @param val - the value to be matched
    */
   inline void erase(const T& val) {
-    CX_ASSERT(sentinel_.next_ && "list is empty");
+    CX_ASSERT(sentinel_.next_ && "list is empty", "");
 
     if (sentinel_.next_->val_ == val) {
       Node* toDelete = sentinel_.next_;
@@ -299,7 +299,7 @@ class LinkedList {
     // Test Copy Constructor
     LinkedList<int> list5(list1);
 
-    CX_ASSERT(list1.size() == list5.size());
+    CX_ASSERT(list1.size() == list5.size(), "");
     std::cout << "  Testing assign operator..." << std::endl;
     // Test Assignment Operator
     LinkedList<int> list6;
@@ -307,23 +307,23 @@ class LinkedList {
 
     int num = 5;
     for (auto val : list1) {
-      CX_ASSERT(val == val);
+      CX_ASSERT(val == val, "");
       val += 5;
     }
     num = 5;
     for (auto val : list6) {
-      CX_ASSERT(val == val);
+      CX_ASSERT(val == val, "");
       val += 5;
     }
 
-    CX_ASSERT(list1.size() == list6.size());
+    CX_ASSERT(list1.size() == list6.size(), "");
 
     LinkedList<int> list;
     list.push_back(1);
-    CX_ASSERT(list.size() == 1);
+    CX_ASSERT(list.size() == 1, "");
 
     list.push_back(2);
-    CX_ASSERT(list.size() == 2);
+    CX_ASSERT(list.size() == 2, "");
     std::cout << "  Testing copy constructor..." << std::endl;
     list1.clear();
     list1.push_back(5);
@@ -332,19 +332,19 @@ class LinkedList {
 
     num = 5;
     for (auto val : list10) {
-      CX_ASSERT(val == num);
+      CX_ASSERT(val == num, "");
       num += 5;
     }
-    // CX_ASSERT(list10 == list1 );
+    // CX_ASSERT(list10 == list1 , "");
 
     std::cout << "  Testing addition..." << std::endl;
     // Testing iterator functionality along with push_back
     auto it = list.begin();
-    CX_ASSERT(*it == 1);
+    CX_ASSERT(*it == 1, "");
     ++it;
-    CX_ASSERT(*it == 2);
+    CX_ASSERT(*it == 2, "");
     ++it;
-    CX_ASSERT(it == list.end());
+    CX_ASSERT(it == list.end(), "");
 
     std::cout << "  Testing removal..." << std::endl;
     LinkedList<int> list2;
@@ -354,19 +354,19 @@ class LinkedList {
     list2.push_back(3);
 
     auto removedNode = list2.erase_at(1);
-    CX_ASSERT(removedNode == 2);
+    CX_ASSERT(removedNode == 2, "");
 
-    CX_ASSERT(list2.size() == 2);
-
-    removedNode = list2.erase_at(0);
-    CX_ASSERT(removedNode == 1);
-
-    CX_ASSERT(list2.size() == 1);
+    CX_ASSERT(list2.size() == 2, "");
 
     removedNode = list2.erase_at(0);
-    CX_ASSERT(removedNode == 3);
+    CX_ASSERT(removedNode == 1, "");
 
-    CX_ASSERT(list2.size() == 0);
+    CX_ASSERT(list2.size() == 1, "");
+
+    removedNode = list2.erase_at(0);
+    CX_ASSERT(removedNode == 3, "");
+
+    CX_ASSERT(list2.size() == 0, "");
 
     std::cout << "  Testing clear..." << std::endl;
     LinkedList<int> list3;
@@ -376,8 +376,8 @@ class LinkedList {
     list3.push_back(3);
     list3.clear();
 
-    CX_ASSERT(list3.size() == 0);
-    CX_ASSERT(list3.begin() == list3.end());
+    CX_ASSERT(list3.size() == 0, "");
+    CX_ASSERT(list3.begin() == list3.end(), "");
 
     std::cout << "  Testing for memory leaks..." << std::endl;
     const int LARGE_NUMBER = 1000;  // 1 million
@@ -387,11 +387,11 @@ class LinkedList {
       for (int i = 0; i < LARGE_NUMBER; i++) {
         list4.push_back(i);
       }
-      CX_ASSERT(list4.size() == LARGE_NUMBER);
+      CX_ASSERT(list4.size() == LARGE_NUMBER, "");
       for (int i = 0; i < LARGE_NUMBER; i++) {
         list4.erase_at(0);
       }
-      CX_ASSERT(list4.size() == 0);
+      CX_ASSERT(list4.size() == 0, "");
     }
 
     std::cout << "  Testing last removal..." << std::endl;
@@ -399,18 +399,18 @@ class LinkedList {
     LinkedList<int> list4;
     list4.push_back(5);
     list4.push_back(10);
-    CX_ASSERT(list4.back() == 10);
+    CX_ASSERT(list4.back() == 10, "");
     list4.pop_back();
-    CX_ASSERT(list4.back() == 5);
+    CX_ASSERT(list4.back() == 5, "");
     list4.pop_back();
 
     std::cout << "  Testing removing from single element list..." << std::endl;
     LinkedList<int> list14;
     list14.push_back(1);
     int removedValue = list14.erase_at(0);
-    CX_ASSERT(removedValue == 1);
-    CX_ASSERT(list14.size() == 0);
-    CX_ASSERT(list14.begin() == list14.end());
+    CX_ASSERT(removedValue == 1, "");
+    CX_ASSERT(list14.size() == 0, "");
+    CX_ASSERT(list14.begin() == list14.end(), "");
 
     std::cout << "  Testing removing from empty list..." << std::endl;
     LinkedList<int> list13;
@@ -418,7 +418,7 @@ class LinkedList {
     try {
       // list13.erase_at(0);
       // This block should never execute
-      //CX_ASSERT(false);
+      //CX_ASSERT(false, "");
     } catch (std::out_of_range& e) {
       // Expected behavior
     }
@@ -426,23 +426,23 @@ class LinkedList {
     std::cout << "  Testing single element list..." << std::endl;
     LinkedList<int> list12;
     list12.push_back(1);
-    CX_ASSERT(list12.size() == 1);
+    CX_ASSERT(list12.size() == 1, "");
 
     // Testing iterator over single-element list
     auto it12 = list12.begin();
-    CX_ASSERT(*it12 == 1);
+    CX_ASSERT(*it12 == 1, "");
     ++it12;
-    CX_ASSERT(it12 == list12.end());
+    CX_ASSERT(it12 == list12.end(), "");
 
     std::cout << "  Testing empty list..." << std::endl;
     LinkedList<int> list30;
-    CX_ASSERT(list30.size() == 0);
-    CX_ASSERT(list30.begin() == list30.end());
+    CX_ASSERT(list30.size() == 0, "");
+    CX_ASSERT(list30.begin() == list30.end(), "");
 
     // Testing iteration over empty list
     for (auto val : list30) {
       // This block should never execute
-      CX_ASSERT(false);
+      CX_ASSERT(false, "");
     }
 
     std::cout << "  Testing copy constructor and assignment operator..." << std::endl;
@@ -454,13 +454,13 @@ class LinkedList {
     LinkedList<int> list9 = list7;  // Assignment operator
 
     // Check n_elem
-    CX_ASSERT(list7.size() == list8.size());
-    CX_ASSERT(list7.size() == list9.size());
+    CX_ASSERT(list7.size() == list8.size(), "");
+    CX_ASSERT(list7.size() == list9.size(), "");
 
     // Check values and correct next and previous pointers
     auto it7 = list7.begin(), it8 = list8.begin(), it9 = list9.begin();
     while (it7 != list7.end()) {
-      CX_ASSERT(*it7 == *it8 && *it7 == *it9);
+      CX_ASSERT(*it7 == *it8 && *it7 == *it9, "");
       ++it7;
       ++it8;
       ++it9;
@@ -477,9 +477,9 @@ class LinkedList {
       list9.erase(i);
     }
     CX_ASSERT(list9.size() == 5, "size 5");
-    CX_ASSERT(list9.back() == 4);
+    CX_ASSERT(list9.back() == 4, "");
     list9.pop_back();
-    CX_ASSERT(list9.back() == 3);
+    CX_ASSERT(list9.back() == 3, "");
   }
 #endif
 };

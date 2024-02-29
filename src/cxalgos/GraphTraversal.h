@@ -79,7 +79,7 @@ static void TEST_DFS() {
   // Perform depth_first_search from node 0
   int reachableNodes = depth_first_search(mat, 0);
 
-  CX_ASSERT(reachableNodes == 5);
+  CX_ASSERT(reachableNodes == 5, "");
 }
 }  // namespace cxtests
 #endif
