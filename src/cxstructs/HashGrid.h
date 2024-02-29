@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define F
+#define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
 
@@ -116,6 +116,7 @@ struct HashGrid {
 
   inline bool isCloseTo(float cellRadius) {}
 
+#ifndef CX_DELETE_TESTS
   static void TEST() {
     uint_32_cx spaceSize = 100;
     float cellSize = 5;
@@ -138,7 +139,8 @@ struct HashGrid {
     hashGrid.containedInRectCollect(0, 0, 99, 99, coll);
     printTime<std::chrono::nanoseconds>("lookup");
     std::cout << coll.size() << std::endl;
-  };
+  }
+#endif
 };
 
 }  // namespace cxstructs
