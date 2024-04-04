@@ -452,7 +452,7 @@ class HashMap {
 
           };
   };
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "HASHMAP TESTS" << std::endl;
     // Test insert and operator[key]

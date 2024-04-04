@@ -29,9 +29,6 @@ In case of slower performance just switch to the other.
  */
 
 #include <deque>
-#include <iostream>
-#include <memory>
-#include <stack>
 #include <vector>
 #include "cxconfig.h"
 

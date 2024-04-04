@@ -287,7 +287,7 @@ template <typename T>
 void heapSort(T* arr, uint_32_cx len, bool ascending) {}
 
 }  // namespace cxstructs
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 namespace cxtests {
 std::vector<int> generate_shuffled_vector(int size) {
   std::vector<int> vec(size);

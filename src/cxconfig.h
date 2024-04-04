@@ -32,7 +32,7 @@
 //
 
 /**
- * namespace for all datastructure related headers
+ * namespace for exposed structs and functions
  */
 namespace cxstructs {}
 /**
@@ -56,9 +56,6 @@ typedef int uint_32_cx;
 typedef int uint_16_cx;
 typedef int int_32_cx;
 #endif
-
-#include "CXAllocator.h"
-
 
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_

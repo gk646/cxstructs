@@ -32,11 +32,8 @@ namespace cxstructs {
  * <h2>DeQueue</h2> is a double ended queue. It functions very similar to the normal queue but is different in that it allows for retrieval and addition at both ends.
  * Like the Queue this implementation also uses a circular array to manage the data.
  */
-template <typename T, bool UseCXPoolAllocator = true>
+template <typename T, typename Allocator = std::allocator<T>, typename size_type = uint32_t>
 class DeQueue {
-  using Allocator =
-      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
-                                std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx len_;
@@ -45,7 +42,6 @@ class DeQueue {
   int_32_cx front_;
   int_32_cx back_;
 
-  bool is_trivial_destr = std::is_trivially_destructible<T>::value;
 
   inline void grow() {
     len_ *= 2;
@@ -65,7 +61,7 @@ class DeQueue {
       std::uninitialized_move(arr_, arr_ + front_, n_arr + size_ - front_);
     }
 
-    if (!is_trivial_destr) {
+    if constexpr (!std::is_trivial_v<T>) {
       for (uint_fast32_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -89,7 +85,7 @@ class DeQueue {
       std::uninitialized_move(arr_, arr_ + front_, n_arr + size_ - front_);
     }
 
-    if (!is_trivial_destr) {
+    if constexpr(!std::is_trivial_v<T>) {
       for (size_t i = 0; i < old_len; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -106,7 +102,7 @@ class DeQueue {
       : arr_(alloc.allocate(len)), len_(len), back_(-1), size_(0), front_(0) {}
   DeQueue(const DeQueue& o) : size_(o.size_), len_(o.len_), front_(o.front_), back_(o.back_) {
     arr_ = alloc.allocate(len_);
-    if (is_trivial_destr) {
+    if (std::is_trivial_v<T>) {
       std::copy(o.arr_, o.arr_ + o.len_, arr_);
     } else {
       std::uninitialized_copy(o.arr_, o.arr_ + o.len_, arr_);
@@ -114,7 +110,7 @@ class DeQueue {
   }
   DeQueue& operator=(const DeQueue& o) {
     if (this != &o) {
-      if (!is_trivial_destr) {
+      if (!std::is_trivial_v<T>) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -126,7 +122,7 @@ class DeQueue {
       size_ = o.size_;
       arr_ = alloc.allocate(len_);
 
-      if (is_trivial_destr) {
+      if constexpr(std::is_trivial_v<T>) {
         std::copy(o.arr_, o.arr_ + o.len_, arr_);
       } else {
         std::uninitialized_copy(o.arr_, o.arr_ + o.len_, arr_);
@@ -143,7 +139,7 @@ class DeQueue {
   //move assign operator
   DeQueue& operator=(DeQueue&& o) noexcept {
     if (this != &o) {
-      if (!is_trivial_destr) {
+      if constexpr(!std::is_trivial_v<T>) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -163,7 +159,7 @@ class DeQueue {
   }
 
   inline ~DeQueue() {
-    if (!is_trivial_destr) {
+    if constexpr(!std::is_trivial_v<T>) {
       uint_32_cx end = (front_ + size_) % len_;
       if (end < front_) {
         for (uint_32_cx i = front_; i < len_; i++) {
@@ -284,7 +280,7 @@ class DeQueue {
    * Clears the queue of all elements
    */
   inline void clear() noexcept {
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       uint_32_cx end = (front_ + size_) % len_;
       if (end < front_) {
         for (uint_32_cx i = front_; i < len_; i++) {
@@ -313,7 +309,7 @@ class DeQueue {
     */
   [[nodiscard]] inline uint_32_cx capacity() const noexcept { return len_; }
   inline void shrink_to_fit() noexcept {
-    CX_WARNING(len_ > size_ * 1.5,"");
+    CX_WARNING(len_ > size_ * 1.5, "");
     shrink();
   }
   friend std::ostream& operator<<(std::ostream& os, DeQueue& q) {
@@ -345,7 +341,7 @@ class DeQueue {
   };
   inline Iterator begin() { return Iterator(arr_, front_, len_); }
   inline Iterator end() { return Iterator(arr_, (back_ + 1) % len_, len_); }
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 #include <deque>
   static void TEST() {
     std::cout << "TESTING DEQUEUE" << std::endl;
@@ -392,13 +388,11 @@ class DeQueue {
     for (uint_32_cx i = 0; i < 100000; i++) {
       CX_ASSERT(de_queue.size() == 100000 - i, "");
 
-
       CX_ASSERT(de_queue.front() == i, "");
 
       de_queue.pop_front();
     }
     CX_ASSERT(de_queue.size() == 0, "");
-
 
     // Testing clear
     std::cout << "   Testing clear..." << std::endl;
@@ -407,7 +401,6 @@ class DeQueue {
     }
     de_queue.clear();
     CX_ASSERT(de_queue.size() == 0, "");
-
 
     // Testing back and pop_back
     std::cout << "   Testing back and pop_back..." << std::endl;
@@ -421,7 +414,6 @@ class DeQueue {
     }
     CX_ASSERT(de_queue.size() == 0, "");
 
-
     // Testing copy constructor and assignment
     std::cout << "   Testing copy constructor and assignment..." << std::endl;
     for (int i = 0; i < 1000; i++) {
@@ -433,7 +425,6 @@ class DeQueue {
     CX_ASSERT(de_queue.size() == de_queue_copy.size(), "");
 
     CX_ASSERT(de_queue.size() == de_queue_assign.size(), "");
-
 
     // Test constructors and assignment operators
     std::cout << "   Testing constructors and assignment operators..." << std::endl;
@@ -498,11 +489,9 @@ class DeQueue {
     uint_32_cx i = 0;
     for (auto it = de_queue.begin(); it != de_queue.end(); ++it, ++i) {
       CX_ASSERT(*it == i, "");
-
     }
     de_queue.clear();
     CX_ASSERT(de_queue.size() == 0, "");
-
 
     std::cout << "   Testing clear with iterator..." << std::endl;
     for (int i = 0; i < 1000; i++) {
@@ -512,7 +501,6 @@ class DeQueue {
     CX_ASSERT(de_queue.size() == 0, "");
 
     CX_ASSERT(de_queue.begin() == de_queue.end(), "");
-
 
     std::cout << "   Testing wrapping around with iterator..." << std::endl;
     DeQueue<int> qq;
@@ -537,7 +525,6 @@ class DeQueue {
     int b = 20;
     for (auto val : qq) {
       CX_ASSERT(b++ == val, "");
-
     }
   }
 #endif

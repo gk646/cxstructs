@@ -385,7 +385,7 @@ class HashSet {
       reHashSmall();
     }
   }
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "HASHSET TESTS" << std::endl;
 

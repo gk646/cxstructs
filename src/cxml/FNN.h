@@ -21,14 +21,7 @@
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 #define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 
-#include <algorithm>
-#include <cmath>
-
-#include <iostream>
-#include <random>
-#include <vector>
 #include "../cxconfig.h"
-#include "../cxutil/cxmath.h"
 
 #ifndef CX_LOOP_FNN
 
@@ -112,7 +105,6 @@ struct Layer {
     out.mat_op(a_func);
     return out;
   }
-
   [[nodiscard]] mat backward(mat& error) {
     w_sums_.mat_op(d_func);
 
@@ -127,7 +119,7 @@ struct Layer {
     mat d_weights =
         inputs_.transpose() * error;  //matrix dimensions: (in x batch) * (batch x out) = in x out
     mat d_bias = error.sum_cols();    //sum the error over the batch dimension
-    d_bias.scale(1.0F/error.n_rows());
+    d_bias.scale(1.0F / error.n_rows());
 
     // Update the weights and bias
     d_weights.scale(learnR_);
@@ -148,7 +140,6 @@ using namespace cxhelper;
  *
  */
 class FNN {
-
   Layer* layers_;
   std::vector<int> bounds_;
   uint_16_cx len_;
@@ -158,7 +149,8 @@ class FNN {
  public:
   explicit FNN(
       const std::vector<int>& bound, func a_func, float learnR,
-      func_M loss_function = mean_sqr_abs_err, func last_layer_func = [](float x) { return x; })
+      func_M loss_function = mat::mean_sqr_abs_err,
+      func last_layer_func = [](float x) { return x; })
       : learnR_(learnR), len_(bound.size() - 1), bounds_(bound), loss_function_(loss_function) {
     layers_ = new Layer[len_];
     for (int i = 1; i < len_ + 1; i++) {
@@ -189,9 +181,9 @@ class FNN {
       }
     }
   }
-  vec<float, false> get_weights(int layer, int row) { return layers_[layer].weights_.get_row(row); }
+  vec<float> get_weights(int layer, int row) { return layers_[layer].weights_.get_row(row); }
 
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 #include "../cxutil/cxtime.h"
   static void TEST() {
     std::cout << "TESTING FNN" << std::endl;
@@ -207,7 +199,6 @@ class FNN {
       output -= expected_outputs;
       for (size_t j = 0; j < inputs.n_rows(); ++j) {
         CX_ASSERT(output(0, j) < 0.1, "");
-
       }
     }
   }
@@ -355,8 +346,7 @@ cxstructs {
       layers_ = new Layer[len_];
       for (int i = 1; i < len_ + 1; i++) {
         if (i == len_) {
-          layers_[i - 1] = Layer(
-              bounds_[i - 1], bounds_[i], [](float x) { return x; }, learnR_);
+          layers_[i - 1] = Layer(bounds_[i - 1], bounds_[i], [](float x) { return x; }, learnR_);
           break;
         }
         layers_[i - 1] = Layer(bounds_[i - 1], bounds_[i], a_func, learnR_);
@@ -403,7 +393,7 @@ cxstructs {
       }
     }
 
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 #include "../cxutil/cxtime.h"
     static void TEST() {
       std::cout << "TESING FNN" << std::endl;

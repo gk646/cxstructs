@@ -196,7 +196,7 @@ class Trie {
    * Removes the given word from the trie
    */
   void remove(const std::string& s) { size_--; }
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "TESTING TRIE" << std::endl;
 

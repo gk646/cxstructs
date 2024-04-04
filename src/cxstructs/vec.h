@@ -21,15 +21,7 @@
 #ifndef CXSTRUCTS_ARRAYLIST_H
 #define CXSTRUCTS_ARRAYLIST_H
 
-#include <algorithm>
-
-#include <cstdint>
 #include <initializer_list>
-#include <iostream>
-#include <memory>
-#include <ostream>
-#include <stdexcept>
-#include <vector>
 #include "../cxalgos/Sorting.h"
 #include "../cxconfig.h"
 
@@ -37,6 +29,7 @@
  * Its using explicit allocator syntax to switch between the default and a custom one
  * Used in QuadTree.h
 */
+
 namespace cxstructs {
 /**
  * <h2>vec</h2>
@@ -45,60 +38,54 @@ namespace cxstructs {
  * <p>A dynamic array is a random access, variable-n_elem list data structure that allows elements to be added or removed.
  * It provides the capability to index into the list, push_back elements to the end, and erase elements from the end in a time-efficient manner.</p>
  */
-template <typename T, bool UseCXPoolAllocator = true>
+template <typename T, typename Allocator = std::allocator<T>, typename size_type = uint32_t>
 class vec {
  public:
   using value_type = T;
   using reference = T&;
   using const_reference = const T&;
-  using size_type = uint_32_cx;
   using iterator = T*;
   using const_iterator = const T*;
 
  private:
-  using Allocator =
-      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
-                                std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   size_type size_;
-  size_type len_;
+  size_type capacity_;
 
-  bool is_trivial_destr = std::is_trivially_destructible<T>::value;
   inline void grow() noexcept {
-    len_ *= 2;
+    capacity_ *= 2;
 
-    T* n_arr = alloc.allocate(len_);
+    T* n_arr = alloc.allocate(capacity_);
 
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    if (!is_trivial_destr) {
-      for (size_t i = 0; i < size_; i++) {
+    if constexpr (!std::is_trivial_v<T>) {
+      for (size_type i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
     }
 
-    alloc.deallocate(arr_, size_);
+    alloc.deallocate(arr_, capacity_);
     arr_ = n_arr;
 
-    if (!is_trivial_destr) {
-      for (uint_fast32_t i = size_; i < len_; i++) {
+    if constexpr (!std::is_trivial_v<T>) {
+      for (uint_fast32_t i = size_; i < capacity_; i++) {
         std::allocator_traits<Allocator>::construct(alloc, &arr_[i]);
       }
     }
-    //as array is moved no need for delete []
   }
   inline void shrink() noexcept {
-    auto old_len = len_;
-    len_ = size_ * 1.5;
+    auto old_len = capacity_;
+    capacity_ = size_ * 1.5;
 
-    T* n_arr = alloc.allocate(len_);
+    T* n_arr = alloc.allocate(capacity_);
 
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    if (!is_trivial_destr) {
+    if constexpr (!std::is_trivial_v<T>) {
       for (size_t i = 0; i < old_len; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -115,16 +102,16 @@ class vec {
    * @param n_elem number of starting elements
    */
   inline explicit vec(uint_32_cx n_elems = 32)
-      : len_(n_elems), size_(0), arr_(alloc.allocate(n_elems)) {
-    if (!is_trivial_destr) {
+      : capacity_(n_elems), size_(0), arr_(alloc.allocate(n_elems)) {
+    if constexpr(!std::is_trivial_v<T>) {
       for (uint_fast32_t i = 0; i < n_elems; i++) {
         std::allocator_traits<Allocator>::construct(alloc, &arr_[i]);
       }
     }
   }
   inline vec(uint_32_cx n_elems, const T fillVal)
-      : len_(n_elems), size_(n_elems), arr_(alloc.allocate(n_elems)) {
-    if (is_trivial_destr) {
+      : capacity_(n_elems), size_(n_elems), arr_(alloc.allocate(n_elems)) {
+    if constexpr (std::is_trivial_v<T>) {
       std::fill(arr_, arr_ + n_elems, fillVal);
     } else {
       for (uint_fast32_t i = 0; i < n_elems; i++) {
@@ -142,7 +129,7 @@ class vec {
   template <typename fill_form,
             typename = std::enable_if_t<std::is_invocable_r_v<T, fill_form, int>>>
   inline vec(uint_32_cx n_elem, fill_form form)
-      : len_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
+      : capacity_(n_elem), size_(n_elem), arr_(alloc.allocate(n_elem)) {
     for (uint_fast32_t i = 0; i < n_elem; i++) {
       std::allocator_traits<Allocator>::construct(alloc, &arr_[i], form(i));
     }
@@ -153,11 +140,11 @@ class vec {
    * @param vector
    */
   explicit vec(const std::vector<T>& vector)
-      : len_(vector.size() * 1.5), size_(vector.size()), arr_(alloc.allocate(vector.size() * 1.5)) {
+      : capacity_(vector.size() * 1.5), size_(vector.size()), arr_(alloc.allocate(vector.size() * 1.5)) {
     std::copy(vector.begin(), vector.end(), arr_);
   }
   explicit vec(const std::vector<T>&& move_vector)
-      : len_(move_vector.size() * 1.5),
+      : capacity_(move_vector.size() * 1.5),
         size_(move_vector.size()),
         arr_(alloc.allocate(move_vector.size() * 1.5)) {
     std::move(move_vector.begin(), move_vector.end(), arr_);
@@ -168,8 +155,8 @@ class vec {
    * @param data
    * @param n_elem
    */
-  inline explicit vec(T* data, uint_32_cx n_elem) : size_(n_elem), len_(n_elem * 2) {
-    arr_ = new T[len_];
+  inline explicit vec(T* data, uint_32_cx n_elem) : size_(n_elem), capacity_(n_elem * 2) {
+    arr_ = new T[capacity_];
     std::copy(data, data + n_elem, arr_);
   }
   /**
@@ -180,9 +167,9 @@ class vec {
    */
   inline vec(std::initializer_list<T> init_list)
       : size_(init_list.size()),
-        len_(init_list.size() * 10),
+        capacity_(init_list.size() * 10),
         arr_(alloc.allocate(init_list.size() * 10)) {
-    if (is_trivial_destr) {
+    if (std::is_trivial_v<T>) {
       std::copy(init_list.begin(), init_list.end(), arr_);
     } else {
       auto it = init_list.begin();
@@ -192,17 +179,9 @@ class vec {
       }
     }
   }
-  inline vec(const vec<T>& o) : size_(o.size_), len_(o.len_) {
-    arr_ = alloc.allocate(len_);
-    if (is_trivial_destr) {
-      std::copy(o.arr_, o.arr_ + o.size_, arr_);
-    } else {
-      std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
-    }
-  }
-  inline vec(const vec<T, false>& o) : size_(o.size_), len_(o.len_) {
-    arr_ = alloc.allocate(len_);
-    if (is_trivial_destr) {
+  inline vec(const vec<T>& o) : size_(o.size_), capacity_(o.capacity_) {
+    arr_ = alloc.allocate(capacity_);
+    if (std::is_trivial_v<T>) {
       std::copy(o.arr_, o.arr_ + o.size_, arr_);
     } else {
       std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
@@ -210,41 +189,18 @@ class vec {
   }
   inline vec& operator=(const vec<T>& o) {
     if (this != &o) {
-      //ugly allocator syntax but saves a lot when using e.g. vec<float>
-      if (!is_trivial_destr) {
-        for (uint_32_cx i = 0; i < len_; i++) {
+      if constexpr (!std::is_trivial_v<T>) {
+        for (uint_32_cx i = 0; i < capacity_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
       }
-      alloc.deallocate(arr_, len_);
+      alloc.deallocate(arr_, capacity_);
 
       size_ = o.size_;
-      len_ = o.len_;
-      arr_ = alloc.allocate(len_);
+      capacity_ = o.capacity_;
+      arr_ = alloc.allocate(capacity_);
 
-      if (is_trivial_destr) {
-        std::copy(o.arr_, o.arr_ + o.size_, arr_);
-      } else {
-        std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
-      }
-    }
-    return *this;
-  }
-  inline vec& operator=(const vec<T, false>& o) {
-    if (this != &o) {
-      //ugly allocator syntax but saves a lot when using e.g. vec<float>
-      if (!is_trivial_destr) {
-        for (uint_32_cx i = 0; i < len_; i++) {
-          std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
-        }
-      }
-      alloc.deallocate(arr_, len_);
-
-      size_ = o.size_;
-      len_ = o.len_;
-      arr_ = alloc.allocate(len_);
-
-      if (is_trivial_destr) {
+      if (std::is_trivial_v<T>) {
         std::copy(o.arr_, o.arr_ + o.size_, arr_);
       } else {
         std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
@@ -253,23 +209,23 @@ class vec {
     return *this;
   }
   //move constructor
-  inline vec(vec&& o) noexcept : arr_(o.arr_), size_(o.size_), len_(o.len_) {
+  inline vec(vec&& o) noexcept : arr_(o.arr_), size_(o.size_), capacity_(o.capacity_) {
     //leve other in previous state
     o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
   }
   //move assignment
   vec& operator=(vec&& o) noexcept {
     if (this != &o) {
-      if (!is_trivial_destr) {
-        for (uint_32_cx i = 0; i < len_; i++) {
+      if (!std::is_trivial_v<T>) {
+        for (uint_32_cx i = 0; i < capacity_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
       }
-      alloc.deallocate(arr_, len_);
+      alloc.deallocate(arr_, capacity_);
 
       arr_ = o.arr_;
       size_ = o.size_;
-      len_ = o.len_;
+      capacity_ = o.capacity_;
 
       //other is left in previous state but invalidated
       o.arr_ = nullptr;  // PREVENT DOUBLE DELETION!
@@ -277,12 +233,12 @@ class vec {
     return *this;
   }
   inline ~vec() {
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       for (uint_32_cx i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
     }
-    alloc.deallocate(arr_, len_);
+    alloc.deallocate(arr_, capacity_);
   }
   /**
    * Direct access to the underlying array
@@ -313,7 +269,7 @@ class vec {
    * @param e the element to be added
    */
   inline void push_back(const T& e) noexcept {
-    if (size_ == len_) {
+    if (size_ == capacity_) {
       grow();
     }
     arr_[size_++] = e;
@@ -326,7 +282,7 @@ class vec {
    */
   template <typename... Args>
   inline void emplace_back(Args&&... args) noexcept {
-    if (size_ == len_) {
+    if (size_ == capacity_) {
       grow();
     }
     std::allocator_traits<Allocator>::construct(alloc, &arr_[size_++], std::forward<Args>(args)...);
@@ -337,19 +293,19 @@ class vec {
    * This decreases memory usage.
    */
   inline void shrink_to_fit() noexcept {
-    if (len_ > size_ * 1.5) {
+    if (capacity_ > size_ * 1.5) {
       shrink();
     }
-    CX_WARNING(len_ < size_ * 1.5, "trying to shrink already fitting vec");
+    CX_WARNING(capacity_ < size_ * 1.5, "trying to shrink already fitting vec");
   }
   /**
   * Removes the last element of the vec.
   * Reduces the size by one.
   */
   inline void pop_back() noexcept {
-    CX_ASSERT(size_ > 0 , "out of bounds");
+    CX_ASSERT(size_ > 0, "out of bounds");
     size_--;
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       std::allocator_traits<Allocator>::destroy(alloc, &arr_[size_]);
     }
   }
@@ -360,7 +316,7 @@ class vec {
    */
   inline void pop_front() noexcept {
     CX_ASSERT(size_ > 0, "out of bounds");
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       std::allocator_traits<Allocator>::destroy(alloc, &arr_[0]);
     }
     std::move(arr_ + 1, arr_ + size_--, arr_);
@@ -372,7 +328,7 @@ class vec {
    */
   inline void pop(const uint_32_cx& i) noexcept {
     CX_ASSERT(i < size_, "out of bounds");
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
     }
     std::move(arr_ + i + 1, arr_ + size_--, arr_ + i);
@@ -383,7 +339,7 @@ class vec {
    */
   inline void erase(const T& e) noexcept {
 #pragma omp simd linear(i : 1)
-    for (uint_32_cx i = 0; i < len_; i++) {
+    for (uint_32_cx i = 0; i < capacity_; i++) {
       if (arr_[i] == e) {
         std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
         size_--;
@@ -393,7 +349,7 @@ class vec {
   }
   template <typename lambda>
   inline void erase_if(lambda condition) {
-    for (uint_32_cx i = 0; i < len_; i++) {
+    for (uint_32_cx i = 0; i < capacity_; i++) {
       if (condition(arr_[i])) {
         std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
         size_--;
@@ -406,7 +362,7 @@ class vec {
    * @param index index of removal
    */
   inline void removeAt(const uint_32_cx& index) noexcept {
-    CX_ASSERT(index < len_ , "index out of bounds");
+    CX_ASSERT(index < capacity_, "index out of bounds");
     std::move(arr_ + index + 1, arr_ + size_--, arr_ + index);
   }
   /**
@@ -414,17 +370,17 @@ class vec {
  * @return the current n_elem of the list
  */
   [[nodiscard]] inline uint_32_cx size() const noexcept { return size_; }
-  [[nodiscard]] inline uint_32_cx capacity() const noexcept { return len_; }
+  [[nodiscard]] inline uint_32_cx capacity() const noexcept { return capacity_; }
   inline void reserve(uint_32_cx new_capacity) noexcept {
-    if (len_ < new_capacity) {
-      len_ = new_capacity;
+    if (capacity_ < new_capacity) {
+      capacity_ = new_capacity;
 
-      T* n_arr = alloc.allocate(len_);
+      T* n_arr = alloc.allocate(capacity_);
 
       std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
       // Destroy the original objects
-      if (!is_trivial_destr) {
+      if (!std::is_trivial_v<T>) {
         for (size_t i = 0; i < size_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -440,14 +396,14 @@ class vec {
    */
   inline void clear() noexcept {
     int ar[3] = {2, 2, 1};
-    if (!is_trivial_destr) {
-      for (uint_32_cx i = 0; i < len_; i++) {
+    if (!std::is_trivial_v<T>) {
+      for (uint_32_cx i = 0; i < capacity_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
     }
-    alloc.deallocate(arr_, len_);
+    alloc.deallocate(arr_, capacity_);
     size_ = 0;
-    len_ = 32;
+    capacity_ = 32;
     arr_ = alloc.allocate(32);
   }
   /**
@@ -485,7 +441,7 @@ class vec {
  * @param vec  the vec to append
  */
   inline void append(const vec<T>& vec) noexcept {
-    while (len_ - size_ < vec.size_) {
+    while (capacity_ - size_ < vec.size_) {
       grow();
     }
     std::copy(vec.arr_, vec.arr_ + vec.size_, arr_ + size_);
@@ -502,7 +458,7 @@ class vec {
  */
   inline void append(const vec<T>& list, uint_32_cx endIndex, uint_32_cx startIndex = 0) noexcept {
     CX_ASSERT(startIndex < endIndex || endIndex <= list.size_, "index out of bounds");
-    while (len_ - size_ < endIndex - startIndex) {
+    while (capacity_ - size_ < endIndex - startIndex) {
       grow();
     }
     std::copy(list.arr_ + startIndex, list.arr_ + endIndex, arr_ + size_);
@@ -574,15 +530,15 @@ class vec {
   inline void resize(uint_32_cx new_size) noexcept {
     CX_WARNING(!(size_ <= new_size), "calling grow for no reason");
     if (size_ > new_size) {
-      auto old_len = len_;
-      len_ = new_size;
+      auto old_len = capacity_;
+      capacity_ = new_size;
 
-      T* n_arr = alloc.allocate(len_);
+      T* n_arr = alloc.allocate(capacity_);
 
       std::uninitialized_move(arr_, arr_ + new_size, n_arr);
 
       // Destroy the original objects
-      if (!is_trivial_destr) {
+      if (!std::is_trivial_v<T>) {
         for (size_t i = 0; i < old_len; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -591,6 +547,18 @@ class vec {
       alloc.deallocate(arr_, old_len);
       arr_ = n_arr;
       size_ = new_size;
+    }
+  }
+
+  //multidimensional distance functions
+  inline static float dist_chebyshev(const vec<float>& p1,
+                                     const vec<float>& p2) noexcept {
+    float max = 0;
+    for (uint_fast32_t i = 0; i < p1.size(); i++) {
+      if (p2[i] - p1[i] > max) {
+        max = p2[i] - p1[i];
+      }
+      return max;
     }
   }
   class Iterator {
@@ -652,7 +620,7 @@ class vec {
   inline Iterator begin() { return Iterator(arr_); }
   inline Iterator end() { return Iterator(arr_ + size_); }
 
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "TESTING VEC\n";
 
@@ -664,15 +632,15 @@ class vec {
     list1.push_back(15);
 
     list1.erase(10);
-    CX_ASSERT(list1.size() == 2,"");
-    CX_ASSERT(list1[1] == 15,"");
+    CX_ASSERT(list1.size() == 2, "");
+    CX_ASSERT(list1[1] == 15, "");
 
     // Test: Testing List access
     std::cout << "   Testing List access...\n";
-    CX_ASSERT(list1[0] == 5,"");
-    CX_ASSERT(list1.at(-1) == 15,"");
-    CX_ASSERT(list1.at(-2) == 5,"");
-    CX_ASSERT(list1[1] == 15,"");
+    CX_ASSERT(list1[0] == 5, "");
+    CX_ASSERT(list1.at(-1) == 15, "");
+    CX_ASSERT(list1.at(-2) == 5, "");
+    CX_ASSERT(list1[1] == 15, "");
 
     // Test: Testing iterator
     std::cout << "   Testing iterator...\n";
@@ -684,9 +652,9 @@ class vec {
     int checkNum = 0;
     for (auto& num : list1) {
       checkNum += 5;
-      CX_ASSERT(num == checkNum,"");
+      CX_ASSERT(num == checkNum, "");
     }
-    CX_ASSERT(checkNum == 15,"");
+    CX_ASSERT(checkNum == 15, "");
 
     // Test: Testing resizing and shrink_to_fit
     std::cout << "   Testing resizing and shrink_to_fit...\n";
@@ -695,19 +663,19 @@ class vec {
       list1.push_back(i);
     }
     list1.shrink_to_fit();
-    CX_ASSERT(list1.capacity() == list1.size() * 1.5,"");
+    CX_ASSERT(list1.capacity() == list1.size() * 1.5, "");
 
     for (int i = 0; i < 10000; i++) {
       list1.erase(i);
     }
-    CX_ASSERT(list1.size() == 0,"");
+    CX_ASSERT(list1.size() == 0, "");
 
     // Test: Testing contained
     std::cout << "   Testing contained...\n";
     list1.clear();
     list1.push_back(5);
-    CX_ASSERT(list1.contains(5) == true,"");
-    CX_ASSERT(list1.contains(5, false) == true,"");
+    CX_ASSERT(list1.contains(5) == true, "");
+    CX_ASSERT(list1.contains(5, false) == true, "");
 
     // Test: Testing append
     std::cout << "   Testing append...\n";
@@ -719,20 +687,20 @@ class vec {
     for (int i = 0; i < 1000000; i++) {
       list2.push_back(i);
     }
-    CX_ASSERT(list2.size() == 1000000,"");
+    CX_ASSERT(list2.size() == 1000000, "");
 
     list1.append(list2);
-    CX_ASSERT(list1.size() == 1000002,"");
-    CX_ASSERT(list2[10] == 10,"");
+    CX_ASSERT(list1.size() == 1000002, "");
+    CX_ASSERT(list2[10] == 10, "");
 
     list1.clear();
 
     list1.append(list2, 10, 1);
     int check = 1;
     for (auto num : list1) {
-      CX_ASSERT(check++ == num,"");
+      CX_ASSERT(check++ == num, "");
     }
-    CX_ASSERT(list1.size() == 9,"");
+    CX_ASSERT(list1.size() == 9, "");
 
     // Test: Testing copy constructor
     std::cout << "   Testing copy constructor...\n";
@@ -742,7 +710,7 @@ class vec {
     }
     vec<int> list6 = list5;  // copy constructor
     for (uint_32_cx i = 0; i < 10; i++) {
-      CX_ASSERT(list6[i] == i,"");
+      CX_ASSERT(list6[i] == i, "");
     }
 
     // Test: Testing copy assignment
@@ -750,14 +718,14 @@ class vec {
     vec<int> list7(10);
     list7 = list5;  // copy assignment
     for (uint_32_cx i = 0; i < 10; i++) {
-      CX_ASSERT(list7[i] == i,"");
+      CX_ASSERT(list7[i] == i, "");
     }
 
     // Test: Testing move constructor
     std::cout << "   Testing move constructor...\n";
     vec<int> list8 = std::move(list5);  // move constructor
     for (uint_32_cx i = 0; i < 10; i++) {
-      CX_ASSERT(list8[i] == i,"");
+      CX_ASSERT(list8[i] == i, "");
     }
 
     // Test: Testing move assignment
@@ -765,15 +733,15 @@ class vec {
     vec<int> list9(10);
     list9 = std::move(list6);  // move assignment
     for (uint_32_cx i = 0; i < 10; i++) {
-      CX_ASSERT(list9[i] == i,"");
+      CX_ASSERT(list9[i] == i, "");
     }
 
     // Test: Testing pop_back()
     std::cout << "   Testing pop_back()...\n";
     list9.push_back(100);
-    CX_ASSERT(list9.back() == 100,"");
+    CX_ASSERT(list9.back() == 100, "");
     list9.pop_back();
-    CX_ASSERT(list9.size() == 10,"");
+    CX_ASSERT(list9.size() == 10, "");
 
     // Test: Checking for memory leaks
     std::cout << "   Checking for memory leaks...\n";
@@ -787,27 +755,27 @@ class vec {
     for (uint_fast32_t i = 0; i < 10; i++) {
       list1.push_back(i);
     }
-    CX_ASSERT(list1.front() == 0,"");
+    CX_ASSERT(list1.front() == 0, "");
     list1.pop_front();
-    CX_ASSERT(list1.size() == 9,"");
+    CX_ASSERT(list1.size() == 9, "");
     for (uint_fast32_t i = 1; i < 10; i++) {
-      CX_ASSERT(list1[i - 1] == i,"");
+      CX_ASSERT(list1[i - 1] == i, "");
     }
-    CX_ASSERT(list1.back() == 9,"");
+    CX_ASSERT(list1.back() == 9, "");
     list1.pop_back();
 
-    CX_ASSERT(list1.size() == 8,"");
+    CX_ASSERT(list1.size() == 8, "");
     for (uint_fast32_t i = 1; i < 9; i++) {
-      CX_ASSERT(list1[i - 1] == i,"");
+      CX_ASSERT(list1[i - 1] == i, "");
     }
 
     list1.pop(3);
-    CX_ASSERT(list1.size() == 7,"");
-    CX_ASSERT(list1[3] == 5,"");
-    CX_ASSERT(list1[3] == 5,"");
+    CX_ASSERT(list1.size() == 7, "");
+    CX_ASSERT(list1[3] == 5, "");
+    CX_ASSERT(list1[3] == 5, "");
     list1.pop(3);
-    CX_ASSERT(list1.size() == 6,"");
-    CX_ASSERT(list1[3] == 6,"");
+    CX_ASSERT(list1.size() == 6, "");
+    CX_ASSERT(list1[3] == 6, "");
   }
 #endif
 };

@@ -297,7 +297,7 @@ class BinaryTree {
    */
   InOrderIterator end() { return InOrderIterator(nullptr); }
 
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "BINARY SEARCH TREE TESTS" << std::endl;
 

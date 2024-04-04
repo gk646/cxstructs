@@ -230,7 +230,7 @@ class DoubleLinkedList {
 
   ReverseIterator begin_re() { return ReverseIterator(end_); }
   ReverseIterator end_re() { return ReverseIterator(nullptr); }
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "DOUBLE LINKED LIST TESTS" << std::endl;
     DoubleLinkedList<int> list1;

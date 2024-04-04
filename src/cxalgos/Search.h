@@ -122,7 +122,7 @@ int binary_search_index(T* arr, T target, int_32_cx len, bool ascending) {
 }
 
 }  // namespace cxstructs
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 namespace cxtests {
 using namespace cxstructs;
 static void TEST_SEARCH() {

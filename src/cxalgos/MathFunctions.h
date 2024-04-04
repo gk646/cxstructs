@@ -96,7 +96,7 @@ double integral_arc_length(Function fx, double a, double b, uint_32_cx steps = 1
   return arc_length;
 }
 }  // namespace cxstructs
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 namespace cxtests {
 using namespace cxstructs;
 static void TEST_MATH() {

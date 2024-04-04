@@ -29,9 +29,11 @@
 #include <memory>
 #include <stdexcept>
 #include "../cxconfig.h"
+#include "../cxstructs/mat.h"
+#include "CXAllocator.h"
 
 //this stack is very fast and implemented natively (std::stack is using the std::vector)
-//more can be up to 1.6 times faster and should be faster in any use case
+//can be up to 1.6 times faster and should be faster in any use case
 
 namespace cxstructs {
 /**
@@ -289,7 +291,7 @@ class Stack {
   };
   Iterator begin() { return Iterator(arr_); }
   Iterator end() { return Iterator(arr_ + size_); }
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 #include "mat.h"
   static void TEST() {
     std::cout << "STACK TESTS" << std::endl;

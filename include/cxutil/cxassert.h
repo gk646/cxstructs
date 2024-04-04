@@ -35,7 +35,7 @@ inline void CX_ASSERT_failed(const char* expr, const char* file, int line, const
 #endif
 }
 
-inline void warning_failed(const char* expr, const char* file, int line, const char* message) {
+inline void WARNING_failed(const char* expr, const char* file, int line, const char* message) {
   std::cerr << "Warning: " << expr << "\n"
             << "At " << file << ":" << line << "\n"
             << "Message: " << message << "\n";
