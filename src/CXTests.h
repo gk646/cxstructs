@@ -21,7 +21,7 @@
 #include "CXStructs.h"
 #include "cxml/word2vec.h"
 
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 namespace cxtests {
 
 using namespace cxstructs;

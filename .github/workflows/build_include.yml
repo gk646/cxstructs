@@ -60,19 +60,19 @@ jobs:
           done
           
           for file in include/cxstructs/*.h; do
-            sed -i '/#ifndef CX_DELETE_TESTS/,/#endif/d' "$file"
+            sed -i '/#ifdef CX_INCLUDE_TESTS/,/#endif/d' "$file"
           done
           
           for file in include/cxalgos/*.h; do
-            sed -i '/#ifndef CX_DELETE_TESTS/,/#endif/d' "$file"
+            sed -i '/#ifdef CX_INCLUDE_TESTS/,/#endif/d' "$file"
           done
           
           for file in include/cxml/*.h; do
-            sed -i '/#ifndef CX_DELETE_TESTS/,/#endif/d' "$file"
+            sed -i '/#ifdef CX_INCLUDE_TESTS/,/#endif/d' "$file"
           done
           
            for file in include/cxutil/*.h; do
-            sed -i '/#ifndef CX_DELETE_TESTS/,/#endif/d' "$file"
+            sed -i '/#ifdef CX_INCLUDE_TESTS/,/#endif/d' "$file"
           done
 
       - name: Commit and push on change

@@ -23,7 +23,6 @@
 
 #include <cmath>
 #include "../cxstructs/mat.h"
-#include "../cxstructs/row.h"
 
 #define CX_PI \
   3.14159265358979323846  // for compatibility | apparently this is only in c++ through std::numbers which is CX20 and not on all compilers equal

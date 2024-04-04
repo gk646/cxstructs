@@ -212,8 +212,8 @@ class QuadTree {
         } else {
           vec_.push_back(e);
           CX_WARNING(false,
-              "|QuadTree.h| Reached max depth | large insertions now will slow "
-              "down the tree");
+                     "|QuadTree.h| Reached max depth | large insertions now will slow "
+                     "down the tree");
           return;
         }
       }
@@ -311,7 +311,7 @@ class QuadTree {
   inline void set_bounds(const Rect& new_bound) noexcept { bounds_ = new_bound; }
   [[nodiscard]] inline const Rect& get_bounds() const noexcept { return bounds_; }
   class Iterator {};
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::random_device rd;
     std::mt19937 gen(rd());

@@ -30,8 +30,8 @@
 namespace cxstructs {
 using namespace std;  //std:: makes this code unreadable
 
-static chrono::time_point<chrono::high_resolution_clock> activeTimeStamp;
-static chrono::time_point<chrono::high_resolution_clock> checkpoints[3];
+inline chrono::time_point<chrono::high_resolution_clock> activeTimeStamp;
+inline chrono::time_point<chrono::high_resolution_clock> checkpoints[3];
 
 /**
  * Sets the activeTimeStamp or alternatively the time of a checkpoint

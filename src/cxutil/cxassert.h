@@ -21,11 +21,10 @@
 #ifndef CXSTRUCTS_SRC_CXASSERT_H_
 #define CXSTRUCTS_SRC_CXASSERT_H_
 
-#include <iostream>
+#include <cstdio>
+
 inline void CX_ASSERT_failed(const char* expr, const char* file, int line, const char* message) {
-  std::cerr << "Assert failed: " << expr << "\n"
-            << "At " << file << ":" << line << "\n"
-            << "Message: " << message << "\n";
+  fprintf(stderr, "Assert failed: %s\nAt: %s:%d\nMessage: %s", expr, file, line, message);
 #if defined(_MSC_VER)
   __debugbreak();
 #elif defined(__GNUC__)
@@ -35,16 +34,15 @@ inline void CX_ASSERT_failed(const char* expr, const char* file, int line, const
 #endif
 }
 
-inline void warning_failed(const char* expr, const char* file, int line, const char* message) {
-  std::cerr << "Warning: " << expr << "\n"
-            << "At " << file << ":" << line << "\n"
-            << "Message: " << message << "\n";
+inline void WARNING_failed(const char* expr, const char* file, int line, const char* message) {
+  fprintf(stderr, "Warning: %s\nAt: %s:%d\nMessage: %s", expr, file, line, message);
 }
 
-#define CX_ASSERT(expr, message) ((expr) ? (void)0 : CX_ASSERT_failed(#expr, __FILE__, __LINE__, message))
+#define CX_ASSERT(expr, message) \
+  ((expr) ? (void)0 : CX_ASSERT_failed(#expr, __FILE__, __LINE__, message))
 
-#define CX_WARNING(expr, message) ((expr) ? (void)0 : warning_failed(#expr, __FILE__, __LINE__, message))
-
+#define CX_WARNING(expr, message) \
+  ((expr) ? (void)0 : WARNING_failed(#expr, __FILE__, __LINE__, message))
 
 #if defined(_MSC_VER) && !defined(_DEBUG)
 #undef CX_ASSERT

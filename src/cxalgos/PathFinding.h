@@ -93,7 +93,7 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
                                      const Point& start, const Point& target) {
   PriorityQueue<Node> frontier;
   HashSet<Point> closedSet;
-  vec<row<2, int>, false> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+  vec<row<2, int>> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
   frontier.emplace(start, 0, start.dist(target), nullptr);
   while (!frontier.empty()) {
     Node* current = new Node(frontier.top());
@@ -124,7 +124,7 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
 }
 
 }  // namespace cxstructs
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 namespace cxtests {  // namespace cxtests
 using namespace cxstructs;
 static void TEST_PATH_FINDING() {

@@ -23,7 +23,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include "../cxalgos/MathFunctions.h"
 #include "../cxconfig.h"
 
 namespace cxstructs {

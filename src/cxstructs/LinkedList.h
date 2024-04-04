@@ -43,7 +43,6 @@ struct ListNode {
 
 }  // namespace cxhelper
 namespace cxstructs {
-using namespace cxhelper;
 /**
  * <h2>Singly Linked List</h2>
  *
@@ -56,18 +55,13 @@ using namespace cxhelper;
  * However, accessing or searching for specific elements in the list requires potentially <b> traversing the entire list,
  * which is an O(n)</b> operation. This makes it less suitable for cases where random access is frequently required.<p>
  */
-template <typename T, bool UseCXPoolAllocator = true>
+template <typename T, typename Allocator = std::allocator<cxhelper::ListNode<T>>, typename  size_type = uint32_t>
 class LinkedList {
-  using Node = ListNode<T>;
-  using Allocator =
-      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<Node, sizeof(Node) * 33, 1>,
-                                std::allocator<Node>>::type;
-
+  using Node = cxhelper::ListNode<T>;
   Allocator alloc;
   uint_32_cx size_;
   Node sentinel_;
   Node* end_;
-  bool is_trivial_destr = std::is_trivially_destructible<T>::value;
 
  public:
   LinkedList() : sentinel_(T()), end_(&sentinel_), size_(0){};
@@ -91,7 +85,7 @@ class LinkedList {
   }
   ~LinkedList() {
     Node* current = sentinel_.next_;
-    if (is_trivial_destr) {
+    if (std::is_trivial_v<T>) {
       while (current != nullptr) {
         Node* next = current->next_;
         alloc.deallocate(current, 1);
@@ -154,7 +148,7 @@ class LinkedList {
     val = toDelete->val_;
     size_--;
 
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       std::allocator_traits<Allocator>::destroy(alloc, toDelete);
     }
     alloc.deallocate(toDelete, 1);
@@ -186,7 +180,7 @@ class LinkedList {
       size_--;
     }
 
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       std::allocator_traits<Allocator>::destroy(alloc, toDelete);
     }
     alloc.deallocate(toDelete, 1);
@@ -211,7 +205,7 @@ class LinkedList {
       if (!sentinel_.next_) {
         end_ = &sentinel_;
       }
-      if (!is_trivial_destr) {
+      if (!std::is_trivial_v<T>) {
         std::allocator_traits<Allocator>::destroy(alloc, toDelete);
       }
       alloc.deallocate(toDelete, 1);
@@ -228,7 +222,7 @@ class LinkedList {
         if (toDelete == end_) {
           end_ = current;
         }
-        if (!is_trivial_destr) {
+        if (!std::is_trivial_v<T>) {
           std::allocator_traits<Allocator>::destroy(alloc, toDelete);
         }
         alloc.deallocate(toDelete, 1);
@@ -241,7 +235,7 @@ class LinkedList {
  */
   inline void clear() {
     Node* current = sentinel_.next_;
-    if (is_trivial_destr) {
+    if constexpr (std::is_trivial_v<T>) {
       while (current != nullptr) {
         Node* next = current->next_;
         alloc.deallocate(current, 1);
@@ -251,7 +245,7 @@ class LinkedList {
       while (current != nullptr) {
         Node* next = current->next_;
         std::allocator_traits<Allocator>::destroy(alloc, current);
-        alloc.deallocate(current, 1);
+        alloc.deallocate(current,1);
         current = next;
       }
     }
@@ -288,7 +282,7 @@ class LinkedList {
     }
     return os;
   }
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "LINKED LIST TESTS" << std::endl;
     LinkedList<int> list1;

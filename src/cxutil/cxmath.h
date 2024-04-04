@@ -22,13 +22,12 @@
 #define CXSTRUCTS_SRC_CXUTIL_MATH_H_
 
 #include <cmath>
-#include "../cxstructs/mat.h"
-#include "../cxstructs/row.h"
 
 #define CX_PI \
   3.14159265358979323846  // for compatibility | apparently this is only in c++ through std::numbers which is CX20 and not on all compilers equal
 
 namespace cxstructs {
+struct mat;
 //function pointer typedef
 typedef float (*func)(float);
 typedef mat (*func_M)(mat&, mat&);  // mat function
@@ -44,18 +43,6 @@ inline float tanh(float x) noexcept {
 inline float relu(float x) noexcept {
   return x > 0 ? x : 0;
 }
-inline void softmax(mat& m) noexcept {
-  float rowSum = 0;
-  for (uint_fast32_t i = 0; i < m.n_rows(); i++) {
-    rowSum = 0;
-    for (uint_fast32_t j = 0; j < m.n_cols(); j++) {
-      rowSum += std::exp(m(i, j));
-    }
-    for (uint_fast32_t j = 0; j < m.n_cols(); j++) {
-      m(i, j) = std::exp(m(i, j)) / rowSum;
-    }
-  }
-}
 //derivatives
 inline float d_sig(float x) noexcept {
   return sig(x) * (1 - sig(x));
@@ -67,19 +54,7 @@ inline float d_tanh(float x) noexcept {
   float t = std::tanh(x);
   return 1 - t * t;
 }
-//loss
-inline mat cross_entropy(mat& pred, mat& target) {  //with softmax activation function
-  softmax(pred);
-  return pred - target;
-}
-inline mat mean_abs(mat& pred, mat& target) {
-  return pred - target;
-}
-inline mat mean_sqr_abs_err(mat& pred, mat& target) {
-  mat ret = pred - target;
-  ret.scale(2);
-  return ret;
-}
+
 //utils
 /**
  * Finds the <b>next</b> closest power of two to the right of the given number
@@ -105,7 +80,7 @@ inline uint_32_cx next_power_of_2(uint_32_cx n) noexcept {
 inline float fast_sqrt(float n) noexcept {
   long i;
   float x2, y;
-  const float threehalfs = 1.5F;
+  constexpr float threehalfs = 1.5F;
 
   x2 = n * 0.5F;
   y = n;
@@ -124,15 +99,5 @@ inline float manhattan(float p1x, float p1y, float p2x, float p2y) noexcept {
   return abs(p2x - p1x) + abs(p2y - p1y);
 }
 
-//multidimensional distance functions
-inline float chebyshev(const vec<float, false>& p1, const vec<float, false>& p2) noexcept {
-  float max = 0;
-  for (uint_fast32_t i = 0; i < p1.size(); i++) {
-    if (p2[i] - p1[i] > max) {
-      max = p2[i] - p1[i];
-    }
-    return max;
-  }
-}
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXUTIL_MATH_H_

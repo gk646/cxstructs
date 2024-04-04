@@ -69,7 +69,7 @@ vec<vec<std::pair<Action, State>>> shortest_path_search(
   }
 }
 }  // namespace cxstructs
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 namespace cxtests {  // namespace cxtests
 static void TEST_DFS() {
   std::cout << "TESTING DEPTH FIRST SEARCH" << std::endl;

@@ -237,7 +237,7 @@ class GraphicsWindow {
 //#include <X11/Xlib.h>
 #endif
 
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 static void TEST() {
   std::vector<Point> p{{2, 2}, {40, 40}, {2, 3}, {5, 6}, {10, 15}, {25, 25}};
   GraphicsWindow win(800, 800, [&p](GraphicsWindow& win) {

@@ -23,7 +23,6 @@
 
 #include <algorithm>
 #include <iostream>
-#include <queue>
 #include "../cxconfig.h"
 
 namespace cxstructs {

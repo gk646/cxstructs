@@ -21,10 +21,9 @@
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
 #define CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
 
-#include <algorithm>
-#include <cstdint>
-#include "../cxalgos/MathFunctions.h"
 #include "../cxconfig.h"
+#include "../cxutil/cxmath.h"
+#include <algorithm>
 
 namespace cxstructs {
 
@@ -418,8 +417,7 @@ struct hash<cxstructs::Circle> {
     return static_cast<int>(c.x()) ^ (static_cast<int>(c.y()) << 1) ^ static_cast<int>(c.radius());
   }
 };
-}  // namespace std
-#ifndef CX_DELETE_TESTS
+#ifdef CX_INCLUDE_TESTS
 static void GEOMETRY_TEST() {
   using namespace cxstructs;
   std::cout << "RECTANGLE TESTS" << std::endl;
@@ -528,4 +526,5 @@ static void GEOMETRY_TEST() {
   // Point p3 is inside Circle c8
 }
 #endif
+}  // namespace std
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
