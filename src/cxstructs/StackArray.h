@@ -21,8 +21,8 @@
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_STACKARRAY_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_STACKARRAY_H_
 
-#include <iterator>  // For std::forward_iterator_tag
 #include "../cxconfig.h"
+#include <iterator>  // For std::forward_iterator_tag
 
 template <typename T, size_t N>
 class StackArray {
