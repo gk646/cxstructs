@@ -467,7 +467,7 @@ class vec {
     size_ += endIndex - startIndex;
   }
   /**
-  * Attempts to print the complete list to std::cout
+  * Attempts to bits_print the complete list to std::cout
   * @param prefix optional prefix
   */
   inline void print(const std::string& prefix = "") {

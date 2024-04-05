@@ -22,11 +22,12 @@
 #define CXSTRUCTS_SRC_CXSTRUCTS_STACKHASHMAP_H_
 
 #include "../cxconfig.h"
-#include <bitset>    //For std::bitset<N> and std::hash<K>
-#include <iterator>  // For std::forward_iterator_tag
+#include <bitset>  //For std::bitset<N> and std::hash<K>
 
 //Memory footprint is still quite big
 //Using std::bitset<> saves memory but is a bit slower
+//Use set_rand(1) if you have your own perfect hash function -> will be overridden on collision
+namespace cxstructs {
 
 /**
  * StackHashMap is a hash map implemented entirely on the stack with an STL-like interface.<br>
@@ -259,6 +260,7 @@ class StackHashMap {
     return register_[hash] && data_[hash].key == key;
   }
 
+  //The multiplier for the hash | Set to 1 if you supply a perfect hash function | Resets on collision
   inline void set_rand(int rand) noexcept { rand_ = rand; }
 
   inline void clear() noexcept {
@@ -317,7 +319,6 @@ class StackHashMap {
     size_t size_;
     size_t index_;
   };
-
   class ValueIterator {
    public:
     using iterator_category = std::forward_iterator_tag;
@@ -362,7 +363,6 @@ class StackHashMap {
     size_t size_;
     size_t index_;
   };
-
   class PairIterator {
    public:
     using iterator_category = std::forward_iterator_tag;
@@ -470,8 +470,9 @@ class StackHashMap {
     myMap2.insert("hey", 100);
     myMap2.insert("blabla", 100);
 
-    printf("%d", myMap2["hey"]);
+    CX_ASSERT(myMap2["hey"] == 100, "");
   }
 #endif
 };
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_STACKHASHMAP_H_

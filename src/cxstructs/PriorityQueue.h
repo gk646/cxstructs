@@ -22,9 +22,11 @@
 #define CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
 
 #include "../cxconfig.h"
+#include <memory> // For std::allocator<T>
 #ifdef CX_INCLUDE_TESTS
 #include <queue>
 #endif
+
 namespace cxstructs {
 
 /**
@@ -103,7 +105,7 @@ class PriorityQueue {
 
  public:
   /**
-   * Per default is a min heap. Pass std::greater<> as comparator to get a max-heap
+   * Per default is a min heap. Pass std::greater<> as comparator to bits_get a max-heap
    * @param len initial length and expansion factor
    */
   inline explicit PriorityQueue(uint_32_cx len = 32)
@@ -241,16 +243,7 @@ class PriorityQueue {
     CX_WARNING(len_ > size_ * 1.5, "calling shrink_to_fit for no reason");
     shrink();
   }
-  friend std::ostream& operator<<(std::ostream& os, const PriorityQueue& q) {
-    if (q.size() == 0) {
-      return os << "[]";
-    }
-    os << "[" << q.arr_[0];
-    for (uint_32_cx i = 1; i < q.size_; i++) {
-      os << "," << q.arr_[i];
-    }
-    return os << "]";
-  }
+
   class Iterator {
     T* ptr;
 
