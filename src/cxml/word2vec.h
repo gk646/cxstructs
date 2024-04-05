@@ -75,7 +75,7 @@ class Word2Vec {
       auto target = mat::unit_matrix(1, vocab_len, 0, i);
       net.train(in[i], target, epochs);
     }
-    in.print();
+    in.bits_print();
   }
   vec<float> predict_next(int vocab_index) {
     mat in(1, vocab_len);
