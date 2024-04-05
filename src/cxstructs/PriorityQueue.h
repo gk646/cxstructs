@@ -44,7 +44,6 @@ class PriorityQueue {
   uint_32_cx size_;
   Compare comp;
 
-
   inline void resize() noexcept {
     len_ *= 2;
 
@@ -67,7 +66,7 @@ class PriorityQueue {
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    if constexpr(!std::is_trivial_v<T>) {
+    if constexpr (!std::is_trivial_v<T>) {
       for (size_t i = 0; i < old_len; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }

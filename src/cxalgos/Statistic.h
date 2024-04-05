@@ -58,14 +58,14 @@ inline float quartile_nth(uint8_t n, const T* arr, int len) noexcept {
     throw std::invalid_argument("Array length must be positive");
   }
   auto cpyArr = new T[len];
-  memcpy(cpyArr, arr,  len * sizeof(int));
+  memcpy(cpyArr, arr, len * sizeof(int));
   cxstructs::selection_sort(cpyArr, len);
 
   float q = (len - 3) / 4.0F;
   q = n * q + n;
 
-  T first = cpyArr[(int)q-1];
-  T second = cpyArr[(int)q ];
+  T first = cpyArr[(int)q - 1];
+  T second = cpyArr[(int)q];
 
   float factor = q - (int)q;
   float val = first + (second - first) * factor;
@@ -73,5 +73,5 @@ inline float quartile_nth(uint8_t n, const T* arr, int len) noexcept {
   delete[] cpyArr;
   return val;
 }
-}
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXALGOS_STATISTIC_H_

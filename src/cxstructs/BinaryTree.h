@@ -310,7 +310,6 @@ class BinaryTree {
 
     CX_ASSERT(bt1.contains(2), "");
 
-
     // Test size
     std::cout << "  Testing size method..." << std::endl;
     CX_ASSERT(bt1.size() == 2, "");
@@ -318,39 +317,39 @@ class BinaryTree {
     // Test erase
     std::cout << "  Testing erase method..." << std::endl;
     bt1.erase(1);
-    CX_ASSERT(!bt1.contains(1),"");
-    CX_ASSERT(bt1.size() == 1,"");
+    CX_ASSERT(!bt1.contains(1), "");
+    CX_ASSERT(bt1.size() == 1, "");
 
     // Test erase non-existing value
     std::cout << "  Testing erase non-existing value..." << std::endl;
     bool erased = bt1.erase(5);  // Should return false as 5 doesn't exist
-    CX_ASSERT(erased == false,"");
+    CX_ASSERT(erased == false, "");
 
     // Test newly created tree
     std::cout << "  Testing newly created tree..." << std::endl;
     BinaryTree<int> bt2;
-    CX_ASSERT(bt2.empty(),"");
-    CX_ASSERT(bt2.size() == 0,"");
+    CX_ASSERT(bt2.empty(), "");
+    CX_ASSERT(bt2.size() == 0, "");
 
     // Test insert and contained
     std::cout << "  Testing insertion and contained method..." << std::endl;
     bt2.insert(10);
-    CX_ASSERT(bt2.contains(10),"");
-    CX_ASSERT(!bt2.empty(),"");
-    CX_ASSERT(bt2.size() == 1,"");
+    CX_ASSERT(bt2.contains(10), "");
+    CX_ASSERT(!bt2.empty(), "");
+    CX_ASSERT(bt2.size() == 1, "");
 
     // Test insert multiple elements
     std::cout << "  Testing insertion of multiple elements..." << std::endl;
     bt2.insert(15);
-    CX_ASSERT(bt2.contains(15),"");
+    CX_ASSERT(bt2.contains(15), "");
     bt2.insert(5);
-    CX_ASSERT(bt2.contains(5),"");
-    CX_ASSERT(!bt2.contains(4),"");
-    CX_ASSERT(bt2.size() == 3,"");
+    CX_ASSERT(bt2.contains(5), "");
+    CX_ASSERT(!bt2.contains(4), "");
+    CX_ASSERT(bt2.size() == 3, "");
 
     // Test maxDepth method
     std::cout << "  Testing maxDepth method..." << std::endl;
-    CX_ASSERT(bt2.maxDepth() == 2,"");  // Check if depth is correct after insertions
+    CX_ASSERT(bt2.maxDepth() == 2, "");  // Check if depth is correct after insertions
     // Test invert method
     std::cout << "  Testing invert method..." << std::endl;
     std::vector<int> normalTraversal, invertedTraversal;
@@ -363,7 +362,7 @@ class BinaryTree {
     for (auto it = bt2.begin(); it != bt2.end(); ++it) {
       invertedTraversal.push_back(*it);
     }
-    CX_ASSERT(normalTraversal != invertedTraversal,"");
+    CX_ASSERT(normalTraversal != invertedTraversal, "");
 
     std::cout << "  Testing sorted traversal..." << std::endl;
     std::random_device rd;

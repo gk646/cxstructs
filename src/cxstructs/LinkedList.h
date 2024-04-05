@@ -55,7 +55,8 @@ namespace cxstructs {
  * However, accessing or searching for specific elements in the list requires potentially <b> traversing the entire list,
  * which is an O(n)</b> operation. This makes it less suitable for cases where random access is frequently required.<p>
  */
-template <typename T, typename Allocator = std::allocator<cxhelper::ListNode<T>>, typename  size_type = uint32_t>
+template <typename T, typename Allocator = std::allocator<cxhelper::ListNode<T>>,
+          typename size_type = uint32_t>
 class LinkedList {
   using Node = cxhelper::ListNode<T>;
   Allocator alloc;
@@ -189,7 +190,7 @@ class LinkedList {
    * @return a reference to the last element
    */
   [[nodiscard]] inline T& back() {
-    CX_ASSERT(end_ != &sentinel_ , "no such element");
+    CX_ASSERT(end_ != &sentinel_, "no such element");
     return end_->get();
   }
   /**
@@ -245,7 +246,7 @@ class LinkedList {
       while (current != nullptr) {
         Node* next = current->next_;
         std::allocator_traits<Allocator>::destroy(alloc, current);
-        alloc.deallocate(current,1);
+        alloc.deallocate(current, 1);
         current = next;
       }
     }

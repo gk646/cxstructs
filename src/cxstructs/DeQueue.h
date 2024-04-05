@@ -42,7 +42,6 @@ class DeQueue {
   int_32_cx front_;
   int_32_cx back_;
 
-
   inline void grow() {
     len_ *= 2;
 
@@ -85,7 +84,7 @@ class DeQueue {
       std::uninitialized_move(arr_, arr_ + front_, n_arr + size_ - front_);
     }
 
-    if constexpr(!std::is_trivial_v<T>) {
+    if constexpr (!std::is_trivial_v<T>) {
       for (size_t i = 0; i < old_len; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -122,7 +121,7 @@ class DeQueue {
       size_ = o.size_;
       arr_ = alloc.allocate(len_);
 
-      if constexpr(std::is_trivial_v<T>) {
+      if constexpr (std::is_trivial_v<T>) {
         std::copy(o.arr_, o.arr_ + o.len_, arr_);
       } else {
         std::uninitialized_copy(o.arr_, o.arr_ + o.len_, arr_);
@@ -139,7 +138,7 @@ class DeQueue {
   //move assign operator
   DeQueue& operator=(DeQueue&& o) noexcept {
     if (this != &o) {
-      if constexpr(!std::is_trivial_v<T>) {
+      if constexpr (!std::is_trivial_v<T>) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -159,7 +158,7 @@ class DeQueue {
   }
 
   inline ~DeQueue() {
-    if constexpr(!std::is_trivial_v<T>) {
+    if constexpr (!std::is_trivial_v<T>) {
       uint_32_cx end = (front_ + size_) % len_;
       if (end < front_) {
         for (uint_32_cx i = front_; i < len_; i++) {
