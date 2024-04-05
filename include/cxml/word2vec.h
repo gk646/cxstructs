@@ -38,7 +38,7 @@ class Word2Vec {
   Word2Vec(int vocabulary_size, int numbers_per_word)
       : net(
             {vocabulary_size, numbers_per_word, vocabulary_size}, [](float x) { return x; }, 0.11,
-            cross_entropy),
+            mat::cross_entropy),
         vec_len(numbers_per_word),
         vocab_len(vocabulary_size) {}
 
@@ -62,7 +62,7 @@ class Word2Vec {
     if (vocabulary.size() != vocab_len) {
       throw std::logic_error("vocabulary size doesnt match the training input");
     }
-    vec<mat, false> in(vocabulary.size(), mat(1,vocab_len));
+    vec<mat> in(vocabulary.size(), mat(1, vocab_len));
 
     for (int i = 0; i < in.size(); i++) {
       int start = std::max(0, i - radius);
@@ -77,14 +77,14 @@ class Word2Vec {
     }
     in.print();
   }
-  vec<float, false> predict_next(int vocab_index) {
+  vec<float> predict_next(int vocab_index) {
     mat in(1, vocab_len);
     in(0, vocab_index) = 1;
     mat out = net.forward(in);
-    softmax(out);
+    mat::softmax(out);
     return out.get_row(0);
   }
-  vec<float, false> get_vec(int vocab_index) { return net.get_weights(0, vocab_index); }
+  vec<float> get_vec(int vocab_index) { return net.get_weights(0, vocab_index); }
 
 };
 }  // namespace cxstructs

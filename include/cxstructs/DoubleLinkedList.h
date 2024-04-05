@@ -142,8 +142,7 @@ class DoubleLinkedList {
   * @return the element removed with this operation
   */
   T removeAt(uint_32_cx index) {
-    if (index >= size_)
-      throw std::out_of_range("index out of bounds");
+    if (index >= size_) throw std::out_of_range("index out of bounds");
 
     DListNode<T>* toDelete;
     T val;

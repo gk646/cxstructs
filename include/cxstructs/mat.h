@@ -22,14 +22,8 @@
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
 
-#include <cstdint>
-#include <iostream>
-#include <ostream>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include <cmath>
 #include "../cxconfig.h"
-#include "../cxutil/cxmath.h"
 #include "vec.h"
 
 namespace cxstructs {
@@ -473,8 +467,8 @@ class mat {
     std::cout << *this << std::endl;
   }
   friend std::ostream& operator<<(std::ostream& os, const mat& obj) {
-    if(obj.n_cols_+obj.n_rows_ == 0 ){
-      return os<<"[]";
+    if (obj.n_cols_ + obj.n_rows_ == 0) {
+      return os << "[]";
     }
     for (uint_32_cx i = 0; i < obj.n_rows_; i++) {
       os << "[";
@@ -505,8 +499,8 @@ class mat {
    * @param row which row data to return
    * @return a vector of length n_cols with elements from the given row
    */
-  [[nodiscard]] inline vec<float, false> get_row(uint_32_cx row) const noexcept {
-    return vec<float, false>(arr + row * n_cols_, n_cols_);
+  [[nodiscard]] inline vec<float> get_row(uint_32_cx row) const noexcept {
+    return vec<float>(arr + row * n_cols_, n_cols_);
   }
   /**
    * Constructs a new vector from the given column<p>
@@ -514,14 +508,35 @@ class mat {
    * @param col the column
    * @return a vector of length n_rows with the data of the given column
    */
-  inline vec<float, false> get_col(uint_32_cx col) const noexcept {
-    vec<float, false> ret(n_rows_, 0);
+  inline vec<float> get_col(uint_32_cx col) const noexcept {
+    vec<float> ret(n_rows_, 0);
     for (uint_fast32_t i = 0; i < n_rows_; i++) {
       ret[i] = arr[i * n_cols_ + col];
     }
     return ret;
   }
-
+  inline static void softmax(mat& m) noexcept {
+    float rowSum = 0;
+    for (uint_fast32_t i = 0; i < m.n_rows(); i++) {
+      rowSum = 0;
+      for (uint_fast32_t j = 0; j < m.n_cols(); j++) {
+        rowSum += std::exp(m(i, j));
+      }
+      for (uint_fast32_t j = 0; j < m.n_cols(); j++) {
+        m(i, j) = std::exp(m(i, j)) / rowSum;
+      }
+    }
+  }
+  inline static mat cross_entropy(mat& pred, mat& target) {  //with softmax activation function
+    softmax(pred);
+    return pred - target;
+  }
+  inline static mat mean_abs(mat& pred, mat& target) { return pred - target; }
+  inline static mat mean_sqr_abs_err(mat& pred, mat& target) {
+    mat ret = pred - target;
+    ret.scale(2);
+    return ret;
+  }
 };
 }  // namespace cxstructs
 #endif

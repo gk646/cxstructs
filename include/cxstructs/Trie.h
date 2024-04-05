@@ -22,7 +22,7 @@
 #define CXSTRUCTS_TRIE_H
 
 #pragma message( \
-        "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!")
+    "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!")
 
 #include <algorithm>
 #include <array>

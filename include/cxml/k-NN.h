@@ -130,7 +130,7 @@ class kNN_2D {
     if (n_points < k) {
       throw std::logic_error("not enough data points");
     }
-    vec<int, false> catg_values(128, 0);  // max categories
+    vec<int> catg_values(128, 0);  // max categories
     vec<DP_*> k_closest;
 
     get_k_closest(x, y, k, k_closest);  //getting pointer list of closest points
@@ -157,7 +157,7 @@ class kNN_2D {
  * @throws std::logic_error If no category is found.
  */
   inline Category classify_by_sum_distance(float x, float y, int k) {
-    vec<float, false> catg_values(128, 0);  // max categories
+    vec<float> catg_values(128, 0);  // max categories
     vec<DP_*> k_closest;
 
     get_k_closest(x, y, k, k_closest);  //getting pointer list of closest points
@@ -184,7 +184,7 @@ class kNN_2D {
  * @throws std::logic_error If no category is found.
  */
   inline Category classify_by_sum_weight(float x, float y, int k) {
-    vec<float, false> catg_values(128, 0);  // max categories
+    vec<float> catg_values(128, 0);  // max categories
     vec<DP_*> k_closest;
 
     get_k_closest(x, y, k, k_closest);  //getting pointer list of closest points
@@ -211,7 +211,7 @@ class kNN_2D {
  * @throws std::logic_error If no category is found.
  */
   inline Category classify_by_sum_weighted_distance(float x, float y, int k) {
-    vec<float, false> catg_values(128, 0);  // max categories
+    vec<float> catg_values(128, 0);  // max categories
     vec<DP_*> k_closest;
 
     get_k_closest(x, y, k, k_closest);  //getting pointer list of closest points

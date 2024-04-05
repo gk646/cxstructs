@@ -176,19 +176,19 @@ class QuadTree {
   QuadTree(QuadTree&&) = delete;
   QuadTree& operator=(QuadTree&&) = delete;
   ~QuadTree() {
-    if(top_right_){
+    if (top_right_) {
       delete top_right_;
       top_right_ = nullptr;
     }
-    if(top_left_){
+    if (top_left_) {
       delete top_left_;
       top_left_ = nullptr;
     }
-    if(bottom_right_){
+    if (bottom_right_) {
       delete bottom_right_;
       bottom_right_ = nullptr;
     }
-    if(bottom_left_){
+    if (bottom_left_) {
       delete bottom_left_;
       bottom_left_ = nullptr;
     }
@@ -212,8 +212,8 @@ class QuadTree {
         } else {
           vec_.push_back(e);
           CX_WARNING(false,
-              "|QuadTree.h| Reached max depth | large insertions now will slow "
-              "down the tree");
+                     "|QuadTree.h| Reached max depth | large insertions now will slow "
+                     "down the tree");
           return;
         }
       }
@@ -221,7 +221,6 @@ class QuadTree {
 
     insert_subtrees(e);
   }
-
 
   /**
    * Number of points contained in the given rectangle bound
@@ -259,19 +258,19 @@ class QuadTree {
    * Clears the QuadTree of all elements including its own subtrees
    */
   inline void clear() {
-    if(top_right_){
+    if (top_right_) {
       delete top_right_;
       top_right_ = nullptr;
     }
-    if(top_left_){
+    if (top_left_) {
       delete top_left_;
       top_left_ = nullptr;
     }
-    if(bottom_right_){
+    if (bottom_right_) {
       delete bottom_right_;
       bottom_right_ = nullptr;
     }
-    if(bottom_left_){
+    if (bottom_left_) {
       delete bottom_left_;
       bottom_left_ = nullptr;
     }

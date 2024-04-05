@@ -21,10 +21,7 @@
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
 
-#include <algorithm>
-#include <iostream>
 #include "../cxconfig.h"
-
 namespace cxstructs {
 
 /**
@@ -35,18 +32,14 @@ namespace cxstructs {
  * of the largest (by default) element, at the expense of logarithmic insertion and extraction. A user-defined comparator
  * can be supplied to change the ordering, e.g., using std::greater<T> would cause the smallest element to appear as the top().
  */
-template <typename T, typename Compare = std::greater<T>, bool UseCXPoolAllocator = true>
+template <typename T, typename Compare = std::greater<T>, typename Allocator = std::allocator<T>,
+          typename size_type = uint32_t>
 class PriorityQueue {
-  using Allocator =
-      typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
-                                std::allocator<T>>::type;
   Allocator alloc;
   T* arr_;
   uint_32_cx len_;
   uint_32_cx size_;
   Compare comp;
-
-  bool is_trivial_destr = std::is_trivially_destructible<T>::value;
 
   inline void resize() noexcept {
     len_ *= 2;
@@ -54,7 +47,7 @@ class PriorityQueue {
     T* n_arr = alloc.allocate(len_);
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
-    if (!is_trivial_destr) {
+    if constexpr (!std::is_trivial_v<T>) {
       for (size_t i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -70,7 +63,7 @@ class PriorityQueue {
     std::uninitialized_move(arr_, arr_ + size_, n_arr);
 
     // Destroy the original objects
-    if (!is_trivial_destr) {
+    if constexpr (!std::is_trivial_v<T>) {
       for (size_t i = 0; i < old_len; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -130,7 +123,7 @@ class PriorityQueue {
    */
   inline explicit PriorityQueue(const T* arr, uint_32_cx len)
       : arr_(alloc.allocate(len)), len_(len), size_(len) {
-    if (is_trivial_destr) {
+    if (std::is_trivial_v<T>) {
       std::copy(arr, arr + len, arr_);
     } else {
       std::uninitialized_copy(arr, arr + len, arr_);
@@ -140,7 +133,7 @@ class PriorityQueue {
 
   PriorityQueue(const PriorityQueue& o) : len_(o.len_), size_(o.size_), comp(o.comp) {
     arr_ = alloc.allocate(len_);
-    if (is_trivial_destr) {
+    if (std::is_trivial_v<T>) {
       std::copy(o.arr_, o.arr_ + o.size_, arr_);
     } else {
       std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
@@ -148,7 +141,7 @@ class PriorityQueue {
   }
   PriorityQueue& operator=(const PriorityQueue& o) {
     if (this != &o) {
-      if (!is_trivial_destr) {
+      if (!std::is_trivial_v<T>) {
         for (uint_32_cx i = 0; i < len_; i++) {
           std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
         }
@@ -159,7 +152,7 @@ class PriorityQueue {
       size_ = o.size_;
       arr_ = alloc.allocate(len_);
 
-      if (is_trivial_destr) {
+      if (std::is_trivial_v<T>) {
         std::copy(o.arr_, o.arr_ + o.size_, arr_);
       } else {
         std::uninitialized_copy(o.arr_, o.arr_ + o.size_, arr_);
@@ -168,7 +161,7 @@ class PriorityQueue {
     return *this;
   }
   inline ~PriorityQueue() {
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       for (uint_32_cx i = 0; i < len_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -227,7 +220,7 @@ class PriorityQueue {
    * Clears the queue of all elements
    */
   inline void clear() {
-    if (!is_trivial_destr) {
+    if (!std::is_trivial_v<T>) {
       for (uint_32_cx i = 0; i < len_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -269,7 +262,6 @@ class PriorityQueue {
   };
   Iterator begin() { return Iterator(arr_); }
   Iterator end() { return Iterator(arr_ + size_); }
-
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
