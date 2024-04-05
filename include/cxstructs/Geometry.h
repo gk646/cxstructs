@@ -21,9 +21,9 @@
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
 #define CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
 
-#include <algorithm>
-#include <cstdint>
 #include "../cxconfig.h"
+#include "../cxutil/cxmath.h"
+#include <algorithm>
 
 namespace cxstructs {
 

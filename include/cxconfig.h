@@ -21,18 +21,18 @@
 #ifndef CXSTRUCTS_SRC_CONFIG_H_
 #define CXSTRUCTS_SRC_CONFIG_H_
 
-/* |-----------------------------------------------------|
- * |                     MACROS                          |
- * |-----------------------------------------------------|
- */
+//-----------DEFINES-----------//
 
 //#define CX_USE_INT            : uses type int for all custom types
-//
+//#define CX_STACK_ABORT        : calls std::abort() when the size limit of stack structures is reached
 //
 //
 
+#define CX_INL inline
+#define CX_NDISC [[nodiscard]]
+
 /**
- * namespace for all datastructure related headers
+ * namespace for exposed structs and functions
  */
 namespace cxstructs {}
 /**
@@ -47,6 +47,12 @@ namespace cxtests {}
 #include <cstdint>
 #include "cxutil/cxassert.h"
 
+#ifdef CX_STACK_ABORT
+#define CX_STACK_ABORT_IMPL() if (size_ >= N) std::abort()
+#else
+#define CX_STACK_ABORT_IMPL() (void(0))
+#endif
+
 #ifndef CX_USE_INT
 typedef uint_fast32_t uint_32_cx;
 typedef uint_fast16_t uint_16_cx;
@@ -56,9 +62,5 @@ typedef int uint_32_cx;
 typedef int uint_16_cx;
 typedef int int_32_cx;
 #endif
-
-#include "CXAllocator.h"
-
-
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_

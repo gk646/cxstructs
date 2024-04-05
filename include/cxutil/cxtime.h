@@ -22,9 +22,6 @@
 #define CX_TIME_H
 
 #include <chrono>
-#include <iomanip>
-#include <iostream>
-#include <string>
 #include "../cxconfig.h"
 
 namespace cxstructs {
@@ -46,35 +43,30 @@ inline void now(int checkpoint = -1) {
 }
 
 template <typename T>
-string get_duration_unit();
-
-template <typename T>
-std::string get_duration_unit();
-
+const char* get_duration_unit();
 template <>
-inline std::string get_duration_unit<std::chrono::seconds>() {
+inline const char* get_duration_unit<std::chrono::seconds>() {
   return "seconds";
 }
 template <>
-inline std::string get_duration_unit<std::chrono::milliseconds>() {
+inline const char* get_duration_unit<std::chrono::milliseconds>() {
   return "milliseconds";
 }
 template <>
-inline std::string get_duration_unit<std::chrono::microseconds>() {
+inline const char* get_duration_unit<std::chrono::microseconds>() {
   return "microseconds";
 }
 template <>
-inline std::string get_duration_unit<std::chrono::nanoseconds>() {
+inline const char* get_duration_unit<std::chrono::nanoseconds>() {
   return "nanoseconds";
 }
 template <>
-inline std::string get_duration_unit<std::chrono::duration<double>>() {
+inline const char* get_duration_unit<std::chrono::duration<double>>() {
   return "seconds";
 }
 
-
 template <typename DurationType = std::chrono::duration<double>>
-inline void printTime(const std::string& prefix = "", int checkpoint = -1) {
+inline void printTime(const char* prefix = nullptr, int checkpoint = -1) {
   std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
   if (checkpoint >= 0 && checkpoint < 3) {
     start_time = checkpoints[checkpoint];
@@ -85,13 +77,12 @@ inline void printTime(const std::string& prefix = "", int checkpoint = -1) {
   auto diff = std::chrono::high_resolution_clock::now() - start_time;
   auto diffInDesiredUnits = std::chrono::duration_cast<DurationType>(diff);
 
-  if (!prefix.empty()) {
+  if (prefix) {
     std::cout << prefix << " ";
   }
   std::cout << std::fixed << std::setprecision(3) << diffInDesiredUnits.count() << " "
             << get_duration_unit<DurationType>() << std::endl;
 }
-
 template <typename DurationType = std::chrono::duration<double>>
 inline long long getTime(int checkpoint = -1) {
   std::chrono::time_point<std::chrono::high_resolution_clock> start_time;

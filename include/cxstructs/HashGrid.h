@@ -21,20 +21,17 @@
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 #include "../cxconfig.h"
-
-namespace cxhelper {}  // namespace cxhelper
 
 namespace cxstructs {
 
 /**
  * HashGrid for a square space
+ * A HashGrid divides the space into cells of uniform size, and entities are assigned to these cells based on their spatial coordinates. <br>
+ * This spatial partitioning allows for efficient querying and management of entities based on their locations.
+ *
  */
 template <typename EntityID = uint32_t>
 struct HashGrid {
@@ -42,18 +39,18 @@ struct HashGrid {
   using GridID = size_type;
 
  private:
-  float cellSize;
-  float spaceSize;
-  size_type gridSize;
-  std::unordered_map<GridID, std::vector<EntityID>> map;
+  float cellSize = 0;
+  float totalSpaceSize = 0;
+  size_type gridSize = 0;
+  std::unordered_map<GridID, std::vector<EntityID>> cells;
 
  public:
-  explicit HashGrid(float cellSize, float spaceSize, bool reserveUpfront = true)
+  explicit HashGrid(float cellSize, float spaceSize)
       : cellSize(cellSize),
-        spaceSize(spaceSize),
+        totalSpaceSize(spaceSize),
         gridSize(static_cast<size_type>(spaceSize / cellSize)) {
-    map.reserve(gridSize * gridSize);
-    map.max_load_factor(1.0F);
+    cells.reserve(gridSize * gridSize);
+    cells.max_load_factor(1.0F);
   };
   HashGrid() = default;
   HashGrid(const HashGrid&) = delete;
@@ -64,18 +61,18 @@ struct HashGrid {
       return *this;
     }
 
-    map = std::move(other.map);
+    cells = std::move(other.cells);
     cellSize = other.cellSize;
-    spaceSize = other.spaceSize;
+    totalSpaceSize = other.totalSpaceSize;
     gridSize = other.gridSize;
 
     other.cellSize = 0;
-    other.spaceSize = 0;
+    other.totalSpaceSize = 0;
     other.gridSize = 0;
 
     return *this;
   }
-  inline const std::vector<EntityID>& operator[](GridID g) noexcept { return map[g]; }
+  inline const std::vector<EntityID>& operator[](GridID g) noexcept { return cells[g]; }
   [[nodiscard]] inline GridID getGridID(float x, float y) const noexcept {
     return static_cast<int>(x / cellSize) + static_cast<int>(y / cellSize) * gridSize;
   }
@@ -98,25 +95,26 @@ struct HashGrid {
                      : -1;  // Bottom-right
   }
   inline void clear() {
-    for (auto& pair : map) {
+    for (auto& pair : cells) {
       pair.second.clear();
     }
   };
   inline void setupNew(float newCellSize, uint_16_cx newSpaceSize, bool optimized = true) {
     if (optimized) {
-      float value = cellSize / spaceSize;
+      float value = cellSize / totalSpaceSize;
       cellSize = newSpaceSize * value;
-      map.reserve(std::pow(spaceSize / cellSize, 2));
+      cells.reserve(std::pow(totalSpaceSize / cellSize, 2));
     } else {
       cellSize = newCellSize;
-      spaceSize = newSpaceSize;
+      totalSpaceSize = newSpaceSize;
     }
-    map.clear();
-  };
+    cells.clear();
+  }
   inline void insert(float x, float y, EntityID entityID) {
-    CX_ASSERT(x < spaceSize && y < spaceSize, "x or y is larger than spaceSize");
-    map[getGridID(x, y)].emplace_back(entityID);
-  };
+    CX_ASSERT(x < totalSpaceSize && y < totalSpaceSize, "x or y is larger than spaceSize");
+    cells[getGridID(x, y)].emplace_back(entityID);
+  }
+
 };
 
 }  // namespace cxstructs
