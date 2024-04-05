@@ -64,12 +64,15 @@ The general namespace is `cxstructs`.
 - **HashSet**: *using separate chaining with LinkedLists with static buffer*
 - **HashGrid**: *uses STL containers / 2D spatial lookups*
 - **Linked List**:
+- **StackVector**: *stack container with std::vector interface*
+- **StackHashMap**: *(yes :) stack container with std::unordered map interface*
 - **Double Linked List**:
 - **Queue**: *using circular array*
 - **DeQueue**: *using circular array*
 - **PriorityQueue**: *using binary heap*
 - **Binary Tree**:
 - **QuadTree**: *allows custom Types with x() and y() getters*
+- **BitMask**: *various bit mask container*
 - **Geometry**(*Rect,Circle,Point*): *standard efficient 2D shapes*
 
 #### Machine Learning
@@ -94,6 +97,7 @@ The general namespace is `cxstructs`.
 - **cxassert**: *custom assertions with optional text*
 - **cxmath**: *activation functions,distance function, next_power_of_2*
 - **cxgraphics**: *simple native windowing and graphics output header*
+- **cxbits**: *bit operations on numbers*
 
 ---
 
