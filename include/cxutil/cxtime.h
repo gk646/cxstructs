@@ -21,8 +21,9 @@
 #ifndef CX_TIME_H
 #define CX_TIME_H
 
-#include <chrono>
 #include "../cxconfig.h"
+#include <cstdio>
+#include <chrono>
 
 namespace cxstructs {
 using namespace std;  //std:: makes this code unreadable
@@ -74,14 +75,14 @@ inline void printTime(const char* prefix = nullptr, int checkpoint = -1) {
     start_time = activeTimeStamp;
   }
 
-  auto diff = std::chrono::high_resolution_clock::now() - start_time;
-  auto diffInDesiredUnits = std::chrono::duration_cast<DurationType>(diff);
+  const auto diff = std::chrono::high_resolution_clock::now() - start_time;
+  const auto diffInDesiredUnits = std::chrono::duration_cast<DurationType>(diff);
 
   if (prefix) {
-    std::cout << prefix << " ";
+    printf("%s ", prefix);
   }
-  std::cout << std::fixed << std::setprecision(3) << diffInDesiredUnits.count() << " "
-            << get_duration_unit<DurationType>() << std::endl;
+  // Print with fixed precision of 3 decimal places
+  printf("%.3f %s\n",  diffInDesiredUnits.count(), get_duration_unit<DurationType>());
 }
 template <typename DurationType = std::chrono::duration<double>>
 inline long long getTime(int checkpoint = -1) {
