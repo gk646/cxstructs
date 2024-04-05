@@ -26,17 +26,17 @@
 
 namespace cxstructs {
 template <typename T, size_t N, typename size_type = uint32_t>
-class StackArray {
+class StackVector {
 
   T data_[N];       // Stack-allocated array
   size_type size_;  // Current number of elements in the array
 
  public:
-  StackArray() : size_(0) {}
-  StackArray(size_type elems) : size_(elems) {}
-  StackArray(const StackArray&) = delete;
-  StackArray& operator=(const StackArray&) = delete;
-  StackArray(StackArray&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
+  StackVector() : size_(0) {}
+  StackVector(size_type elems) : size_(elems) {}
+  StackVector(const StackVector&) = delete;
+  StackVector& operator=(const StackVector&) = delete;
+  StackVector(StackVector&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
       : size_(other.size_) {
     if constexpr (std::is_trivially_copyable_v<T>) {
       std::memcpy(data_, other.data_, other.size_ * sizeof(T));
@@ -48,7 +48,7 @@ class StackArray {
     }
     other.size_ = 0;
   }
-  StackArray& operator=(StackArray&& other) noexcept(std::is_nothrow_move_assignable_v<T>) {
+  StackVector& operator=(StackVector&& other) noexcept(std::is_nothrow_move_assignable_v<T>) {
     if (this != &other) {
       clear();
       size_ = other.size_;
@@ -64,7 +64,7 @@ class StackArray {
     }
     return *this;
   }
-  ~StackArray() { clear(); }
+  ~StackVector() { clear(); }
   // Call can fail
   void push_back(const T& value) {
     CX_ASSERT(size_ < N, "Attempt to add to a full StackArray");
