@@ -21,13 +21,12 @@
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_STACKARRAY_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_STACKARRAY_H_
 
-#include <iterator>  // For std::forward_iterator_tag
 #include "../cxconfig.h"
+#include <iterator>  // For std::forward_iterator_tag
 
-template <typename T, size_t N>
+namespace cxstructs {
+template <typename T, size_t N, typename size_type = uint32_t>
 class StackArray {
-  static_assert(std::is_trivial_v<T>, "StackArray only supports trivial types.");
-  using size_type = uint32_t;
 
   T data_[N];       // Stack-allocated array
   size_type size_;  // Current number of elements in the array
@@ -35,20 +34,71 @@ class StackArray {
  public:
   StackArray() : size_(0) {}
   StackArray(size_type elems) : size_(elems) {}
-  //Call can fail
+  StackArray(const StackArray&) = delete;
+  StackArray& operator=(const StackArray&) = delete;
+  StackArray(StackArray&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
+      : size_(other.size_) {
+    if constexpr (std::is_trivially_copyable_v<T>) {
+      std::memcpy(data_, other.data_, other.size_ * sizeof(T));
+    } else {
+      for (size_type i = 0; i < other.size_; ++i) {
+        new (data_ + i) T(std::move(other.data_[i]));
+        other.data_[i].~T();
+      }
+    }
+    other.size_ = 0;
+  }
+  StackArray& operator=(StackArray&& other) noexcept(std::is_nothrow_move_assignable_v<T>) {
+    if (this != &other) {
+      clear();
+      size_ = other.size_;
+      if constexpr (std::is_trivially_copyable_v<T>) {
+        std::memcpy(data_, other.data_, other.size_ * sizeof(T));
+      } else {
+        for (size_type i = 0; i < other.size_; ++i) {
+          new (data_ + i) T(std::move(other.data_[i]));
+          other.data_[i].~T();
+        }
+      }
+      other.size_ = 0;
+    }
+    return *this;
+  }
+  ~StackArray() { clear(); }
+  // Call can fail
   void push_back(const T& value) {
     CX_ASSERT(size_ < N, "Attempt to add to a full StackArray");
-    data_[size_++] = value;
+    if constexpr (std::is_trivially_copyable_v<T>) {
+      data_[size_++] = value;
+    } else {
+      new (data_ + size_) T(value);
+      ++size_;
+    }
   }
-  //Call cannot fail | Loops around and overwrites first elements and sets size to length from 0
+  void push_back(T&& value) {
+    CX_ASSERT(size_ < N, "Attempt to add to a full StackArray");
+    if constexpr (std::is_trivially_copyable_v<T>) {
+      data_[size_++] = std::move(value);
+    } else {
+      new (data_ + size_) T(std::move(value));
+      ++size_;
+    }
+  }
+  // Call cannot fail | Overwrites first elements and resets size on loop
   void push_back_loop(const T& value) {
-    data_[size_ % N] = value;
+    size_type index = size_ % N;
+    if constexpr (!std::is_trivially_copyable_v<T>) {
+      if (size_ >= N) {
+        data_[index].~T();
+      }
+    }
+    new (data_ + index) T(value);
     size_ = (size_ + 1) % N;
   }
   template <typename... Args>
   void emplace_back(Args&&... args) {
     CX_ASSERT(size_ < N, "Attempt to add to a full StackArray");
-    new (data_ + size_) T(std::forward<Args>(args)...);
+    new (data_ + size_) T(std::forward<Args>(args)...);  // Direct construction with arguments
     ++size_;
   }
   T& operator[](size_type index) {
@@ -59,7 +109,14 @@ class StackArray {
     CX_ASSERT(index < size_, "Index out of range");
     return data_[index];
   }
-  inline void clear() { size_ = 0; }
+  inline void clear() {
+    if constexpr (!std::is_trivially_destructible_v<T>) {
+      for (size_type i = 0; i < size_; ++i) {
+        data_[i].~T();  // Call destructor for each constructed element
+      }
+    }
+    size_ = 0;
+  }
   [[nodiscard]] inline size_type size() const { return size_; }
   [[nodiscard]] bool empty() const { return size_ == 0; }
   [[nodiscard]] inline bool full() const { return size_ == N; }
@@ -122,7 +179,8 @@ class StackArray {
     // Move elements after pos one position to the left
     std::move(posPtr + 1, &(*end()), posPtr);
 
-    // Destroy the last element (now a duplicate) if it's not trivially destructible
+    // Destroy the last element (now a duplicate) if it's not trivially
+    // destructible
     if constexpr (!std::is_trivially_destructible_v<T>) {
       data_[size_ - 1].~T();
     }
@@ -138,5 +196,5 @@ class StackArray {
   Iterator end() { return Iterator(&data_[size_]); }
 
 };
-
+}  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_STACKARRAY_H_

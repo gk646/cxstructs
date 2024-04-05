@@ -49,6 +49,7 @@ class Stack {
   using Allocator =
       typename std::conditional<UseCXPoolAllocator, CXPoolAllocator<T, sizeof(T) * 33, 1>,
                                 std::allocator<T>>::type;
+
   Allocator alloc;
   T* arr_;
   uint_32_cx size_;

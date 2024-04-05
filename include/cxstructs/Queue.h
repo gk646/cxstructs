@@ -22,6 +22,7 @@
 #define CXSTRUCTS_QUEUE_H
 
 #include "../cxconfig.h"
+#include <memory> //For std::allocator<T>
 
 namespace cxstructs {
 
@@ -276,7 +277,7 @@ class Queue {
    * Clears the queue of all elements
    */
   inline void clear() {
-    if (!std::is_trivial_v<T>) {
+    if constexpr (!std::is_trivial_v<T>) {
       for (uint_32_cx i = 0; i < size_; i++) {
         std::allocator_traits<Allocator>::destroy(alloc, &arr_[i]);
       }
@@ -298,16 +299,6 @@ class Queue {
    * @return
    */
   [[nodiscard]] inline uint_32_cx capacity() const { return capacity_; }
-  friend std::ostream& operator<<(std::ostream& os, const Queue& q) {
-    if (q.size() == 0) {
-      return os << "[]";
-    }
-    os << "[" << q.arr_[0];
-    for (uint_32_cx i = q.front_ + 1; i < q.size_; i++) {
-      os << "," << q.arr_[i];
-    }
-    return os << "]";
-  }
   class Iterator {
     T* ptr;
     uint_32_cx current;
