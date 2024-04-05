@@ -30,6 +30,7 @@
 #include <windows.h>
 #include <functional>
 #include <utility>
+
 namespace cxstructs {
 class GraphicsWindow {
   using RenderCallback = std::function<void(GraphicsWindow&)>;
