@@ -481,7 +481,7 @@ static void GEOMETRY_TEST() {
   CX_ASSERT(r14.contains(r14), "Rectangle should not contain itself");
   CX_ASSERT(r16.contains(p10), "Rectangle should contain point inside it");
   CX_ASSERT(r14.contains(p11), "Rectangle should contain point on its edge");
-  CX_ASSERT(r16.contains(p11),"");
+  CX_ASSERT(r16.contains(p11), "");
 
   std::cout << "  Testing circle contained circle...\n";
   Circle c5(0.0, 0.0, 10.0);

@@ -103,7 +103,7 @@ class vec {
    */
   inline explicit vec(uint_32_cx n_elems = 32)
       : capacity_(n_elems), size_(0), arr_(alloc.allocate(n_elems)) {
-    if constexpr(!std::is_trivial_v<T>) {
+    if constexpr (!std::is_trivial_v<T>) {
       for (uint_fast32_t i = 0; i < n_elems; i++) {
         std::allocator_traits<Allocator>::construct(alloc, &arr_[i]);
       }
@@ -140,7 +140,9 @@ class vec {
    * @param vector
    */
   explicit vec(const std::vector<T>& vector)
-      : capacity_(vector.size() * 1.5), size_(vector.size()), arr_(alloc.allocate(vector.size() * 1.5)) {
+      : capacity_(vector.size() * 1.5),
+        size_(vector.size()),
+        arr_(alloc.allocate(vector.size() * 1.5)) {
     std::copy(vector.begin(), vector.end(), arr_);
   }
   explicit vec(const std::vector<T>&& move_vector)
@@ -551,8 +553,7 @@ class vec {
   }
 
   //multidimensional distance functions
-  inline static float dist_chebyshev(const vec<float>& p1,
-                                     const vec<float>& p2) noexcept {
+  inline static float dist_chebyshev(const vec<float>& p1, const vec<float>& p2) noexcept {
     float max = 0;
     for (uint_fast32_t i = 0; i < p1.size(); i++) {
       if (p2[i] - p1[i] > max) {

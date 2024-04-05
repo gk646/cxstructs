@@ -334,30 +334,30 @@ class Stack {
     Stack<int> moveAssignStack;
     moveAssignStack = std::move(copyStack);
     CX_ASSERT(moveAssignStack.size() == assignStack.size(), "");
-    CX_ASSERT(copyStack.empty(),"");
+    CX_ASSERT(copyStack.empty(), "");
 
     std::cout << "  Testing push_back method..." << std::endl;
     defaultStack.push(1);
-    CX_ASSERT(defaultStack.top() == 1,"");
-    CX_ASSERT(defaultStack.size() == 1,"");
+    CX_ASSERT(defaultStack.top() == 1, "");
+    CX_ASSERT(defaultStack.size() == 1, "");
 
     std::cout << "  Testing emplace method..." << std::endl;
     defaultStack.emplace(2);
-    CX_ASSERT(defaultStack.top() == 2,"");
-    CX_ASSERT(defaultStack.size() == 2,"");
+    CX_ASSERT(defaultStack.top() == 2, "");
+    CX_ASSERT(defaultStack.size() == 2, "");
 
     std::cout << "  Testing pop_back method..." << std::endl;
     defaultStack.pop();
-    CX_ASSERT(defaultStack.top() == 1,"");
-    CX_ASSERT(defaultStack.size() == 1,"");
+    CX_ASSERT(defaultStack.top() == 1, "");
+    CX_ASSERT(defaultStack.size() == 1, "");
 
     std::cout << "  Testing iterator..." << std::endl;
     for (auto it = assignStack.begin(); it != assignStack.end(); ++it) {
-      CX_ASSERT(*it == 1,"");  // Assuming all elements are 1
+      CX_ASSERT(*it == 1, "");  // Assuming all elements are 1
     }
 
     for (auto it : defaultStack) {
-      CX_ASSERT(it == 1,"");
+      CX_ASSERT(it == 1, "");
     }
 
     std::cout << "  Testing memory leak..." << std::endl;

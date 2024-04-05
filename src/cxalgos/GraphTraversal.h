@@ -40,8 +40,7 @@ template <typename T>
 int depth_first_search(std::vector<std::vector<T>>& mat, int nodeIndex,
                        std::vector<bool> vis = {}) {
   int count = 1;
-  if (mat.empty() || nodeIndex >= mat.size())
-    return 0;
+  if (mat.empty() || nodeIndex >= mat.size()) return 0;
   if (vis.empty()) {
     count++;
     vis = std::vector(mat.size(), false);

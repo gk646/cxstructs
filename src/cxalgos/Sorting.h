@@ -298,9 +298,9 @@ std::vector<int> generate_shuffled_vector(int size) {
 void CX_ASSERT_sorted(std::vector<int>& vec, bool ascending = true) {
   for (size_t i = 1; i < vec.size(); i++) {
     if (ascending) {
-      CX_ASSERT(vec[i - 1] <= vec[i],"");
+      CX_ASSERT(vec[i - 1] <= vec[i], "");
     } else {
-      CX_ASSERT(vec[i - 1] >= vec[i],"");
+      CX_ASSERT(vec[i - 1] >= vec[i], "");
     }
   }
 }

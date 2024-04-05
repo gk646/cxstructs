@@ -142,8 +142,7 @@ class DoubleLinkedList {
   * @return the element removed with this operation
   */
   T removeAt(uint_32_cx index) {
-    if (index >= size_)
-      throw std::out_of_range("index out of bounds");
+    if (index >= size_) throw std::out_of_range("index out of bounds");
 
     DListNode<T>* toDelete;
     T val;
@@ -241,7 +240,7 @@ class DoubleLinkedList {
     // Test Copy Constructor
     DoubleLinkedList<int> list5(list1);
 
-    CX_ASSERT(list1.size() == list5.size(),"");
+    CX_ASSERT(list1.size() == list5.size(), "");
     std::cout << "  Testing assign operator..." << std::endl;
     // Test Assignment Operator
     DoubleLinkedList<int> list6;
@@ -261,11 +260,9 @@ class DoubleLinkedList {
     }
     CX_ASSERT(list1.size() == list6.size(), "");
 
-
     DoubleLinkedList<int> list;
     list.add(1);
     CX_ASSERT(list.size() == 1, "");
-
 
     list.add(2);
     CX_ASSERT(list.size() == 2, "");
@@ -284,7 +281,6 @@ class DoubleLinkedList {
     }
     // CX_ASSERT(list10 == list1 , "");
 
-
     std::cout << "  Testing addition..." << std::endl;
     // Testing iterator functionality along with push_back
     auto it = list.begin();
@@ -296,7 +292,6 @@ class DoubleLinkedList {
     ++it;
     CX_ASSERT(it == list.end(), "");
 
-
     std::cout << "  Testing removal..." << std::endl;
     DoubleLinkedList<int> list2;
 
@@ -307,23 +302,17 @@ class DoubleLinkedList {
     auto removedNode = list2.removeAt(1);
     CX_ASSERT(removedNode == 2, "");
 
-
     CX_ASSERT(list2.size() == 2, "");
-
 
     removedNode = list2.removeAt(0);
     CX_ASSERT(removedNode == 1, "");
 
-
     CX_ASSERT(list2.size() == 1, "");
-
 
     removedNode = list2.removeAt(0);
     CX_ASSERT(removedNode == 3, "");
 
-
     CX_ASSERT(list2.size() == 0, "");
-
 
     std::cout << "  Testing clear..." << std::endl;
     DoubleLinkedList<int> list3;

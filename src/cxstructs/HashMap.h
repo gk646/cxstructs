@@ -461,7 +461,7 @@ class HashMap {
     map1.insert(1, "One");
     map1.insert(2, "Two");
     CX_ASSERT(map1[1] == "One", "");
-    CX_ASSERT(map1[2] == "Two","");
+    CX_ASSERT(map1[2] == "Two", "");
 
     // Test replace value
     std::cout << "  Testing replacement of values..." << std::endl;
@@ -473,24 +473,24 @@ class HashMap {
     map1.erase(1);
     try {
       std::string nodiscard = map1.at(1);
-      CX_ASSERT(false,"");
+      CX_ASSERT(false, "");
     } catch (const std::exception& e) {
-      CX_ASSERT(true,"");
+      CX_ASSERT(true, "");
     }
 
     // Test copy constructor
     std::cout << "  Testing copy constructor..." << std::endl;
     HashMap<int, std::string> map2(map1);
-    CX_ASSERT(map2[2] == "Two","");
+    CX_ASSERT(map2[2] == "Two", "");
 
     // Test assignment operator
     std::cout << "  Testing assignment operator..." << std::endl;
     HashMap<int, std::string> map3;
     map3 = map1;
-    CX_ASSERT(map3[2] == "Two","");
+    CX_ASSERT(map3[2] == "Two", "");
     // Test n_elem
     std::cout << "  Testing size()..." << std::endl;
-    CX_ASSERT(map1.size() == 1,"");
+    CX_ASSERT(map1.size() == 1, "");
     CX_ASSERT(map2.size() == 1, "");
     CX_ASSERT(map3.size() == 1, "");
 

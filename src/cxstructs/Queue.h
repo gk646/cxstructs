@@ -127,7 +127,8 @@ class Queue {
     return *this;
   }
   //move copy
-  Queue(Queue&& o) noexcept : front_(o.front_), capacity_(o.capacity_), arr_(o.arr_), size_(o.size_) {
+  Queue(Queue&& o) noexcept
+      : front_(o.front_), capacity_(o.capacity_), arr_(o.arr_), size_(o.size_) {
     o.arr_ = nullptr;  //avoid double deletion
     o.capacity_ = 0;
     o.size_ = 0;
@@ -290,7 +291,7 @@ class Queue {
    * Reduces the underlying array size to something close to the actual data size.
    * This decreases memory usage.
    */
-  inline void shrink_to_fit() noexcept{
+  inline void shrink_to_fit() noexcept {
     if (capacity_ > size() * 1.5) {
       shrink();
     }

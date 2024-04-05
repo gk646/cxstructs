@@ -176,19 +176,19 @@ class QuadTree {
   QuadTree(QuadTree&&) = delete;
   QuadTree& operator=(QuadTree&&) = delete;
   ~QuadTree() {
-    if(top_right_){
+    if (top_right_) {
       delete top_right_;
       top_right_ = nullptr;
     }
-    if(top_left_){
+    if (top_left_) {
       delete top_left_;
       top_left_ = nullptr;
     }
-    if(bottom_right_){
+    if (bottom_right_) {
       delete bottom_right_;
       bottom_right_ = nullptr;
     }
-    if(bottom_left_){
+    if (bottom_left_) {
       delete bottom_left_;
       bottom_left_ = nullptr;
     }
@@ -221,7 +221,6 @@ class QuadTree {
 
     insert_subtrees(e);
   }
-
 
   /**
    * Number of points contained in the given rectangle bound
@@ -259,19 +258,19 @@ class QuadTree {
    * Clears the QuadTree of all elements including its own subtrees
    */
   inline void clear() {
-    if(top_right_){
+    if (top_right_) {
       delete top_right_;
       top_right_ = nullptr;
     }
-    if(top_left_){
+    if (top_left_) {
       delete top_left_;
       top_left_ = nullptr;
     }
-    if(bottom_right_){
+    if (bottom_right_) {
       delete bottom_right_;
       bottom_right_ = nullptr;
     }
-    if(bottom_left_){
+    if (bottom_left_) {
       delete bottom_left_;
       bottom_left_ = nullptr;
     }
@@ -329,11 +328,11 @@ class QuadTree {
 
     std::cout << "   Testing count subrect..." << std::endl;
     CX_ASSERT(tree.count_subrect({0, 0, 200, 200}) == 1000, "");
-    CX_ASSERT(tree.count_subrect({10, 10, 50, 50}) > 10,"");
+    CX_ASSERT(tree.count_subrect({10, 10, 50, 50}) > 10, "");
     tree.insert({2, 2});
-    CX_ASSERT(tree.size() == 1001,"");
+    CX_ASSERT(tree.size() == 1001, "");
     tree.erase({2, 2});
-    CX_ASSERT(tree.size() == 1000,"");
+    CX_ASSERT(tree.size() == 1000, "");
 
     std::cout << "   Testing max capacity..." << std::endl;
     QuadTree<Point> tree1({0, 0, 200, 200}, 2, 10);
@@ -345,7 +344,7 @@ class QuadTree {
     tree1.clear();
     tree1.insert({2, 2});
     for (auto ptr : tree1.get_subrect({0, 0, 2, 2})) {
-      CX_ASSERT(*ptr == Point(2, 2),"");
+      CX_ASSERT(*ptr == Point(2, 2), "");
     }
   }
 #endif
