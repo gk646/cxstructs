@@ -22,13 +22,6 @@
 #define CXSTRUCTS_SORTING_H
 
 #include <algorithm>
-#include <array>
-
-#include <cstdint>
-#include <iostream>
-#include <numeric>
-#include <random>
-#include <vector>
 #include "../cxconfig.h"
 
 namespace cxhelper {  // helper methods to provide clean calling interface
@@ -144,12 +137,8 @@ namespace cxstructs {
  */
 template <typename T>
 void bogo_sort(T* arr, uint_32_cx len, bool ascending = true) {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distr(0, len - 1);
-
   for (uint_32_cx i = 0; i < 100000000; i++) {
-    std::swap(arr[distr(gen)], arr[distr(gen)]);
+    std::swap(arr[rand()], arr[rand()]);
     if (cxhelper::bogo_sort_internal(arr, len, ascending)) {
       return;
     }

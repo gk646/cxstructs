@@ -151,7 +151,7 @@ version and add them to your *includes*.
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(cxstructs GIT_REPOSITORY https://github.com/gk646/CXStructures.git)
+FetchContent_Declare(cxstructs GIT_REPOSITORY https://github.com/gk646/cxstructs.git)
 FetchContent_MakeAvailable(cxstructs)
 
 #add_executable(${PROJECT_NAME} ${SRC_FILES})
@@ -189,8 +189,8 @@ typedef int_fast32_t int_32_cx;
 #### macros
 
 - `#define CX_LOOP_FNN` to use the FNN without matrix calculations (slower)
-- `CX_ASSERT(expr,msg(optinal))` enhanced assertion with optional text
-- `CX_WARNING(expr,msg(optinal))` similar to *CX_ASSERT* but doesn't abort
+- `CX_ASSERT(expr,msg)` enhanced assertion with optional text
+- `CX_WARNING(expr,msg)` similar to *CX_ASSERT* but doesn't abort
 
 ### Contributing
 

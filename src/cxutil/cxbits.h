@@ -62,7 +62,7 @@ enum Endianness { LITTLE_ENDIAN, BIG_ENDIAN };
 
 // Type trait to check if both types are the same size and either both signed or both unsigned
 template <typename T, typename U>
-struct is_same_size_a_sign {
+struct is_same_size_and_sign {
   static constexpr bool value =
       (sizeof(T) == sizeof(U)) && (std::is_signed<T>::value == std::is_signed<U>::value);
 };
@@ -79,24 +79,71 @@ struct ConcatType<T, U, true> {
                                             std::conditional_t<totalSize <= 64, uint64_t, void>>>;
 };
 
-//Concatenates two equal sized numbers
-template <typename T, typename U>
-inline constexpr auto bits_concat(T first, U second) ->
-    typename ConcatType<T, U, is_same_size_a_sign<T, U>::value>::type {
+template <typename T, typename U, size_t PadToBytes>
+struct ConcatPaddingType {
+  // Calculate the total size needed, considering padding.
+  inline static constexpr size_t paddedSize = PadToBytes > sizeof(T) ? PadToBytes : sizeof(T);
+  inline static constexpr size_t totalSize =
+      paddedSize + (PadToBytes > sizeof(U) ? PadToBytes : sizeof(U));
+
+  // Select the smallest standard integer type that fits the total size.
+  // Fallback to void for sizes > 64 bits (indicating an error).
+  using type =
+      std::conditional_t<totalSize <= 2, uint16_t,
+                         std::conditional_t<totalSize <= 4, uint32_t,
+                                            std::conditional_t<totalSize <= 8, uint64_t, void>>>;
+};
+
+/**Concatenates two numbers padding each number to at least PadToBytes
+ *
+ * @tparam T integral type
+ * @tparam U integral type
+ * @tparam PadToBytes minimal size (numbers smaller than this will be padded)
+ * @param first will be in the first bits
+ * @param second  will be in the second bits
+ * @return a number consisting out of the bits of T and U
+ */
+
+template <typename T, typename U, size_t PadToBytes>
+inline auto bits_concat_ex(T first, U second) {
   static_assert(std::is_integral<T>::value && std::is_integral<U>::value,
                 "Only integer types are supported.");
-  static_assert(is_same_size_a_sign<T, U>::value, "T and U must be of the same size and sign.");
-  static_assert(
-      !std::is_same_v<typename ConcatType<T, U, is_same_size_a_sign<T, U>::value>::type, void>,
-      "Resulting type is too large to represent.");
 
-  using ResultType = typename ConcatType<T, U, is_same_size_a_sign<T, U>::value>::type;
+  using ResultType = typename ConcatPaddingType<T, U, PadToBytes>::type;
+  static_assert(!std::is_same_v<ResultType, void>, "Resulting type is too large to represent.");
+
+  constexpr size_t shiftAmount = PadToBytes > sizeof(T) ? PadToBytes * 8 : sizeof(T) * 8;
+
+  return (static_cast<ResultType>(second) << shiftAmount) | first;
+}
+
+/**Concatenates two equal sized numbers
+ *
+ * @tparam T number type
+ * @tparam U
+ * @param first
+ * @param second
+ * @return
+ */
+template <typename T>
+inline constexpr auto bits_concat(T first, T second) {
+  static_assert(std::is_integral<T>::value, "Only integer types are supported.");
+  constexpr auto same = is_same_size_and_sign<T, T>::value;
+  constexpr bool fits = !std::is_same_v<typename ConcatType<T, T, same>::type, void>;
+  static_assert(fits, "Resulting type is too large to represent.");
+
+  using ResultType = typename ConcatType<T, T, is_same_size_and_sign<T, T>::value>::type;
   return (static_cast<ResultType>(second) << (sizeof(T) * 8)) | static_cast<ResultType>(first);
 }
 
-//Prints the bits of the given num in the given format
+/**Prints the bits of the given num
+ *
+ * @tparam T
+ * @param num must be integral
+ * @return void - prints to stdout (flushes on result)
+ */
 template <typename T>
-inline constexpr void bits_print(T num, Endianness endian = LITTLE_ENDIAN) {
+inline void bits_print(T num) {
   static_assert(std::is_integral<T>::value, "Only integral types are supported.");
 
   constexpr size_t numBits = sizeof(T) * 8;  // Total bits in type T
@@ -104,20 +151,22 @@ inline constexpr void bits_print(T num, Endianness endian = LITTLE_ENDIAN) {
   bitRepresentation[numBits] = '\0';         // Null-terminate the string
 
   for (size_t i = 0; i < numBits; ++i) {
-    size_t index = endian == LITTLE_ENDIAN ? i : (numBits - 1) - i;
-    bitRepresentation[i] = (num & (T(1) << index)) ? '1' : '0';
+    bitRepresentation[(numBits-1) -i] = (num & (T(1) << i)) ? '1' : '0';
   }
 
-  // Print the bit representation directly
-  for (size_t i = 0; i < numBits; ++i) {
-    putchar(bitRepresentation[i]);
-  }
-  putchar('\n');
+  fputs(bitRepresentation, stdout);
+  fputc('\n', stdout);
+  fflush(stdout);
 }
 
-//Prints the bytes of the given num in the given format
+/**Prints the bytes of the given num in the given format
+ *
+ * @tparam T
+ * @param num must be integral
+ * @param endian  endian value (defaults to little-endian)
+ */
 template <typename T>
-void bits_print_bytes(const T& num, Endianness endian = LITTLE_ENDIAN) {
+inline void bits_print_bytes(const T& num, Endianness endian = LITTLE_ENDIAN) {
   static_assert(std::is_integral<T>::value, "Only integral types are supported.");
 
   const size_t numBytes = sizeof(T);
@@ -132,12 +181,20 @@ void bits_print_bytes(const T& num, Endianness endian = LITTLE_ENDIAN) {
       printf("%02X ", bytePointer[i - 1]);
     }
   }
-
-  printf("\n");
+  fputc('\n', stdout);
+  fflush(stdout);
 }
-
+/**
+ * Retrieves a number from within a given number.
+ * The given range is [off] - [off + sizeof(R)]
+ * @tparam R return type
+ * @tparam T must be integral
+ * @param num the given number to extract from
+ * @param off a right offset in bits
+ * @return a number of type r created from the specified bit range
+ */
 template <typename R, typename T>
-inline constexpr R bits_get(T num, uint8_t off) {
+inline constexpr R bits_get(T num, uint8_t off = 0) {
   static_assert(std::is_integral<T>::value, "Only integer type are supported.");
   return static_cast<R>(num >> off);
 }
@@ -166,6 +223,14 @@ static void TEST_BITS() {
   CX_ASSERT(bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 0) ==
                 bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 32),
             "");
+  uint16_t  bla = 1;
+  uint16_t a = 257;
+
+  bits_print(bits_get<uint8_t>(513));
+  bits_print(a);
+
+  auto res = bits_concat_ex<uint16_t, uint16_t, 4>(1, 1);
+  bits_print(res);
 }
 #endif
 
