@@ -93,7 +93,7 @@ inline float fast_sqrt(float n) noexcept {
   return 1.0F / y;
 }
 /**
- * Clamps th given value between the range
+ * Clamps the given value between the range
  * @tparam T
  * @param val value to check
  * @param low lowest possible value
@@ -101,7 +101,7 @@ inline float fast_sqrt(float n) noexcept {
  * @return low if val is smaller than low, val if val is between low and high, and high if val is bigger than high
  */
 template <typename T>
-inline T clamp(const T& val, const T& low, const T& high) {
+inline constexpr T clamp(const T& val, const T& low, const T& high) {
   if (val < low) {
     return low;
   } else if (val > high) {
@@ -109,8 +109,9 @@ inline T clamp(const T& val, const T& low, const T& high) {
   }
   return val;
 }
+
 template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
-inline T clamp(T val, T low, T high) {
+inline constexpr T clamp(T val, T low, T high) {
   if (val < low) {
     return low;
   } else if (val > high) {
