@@ -22,7 +22,6 @@
 #define CXSTRUCTS_BINARYSEARCH_H
 
 #include <cstdint>
-#include <iostream>
 #include "../cxconfig.h"
 
 namespace cxhelper {  // helper methods to provide clean calling interface

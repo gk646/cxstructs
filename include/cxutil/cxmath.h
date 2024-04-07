@@ -22,11 +22,14 @@
 #define CXSTRUCTS_SRC_CXUTIL_MATH_H_
 
 #include <cmath>
-
-#define CX_PI \
-  3.14159265358979323846  // for compatibility | apparently this is only in c++ through std::numbers which is CX20 and not on all compilers equal
+#include "../cxconfig.h"
 
 namespace cxstructs {
+// for compatibility | apparently this is only in c++ through std::numbers which is CX20 and not on all compilers equal
+#define CX_PI 3.14159265358979323846F
+#define CX_DEG2RAD (PI / 180.0F)
+#define CX_RAD2DEG (180.0F / PI)
+
 struct mat;
 //function pointer typedef
 typedef float (*func)(float);
@@ -48,21 +51,20 @@ inline float d_sig(float x) noexcept {
   return sig(x) * (1 - sig(x));
 }
 inline float d_relu(float x) noexcept {
-  return x > 0 ? 1 : 0;
+  return x > 0 ? 1.0F : 0.0F;
 }
 inline float d_tanh(float x) noexcept {
   float t = std::tanh(x);
   return 1 - t * t;
 }
 
-//utils
+//-----------UTILS-----------//
 /**
  * Finds the <b>next</b> closest power of two to the right of the given number
  * @param n the start number
  * @return the next power of two or n, if n is a power of 2
  */
-inline uint_32_cx next_power_of_2(uint_32_cx n) noexcept {
-  //black magic
+inline uint32_t next_power_of_2(uint32_t n) noexcept {
   n--;
   n |= n >> 1;
   n |= n >> 2;
@@ -90,8 +92,34 @@ inline float fast_sqrt(float n) noexcept {
   y = y * (threehalfs - (x2 * y * y));
   return 1.0F / y;
 }
+/**
+ * Clamps th given value between the range
+ * @tparam T
+ * @param val value to check
+ * @param low lowest possible value
+ * @param high  highest possible value
+ * @return low if val is smaller than low, val if val is between low and high, and high if val is bigger than high
+ */
+template <typename T>
+inline T clamp(const T& val, const T& low, const T& high) {
+  if (val < low) {
+    return low;
+  } else if (val > high) {
+    return high;
+  }
+  return val;
+}
+template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+inline T clamp(T val, T low, T high) {
+  if (val < low) {
+    return low;
+  } else if (val > high) {
+    return high;
+  }
+  return val;
+}
 
-//distance functions
+//-----------DISTANCE-----------//
 inline float euclidean(float p1x, float p1y, float p2x, float p2y) noexcept {
   return fast_sqrt((p2x - p1x) * (p2x - p1x) + (p2y - p1y) * (p2y - p1y));
 }
