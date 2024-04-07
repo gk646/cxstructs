@@ -100,7 +100,7 @@ inline float fast_sqrt(float n) noexcept {
  * @param high  highest possible value
  * @return low if val is smaller than low, val if val is between low and high, and high if val is bigger than high
  */
-template <typename T>
+template <typename T, typename std::enable_if_t<!std::is_integral<T>::value, int> = 0>
 inline constexpr T clamp(const T& val, const T& low, const T& high) {
   if (val < low) {
     return low;
@@ -110,7 +110,7 @@ inline constexpr T clamp(const T& val, const T& low, const T& high) {
   return val;
 }
 
-template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+template <typename T, typename std::enable_if_t<std::is_integral<T>::value, int> = 0>
 inline constexpr T clamp(T val, T low, T high) {
   if (val < low) {
     return low;
@@ -119,6 +119,7 @@ inline constexpr T clamp(T val, T low, T high) {
   }
   return val;
 }
+
 
 //-----------DISTANCE-----------//
 inline float euclidean(float p1x, float p1y, float p2x, float p2y) noexcept {
