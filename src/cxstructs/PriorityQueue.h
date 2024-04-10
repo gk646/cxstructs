@@ -46,7 +46,7 @@ class PriorityQueue {
   uint_32_cx size_;
   Compare comp;
 
-  inline void resize() noexcept {
+  void resize() noexcept {
     len_ *= 2;
 
     T* n_arr = alloc.allocate(len_);
@@ -60,7 +60,7 @@ class PriorityQueue {
     alloc.deallocate(arr_, size_);
     arr_ = n_arr;
   }
-  inline void shrink() noexcept {
+  void shrink() noexcept {
     auto old_len = len_;
     len_ = size_ * 1.5;
 
@@ -77,7 +77,7 @@ class PriorityQueue {
     alloc.deallocate(arr_, old_len);
     arr_ = n_arr;
   }
-  inline void sift_up(uint_32_cx index) noexcept {
+  void sift_up(uint_32_cx index) noexcept {
     auto parent = (index - 1) / 2;
     while (index != 0 && !comp(arr_[index], arr_[parent])) {
       std::swap(arr_[index], arr_[parent]);
@@ -85,7 +85,7 @@ class PriorityQueue {
       parent = (index - 1) / 2;
     }
   }
-  inline void sift_down(uint_32_cx index) noexcept {
+  void sift_down(uint_32_cx index) noexcept {
     auto left = 2 * index + 1;
     auto right = 2 * index + 2;
     while ((left < size_ && comp(arr_[index], arr_[left])) ||
@@ -97,7 +97,7 @@ class PriorityQueue {
       right = 2 * index + 2;
     }
   }
-  inline void heapify() noexcept {
+  void heapify() noexcept {
     for (uint_fast32_t i = len_ - 1; i > -1; i--) {
       sift_down(i);
     }
@@ -108,7 +108,7 @@ class PriorityQueue {
    * Per default is a min heap. Pass std::greater<> as comparator to bits_get a max-heap
    * @param len initial length and expansion factor
    */
-  inline explicit PriorityQueue(uint_32_cx len = 32)
+  explicit PriorityQueue(uint_32_cx len = 32)
       : arr_(alloc.allocate(len)), len_(len), size_(0) {}
   /**
    * @brief Constructor that initializes the priority queue with an existing array.
@@ -116,7 +116,7 @@ class PriorityQueue {
    * @param arr Pointer to the array to copy elements from.
    * @param len The number of elements in the array.
    */
-  inline explicit PriorityQueue(T*&& arr, uint_32_cx len) : arr_(arr), len_(len), size_(len) {
+  explicit PriorityQueue(T*&& arr, uint_32_cx len) : arr_(arr), len_(len), size_(len) {
     heapify();
     arr = nullptr;  //avoid double deletion
   }
@@ -126,7 +126,7 @@ class PriorityQueue {
    * @param arr Pointer to the array to copy elements from.
    * @param len The number of elements in the array.
    */
-  inline explicit PriorityQueue(const T* arr, uint_32_cx len)
+  explicit PriorityQueue(const T* arr, uint_32_cx len)
       : arr_(alloc.allocate(len)), len_(len), size_(len) {
     if (std::is_trivial_v<T>) {
       std::copy(arr, arr + len, arr_);

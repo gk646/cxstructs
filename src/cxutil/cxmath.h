@@ -21,8 +21,8 @@
 #ifndef CXSTRUCTS_SRC_CXUTIL_MATH_H_
 #define CXSTRUCTS_SRC_CXUTIL_MATH_H_
 
-#include <cmath>
 #include "../cxconfig.h"
+#include <cmath>
 
 namespace cxstructs {
 // for compatibility | apparently this is only in c++ through std::numbers which is CX20 and not on all compilers equal

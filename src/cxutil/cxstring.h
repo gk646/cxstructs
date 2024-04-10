@@ -17,7 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#define FINISHED
+#define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
 #define CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
 
@@ -26,6 +26,7 @@
 #include <type_traits>
 
 namespace cxstructs {
+
 
 template <typename T>
 inline auto str_parse_token(char** context, char delim) {
@@ -51,8 +52,6 @@ inline auto str_parse_token(char** context, char delim) {
     return result;
   }
 }
-
-
 constexpr auto fnv1a_32(char const* s) noexcept -> uint32_t {
    uint32_t hash = 2166136261U;
   while (*s != 0) {
@@ -61,7 +60,6 @@ constexpr auto fnv1a_32(char const* s) noexcept -> uint32_t {
   }
   return hash;
 }
-
 struct Fnv1aHash {
   auto operator()(const char* s) const noexcept -> std::size_t {
     uint32_t hash = 2166136261U;
@@ -72,7 +70,6 @@ struct Fnv1aHash {
     return hash;
   }
 };
-
 #ifdef CX_INCLUDE_TESTS
 static void TEST_STRING() {
   char buff[64] = "ParseME|0.3|55|-55|";

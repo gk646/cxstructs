@@ -1,14 +1,17 @@
 ## Datastructures, algorithms, machine-learning and utilities library in C++
 
 A medium-sized modern header only library of selected datastructures, algorithms, machinelearning topics and utilities.
-This
-collection is built for educational purposes and for use in non-essential projects. All implementations are easy to read
-and well documented.
+This collection is built for educational purposes and for use in non-essential projects.
+
+**Documentation is provided in-header.**
 
 While I am not an expert in datastructures nor C++, I am still aiming for reference type implementations in terms of
 efficiency and interface.
 
 The general namespace is `cxstructs`.
+
+*Note: Currently the old datastructures are modernized with focus on better includes for compile times and correctness.*  
+*Non-Stack datastructure might not be usable for now*
 
 **1.** [Contents](#contents)   
 **2.** [Usage Guide](#usage-guide)   
@@ -19,12 +22,12 @@ The general namespace is `cxstructs`.
 
 ### Speed Comparison
 
-*Relative to the fastest / with CXPoolAllocator*
+*Relative to the fastest / with CXPoolAllocator (if applicable)*
 
-|                 |  vector  |  Stack   | HashMap  | HashSet | LinkedList |  Queue   | DeQueue  |
-|:----------------|:--------:|:--------:|:--------:|:-------:|:----------:|:--------:|:--------:|
-| **std::**       |  *0.81*  |  *0.52*  |  *0.51*  | *0.52*  |   *0.71*   |  *0.46*  |  *0.57*  |
-| **cxstructs::** | **1.00** | **1.00** | **1.00** | **1.0** |  **1.00**  | **1.00** | **1.00** |
+|                 |  vector  |  Stack   | HashMap  | StackHashMap | HashSet | LinkedList |  Queue   | DeQueue  |
+|:----------------|:--------:|:--------:|:--------:|:------------:|:-------:|:----------:|:--------:|:--------:|
+| **std::**       |  *0.81*  |  *0.52*  |  *0.51*  |    *0.5*     | *0.52*  |   *0.71*   |  *0.46*  |  *0.57*  |
+| **cxstructs::** | **1.00** | **1.00** | **1.00** |   **1.00**   | **1.0** |  **1.00**  | **1.00** | **1.00** |
 
 ### Features
 
@@ -92,12 +95,14 @@ The general namespace is `cxstructs`.
 
 #### Utilities
 
-- **cxtime**: *easily measure the time from `now()` to `printTime()`*
-- **cxio**: *load_text,*
 - **cxassert**: *custom assertions with optional text*
-- **cxmath**: *activation functions,distance function, next_power_of_2*
+- **cxbits**: *bit operations on numbers for embedding and retrieving information*
 - **cxgraphics**: *simple native windowing and graphics output header*
-- **cxbits**: *bit operations on numbers*
+- **cxio**: *simple, readable and symmetric file io format*
+- **cxmath**: *activation functions,distance functions, next_power_of_2, square root*
+- **cxstring**: *operations on strings*
+- **cxtime**: *simple time measurements with multiple time points and formats*
+- **cxtips**: *collection of helpful resources and personal guidelines with examples*
 
 ---
 
