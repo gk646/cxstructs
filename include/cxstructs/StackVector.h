@@ -137,61 +137,48 @@ class StackVector {
   }
   const T* data() { return data_; }
 
-  // Iterator support
-  class Iterator {
+  template <typename PtrType>
+  class IteratorTemplate {
    public:
     using iterator_category = std::forward_iterator_tag;
-    using value_type = T;
+    using value_type = std::remove_const_t<PtrType>;  // Remove const for value_type
     using difference_type = std::ptrdiff_t;
-    using pointer = T*;
-    using reference = T&;
+    using pointer = PtrType*;
+    using reference = PtrType&;
 
-    explicit Iterator(pointer ptr) : ptr_(ptr) {}
+    explicit IteratorTemplate(pointer ptr) : ptr_(ptr) {}
 
     reference operator*() const { return *ptr_; }
-    pointer operator->() { return ptr_; }
+    pointer operator->() const { return ptr_; }
 
     // Prefix increment
-    Iterator& operator++() {
+    IteratorTemplate& operator++() {
       ptr_++;
       return *this;
     }
 
     // Postfix increment
-    Iterator operator++(int) {
-      Iterator tmp = *this;
+    IteratorTemplate operator++(int) {
+      IteratorTemplate tmp = *this;
       ++(*this);
       return tmp;
     }
 
-    friend bool operator==(const Iterator& a, const Iterator& b) { return a.ptr_ == b.ptr_; };
-    friend bool operator!=(const Iterator& a, const Iterator& b) { return a.ptr_ != b.ptr_; };
+    friend bool operator==(const IteratorTemplate& a, const IteratorTemplate& b) {
+      return a.ptr_ == b.ptr_;
+    }
+    friend bool operator!=(const IteratorTemplate& a, const IteratorTemplate& b) {
+      return a.ptr_ != b.ptr_;
+    }
 
    private:
     pointer ptr_;
   };
 
-  Iterator erase(Iterator pos) {
-    // Direct pointer arithmetic on the underlying pointers to find the index
-    auto posPtr = &(*pos);                   // Convert Iterator to pointer
-    size_type index = posPtr - &(*begin());  // Use underlying pointers for subtraction
-
-    // Move elements after pos one position to the left
-    std::move(posPtr + 1, &(*end()), posPtr);
-
-    // Destroy the last element (now a duplicate) if it's not trivially
-    // destructible
-    if constexpr (!std::is_trivially_destructible_v<T>) {
-      data_[size_ - 1].~T();
-    }
-
-    // Adjust the size
-    --size_;
-
-    // Return iterator to the next element after the erased one
-    // Convert back to Iterator at the correct position
-    return Iterator(data_ + index);
-  }
+  using Iterator = IteratorTemplate<T>;
+  using ConstIterator = IteratorTemplate<const T>;
+  ConstIterator begin() const { return ConstIterator(&data_[0]); }
+  ConstIterator end() const { return ConstIterator(&data_[size_]); }
   Iterator begin() { return Iterator(&data_[0]); }
   Iterator end() { return Iterator(&data_[size_]); }
 
