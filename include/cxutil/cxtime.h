@@ -24,75 +24,65 @@
 #include "../cxconfig.h"
 #include <cstdio>
 #include <chrono>
+#include <print>
 
 namespace cxstructs {
 using namespace std;  //std:: makes this code unreadable
-
-inline chrono::time_point<chrono::high_resolution_clock> activeTimeStamp;
-inline chrono::time_point<chrono::high_resolution_clock> checkpoints[3];
+inline static constexpr int MAX_CHECKPOINTS = 4;
+inline chrono::time_point<chrono::high_resolution_clock> checkpoints[MAX_CHECKPOINTS];
 
 /**
  * Sets the activeTimeStamp or alternatively the time of a checkpoint
  * @param checkpoint (optional, max=2) the checkpoint to set the current time
  */
-inline void now(int checkpoint = -1) {
-  if (checkpoint >= 0 && checkpoint < 3) {
-    checkpoints[checkpoint] = std::chrono::high_resolution_clock::now();
-  } else {
-    activeTimeStamp = std::chrono::high_resolution_clock::now();
-  }
+inline void now(int checkpoint = 0) {
+  checkpoints[checkpoint] = std::chrono::high_resolution_clock::now();
 }
 
 template <typename T>
-const char* get_duration_unit();
+auto get_duration_unit() -> const char*;
 template <>
-inline const char* get_duration_unit<std::chrono::seconds>() {
+inline auto get_duration_unit<std::chrono::seconds>() -> const char* {
   return "seconds";
 }
 template <>
-inline const char* get_duration_unit<std::chrono::milliseconds>() {
+inline auto get_duration_unit<std::chrono::milliseconds>() -> const char* {
   return "milliseconds";
 }
 template <>
-inline const char* get_duration_unit<std::chrono::microseconds>() {
+inline auto get_duration_unit<std::chrono::microseconds>() -> const char* {
   return "microseconds";
 }
 template <>
-inline const char* get_duration_unit<std::chrono::nanoseconds>() {
+inline auto get_duration_unit<std::chrono::nanoseconds>() -> const char* {
   return "nanoseconds";
 }
 template <>
-inline const char* get_duration_unit<std::chrono::duration<double>>() {
+inline auto get_duration_unit<std::chrono::duration<double>>() -> const char* {
   return "seconds";
 }
 
 template <typename DurationType = std::chrono::duration<double>>
-inline void printTime(const char* prefix = nullptr, int checkpoint = -1) {
-  std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
-  if (checkpoint >= 0 && checkpoint < 3) {
-    start_time = checkpoints[checkpoint];
-  } else {
-    start_time = activeTimeStamp;
-  }
-
-  const auto diff = std::chrono::high_resolution_clock::now() - start_time;
+inline void printTime(const char* prefix = nullptr, int checkpoint = 0) {
+  const auto diff = std::chrono::high_resolution_clock::now() - checkpoints[checkpoint];
   const auto diffInDesiredUnits = std::chrono::duration_cast<DurationType>(diff);
 
   if (prefix) {
-    printf("%s ", prefix);
+#if _HAS_CXX23
+    std::print("{} ", prefix);
+#else
+    printf("%s", prefix);
+#endif
   }
-  // Print with fixed precision of 3 decimal places
-  printf("%.3f %s\n",  diffInDesiredUnits.count(), get_duration_unit<DurationType>());
+#if _HAS_CXX23
+  std::print("{} {}\n", diffInDesiredUnits.count(), get_duration_unit<DurationType>());
+#else
+  printf("%lld %s\n", diffInDesiredUnits.count(), get_duration_unit<DurationType>());
+#endif
 }
 template <typename DurationType = std::chrono::duration<double>>
-inline long long getTime(int checkpoint = -1) {
-  std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
-  if (checkpoint >= 0 && checkpoint < 3) {
-    start_time = checkpoints[checkpoint];
-  } else {
-    start_time = activeTimeStamp;
-  }
-  auto diff = std::chrono::high_resolution_clock::now() - start_time;
+inline long long getTime(int checkpoint = 0) {
+  const auto diff = std::chrono::high_resolution_clock::now() - checkpoints[checkpoint];
   auto diffInDesiredUnits = std::chrono::duration_cast<DurationType>(diff);
   return diffInDesiredUnits.count();
 }

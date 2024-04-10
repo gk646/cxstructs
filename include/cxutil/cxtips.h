@@ -18,50 +18,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define CX_FINISHED
-#ifndef CXSTRUCTS_SRC_CONFIG_H_
-#define CXSTRUCTS_SRC_CONFIG_H_
+#ifndef CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
+#define CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
 
-//-----------DEFINES-----------//
+//Links provided without warranty of function, implied ownership or support of the linked website
 
-//#define CX_USE_INT            : uses type int for all custom types
-//#define CX_STACK_ABORT        : calls std::abort() when the size limit of stack structures is reached
+//Extensive ranking of header compile times
+//https://artificial-mind.net/projects/compile-health/
+
+//
+// Tips:
+//
+/// 1. Explicit is better than implicit (constructors)
+//
+/// 2. Use const when you can
+//
+/// 3. Use extra variables to keep every code line without line breaks
+// const auto dx = 5;
+// const auto dy = 10;
+// DrawText(dx,dy,"Text");
+//
+/// 4. Use constexpr for inside function constants
+//  constexpr int threshHold = 42;
+//  if(val > threshHold){}
+//
+/// 5. Use anonymous namespace for internal linked function
+//
+// namespace{
+// inline DoSomething(Foo bar){}
+// }
+//
+// DoSomething(myBar)
+//
+///6. Use modern C++ features (generally)
+//
+// std::print({},3.0F); //instead of printf(%.f,3.0F);
 //
 //
 
-#define CX_INL inline
-#define CX_NDISC [[nodiscard]]
-
-/**
- * namespace for exposed structs and functions
- */
-namespace cxstructs {}
-/**
- * internal namespace for helper methods or structs
- */
-namespace cxhelper {}
-/**
- * internal namespace for test methods
- */
-namespace cxtests {}
-
-#include <cstdint>
-#include "cxutil/cxassert.h"
-
-#ifdef CX_STACK_ABORT
-#define CX_STACK_ABORT_IMPL() if (size_ >= N) std::abort()
-#else
-#define CX_STACK_ABORT_IMPL() (void(0))
-#endif
-
-
-#ifndef CX_USE_INT
-typedef uint_fast32_t uint_32_cx;
-typedef uint_fast16_t uint_16_cx;
-typedef int_fast32_t int_32_cx;
-#else
-typedef int uint_32_cx;
-typedef int uint_16_cx;
-typedef int int_32_cx;
-#endif
-
-#endif  //CXSTRUCTS_SRC_CONFIG_H_
+#endif  //CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
