@@ -32,28 +32,28 @@ namespace cxstructs {
 
 struct mat;
 //function pointer typedef
-typedef float (*func)(float);
-typedef mat (*func_M)(mat&, mat&);  // mat function
-typedef float (*D_func)(float p1x, float p1y, float p2x, float p2y);
+using func = float (*)(float);
+using func_M = mat (*)(mat &, mat &);  // mat function
+using D_func = float (*)(float, float, float, float);
 
 //activation functions
-inline float sig(float x) noexcept {
+inline auto sig(float x) noexcept -> float {
   return 1.0F / (1.0F + std::exp(-x));
 }
-inline float tanh(float x) noexcept {
+inline auto tanh(float x) noexcept -> float {
   return std::tanh(x);
 }
-inline float relu(float x) noexcept {
+inline auto relu(float x) noexcept -> float {
   return x > 0 ? x : 0;
 }
 //derivatives
-inline float d_sig(float x) noexcept {
+inline auto d_sig(float x) noexcept -> float {
   return sig(x) * (1 - sig(x));
 }
-inline float d_relu(float x) noexcept {
+inline auto d_relu(float x) noexcept -> float {
   return x > 0 ? 1.0F : 0.0F;
 }
-inline float d_tanh(float x) noexcept {
+inline auto d_tanh(float x) noexcept -> float {
   float t = std::tanh(x);
   return 1 - t * t;
 }
@@ -64,7 +64,7 @@ inline float d_tanh(float x) noexcept {
  * @param n the start number
  * @return the next power of two or n, if n is a power of 2
  */
-inline uint32_t next_power_of_2(uint32_t n) noexcept {
+inline auto next_power_of_2(uint32_t n) noexcept -> uint32_t {
   n--;
   n |= n >> 1;
   n |= n >> 2;
@@ -79,7 +79,7 @@ inline uint32_t next_power_of_2(uint32_t n) noexcept {
  * @param n
  * @return the square root of n
  */
-inline float fast_sqrt(float n) noexcept {
+inline auto fast_sqrt(float n) noexcept -> float {
   long i;
   float x2, y;
   constexpr float threehalfs = 1.5F;
@@ -100,21 +100,24 @@ inline float fast_sqrt(float n) noexcept {
  * @param high  highest possible value
  * @return low if val is smaller than low, val if val is between low and high, and high if val is bigger than high
  */
-template <typename T, typename std::enable_if_t<!std::is_integral<T>::value, int> = 0>
-inline constexpr T clamp(const T& val, const T& low, const T& high) {
+template <typename T>
+constexpr auto clamp(const T& val, const T& low, const T& high) -> T requires (!std::is_integral_v<T>) {
   if (val < low) {
     return low;
-  } else if (val > high) {
+  }
+  if (val > high) {
     return high;
   }
+
   return val;
 }
 
-template <typename T, typename std::enable_if_t<std::is_integral<T>::value, int> = 0>
-inline constexpr T clamp(T val, T low, T high) {
+template <typename T>
+constexpr auto clamp(T val, T low, T high) -> T requires std::is_integral_v<T> {
   if (val < low) {
     return low;
-  } else if (val > high) {
+  }
+  if (val > high) {
     return high;
   }
   return val;
@@ -122,10 +125,10 @@ inline constexpr T clamp(T val, T low, T high) {
 
 
 //-----------DISTANCE-----------//
-inline float euclidean(float p1x, float p1y, float p2x, float p2y) noexcept {
+inline auto euclidean(float p1x, float p1y, float p2x, float p2y) noexcept -> float {
   return fast_sqrt((p2x - p1x) * (p2x - p1x) + (p2y - p1y) * (p2y - p1y));
 }
-inline float manhattan(float p1x, float p1y, float p2x, float p2y) noexcept {
+inline auto manhattan(float p1x, float p1y, float p2x, float p2y) noexcept -> float {
   return abs(p2x - p1x) + abs(p2y - p1y);
 }
 
