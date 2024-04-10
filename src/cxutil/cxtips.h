@@ -17,22 +17,43 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
+#define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
 #define CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
 
 //Links provided without warranty of function, implied ownership or support of the linked website
 
 //Extensive ranking of header compile times
-////https://artificial-mind.net/projects/compile-health/
+//https://artificial-mind.net/projects/compile-health/
 
-/*
- * Rules:
- *
- * 1. Explicit is better than implicit
- * 2. Use const when you can
- * 3. Use extra variables to keep every code line without line breaks
- *
- */
+//
+// Tips:
+//
+/// 1. Explicit is better than implicit (constructors)
+//
+/// 2. Use const when you can
+//
+/// 3. Use extra variables to keep every code line without line breaks
+// const auto dx = 5;
+// const auto dy = 10;
+// DrawText(dx,dy,"Text");
+//
+/// 4. Use constexpr for inside function constants
+//  constexpr int threshHold = 42;
+//  if(val > threshHold){}
+//
+/// 5. Use anonymous namespace for internal linked function
+//
+// namespace{
+// inline DoSomething(Foo bar){}
+// }
+//
+// DoSomething(myBar)
+//
+///6. Use modern C++ features (generally)
+//
+// std::print({},3.0F); //instead of printf(%.f,3.0F);
+//
+//
 
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_

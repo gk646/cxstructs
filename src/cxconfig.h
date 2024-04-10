@@ -53,6 +53,7 @@ namespace cxtests {}
 #define CX_STACK_ABORT_IMPL() (void(0))
 #endif
 
+
 #ifndef CX_USE_INT
 typedef uint_fast32_t uint_32_cx;
 typedef uint_fast16_t uint_16_cx;

@@ -210,7 +210,8 @@ static void TEST_BITS() {
             "Concatenation of uint16_t failed.");
   CX_ASSERT(bits_concat(static_cast<uint32_t>(0x1), static_cast<uint32_t>(0x2)) == 0x200000001,
             "Concatenation of uint32_t failed.");
-  uint16_t num1 = 1, num2 = 2;
+  uint16_t num1 = 1;
+  uint16_t num2 = 2;
   CX_ASSERT(bits_concat(num1, num2) == 0x20001,
             "Concatenation of uint16_t with different values failed.");
 

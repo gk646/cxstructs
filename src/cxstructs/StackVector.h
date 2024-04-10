@@ -184,7 +184,7 @@ class StackVector {
 
 #ifdef CX_INCLUDE_TESTS
   static void TEST() {
-    StackArray<int, 100> arr;
+    StackVector<int, 100> arr;
     for (int i = 0; i < 10; i++) {
       arr.push_back(100);
     }

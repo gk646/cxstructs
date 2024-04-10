@@ -22,8 +22,8 @@
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
 #define CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
 
-#include <cmath>
 #include "../cxconfig.h"
+#include <cmath>
 #include "vec.h"
 
 namespace cxstructs {
@@ -449,7 +449,7 @@ class mat {
   /**Prints out the matrix
    * @param header optional header
    */
-  void print(const std::string& header = "") const {
+  void print(const char* name = "") const {
     if (!header.empty()) {
       std::cout << header << std::endl;
       for (uint_32_cx i = 0; i < n_rows_; i++) {
