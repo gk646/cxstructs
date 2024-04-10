@@ -73,14 +73,14 @@ class StackHashMap {
   size_type size_ = 0;
   int rand_ = rand();
 
-  [[nodiscard]] inline constexpr size_t impl_hash_func(const K& key) const noexcept {
+  [[nodiscard]] constexpr size_t impl_hash_func(const K& key) const noexcept {
     if constexpr ((N & (N - 1)) == 0) {  //Power of 2 optimization
       return hash_func_(key) & (N - 1);
     }
     return (hash_func_(key) * rand_) % N;
   }
 
-  inline void add_node(size_t hash, const_key_ref key, auto val) noexcept {
+  void add_node(size_t hash, const_key_ref key, auto val) noexcept {
     if (!register_[hash]) {
       if constexpr (std::is_trivially_copyable_v<K> && std::is_trivially_copyable_v<V>) {
         data_[hash].key = key;
@@ -96,7 +96,7 @@ class StackHashMap {
     }
   }
 
-  inline void insert_non_empty(const K& key, auto val) noexcept {
+  void insert_non_empty(const K& key, auto val) noexcept {
     Node org_data[N];
     bool org_register[N];
     std::memcpy(org_data, data_, N * sizeof(Node));
@@ -180,7 +180,7 @@ class StackHashMap {
   }
 
   //Call can result in endless loop at high load factor
-  inline void insert(const K& key, V&& val) noexcept {
+  void insert(const K& key, V&& val) noexcept {
     CX_ASSERT(size_ < N, "Trying to add to full StackHashMap");
     CX_STACK_ABORT_IMPL();
 
@@ -194,7 +194,7 @@ class StackHashMap {
   }
 
   //Call can result in endless loop at high load factor
-  inline void insert(const K& key, const V& val) noexcept {
+  void insert(const K& key, const V& val) noexcept {
     CX_ASSERT(size_ < N, "Trying to add to full StackHashMap");
     CX_STACK_ABORT_IMPL();
 
@@ -207,7 +207,7 @@ class StackHashMap {
     add_node(hash, key, val);
   }
 
-  inline void insert(const std::pair<const K, V>& keyValue) noexcept {
+  void insert(const std::pair<const K, V>& keyValue) noexcept {
     CX_ASSERT(size_ < N, "Trying to add to full StackHashMap");
     CX_STACK_ABORT_IMPL();
 
@@ -223,13 +223,15 @@ class StackHashMap {
     add_node(hash, key, val);
   }
 
-  inline V& operator[](const K& key) noexcept {
+  auto operator[](const K& key) noexcept -> V& {
     const size_t hash = impl_hash_func(key);
 
     if (!register_[hash]) {
       add_node(hash, key, V());
       return data_[hash].val;
-    } else if (data_[hash].key == key) {
+    }
+
+    if (data_[hash].key == key) {
       return data_[hash].val;
     }
 
@@ -237,9 +239,9 @@ class StackHashMap {
     return data_[impl_hash_func(key)].val;
   }
 
-  [[nodiscard]] size_type size() const noexcept { return size_; }
+  [[nodiscard]] auto size() const noexcept -> size_type { return size_; }
 
-  inline bool erase(const K& key) noexcept {
+  auto erase(const K& key) noexcept -> bool {
     const size_t hash = impl_hash_func(key);
     if (register_[hash]) {
       if constexpr (!std::is_trivial_v<K>) {
@@ -255,24 +257,24 @@ class StackHashMap {
     return false;
   }
 
-  [[nodiscard]] inline bool contains(const K& key) const noexcept {
+  [[nodiscard]] auto contains(const K& key) const noexcept -> bool {
     const size_t hash = impl_hash_func(key);
     return register_[hash] && data_[hash].key == key;
   }
 
   //The multiplier for the hash | Set to 1 if you supply a perfect hash function | Resets on collision
-  inline void set_rand(int rand) noexcept { rand_ = rand; }
+  void set_rand(int rand) noexcept { rand_ = rand; }
 
-  inline void clear() noexcept {
+  void clear() noexcept {
     std::memset(register_, false, N);
     size_ = 0;
   }
 
-  [[nodiscard]] inline bool empty() const noexcept { return !register_.any(); }
+  [[nodiscard]] auto empty() const noexcept -> bool { return !register_.any(); }
 
-  [[nodiscard]] inline float load_factor() const noexcept { return (float)size_ / (float)N; }
+  [[nodiscard]] auto load_factor() const noexcept -> float { return (float)size_ / (float)N; }
 
-  [[nodiscard]] inline size_t get_hash(const K& key) const noexcept { return impl_hash_func(key); }
+  [[nodiscard]] auto get_hash(const K& key) const noexcept -> size_t { return impl_hash_func(key); }
 
   // Iterator support
   class KeyIterator {
@@ -319,6 +321,7 @@ class StackHashMap {
     size_t size_;
     size_t index_;
   };
+
   class ValueIterator {
    public:
     using iterator_category = std::forward_iterator_tag;
@@ -371,8 +374,7 @@ class StackHashMap {
     using pointer = Node*;
     using reference = Node&;
 
-    explicit PairIterator(Node* ptr, bool* reg, size_t size)
-        : ptr_(ptr), reg_(reg), size_(size), index_(0) {
+    explicit PairIterator(Node* ptr, bool* reg, size_t size) : ptr_(ptr), reg_(reg), size_(size) {
       if (!reg_[index_]) {
         ++(*this);
       }
@@ -407,7 +409,7 @@ class StackHashMap {
     Node* ptr_;
     bool* reg_;
     size_t size_;
-    size_t index_;
+    size_t index_{0};
   };
 
   KeyIterator key_begin() { return KeyIterator(data_, register_, N); }
