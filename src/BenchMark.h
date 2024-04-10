@@ -26,7 +26,7 @@
 #include <random>
 #include <unordered_map>
 #include <unordered_set>
-#include "CXStructs.h"
+#include "cxstructs.h"
 inline static volatile int num1 = 2;
 //benchmarks are this /  run separately
 static void VEC() {

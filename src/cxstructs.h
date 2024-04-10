@@ -23,10 +23,17 @@
 
 #include "cxconfig.h"
 
-#include "cxutil/cxio.h"
-#include "cxutil/cxtime.h"
+//-----------UTIL-----------//
+#include "cxutil/cxassert.h"
+#include "cxutil/cxbits.h"
 #include "cxutil/cxgraphics.h"
+#include "cxutil/cxio.h"
+#include "cxutil/cxmath.h"
+#include "cxutil/cxstring.h"
+#include "cxutil/cxtime.h"
+#include "cxutil/cxtips.h"
 
+//-----------DATASTRUCTURES-----------//
 #include "cxstructs/BinaryTree.h"
 #include "cxstructs/DeQueue.h"
 #include "cxstructs/DoubleLinkedList.h"
@@ -44,11 +51,15 @@
 #include "cxstructs/row.h"
 #include "cxstructs/vec.h"
 #include "cxstructs/HashGrid.h"
+#include "cxstructs/StackVector.h"
+#include "cxstructs/StackHashMap.h"
 
+//-----------MACHINE_LEARNING-----------//
 #include "cxml/FNN.h"
 #include "cxml/k-NN.h"
 #include "cxml/word2vec.h"
 
+//-----------ALGORITHMS-----------//
 #include "cxalgos/GraphTraversal.h"
 #include "cxalgos/MathFunctions.h"
 #include "cxalgos/Misc.h"
