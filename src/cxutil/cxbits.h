@@ -23,6 +23,7 @@
 
 #include "../cxconfig.h"
 #include <cstdlib>
+#include <print>
 #include <type_traits>  //For type traits
 
 //Assumes little endian for all operations
@@ -64,7 +65,7 @@ enum Endianness { LITTLE_ENDIAN, BIG_ENDIAN };
 template <typename T, typename U>
 struct is_same_size_and_sign {
   static constexpr bool value =
-      (sizeof(T) == sizeof(U)) && (std::is_signed<T>::value == std::is_signed<U>::value);
+      (sizeof(T) == sizeof(U)) && (std::is_signed_v<T> == std::is_signed_v<U>);
 };
 
 template <typename T, typename U, bool SameSizeAndSign>
@@ -82,8 +83,8 @@ struct ConcatType<T, U, true> {
 template <typename T, typename U, size_t PadToBytes>
 struct ConcatPaddingType {
   // Calculate the total size needed, considering padding.
-  inline static constexpr size_t paddedSize = PadToBytes > sizeof(T) ? PadToBytes : sizeof(T);
-  inline static constexpr size_t totalSize =
+  static constexpr size_t paddedSize = PadToBytes > sizeof(T) ? PadToBytes : sizeof(T);
+  static constexpr size_t totalSize =
       paddedSize + (PadToBytes > sizeof(U) ? PadToBytes : sizeof(U));
 
   // Select the smallest standard integer type that fits the total size.
@@ -106,7 +107,7 @@ struct ConcatPaddingType {
 
 template <typename T, typename U, size_t PadToBytes>
 inline auto bits_concat_ex(T first, U second) {
-  static_assert(std::is_integral<T>::value && std::is_integral<U>::value,
+  static_assert(std::is_integral_v<T> && std::is_integral_v<U>,
                 "Only integer types are supported.");
 
   using ResultType = typename ConcatPaddingType<T, U, PadToBytes>::type;
@@ -126,8 +127,8 @@ inline auto bits_concat_ex(T first, U second) {
  * @return
  */
 template <typename T>
-inline constexpr auto bits_concat(T first, T second) {
-  static_assert(std::is_integral<T>::value, "Only integer types are supported.");
+constexpr auto bits_concat(T first, T second) {
+  static_assert(std::is_integral_v<T>, "Only integer types are supported.");
   constexpr auto same = is_same_size_and_sign<T, T>::value;
   constexpr bool fits = !std::is_same_v<typename ConcatType<T, T, same>::type, void>;
   static_assert(fits, "Resulting type is too large to represent.");
@@ -144,14 +145,14 @@ inline constexpr auto bits_concat(T first, T second) {
  */
 template <typename T>
 inline void bits_print(T num) {
-  static_assert(std::is_integral<T>::value, "Only integral types are supported.");
+  static_assert(std::is_integral_v<T>, "Only integral types are supported.");
 
   constexpr size_t numBits = sizeof(T) * 8;  // Total bits in type T
   char bitRepresentation[numBits + 1];       // +1 for null terminator
   bitRepresentation[numBits] = '\0';         // Null-terminate the string
 
   for (size_t i = 0; i < numBits; ++i) {
-    bitRepresentation[(numBits-1) -i] = (num & (T(1) << i)) ? '1' : '0';
+    bitRepresentation[(numBits - 1) - i] = (num & (T(1) << i)) ? '1' : '0';
   }
 
   fputs(bitRepresentation, stdout);
@@ -167,18 +168,18 @@ inline void bits_print(T num) {
  */
 template <typename T>
 inline void bits_print_bytes(const T& num, Endianness endian = LITTLE_ENDIAN) {
-  static_assert(std::is_integral<T>::value, "Only integral types are supported.");
+  static_assert(std::is_integral_v<T>, "Only integral types are supported.");
 
   const size_t numBytes = sizeof(T);
   const auto* bytePointer = reinterpret_cast<const unsigned char*>(&num);
 
   if (endian == LITTLE_ENDIAN) {
     for (size_t i = 0; i < numBytes; ++i) {
-      printf("%02X ", bytePointer[i]);
+      std::print("{:02X} ", bytePointer[i]);
     }
   } else {
     for (size_t i = numBytes; i > 0; --i) {
-      printf("%02X ", bytePointer[i - 1]);
+      std::print("{:02X} ", bytePointer[i - 1]);
     }
   }
   fputc('\n', stdout);
@@ -194,8 +195,8 @@ inline void bits_print_bytes(const T& num, Endianness endian = LITTLE_ENDIAN) {
  * @return a number of type r created from the specified bit range
  */
 template <typename R, typename T>
-inline constexpr R bits_get(T num, uint8_t off = 0) {
-  static_assert(std::is_integral<T>::value, "Only integer type are supported.");
+constexpr auto bits_get(T num, uint8_t off = 0) -> R {
+  static_assert(std::is_integral_v<T>, "Only integer type are supported.");
   return static_cast<R>(num >> off);
 }
 
@@ -223,7 +224,7 @@ static void TEST_BITS() {
   CX_ASSERT(bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 0) ==
                 bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 32),
             "");
-  uint16_t  bla = 1;
+  uint16_t bla = 1;
   uint16_t a = 257;
 
   bits_print(bits_get<uint8_t>(513));
