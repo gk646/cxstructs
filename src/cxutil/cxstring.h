@@ -22,6 +22,8 @@
 #define CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
 
 #include "../cxconfig.h"
+#include <cstdlib>
+#include <type_traits>
 
 namespace cxstructs {
 
@@ -31,12 +33,13 @@ inline auto str_parse_token(char** context, char delim) {
   while (**context != '\0' && **context != delim) {
     (*context)++;
   }
+
   if constexpr (std::is_same_v<T, float>) {
-    auto result = std::strtof(start, const_cast<char**>(context));
+    auto result = std::strtof(start, context);
     if (**context == delim) (*context)++;
     return result;
   } else if constexpr (std::is_same_v<T, int>) {
-    auto result = (int)std::strtol(start, const_cast<char**>(context), 10);
+    auto result = (int)std::strtol(start, context, 10);
     if (**context == delim) (*context)++;
     return result;
   } else if constexpr (std::is_same_v<T, const char*>) {
@@ -48,6 +51,27 @@ inline auto str_parse_token(char** context, char delim) {
     return result;
   }
 }
+
+
+constexpr auto fnv1a_32(char const* s) noexcept -> uint32_t {
+   uint32_t hash = 2166136261U;
+  while (*s != 0) {
+    hash ^= (uint32_t)(*s++);
+    hash *= 16777619U;
+  }
+  return hash;
+}
+
+struct Fnv1aHash {
+  auto operator()(const char* s) const noexcept -> std::size_t {
+    uint32_t hash = 2166136261U;
+    while (*s != 0) {
+      hash ^= (uint32_t)(*s++);
+      hash *= 16777619U;
+    }
+    return hash;
+  }
+};
 
 #ifdef CX_INCLUDE_TESTS
 static void TEST_STRING() {
