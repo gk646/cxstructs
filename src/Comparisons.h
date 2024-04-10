@@ -20,7 +20,7 @@
 #pragma warning(disable : 4834)
 
 #include <iostream>
-#include "CXStructs.h"
+#include "cxstructs.h"
 
 #include <deque>
 #include <list>

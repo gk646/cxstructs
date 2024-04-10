@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "CXStructs.h"
+#include "cxstructs.h"
 #include "cxml/word2vec.h"
 
 #ifdef CX_INCLUDE_TESTS

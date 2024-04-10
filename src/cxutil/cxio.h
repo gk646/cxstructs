@@ -22,12 +22,10 @@
 #define CXSTRUCTS_SRC_CXIO_H_
 
 #include "../cxconfig.h"
-#include "cxstring.h"
 
-//Simple, readable and fast symmetric serialization structure with loading and saving
-//Each line is a concatenates list of values and delimiter '|'
-//13|45|23|56|
-//These lines can then be parsed by load_property
+//Simple, readable and fast *symmetric* serialization structure with loading and saving
+//Each line is a concatenated list of values and delimiter '|' (might be changeable in the future)
+//13|3.145|This is a string|56|
 
 //Using the CXX23 std::print() is about 10% slower
 namespace cxstructs {
