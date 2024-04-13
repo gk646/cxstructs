@@ -19,10 +19,10 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SORTING_H
-#define CXSTRUCTS_SORTING_H
+#  define CXSTRUCTS_SORTING_H
 
-#include <algorithm>
-#include "../cxconfig.h"
+#  include <algorithm>
+#  include "../cxconfig.h"
 
 namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
@@ -276,7 +276,7 @@ template <typename T>
 void heapSort(T* arr, uint_32_cx len, bool ascending) {}
 
 }  // namespace cxstructs
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
 namespace cxtests {
 std::vector<int> generate_shuffled_vector(int size) {
   std::vector<int> vec(size);
@@ -323,5 +323,5 @@ static void TEST_SORTING() {
   CX_ASSERT_sorted(bogo_vec);
 }
 }  // namespace cxtests
-#endif
+#  endif
 #endif  // CXSTRUCTS_SORTING_H

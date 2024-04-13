@@ -19,9 +19,9 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXIO_H_
-#define CXSTRUCTS_SRC_CXIO_H_
+#  define CXSTRUCTS_SRC_CXIO_H_
 
-#include "../cxconfig.h"
+#  include "../cxconfig.h"
 
 //Simple, readable and fast *symmetric* serialization structure with loading and saving
 //Each line is a concatenated list of values and delimiter '|' (might be changeable in the future)
@@ -30,6 +30,24 @@
 //Using the CXX23 std::print() is about 10% slower
 namespace cxstructs {
 //inline static constexpr char DELIMITER = '|'; //Not used yet
+
+//-----------SHARED-----------//
+// true if end of file // don't call this more than once per line
+inline auto io_check_eof(FILE* file) -> bool {
+  // Remember the current position
+  long currentPos = ftell(file);
+  if (currentPos == -1) return true;  // Error in ftell
+
+  // Try to read a byte
+  char ch;
+  if (fread(&ch, 1, 1, file) != 1) {
+    return true;  // EOF reached or read error
+  }
+
+  // Seek back to the original position
+  fseek(file, currentPos, SEEK_SET);
+  return false;  // Not EOF
+}
 
 //-----------SAVING-----------//
 // Writes a new line to file
@@ -50,15 +68,16 @@ inline void io_save(FILE* file, float value) {
 }
 
 //-----------LOADING-----------//
-//Attempts to skip a new line until the next delimiter
-inline void io_load_newline(FILE* file) {
+//Searches for the next new line but stops at the delimiter if not forced
+inline void io_load_newline(FILE* file, bool force = false) {
   char ch;
-  while (fread(&ch, 1, 1, file) == 1 && ch != '|') {
+  while (fread(&ch, 1, 1, file) == 1) {
+    if (!force && ch == '|') return;
     if (ch == '\n') return;
   }
 }
-//include <string> to use or define _STRING_
-#ifdef _STRING_
+//include <string> to use
+#  ifdef _STRING_
 inline void io_load(FILE* file, std::string& s, int reserve_amount = 50) {
   s.reserve(reserve_amount);
   char ch;
@@ -66,7 +85,7 @@ inline void io_load(FILE* file, std::string& s, int reserve_amount = 50) {
     s.push_back(ch);
   }
 }
-#endif
+#  endif
 // Load a string property into a user-supplied buffer
 inline void io_load(FILE* file, char* buffer, size_t buffer_size) {
   size_t count = 0;
@@ -87,8 +106,8 @@ inline void io_load(FILE* file, float& f) {
 
 }  // namespace cxstructs
 
-#ifdef CX_INCLUDE_TESTS
-#include <chrono>
+#  ifdef CX_INCLUDE_TESTS
+#    include <chrono>
 namespace cxtests {
 using namespace cxstructs;
 using namespace std::chrono;
@@ -260,5 +279,5 @@ static void TEST_IO() {
   delete_test_files();
 }
 }  // namespace cxtests
-#endif
+#  endif
 #endif  //CXSTRUCTS_SRC_CXIO_H_

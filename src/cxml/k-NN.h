@@ -19,15 +19,15 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
-#define CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
+#  define CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
 
-#include <exception>
-#include <vector>
-#include "../cxconfig.h"
-#include "../cxstructs/Geometry.h"
-#include "../cxstructs/HashMap.h"
-#include "../cxstructs/QuadTree.h"
-#include "../cxstructs/row.h"
+#  include <exception>
+#  include <vector>
+#  include "../cxconfig.h"
+#  include "../cxstructs/Geometry.h"
+#  include "../cxstructs/HashMap.h"
+#  include "../cxstructs/QuadTree.h"
+#  include "../cxstructs/row.h"
 /**
  * <h2>k-Nearest Neighbour</h2>
  *
@@ -229,7 +229,7 @@ class kNN_2D {
 
     return Category(index);
   }
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     enum Category { A, B, C };
     struct DataPoint : public DataPoint_<Category> {
@@ -284,7 +284,7 @@ class kNN_2D {
     cat1 = knn.classify_by_sum_weighted_distance(5, 5, 4);
     CX_ASSERT((int)cat1 == 1, "");
   }
-#endif
+#  endif
 };
 
 class kNN_XD {

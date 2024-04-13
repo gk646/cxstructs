@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
 
-#include "../cxconfig.h"
-#include <memory> // For std::allocator<T>
-#ifdef CX_INCLUDE_TESTS
-#include <queue>
-#endif
+#  include "../cxconfig.h"
+#  include <memory>  // For std::allocator<T>
+#  ifdef CX_INCLUDE_TESTS
+#    include <queue>
+#  endif
 
 namespace cxstructs {
 
@@ -88,8 +88,8 @@ class PriorityQueue {
   void sift_down(uint_32_cx index) noexcept {
     auto left = 2 * index + 1;
     auto right = 2 * index + 2;
-    while ((left < size_ && comp(arr_[index], arr_[left])) ||
-           (right < size_ && comp(arr_[index], arr_[right]))) {
+    while ((left < size_ && comp(arr_[index], arr_[left]))
+           || (right < size_ && comp(arr_[index], arr_[right]))) {
       auto smallest = (right >= size_ || comp(arr_[right], arr_[left])) ? left : right;
       std::swap(arr_[index], arr_[smallest]);
       index = smallest;
@@ -108,8 +108,7 @@ class PriorityQueue {
    * Per default is a min heap. Pass std::greater<> as comparator to bits_get a max-heap
    * @param len initial length and expansion factor
    */
-  explicit PriorityQueue(uint_32_cx len = 32)
-      : arr_(alloc.allocate(len)), len_(len), size_(0) {}
+  explicit PriorityQueue(uint_32_cx len = 32) : arr_(alloc.allocate(len)), len_(len), size_(0) {}
   /**
    * @brief Constructor that initializes the priority queue with an existing array.
    *  <b>Takes ownership of the array</b>
@@ -258,7 +257,7 @@ class PriorityQueue {
   };
   Iterator begin() { return Iterator(arr_); }
   Iterator end() { return Iterator(arr_ + size_); }
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "PRIORITY QUEUE TESTS" << std::endl;
     // Test default constructor
@@ -378,7 +377,7 @@ class PriorityQueue {
     CX_ASSERT(nums2 == nullptr, "");
     CX_ASSERT(q13.top() == 2, "");
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_

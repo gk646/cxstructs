@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
 
-#include <algorithm>
+#  include <algorithm>
 
-#include <cstdint>
-#include <iostream>
-#include "../cxconfig.h"
+#  include <cstdint>
+#  include <iostream>
+#  include "../cxconfig.h"
 
 namespace cxstructs {
 /**
@@ -340,8 +340,8 @@ class DeQueue {
   };
   inline Iterator begin() { return Iterator(arr_, front_, len_); }
   inline Iterator end() { return Iterator(arr_, (back_ + 1) % len_, len_); }
-#ifdef CX_INCLUDE_TESTS
-#include <deque>
+#  ifdef CX_INCLUDE_TESTS
+#    include <deque>
   static void TEST() {
     std::cout << "TESTING DEQUEUE" << std::endl;
 
@@ -526,7 +526,7 @@ class DeQueue {
       CX_ASSERT(b++ == val, "");
     }
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_

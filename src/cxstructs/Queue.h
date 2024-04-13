@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_QUEUE_H
-#define CXSTRUCTS_QUEUE_H
+#  define CXSTRUCTS_QUEUE_H
 
-#include "../cxconfig.h"
-#include <memory> //For std::allocator<T>
-#ifdef CX_INCLUDE_TESTS
-#include <queue>
-#endif
+#  include "../cxconfig.h"
+#  include <memory>  //For std::allocator<T>
+#  ifdef CX_INCLUDE_TESTS
+#    include <queue>
+#  endif
 
 namespace cxstructs {
 
@@ -327,7 +327,7 @@ class Queue {
     }
     return Iterator(arr_, index, capacity_);
   }
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "QUEUE TESTS" << std::endl;
     // Test default constructor
@@ -451,7 +451,7 @@ class Queue {
       // CX_ASSERT(b++ ==val, "");
     }
   }
-#endif
+#  endif
 };
 
 }  // namespace cxstructs

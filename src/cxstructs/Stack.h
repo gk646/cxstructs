@@ -19,18 +19,18 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTURES_STACK_H
-#define CXSTRUCTURES_STACK_H
+#  define CXSTRUCTURES_STACK_H
 
-#include <algorithm>
+#  include <algorithm>
 
-#include <cstdint>
-#include <initializer_list>
-#include <iostream>
-#include <memory>
-#include <stdexcept>
-#include "../cxconfig.h"
-#include "../cxstructs/mat.h"
-#include "CXAllocator.h"
+#  include <cstdint>
+#  include <initializer_list>
+#  include <iostream>
+#  include <memory>
+#  include <stdexcept>
+#  include "../cxconfig.h"
+#  include "../cxstructs/mat.h"
+#  include "CXAllocator.h"
 
 //this stack is very fast and implemented natively (std::stack is using the std::vector)
 //can be up to 1.6 times faster and should be faster in any use case
@@ -123,8 +123,7 @@ class Stack {
    * @param init_list init list elements
    */
   Stack(std::initializer_list<T> init_list)
-      : size_(init_list.size()),
-        len_(init_list.size() * 10),
+      : size_(init_list.size()), len_(init_list.size() * 10),
         arr_(alloc.allocate(init_list.size() * 10)) {
     if (is_trivial_destr) {
       std::copy(init_list.begin(), init_list.end(), arr_);
@@ -292,8 +291,8 @@ class Stack {
   };
   Iterator begin() { return Iterator(arr_); }
   Iterator end() { return Iterator(arr_ + size_); }
-#ifdef CX_INCLUDE_TESTS
-#include "mat.h"
+#  ifdef CX_INCLUDE_TESTS
+#    include "mat.h"
   static void TEST() {
     std::cout << "STACK TESTS" << std::endl;
 
@@ -375,7 +374,7 @@ class Stack {
     Stack<mat> mat_stack01(15, mat(10, 10));
     Stack<mat> mat_stack02{mat(5, 5), mat(10, 10)};
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 

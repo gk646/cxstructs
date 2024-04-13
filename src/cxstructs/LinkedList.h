@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_LINKEDLIST_H
-#define CXSTRUCTS_LINKEDLIST_H
+#  define CXSTRUCTS_LINKEDLIST_H
 
-#include <cstdint>
-#include <iostream>
-#include <memory>
-#include <stdexcept>
-#include "../cxconfig.h"
+#  include <cstdint>
+#  include <iostream>
+#  include <memory>
+#  include <stdexcept>
+#  include "../cxconfig.h"
 
 namespace cxhelper {
 template <typename T>
@@ -283,7 +283,7 @@ class LinkedList {
     }
     return os;
   }
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "LINKED LIST TESTS" << std::endl;
     LinkedList<int> list1;
@@ -476,7 +476,7 @@ class LinkedList {
     list9.pop_back();
     CX_ASSERT(list9.back() == 3, "");
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_LINKEDLIST_H

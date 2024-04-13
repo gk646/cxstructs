@@ -19,14 +19,14 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_BINARYTREE_H
-#define CXSTRUCTS_BINARYTREE_H
+#  define CXSTRUCTS_BINARYTREE_H
 
-#include <algorithm>
-#include <deque>
-#include <iostream>
-#include <stdexcept>
-#include <vector>
-#include "../cxconfig.h"
+#  include <algorithm>
+#  include <deque>
+#  include <iostream>
+#  include <stdexcept>
+#  include <vector>
+#  include "../cxconfig.h"
 
 namespace cxhelper {  // namespace to hide helper structs
 /**
@@ -78,13 +78,11 @@ class BinaryTree {
     if (val < node->data_) {
       if (!node->left_) {
         node->left_ = new TNode(val);
-      } else
-        insert(val, node->left_);
+      } else insert(val, node->left_);
     } else {
       if (!node->right_) {
         node->right_ = new TNode(val);
-      } else
-        insert(val, node->right_);
+      } else insert(val, node->right_);
     }
   }
   inline bool contains(const T& val, TNode* node) const {
@@ -297,7 +295,7 @@ class BinaryTree {
    */
   InOrderIterator end() { return InOrderIterator(nullptr); }
 
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "BINARY SEARCH TREE TESTS" << std::endl;
 
@@ -378,7 +376,7 @@ class BinaryTree {
       prev_num = num;
     }
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_BINARYTREE_H

@@ -19,9 +19,9 @@
 // SOFTWARE.
 #define F
 #ifndef CXSTRUCTS_SRC_CXALGOS_STATISTIC_H_
-#define CXSTRUCTS_SRC_CXALGOS_STATISTIC_H_
-#include "../cxconfig.h"
-#include "Sorting.h"
+#  define CXSTRUCTS_SRC_CXALGOS_STATISTIC_H_
+#  include "../cxconfig.h"
+#  include "Sorting.h"
 
 namespace cxstructs {
 /**

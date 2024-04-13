@@ -19,10 +19,10 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_BINARYSEARCH_H
-#define CXSTRUCTS_BINARYSEARCH_H
+#  define CXSTRUCTS_BINARYSEARCH_H
 
-#include <cstdint>
-#include "../cxconfig.h"
+#  include <cstdint>
+#  include "../cxconfig.h"
 
 namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
@@ -121,7 +121,7 @@ int binary_search_index(T* arr, T target, int_32_cx len, bool ascending) {
 }
 
 }  // namespace cxstructs
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
 namespace cxtests {
 using namespace cxstructs;
 static void TEST_SEARCH() {
@@ -139,5 +139,5 @@ static void TEST_SEARCH() {
   CX_ASSERT(binary_search_index(arr, 2, 9, true) == 1, "");
 }
 }  // namespace cxtests
-#endif
+#  endif
 #endif  // CXSTRUCTS_BINARYSEARCH_H

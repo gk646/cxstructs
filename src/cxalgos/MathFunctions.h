@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
-#define CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
+#  define CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
 
-#include <cmath>
-#include <cstdint>
-#include <type_traits>
-#include "../cxconfig.h"
-#include "../cxutil/cxmath.h"
+#  include <cmath>
+#  include <cstdint>
+#  include <type_traits>
+#  include "../cxconfig.h"
+#  include "../cxutil/cxmath.h"
 
 namespace cxstructs {
 
@@ -95,7 +95,7 @@ double integral_arc_length(Function fx, double a, double b, uint_32_cx steps = 1
   return arc_length;
 }
 }  // namespace cxstructs
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
 namespace cxtests {
 using namespace cxstructs;
 static void TEST_MATH() {
@@ -115,5 +115,5 @@ static void TEST_MATH() {
   CX_ASSERT(cxstructs::next_power_of_2(53) == 64, "");
 }
 }  // namespace cxtests
-#endif
+#  endif
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
