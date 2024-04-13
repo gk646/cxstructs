@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXML_WORD2VEC_H_
-#define CXSTRUCTS_SRC_CXML_WORD2VEC_H_
+#  define CXSTRUCTS_SRC_CXML_WORD2VEC_H_
 
-#include "../cxconfig.h"
-#include "../cxstructs/vec.h"
-#include "FNN.h"
+#  include "../cxconfig.h"
+#  include "../cxstructs/vec.h"
+#  include "FNN.h"
 
 namespace cxhelper {}
 
@@ -39,8 +39,7 @@ class Word2Vec {
       : net(
             {vocabulary_size, numbers_per_word, vocabulary_size}, [](float x) { return x; }, 0.11,
             mat::cross_entropy),
-        vec_len(numbers_per_word),
-        vocab_len(vocabulary_size) {}
+        vec_len(numbers_per_word), vocab_len(vocabulary_size) {}
 
   void train(const std::vector<string>& sentence, int epochs) {
     mat in(sentence.size(), sentence.size());
@@ -86,6 +85,21 @@ class Word2Vec {
   }
   vec<float> get_vec(int vocab_index) { return net.get_weights(0, vocab_index); }
 
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::cout << "TESTING WORD2VEC" << std::endl;
+    Word2Vec word_2_vec(4, 2);
+    std::vector<string> train = {{"I"}, {"like"}, {"programming"}, {"alot"}};
+    word_2_vec.train(train, 40);
+    word_2_vec.predict_next(0).print();
+    std::cout << word_2_vec.get_vec(0) << std::endl;
+
+    Word2Vec word_3_vec(4, 2);
+    word_3_vec.train_bag_of_words(train, 2, 30);
+    word_3_vec.predict_next(0).print();
+    std::cout << word_3_vec.get_vec(0) << std::endl;
+  }
+#  endif
 };
 }  // namespace cxstructs
 

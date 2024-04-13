@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
 
-#include <unordered_map>
-#include <vector>
-#include "../cxconfig.h"
+#  include <unordered_map>
+#  include <vector>
+#  include "../cxconfig.h"
 
 namespace cxstructs {
 
@@ -46,8 +46,7 @@ struct HashGrid {
 
  public:
   explicit HashGrid(float cellSize, float spaceSize)
-      : cellSize(cellSize),
-        totalSpaceSize(spaceSize),
+      : cellSize(cellSize), totalSpaceSize(spaceSize),
         gridSize(static_cast<size_type>(spaceSize / cellSize)) {
     cells.reserve(gridSize * gridSize);
     cells.max_load_factor(1.0F);
@@ -115,6 +114,31 @@ struct HashGrid {
     cells[getGridID(x, y)].emplace_back(entityID);
   }
 
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    float spaceSize = 100;
+    float cellSize = 5;
+
+    HashGrid hashGrid{cellSize, spaceSize};
+
+    for (uint_fast32_t i = 0; i < spaceSize; i++) {
+      for (uint_fast32_t j = 0; j < spaceSize; j++) {
+        hashGrid.insert(i, j, i);
+      }
+    }
+
+    hashGrid.insert(99, 99, 1);
+    hashGrid.insert(1, 1, 2);
+
+    std::vector<uint32_t> coll;
+    coll.reserve(60);
+
+    now();
+    hashGrid.containedInRectCollect(0, 0, 99, 99, coll);
+    printTime<std::chrono::nanoseconds>("lookup");
+    std::cout << coll.size() << std::endl;
+  }
+#  endif
 };
 
 }  // namespace cxstructs

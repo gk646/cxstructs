@@ -19,10 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
 
-#include "../cxconfig.h"
-#include <memory> // For std::allocator<T>
+#  include "../cxconfig.h"
+#  include <memory>  // For std::allocator<T>
+#  ifdef CX_INCLUDE_TESTS
+#    include <queue>
+#  endif
 
 namespace cxstructs {
 
@@ -85,8 +88,8 @@ class PriorityQueue {
   void sift_down(uint_32_cx index) noexcept {
     auto left = 2 * index + 1;
     auto right = 2 * index + 2;
-    while ((left < size_ && comp(arr_[index], arr_[left])) ||
-           (right < size_ && comp(arr_[index], arr_[right]))) {
+    while ((left < size_ && comp(arr_[index], arr_[left]))
+           || (right < size_ && comp(arr_[index], arr_[right]))) {
       auto smallest = (right >= size_ || comp(arr_[right], arr_[left])) ? left : right;
       std::swap(arr_[index], arr_[smallest]);
       index = smallest;
@@ -105,8 +108,7 @@ class PriorityQueue {
    * Per default is a min heap. Pass std::greater<> as comparator to bits_get a max-heap
    * @param len initial length and expansion factor
    */
-  explicit PriorityQueue(uint_32_cx len = 32)
-      : arr_(alloc.allocate(len)), len_(len), size_(0) {}
+  explicit PriorityQueue(uint_32_cx len = 32) : arr_(alloc.allocate(len)), len_(len), size_(0) {}
   /**
    * @brief Constructor that initializes the priority queue with an existing array.
    *  <b>Takes ownership of the array</b>
@@ -255,6 +257,127 @@ class PriorityQueue {
   };
   Iterator begin() { return Iterator(arr_); }
   Iterator end() { return Iterator(arr_ + size_); }
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::cout << "PRIORITY QUEUE TESTS" << std::endl;
+    // Test default constructor
+    std::cout << "  Testing default constructor..." << std::endl;
+    PriorityQueue<int> q1;
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
+
+    // Test push
+    std::cout << "  Testing push..." << std::endl;
+    q1.push(5);
+    CX_ASSERT(q1.size() == 1, "");
+    CX_ASSERT(q1.empty() == false, "");
+    CX_ASSERT(q1.top() == 5, "");
+
+    // Test pop
+    std::cout << "  Testing pop..." << std::endl;
+    int val = q1.top();
+    q1.pop();
+    CX_ASSERT(val == 5, "");
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
+
+    // Test non-empty constructor
+    std::cout << "  Testing non-empty constructor..." << std::endl;
+    PriorityQueue<int> q2(5);
+    for (int i = 0; i < 5; i++) {
+      q2.push(10);
+    }
+    CX_ASSERT(q2.size() == 5, "");
+    CX_ASSERT(q2.empty() == false, "");
+    CX_ASSERT(q2.top() == 10, "");
+
+    // Test copy constructor
+    std::cout << "  Testing copy constructor..." << std::endl;
+    PriorityQueue<int> q3(q2);
+    CX_ASSERT(q3.size() == q2.size(), "");
+    CX_ASSERT(q3.empty() == q2.empty(), "");
+    CX_ASSERT(q3.top() == q2.top(), "");
+
+    // Test assignment operator
+    std::cout << "  Testing assignment operator..." << std::endl;
+    PriorityQueue<int> q4;
+    q4 = q2;
+    CX_ASSERT(q4.size() == q2.size(), "");
+    CX_ASSERT(q4.empty() == q2.empty(), "");
+    CX_ASSERT(q4.top() == q2.top(), "");
+
+    q1.clear();
+    // Test multiple push/pop
+    std::cout << "  Testing multiple push/pop..." << std::endl;
+    for (int i = 0; i < 100; i++) {
+      q1.push(i);
+    }
+    CX_ASSERT(q1.size() == 100, "");
+    for (int i = 0; i < 100; i++) {
+      int temp = q1.top();
+      q1.pop();
+      CX_ASSERT(temp == i, "");
+    }
+    CX_ASSERT(q1.size() == 0, "");
+
+    q1.clear();
+    PriorityQueue<int, std::less<>> q10;
+    // Test multiple push/pop
+    std::cout << "  Testing multiple push/pop reversed..." << std::endl;
+    for (int i = 0; i < 100; i++) {
+      q10.push(i);
+    }
+    CX_ASSERT(q10.size() == 100, "");
+    for (int i = 0; i < 100; i++) {
+      int temp = q10.top();
+      q10.pop();
+      CX_ASSERT(temp == 99 - i, "");
+    }
+    CX_ASSERT(q10.size() == 0, "");
+
+    // Test clear
+    std::cout << "  Testing clear..." << std::endl;
+    q1.clear();
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
+
+    // Test push after clear
+    std::cout << "  Testing push after clear..." << std::endl;
+    for (int i = 0; i < 10; i++) {
+      q1.push(i);
+    }
+    q1.push(-1);
+    CX_ASSERT(q1.size() == 11, "");
+    CX_ASSERT(q1.top() == -1, "");
+
+    std::cout << "  Testing similarity to std::priority_queue..." << std::endl;
+    q1.clear();
+    std::priority_queue<int, std::vector<int>, std::greater<>> frontier;
+    srand(1000);
+    for (uint_fast32_t i = 0; i < 10; i++) {
+      auto ran = rand();
+      frontier.push(ran);
+      q1.push(ran);
+    }
+    CX_ASSERT(frontier.top() == q1.top(), "");
+    q1.pop();
+    frontier.pop();
+    CX_ASSERT(frontier.top() == q1.top(), "");
+    q1.pop();
+    frontier.pop();
+    CX_ASSERT(frontier.top() == q1.top(), "");
+
+    std::cout << "  Testing heapify..." << std::endl;
+    int nums[4] = {5, 2, 3, 1};
+    PriorityQueue<int> q12(const_cast<const int*>(nums), 4);
+    CX_ASSERT(q12.top() == 5, "");
+
+    int* nums2 = new int[5]{2, 3, 54, 123};
+    PriorityQueue<int, std::less<>> q13(std::move(nums2), 4);
+    CX_ASSERT(nums2 == nullptr, "");
+    CX_ASSERT(q13.top() == 2, "");
+  }
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_PRIORITYQUEUE_H_
