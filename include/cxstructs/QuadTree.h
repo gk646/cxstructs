@@ -19,13 +19,12 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
 
-
-#include "../cxconfig.h"
-#include "Geometry.h"
-#include "vec.h"
-#include <utility>
+#  include "../cxconfig.h"
+#  include "Geometry.h"
+#  include "vec.h"
+#  include <utility>
 
 //used in kNN 2D
 
@@ -164,13 +163,8 @@ class QuadTree {
      * @param max_points maximum amount of points per each node
      */
   explicit QuadTree(Rect initial_bounds, uint_16_cx max_depth = 10, uint_32_cx max_points = 50)
-      : max_depth_(max_depth),
-        max_points_(max_points),
-        bounds_(std::move(initial_bounds)),
-        top_left_(nullptr),
-        top_right_(nullptr),
-        bottom_left_(nullptr),
-        bottom_right_(nullptr){};
+      : max_depth_(max_depth), max_points_(max_points), bounds_(std::move(initial_bounds)),
+        top_left_(nullptr), top_right_(nullptr), bottom_left_(nullptr), bottom_right_(nullptr){};
   QuadTree(const QuadTree&) = delete;
   QuadTree& operator=(const QuadTree&) = delete;
   QuadTree(QuadTree&&) = delete;
@@ -211,9 +205,8 @@ class QuadTree {
           split();
         } else {
           vec_.push_back(e);
-          CX_WARNING(false,
-                     "|QuadTree.h| Reached max depth | large insertions now will slow "
-                     "down the tree");
+          CX_WARNING(false, "|QuadTree.h| Reached max depth | large insertions now will slow "
+                            "down the tree");
           return;
         }
       }
@@ -310,6 +303,44 @@ class QuadTree {
   inline void set_bounds(const Rect& new_bound) noexcept { bounds_ = new_bound; }
   [[nodiscard]] inline const Rect& get_bounds() const noexcept { return bounds_; }
   class Iterator {};
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distr(0, 200);
+    std::cout << "TESTING QUAD TREE" << std::endl;
+
+    std::cout << "   Testing insert..." << std::endl;
+    QuadTree<Point> tree({0, 0, 200, 200});
+    for (uint_fast32_t i = 0; i < 1000; i++) {
+      tree.insert({distr(gen), distr(gen)});
+    }
+
+    CX_ASSERT(tree.depth() == 3, "");
+    CX_ASSERT(tree.size() == 1000, "");
+
+    std::cout << "   Testing count subrect..." << std::endl;
+    CX_ASSERT(tree.count_subrect({0, 0, 200, 200}) == 1000, "");
+    CX_ASSERT(tree.count_subrect({10, 10, 50, 50}) > 10, "");
+    tree.insert({2, 2});
+    CX_ASSERT(tree.size() == 1001, "");
+    tree.erase({2, 2});
+    CX_ASSERT(tree.size() == 1000, "");
+
+    std::cout << "   Testing max capacity..." << std::endl;
+    QuadTree<Point> tree1({0, 0, 200, 200}, 2, 10);
+    for (uint_fast32_t i = 0; i < 100000; i++) {
+      tree.insert({distr(gen), distr(gen)});
+    }
+
+    std::cout << "   Testing object retrieval..." << std::endl;
+    tree1.clear();
+    tree1.insert({2, 2});
+    for (auto ptr : tree1.get_subrect({0, 0, 2, 2})) {
+      CX_ASSERT(*ptr == Point(2, 2), "");
+    }
+  }
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_

@@ -19,7 +19,10 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CONFIG_H_
-#define CXSTRUCTS_SRC_CONFIG_H_
+#  define CXSTRUCTS_SRC_CONFIG_H_
+
+#  include <cstdint>            //Used for almost all size_types
+#  include "cxutil/cxassert.h"  //includes only <cstdio>
 
 //-----------DEFINES-----------//
 
@@ -28,40 +31,30 @@
 //
 //
 
-#define CX_INL inline
-#define CX_NDISC [[nodiscard]]
+#  define CX_INL inline
+#  define CX_NDISC [[nodiscard]]
 
 /**
  * namespace for exposed structs and functions
  */
 namespace cxstructs {}
-/**
- * internal namespace for helper methods or structs
- */
-namespace cxhelper {}
-/**
- * internal namespace for test methods
- */
-namespace cxtests {}
-
-#include <cstdint>
-#include "cxutil/cxassert.h"
-
-#ifdef CX_STACK_ABORT
-#define CX_STACK_ABORT_IMPL() if (size_ >= N) std::abort()
-#else
-#define CX_STACK_ABORT_IMPL() (void(0))
-#endif
 
 
-#ifndef CX_USE_INT
-typedef uint_fast32_t uint_32_cx;
-typedef uint_fast16_t uint_16_cx;
-typedef int_fast32_t int_32_cx;
-#else
+#  ifdef CX_STACK_ABORT
+#    define CX_STACK_ABORT_IMPL()                                                                  \
+      if (size_ >= N) std::abort()
+#  else
+#    define CX_STACK_ABORT_IMPL() (void(0))
+#  endif
+
+#  ifndef CX_USE_INT
+using uint_32_cx = uint_fast32_t;
+using uint_16_cx = uint_fast16_t;
+using int_32_cx = int_fast32_t;
+#  else
 typedef int uint_32_cx;
 typedef int uint_16_cx;
 typedef int int_32_cx;
-#endif
+#  endif
 
 #endif  //CXSTRUCTS_SRC_CONFIG_H_

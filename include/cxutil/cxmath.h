@@ -19,21 +19,21 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_MATH_H_
-#define CXSTRUCTS_SRC_CXUTIL_MATH_H_
+#  define CXSTRUCTS_SRC_CXUTIL_MATH_H_
 
-#include "../cxconfig.h"
-#include <cmath>
+#  include "../cxconfig.h"
+#  include <cmath>
 
 namespace cxstructs {
 // for compatibility | apparently this is only in c++ through std::numbers which is CX20 and not on all compilers equal
-#define CX_PI 3.14159265358979323846F
-#define CX_DEG2RAD (PI / 180.0F)
-#define CX_RAD2DEG (180.0F / PI)
+#  define CX_PI 3.14159265358979323846F
+#  define CX_DEG2RAD (PI / 180.0F)
+#  define CX_RAD2DEG (180.0F / PI)
 
 struct mat;
 //function pointer typedef
 using func = float (*)(float);
-using func_M = mat (*)(mat &, mat &);  // mat function
+using func_M = mat (*)(mat&, mat&);  // mat function
 using D_func = float (*)(float, float, float, float);
 
 //activation functions
@@ -101,7 +101,9 @@ inline auto fast_sqrt(float n) noexcept -> float {
  * @return low if val is smaller than low, val if val is between low and high, and high if val is bigger than high
  */
 template <typename T>
-constexpr auto clamp(const T& val, const T& low, const T& high) -> T requires (!std::is_integral_v<T>) {
+constexpr auto clamp(const T& val, const T& low, const T& high) -> T
+  requires(!std::is_integral_v<T>)
+{
   if (val < low) {
     return low;
   }
@@ -113,7 +115,9 @@ constexpr auto clamp(const T& val, const T& low, const T& high) -> T requires (!
 }
 
 template <typename T>
-constexpr auto clamp(T val, T low, T high) -> T requires std::is_integral_v<T> {
+constexpr auto clamp(T val, T low, T high) -> T
+  requires std::is_integral_v<T>
+{
   if (val < low) {
     return low;
   }
@@ -122,7 +126,6 @@ constexpr auto clamp(T val, T low, T high) -> T requires std::is_integral_v<T> {
   }
   return val;
 }
-
 
 //-----------DISTANCE-----------//
 inline auto euclidean(float p1x, float p1y, float p2x, float p2y) noexcept -> float {

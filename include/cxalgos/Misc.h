@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXALGOS_MISC_H_
-#define CXSTRUCTS_SRC_CXALGOS_MISC_H_
+#  define CXSTRUCTS_SRC_CXALGOS_MISC_H_
 
-#include <ctime>
-#include <vector>
-#include "../cxstructs/Geometry.h"
+#  include <ctime>
+#  include <vector>
+#  include "../cxstructs/Geometry.h"
 
 namespace cxstructs {
 template <typename S, typename B>

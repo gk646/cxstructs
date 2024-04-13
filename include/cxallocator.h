@@ -19,7 +19,7 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXALLOCATOR_H_
-#define CXSTRUCTS_SRC_CXALLOCATOR_H_
+#  define CXSTRUCTS_SRC_CXALLOCATOR_H_
 
 /*
 Use the last template option to specify whether to use the allocator or not cxstruct<Type,false>.
@@ -28,9 +28,9 @@ In turn, generally do not use it if it's a temporary or fixed size structure
 In case of slower performance just switch to the other.
  */
 
-#include <deque>
-#include <vector>
-#include "cxconfig.h"
+#  include <deque>
+#  include <vector>
+#  include "cxconfig.h"
 
 namespace cxstructs {
 template <uint_32_cx BlockSize, uint_16_cx ReservedBlocks>
@@ -60,7 +60,7 @@ class Pool {
     }
   }
 
-  void* allocate() {
+  auto allocate() -> void* {
     if (addrs_.empty()) {
       allocateBlock();
     }

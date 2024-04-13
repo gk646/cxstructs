@@ -20,11 +20,11 @@
 #define CX_FINISHED
 
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
 
-#include "../cxconfig.h"
-#include <cmath>
-#include "vec.h"
+#  include "../cxconfig.h"
+#  include <cmath>
+#  include "vec.h"
 
 namespace cxstructs {
 /**
@@ -173,7 +173,7 @@ class mat {
    * @param f a float scalar
    */
   inline void operator*=(const float& f) const {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] *= f;
     }
@@ -210,7 +210,7 @@ class mat {
   };
   inline void operator-=(const mat& o) const {
     CX_ASSERT(o.n_cols_ == n_cols_ || o.n_rows_ == n_rows_, "invalid dimensions");
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] -= o.arr[i];
     }
@@ -325,7 +325,7 @@ class mat {
   }
   template <typename lambda>
   inline void mat_op(lambda l) {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] = l(arr[i]);
     }
@@ -338,7 +338,7 @@ class mat {
    * @param l the function to determine the new value
    */
   inline void mat_op(float (*func)(float)) {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] = func(arr[i]);
     }
@@ -411,7 +411,7 @@ class mat {
    * @param s the scalar
    */
   inline void scale(const float& a) {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] = arr[i] * a;
     }
@@ -537,6 +537,155 @@ class mat {
     ret.scale(2);
     return ret;
   }
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::cout << "MATRIX TESTS" << std::endl;
+    // Test default constructor
+    std::cout << "  Testing default constructor...\n";
+    mat m1;
+    CX_ASSERT(m1.arr == nullptr && m1.n_rows_ == 0 && m1.n_cols_ == 0, "");
+
+    // Test parameterized constructor
+    std::cout << "  Testing parameterized constructor...\n";
+    mat m2(2, 3);
+    CX_ASSERT(m2.n_rows_ == 2 && m2.n_cols_ == 3, "");
+
+    // Test copy constructor
+    std::cout << "  Testing copy constructor...\n";
+    mat m3 = m2;
+    CX_ASSERT(m3.n_rows_ == m2.n_rows_ && m3.n_cols_ == m2.n_cols_, "");
+
+    // Test multiplication and assignment operators
+    std::cout << "  Testing multiplication and assignment operators...\n";
+    mat m4(3, 2);
+    m2 = m2 * m4;
+    CX_ASSERT(m2.n_rows_ == 2 && m2.n_cols_ == 2, "");
+
+    // Test constructor from vector of vectors
+    std::cout << "  Testing constructor from vector of vectors...\n";
+    std::vector<std::vector<float>> data = {{1.0f, 2.0f}, {3.0f, 4.0f}};
+    mat m5(data);
+    CX_ASSERT(m5.n_rows_ == 2 && m5.n_cols_ == 2, "");
+    CX_ASSERT(m5(0, 0) - 1.0f < 1e-6, "");  // Comparing floats with a tolerance
+
+    // Test specific multiplication
+    std::cout << "  Testing specific multiplication...\n";
+    std::vector<std::vector<float>> data1 = {{1.0f, 2.0f}, {3.0f, 4.0f}};
+    std::vector<std::vector<float>> data2 = {{5.0f, 6.0f}, {7.0f, 8.0f}};
+    mat m6(data1);
+    mat m7(data2);
+    mat m8 = m6 * m7;
+    CX_ASSERT(m8(0, 0) - 19.0f < 1e-6, "");
+    CX_ASSERT(m8(0, 1) - 22.0f < 1e-6, "");
+    CX_ASSERT(m8(1, 0) - 43.0f < 1e-6, "");
+    CX_ASSERT(m8(1, 1) - 50.0f < 1e-6, "");
+
+    std::cout << "  Testing equals operator...\n";
+
+    mat m9({{2, 3}, {2, 3}});
+    mat m10({{2, 3}, {2, 3}});
+
+    CX_ASSERT(m9 == m10, "");
+    CX_ASSERT(!(m9 != m10), "");
+    m9(1, 1) = 5;
+    CX_ASSERT(m9 != m10, "");
+    CX_ASSERT(!(m9 == m10), "");
+
+    std::cout << "  Testing transpose...\n";
+    m10 = mat(2, 3);
+    m10(0, 0) = 1;
+    m10(0, 1) = 2;
+    m10(0, 2) = 3;
+    m10(1, 0) = 4;
+    m10(1, 1) = 5;
+    m10(1, 2) = 6;
+
+    mat m1_transpose = m10.transpose();
+
+    CX_ASSERT(m1_transpose.n_rows_ == m10.n_cols_, "");
+    CX_ASSERT(m1_transpose.n_cols_ == m10.n_rows_, "");
+    CX_ASSERT(m1_transpose(0, 0) == m10(0, 0), "");
+    CX_ASSERT(m1_transpose(0, 1) == m10(1, 0), "");
+    CX_ASSERT(m1_transpose(1, 0) == m10(0, 1), "");
+    CX_ASSERT(m1_transpose(2, 0) == m10(0, 2), "");
+    CX_ASSERT(m1_transpose(2, 1) == m10(1, 2), "");
+
+    std::cout << "  Testing assignment and equality...\n";
+    mat m11(2, 2);
+    m11(0, 0) = 1;
+    m11(0, 1) = 2;
+    m11(1, 0) = 3;
+    m11(1, 1) = 4;
+
+    mat m12 = m11;
+
+    CX_ASSERT(m11 == m12, "");
+    CX_ASSERT(!(m11 != m12), "");
+
+    std::cout << "  Testing addition and subtraction...\n";
+    mat m13(2, 2);
+    m13(0, 0) = 1;
+    m13(0, 1) = 2;
+    m13(1, 0) = 3;
+    m13(1, 1) = 4;
+
+    mat m14(2, 2);
+    m14(0, 0) = 5;
+    m14(0, 1) = 6;
+    m14(1, 0) = 7;
+    m14(1, 1) = 8;
+
+    mat m15 = m13 + m14;
+    CX_ASSERT(m15(0, 0) == 6, "");
+    CX_ASSERT(m15(0, 1) == 8, "");
+    CX_ASSERT(m15(1, 0) == 10, "");
+    CX_ASSERT(m15(1, 1) == 12, "");
+
+    mat m16 = m15 - m14;
+    CX_ASSERT(m16 == m13, "");
+
+    std::cout << "  Testing multiplication...\n";
+
+    mat m17(2, 2);
+    m17(0, 0) = 1;
+    m17(0, 1) = 2;
+    m17(1, 0) = 3;
+    m17(1, 1) = 4;
+
+    mat m18(2, 2);
+    m18(0, 0) = 5;
+    m18(0, 1) = 6;
+    m18(1, 0) = 7;
+    m18(1, 1) = 8;
+
+    mat m19 = m17 * m18;
+    CX_ASSERT(m19(0, 0) == 19, "");
+    CX_ASSERT(m19(0, 1) == 22, "");
+    CX_ASSERT(m19(1, 0) == 43, "");
+    CX_ASSERT(m19(1, 1) == 50, "");
+
+    std::cout << "  Testing row and col operations...\n";
+
+    mat m20(2, 2);
+    m20(0, 0) = 1;
+    m20(0, 1) = 2;
+    m20(1, 0) = 3;
+    m20(1, 1) = 4;
+
+    m20.row_op(1, [](uint_32_cx col, float val) { return val * 2; });
+    CX_ASSERT(m20(1, 0) == 6, "");
+    CX_ASSERT(m20(1, 1) == 8, "");
+
+    m20.col_op(0, [](uint_32_cx row, float val) { return val + 1; });
+    CX_ASSERT(m20(0, 0) == 2, "");
+    CX_ASSERT(m20(1, 0) == 7, "");
+
+    std::cout << "  Testing print...\n";
+    m20.print();
+    m20.print("m20");
+    mat mem_leak(20000, 20000);
+  }
+#  endif
 };
 }  // namespace cxstructs
 #endif

@@ -19,10 +19,10 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SORTING_H
-#define CXSTRUCTS_SORTING_H
+#  define CXSTRUCTS_SORTING_H
 
-#include <algorithm>
-#include "../cxconfig.h"
+#  include <algorithm>
+#  include "../cxconfig.h"
 
 namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
@@ -276,4 +276,52 @@ template <typename T>
 void heapSort(T* arr, uint_32_cx len, bool ascending) {}
 
 }  // namespace cxstructs
+#  ifdef CX_INCLUDE_TESTS
+namespace cxtests {
+std::vector<int> generate_shuffled_vector(int size) {
+  std::vector<int> vec(size);
+  std::iota(vec.begin(), vec.end(), 1);  // fill with increasing numbers
+  std::shuffle(vec.begin(), vec.end(), std::mt19937{std::random_device{}()});
+  return vec;
+}
+void CX_ASSERT_sorted(std::vector<int>& vec, bool ascending = true) {
+  for (size_t i = 1; i < vec.size(); i++) {
+    if (ascending) {
+      CX_ASSERT(vec[i - 1] <= vec[i], "");
+    } else {
+      CX_ASSERT(vec[i - 1] >= vec[i], "");
+    }
+  }
+}
+using namespace cxstructs;
+static void TEST_SORTING() {
+  const int SIZE = 10000;
+
+  std::cout << "TESTING BUBBLESORT" << std::endl;
+  std::vector<int> bubble_vec = generate_shuffled_vector(SIZE);
+  bubble_sort(bubble_vec.data(), SIZE);
+  CX_ASSERT_sorted(bubble_vec);
+
+  std::cout << "TESTING QUICKSORT" << std::endl;
+  std::vector<int> quick_vec = generate_shuffled_vector(SIZE);
+  quick_sort(quick_vec.data(), SIZE);
+  CX_ASSERT_sorted(quick_vec);
+
+  std::cout << "TESTING SELECTIONSORT" << std::endl;
+  std::vector<int> selection_vec = generate_shuffled_vector(SIZE);
+  selection_sort(selection_vec.data(), SIZE);
+  CX_ASSERT_sorted(selection_vec);
+
+  std::cout << "TESTING MERGE SORT" << std::endl;
+  std::vector<int> merge_vec = generate_shuffled_vector(SIZE);
+  merge_sort(merge_vec.data(), SIZE);
+  CX_ASSERT_sorted(merge_vec);
+
+  std::cout << "TESTING BOGO SORT" << std::endl;
+  std::vector<int> bogo_vec = generate_shuffled_vector(10);
+  bogo_sort(bogo_vec.data(), 10);
+  CX_ASSERT_sorted(bogo_vec);
+}
+}  // namespace cxtests
+#  endif
 #endif  // CXSTRUCTS_SORTING_H

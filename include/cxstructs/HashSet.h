@@ -19,16 +19,16 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_HASHSET_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_HASHSET_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_HASHSET_H_
 
-#include <cstdint>
-#include <deque>
-#include <functional>
-#include <stdexcept>
-#include <string>
-#include "../cxalgos/MathFunctions.h"
-#include "../cxconfig.h"
-#include "row.h"
+#  include <cstdint>
+#  include <deque>
+#  include <functional>
+#  include <stdexcept>
+#  include <string>
+#  include "../cxalgos/MathFunctions.h"
+#  include "../cxconfig.h"
+#  include "row.h"
 
 namespace cxhelper {  // namespace to hide the classes
 /**
@@ -207,7 +207,7 @@ class HashSet {
     buckets_ = buckets_ * 2;
     auto* newArr = new HList[buckets_];
 
-#pragma omp simd  //single instruction multiple d?
+#  pragma omp simd  //single instruction multiple d?
     for (int i = 0; i < oldBuckets; i++) {
       const auto& data = arr_[i].data_;
       for (uint_fast32_t j = 0; j < BufferLen; j++) {
@@ -253,11 +253,9 @@ class HashSet {
  public:
   explicit HashSet(uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
-        initialCapacity_(next_power_of_2(initialCapacity)),
-        size_(0),
+        initialCapacity_(next_power_of_2(initialCapacity)), size_(0),
         arr_(new HList[next_power_of_2(initialCapacity)]),
-        maxSize(next_power_of_2(initialCapacity) * loadFactor),
-        hash_func_(std::hash<V>()),
+        maxSize(next_power_of_2(initialCapacity) * loadFactor), hash_func_(std::hash<V>()),
         load_factor_(loadFactor) {}
   /**
    * This constructor allows the user to supply their own hash function for the key type
@@ -268,31 +266,21 @@ class HashSet {
 
   explicit HashSet(Hash hash_function, uint_32_cx initialCapacity = 32, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
-        initialCapacity_(next_power_of_2(initialCapacity)),
-        size_(0),
+        initialCapacity_(next_power_of_2(initialCapacity)), size_(0),
         arr_(new HList[next_power_of_2(initialCapacity)]),
-        maxSize(next_power_of_2(initialCapacity) * loadFactor),
-        hash_func_(hash_function),
+        maxSize(next_power_of_2(initialCapacity) * loadFactor), hash_func_(hash_function),
         load_factor_(loadFactor) {}
   HashSet(const HashSet& o)
-      : initialCapacity_(o.initialCapacity_),
-        size_(o.size_),
-        buckets_(o.buckets_),
-        hash_func_(o.hash_func_),
-        maxSize(o.maxSize),
-        load_factor_(o.load_factor_) {
+      : initialCapacity_(o.initialCapacity_), size_(o.size_), buckets_(o.buckets_),
+        hash_func_(o.hash_func_), maxSize(o.maxSize), load_factor_(o.load_factor_) {
     arr_ = new HList[buckets_];
     for (uint_32_cx i = 0; i < buckets_; i++) {
       arr_[i] = o.arr_[i];
     }
   }
   HashSet(HashSet&& o) noexcept
-      : initialCapacity_(o.initialCapacity_),
-        size_(o.size_),
-        buckets_(o.buckets_),
-        hash_func_(std::move(o.hash_func_)),
-        maxSize(o.maxSize),
-        load_factor_(o.load_factor_),
+      : initialCapacity_(o.initialCapacity_), size_(o.size_), buckets_(o.buckets_),
+        hash_func_(std::move(o.hash_func_)), maxSize(o.maxSize), load_factor_(o.load_factor_),
         arr_(o.arr_) {
     o.arr_ = nullptr;
     o.size_ = 0;
@@ -385,6 +373,89 @@ class HashSet {
       reHashSmall();
     }
   }
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::cout << "HASHSET TESTS" << std::endl;
+
+    // Test insert
+    std::cout << "  Testing insertion..." << std::endl;
+    HashSet<int> set1;
+    set1.insert(1);
+    set1.insert(2);
+    CX_ASSERT(set1.contains(1), "");
+    CX_ASSERT(set1.contains(2), "");
+
+    // Test erase
+    std::cout << "  Testing erase method..." << std::endl;
+    set1.erase(1);
+    CX_ASSERT(!set1.contains(1), "");
+
+    // Test copy constructor
+    std::cout << "  Testing copy constructor..." << std::endl;
+    HashSet<int> set2(set1);
+    CX_ASSERT(set2.contains(2), "");
+
+    // Test assignment operator
+    std::cout << "  Testing assignment operator..." << std::endl;
+    HashSet<int> set3;
+    set3 = set1;
+    CX_ASSERT(set3.contains(2), "");
+
+    // Test size
+    std::cout << "  Testing size()..." << std::endl;
+    CX_ASSERT(set1.size() == 1, "");
+    CX_ASSERT(set2.size() == 1, "");
+    CX_ASSERT(set3.size() == 1, "");
+
+    // Test clear
+    std::cout << "  Testing clear method..." << std::endl;
+    set1.clear();
+    CX_ASSERT(set1.size() == 0, "");
+
+    // Test large additions
+    std::cout << "  Testing large additions..." << std::endl;
+    HashSet<int> set4;
+    for (int i = 0; i < 10000; i++) {
+      set4.insert(i);
+    }
+    for (int i = 0; i < 10000; i++) {
+      CX_ASSERT(set4.contains(i), "");
+    }
+
+    // Test move constructor
+    std::cout << "  Testing move constructor..." << std::endl;
+    HashSet<int> set5(std::move(set3));
+    CX_ASSERT(set5.contains(2), "");
+    CX_ASSERT(set3.size() == 0, "");
+
+    // Test move assignment operator
+    std::cout << "  Testing move assignment operator..." << std::endl;
+    HashSet<int> set6;
+    set6 = std::move(set2);
+    CX_ASSERT(set6.contains(2), "");
+    CX_ASSERT(set2.size() == 0, "");
+
+    // Test destructor
+    std::cout << "  Testing destructor indirectly..." << std::endl;
+    {
+      HashSet<int> set7;
+      set7.insert(1);
+    }  // set7 goes out of scope here, its destructor should be called.
+
+    // Stress test
+    std::cout << "  Stress testing..." << std::endl;
+    HashSet<int> set8;
+    for (int i = 0; i < 100000; i++) {
+      set8.insert(i);
+    }
+    for (int i = 0; i < 100000; i += 2) {
+      set8.erase(i);
+    }
+    for (int i = 1; i < 100000; i += 2) {
+      CX_ASSERT(set8.contains(i), "");
+    }
+  };
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_HASHSET_H_

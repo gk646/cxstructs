@@ -19,14 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
-#define CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
+#  define CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
 
-#include "../cxconfig.h"
-#include <cstdlib>
-#include <type_traits>
+#  include "../cxconfig.h"
+#  include <cstdlib>
+#  include <type_traits>
 
 namespace cxstructs {
-
 
 template <typename T>
 inline auto str_parse_token(char** context, char delim) {
@@ -53,7 +52,7 @@ inline auto str_parse_token(char** context, char delim) {
   }
 }
 constexpr auto fnv1a_32(char const* s) noexcept -> uint32_t {
-   uint32_t hash = 2166136261U;
+  uint32_t hash = 2166136261U;
   while (*s != 0) {
     hash ^= (uint32_t)(*s++);
     hash *= 16777619U;
@@ -70,6 +69,16 @@ struct Fnv1aHash {
     return hash;
   }
 };
+#  ifdef CX_INCLUDE_TESTS
+static void TEST_STRING() {
+  char buff[64] = "ParseME|0.3|55|-55|";
+  char* ptr = buff;
+  printf("%s\n", cxstructs::str_parse_token<const char*>(&ptr, '|'));
+  printf("%f\n", cxstructs::str_parse_token<float>(&ptr, '|'));
+  printf("%d\n", cxstructs::str_parse_token<int>(&ptr, '|'));
+  printf("%d\n", cxstructs::str_parse_token<int>(&ptr, '|'));
+}
+#  endif
 
 }  // namespace cxstructs
 
