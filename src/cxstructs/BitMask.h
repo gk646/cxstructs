@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_BITFLAG_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_BITFLAG_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_BITFLAG_H_
 
-#include "../cxconfig.h"
-#include <type_traits>
-#include <initializer_list>
+#  include "../cxconfig.h"
+#  include <type_traits>
+#  include <initializer_list>
 
 namespace cxstructs {
 
@@ -137,7 +137,7 @@ class EnumMask {
   }
 };
 
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
 static void TEST_FLAG_CONTAINERS() {
 
   enum Test { ONE = 1, TWO = 2, THREE = 4 };
@@ -159,7 +159,7 @@ static void TEST_FLAG_CONTAINERS() {
   res = flag.all_of<THREE, TWO>();
   CX_ASSERT(res, "");
 }
-#endif
+#  endif
 
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_BITFLAG_H_

@@ -19,9 +19,9 @@
 // SOFTWARE.
 #define F
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_K_TREE_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_K_TREE_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_K_TREE_H_
 
-#include "../cxconfig.h"
+#  include "../cxconfig.h"
 
 namespace cxstructs {
 class kTree {};

@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
 
-#include "../cxconfig.h"
-#include "../cxutil/cxmath.h"
-#include <algorithm>
+#  include "../cxconfig.h"
+#  include "../cxutil/cxmath.h"
+#  include <algorithm>
 
 namespace cxstructs {
 
@@ -368,8 +368,8 @@ bool Rect::intersects(const Circle& c) const {
   const float closestX = std::clamp(c.x(), x_, x_ + w_);
   const float closestY = std::clamp(c.y(), y_, y_ + h_);
 
-  return ((closestX - c.x()) * (closestX - c.x()) + (closestY - c.y()) * (closestY - c.y())) <=
-         (c.radius() * c.radius());
+  return ((closestX - c.x()) * (closestX - c.x()) + (closestY - c.y()) * (closestY - c.y()))
+         <= (c.radius() * c.radius());
 }
 bool Rect::contains(const Point& p) const {
   return !(x_ > p.x() || y_ > p.y() || x_ + w_ < p.x() || y_ + h_ < p.y());
@@ -407,8 +407,8 @@ struct hash<cxstructs::PointT<int16_t>> {
 template <>
 struct hash<cxstructs::Rect> {
   std::size_t operator()(const cxstructs::Rect& r) const {
-    return static_cast<int>(r.x()) ^ (static_cast<int>(r.y()) << 1) ^ static_cast<int>(r.width()) ^
-           (static_cast<int>(r.height()) << 1);
+    return static_cast<int>(r.x()) ^ (static_cast<int>(r.y()) << 1) ^ static_cast<int>(r.width())
+           ^ (static_cast<int>(r.height()) << 1);
   }
 };
 template <>
@@ -417,7 +417,7 @@ struct hash<cxstructs::Circle> {
     return static_cast<int>(c.x()) ^ (static_cast<int>(c.y()) << 1) ^ static_cast<int>(c.radius());
   }
 };
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
 static void GEOMETRY_TEST() {
   using namespace cxstructs;
   std::cout << "RECTANGLE TESTS" << std::endl;
@@ -525,6 +525,6 @@ static void GEOMETRY_TEST() {
 
   // Point p3 is inside Circle c8
 }
-#endif
+#  endif
 }  // namespace std
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_

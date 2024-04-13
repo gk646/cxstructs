@@ -19,16 +19,16 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_HASHMAP_H
-#define CXSTRUCTS_HASHMAP_H
+#  define CXSTRUCTS_HASHMAP_H
 
-#include <cstdint>
-#include <deque>
-#include <functional>
-#include <stdexcept>
-#include <string>
-#include "../cxalgos/MathFunctions.h"
-#include "../cxconfig.h"
-#include "Pair.h"
+#  include <cstdint>
+#  include <deque>
+#  include <functional>
+#  include <stdexcept>
+#  include <string>
+#  include "../cxalgos/MathFunctions.h"
+#  include "../cxconfig.h"
+#  include "Pair.h"
 
 // HashMap implementation using constant stack arrays as buffer and linked lists
 //already medium well optimized, should perform faster than the std:unordered_map in a lot of scenarios
@@ -295,11 +295,9 @@ class HashMap {
  public:
   explicit HashMap(uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
-        initialCapacity_(next_power_of_2(initialCapacity)),
-        size_(0),
+        initialCapacity_(next_power_of_2(initialCapacity)), size_(0),
         arr_(new HList[next_power_of_2(initialCapacity)]),
-        maxSize(next_power_of_2(initialCapacity) * loadFactor),
-        hash_func_(std::hash<K>()),
+        maxSize(next_power_of_2(initialCapacity) * loadFactor), hash_func_(std::hash<K>()),
         load_factor_(loadFactor) {}
   /**
    * This constructor allows the user to supply their own hash function for the key type
@@ -310,31 +308,21 @@ class HashMap {
 
   explicit HashMap(Hash hash_function, uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
-        initialCapacity_(next_power_of_2(initialCapacity)),
-        size_(0),
+        initialCapacity_(next_power_of_2(initialCapacity)), size_(0),
         arr_(new HList[next_power_of_2(initialCapacity)]),
-        maxSize(next_power_of_2(initialCapacity) * loadFactor),
-        hash_func_(hash_function),
+        maxSize(next_power_of_2(initialCapacity) * loadFactor), hash_func_(hash_function),
         load_factor_(loadFactor) {}
   HashMap(const HashMap<K, V>& o)
-      : initialCapacity_(o.initialCapacity_),
-        size_(o.size_),
-        buckets_(o.buckets_),
-        hash_func_(o.hash_func_),
-        maxSize(o.maxSize),
-        load_factor_(o.load_factor_) {
+      : initialCapacity_(o.initialCapacity_), size_(o.size_), buckets_(o.buckets_),
+        hash_func_(o.hash_func_), maxSize(o.maxSize), load_factor_(o.load_factor_) {
     arr_ = new HList[buckets_];
     for (uint_32_cx i = 0; i < buckets_; i++) {
       arr_[i] = o.arr_[i];
     }
   }
   HashMap(HashMap<K, V>&& o) noexcept
-      : initialCapacity_(o.initialCapacity_),
-        size_(o.size_),
-        buckets_(o.buckets_),
-        hash_func_(std::move(o.hash_func_)),
-        maxSize(o.maxSize),
-        load_factor_(o.load_factor_),
+      : initialCapacity_(o.initialCapacity_), size_(o.size_), buckets_(o.buckets_),
+        hash_func_(std::move(o.hash_func_)), maxSize(o.maxSize), load_factor_(o.load_factor_),
         arr_(o.arr_) {
     o.arr_ = nullptr;
     o.size_ = 0;
@@ -452,7 +440,7 @@ class HashMap {
 
           };
   };
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "HASHMAP TESTS" << std::endl;
     // Test insert and operator[key]
@@ -575,7 +563,7 @@ class HashMap {
       CX_ASSERT(true, "");
     }
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_HASHMAP_H

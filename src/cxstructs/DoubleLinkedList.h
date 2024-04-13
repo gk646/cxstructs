@@ -19,12 +19,12 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTURES_DOUBLELINKEDLIST_H
-#define CXSTRUCTURES_DOUBLELINKEDLIST_H
+#  define CXSTRUCTURES_DOUBLELINKEDLIST_H
 
-#include <algorithm>
+#  include <algorithm>
 
-#include <iostream>
-#include "../cxconfig.h"
+#  include <iostream>
+#  include "../cxconfig.h"
 
 namespace cxhelper {
 template <typename T>
@@ -229,7 +229,7 @@ class DoubleLinkedList {
 
   ReverseIterator begin_re() { return ReverseIterator(end_); }
   ReverseIterator end_re() { return ReverseIterator(nullptr); }
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "DOUBLE LINKED LIST TESTS" << std::endl;
     DoubleLinkedList<int> list1;
@@ -434,7 +434,7 @@ class DoubleLinkedList {
     CX_ASSERT(list14.size() == 0, "");
     CX_ASSERT(list14.begin() == list14.end(), "");
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 

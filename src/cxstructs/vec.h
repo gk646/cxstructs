@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_ARRAYLIST_H
-#define CXSTRUCTS_ARRAYLIST_H
+#  define CXSTRUCTS_ARRAYLIST_H
 
-#include <initializer_list>
-#include "../cxalgos/Sorting.h"
-#include "../cxconfig.h"
+#  include <initializer_list>
+#  include "../cxalgos/Sorting.h"
+#  include "../cxconfig.h"
 
 /*This implementation is well optimized and should generally be a bit faster than the std::vector in a lot of use cases
  * Its using explicit allocator syntax to switch between the default and a custom one
@@ -140,14 +140,12 @@ class vec {
    * @param vector
    */
   explicit vec(const std::vector<T>& vector)
-      : capacity_(vector.size() * 1.5),
-        size_(vector.size()),
+      : capacity_(vector.size() * 1.5), size_(vector.size()),
         arr_(alloc.allocate(vector.size() * 1.5)) {
     std::copy(vector.begin(), vector.end(), arr_);
   }
   explicit vec(const std::vector<T>&& move_vector)
-      : capacity_(move_vector.size() * 1.5),
-        size_(move_vector.size()),
+      : capacity_(move_vector.size() * 1.5), size_(move_vector.size()),
         arr_(alloc.allocate(move_vector.size() * 1.5)) {
     std::move(move_vector.begin(), move_vector.end(), arr_);
   }
@@ -168,8 +166,7 @@ class vec {
    * @param init_list init list elements
    */
   inline vec(std::initializer_list<T> init_list)
-      : size_(init_list.size()),
-        capacity_(init_list.size() * 10),
+      : size_(init_list.size()), capacity_(init_list.size() * 10),
         arr_(alloc.allocate(init_list.size() * 10)) {
     if (std::is_trivial_v<T>) {
       std::copy(init_list.begin(), init_list.end(), arr_);
@@ -340,7 +337,7 @@ class vec {
    * @param e element to be removed
    */
   inline void erase(const T& e) noexcept {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_32_cx i = 0; i < capacity_; i++) {
       if (arr_[i] == e) {
         std::move(arr_ + i + 1, arr_ + size_, arr_ + i);
@@ -621,7 +618,7 @@ class vec {
   inline Iterator begin() { return Iterator(arr_); }
   inline Iterator end() { return Iterator(arr_ + size_); }
 
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "TESTING VEC\n";
 
@@ -778,7 +775,7 @@ class vec {
     CX_ASSERT(list1.size() == 6, "");
     CX_ASSERT(list1[3] == 6, "");
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_ARRAYLIST_H

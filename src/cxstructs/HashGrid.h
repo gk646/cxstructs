@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
 
-#include <unordered_map>
-#include <vector>
-#include "../cxconfig.h"
+#  include <unordered_map>
+#  include <vector>
+#  include "../cxconfig.h"
 
 namespace cxstructs {
 
@@ -46,8 +46,7 @@ struct HashGrid {
 
  public:
   explicit HashGrid(float cellSize, float spaceSize)
-      : cellSize(cellSize),
-        totalSpaceSize(spaceSize),
+      : cellSize(cellSize), totalSpaceSize(spaceSize),
         gridSize(static_cast<size_type>(spaceSize / cellSize)) {
     cells.reserve(gridSize * gridSize);
     cells.max_load_factor(1.0F);
@@ -115,7 +114,7 @@ struct HashGrid {
     cells[getGridID(x, y)].emplace_back(entityID);
   }
 
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     float spaceSize = 100;
     float cellSize = 5;
@@ -139,7 +138,7 @@ struct HashGrid {
     printTime<std::chrono::nanoseconds>("lookup");
     std::cout << coll.size() << std::endl;
   }
-#endif
+#  endif
 };
 
 }  // namespace cxstructs

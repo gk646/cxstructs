@@ -20,11 +20,11 @@
 #define CX_FINISHED
 
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_MAT_H_
 
-#include "../cxconfig.h"
-#include <cmath>
-#include "vec.h"
+#  include "../cxconfig.h"
+#  include <cmath>
+#  include "vec.h"
 
 namespace cxstructs {
 /**
@@ -173,7 +173,7 @@ class mat {
    * @param f a float scalar
    */
   inline void operator*=(const float& f) const {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] *= f;
     }
@@ -210,7 +210,7 @@ class mat {
   };
   inline void operator-=(const mat& o) const {
     CX_ASSERT(o.n_cols_ == n_cols_ || o.n_rows_ == n_rows_, "invalid dimensions");
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] -= o.arr[i];
     }
@@ -325,7 +325,7 @@ class mat {
   }
   template <typename lambda>
   inline void mat_op(lambda l) {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] = l(arr[i]);
     }
@@ -338,7 +338,7 @@ class mat {
    * @param l the function to determine the new value
    */
   inline void mat_op(float (*func)(float)) {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] = func(arr[i]);
     }
@@ -411,7 +411,7 @@ class mat {
    * @param s the scalar
    */
   inline void scale(const float& a) {
-#pragma omp simd linear(i : 1)
+#  pragma omp simd linear(i : 1)
     for (uint_fast32_t i = 0; i < n_rows_ * n_cols_; i++) {
       arr[i] = arr[i] * a;
     }
@@ -537,7 +537,7 @@ class mat {
     ret.scale(2);
     return ret;
   }
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "MATRIX TESTS" << std::endl;
     // Test default constructor
@@ -685,7 +685,7 @@ class mat {
     m20.print("m20");
     mat mem_leak(20000, 20000);
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 #endif

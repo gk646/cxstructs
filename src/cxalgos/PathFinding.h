@@ -19,16 +19,16 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_ASTAR_PATHFINDING_H
-#define CXSTRUCTS_ASTAR_PATHFINDING_H
+#  define CXSTRUCTS_ASTAR_PATHFINDING_H
 
-#include <cstdint>
-#include <queue>
-#include <type_traits>
-#include "../cxconfig.h"
-#include "../cxstructs/Geometry.h"
-#include "../cxstructs/HashSet.h"
-#include "../cxstructs/Pair.h"
-#include "../cxstructs/PriorityQueue.h"
+#  include <cstdint>
+#  include <queue>
+#  include <type_traits>
+#  include "../cxconfig.h"
+#  include "../cxstructs/Geometry.h"
+#  include "../cxstructs/HashSet.h"
+#  include "../cxstructs/Pair.h"
+#  include "../cxstructs/PriorityQueue.h"
 
 namespace cxhelper {
 using namespace cxstructs;
@@ -40,16 +40,10 @@ struct Node {
   Node* parent;
   Node() {}
   Node(const Node& n)
-      : f_cost(n.f_cost),
-        position(n.position),
-        parent(n.parent),
-        h_cost(n.h_cost),
+      : f_cost(n.f_cost), position(n.position), parent(n.parent), h_cost(n.h_cost),
         g_cost(n.g_cost) {}
   Node(Point position, uint16_t g_cost, uint16_t h_cost, Node* parent)
-      : position(position),
-        g_cost(g_cost),
-        h_cost(h_cost),
-        f_cost(g_cost + h_cost),
+      : position(position), g_cost(g_cost), h_cost(h_cost), f_cost(g_cost + h_cost),
         parent(parent) {}
 
   inline bool operator<(const Node& o) const { return f_cost < o.f_cost; }
@@ -109,8 +103,8 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
       int newX = static_cast<int>(current->position.x()) + dir[0];
       int newY = static_cast<int>(current->position.y()) + dir[1];
       Point new_pos(newX, newY);
-      if (newX >= 0 && newY < field.size() && newY >= 0 && newX < field[0].size() &&
-          field[newY][newX] != blocked_val && !closedSet.contains(new_pos)) {
+      if (newX >= 0 && newY < field.size() && newY >= 0 && newX < field[0].size()
+          && field[newY][newX] != blocked_val && !closedSet.contains(new_pos)) {
 
         uint16_t tentative_g_cost = current->g_cost + 1;
         uint16_t h_cost =
@@ -124,7 +118,7 @@ std::vector<Point> astar_pathfinding(const std::vector<std::vector<S>>& field, c
 }
 
 }  // namespace cxstructs
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
 namespace cxtests {  // namespace cxtests
 using namespace cxstructs;
 static void TEST_PATH_FINDING() {
@@ -149,6 +143,6 @@ static void TEST_PATH_FINDING() {
   CX_ASSERT(path[path.size() - 3] == Point(11, 6), "");
 }
 }  // namespace cxtests
-#endif
+#  endif
 
 #endif  //CXSTRUCTS_ASTAR_PATHFINDING_H

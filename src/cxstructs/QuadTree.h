@@ -19,13 +19,12 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_
 
-
-#include "../cxconfig.h"
-#include "Geometry.h"
-#include "vec.h"
-#include <utility>
+#  include "../cxconfig.h"
+#  include "Geometry.h"
+#  include "vec.h"
+#  include <utility>
 
 //used in kNN 2D
 
@@ -164,13 +163,8 @@ class QuadTree {
      * @param max_points maximum amount of points per each node
      */
   explicit QuadTree(Rect initial_bounds, uint_16_cx max_depth = 10, uint_32_cx max_points = 50)
-      : max_depth_(max_depth),
-        max_points_(max_points),
-        bounds_(std::move(initial_bounds)),
-        top_left_(nullptr),
-        top_right_(nullptr),
-        bottom_left_(nullptr),
-        bottom_right_(nullptr){};
+      : max_depth_(max_depth), max_points_(max_points), bounds_(std::move(initial_bounds)),
+        top_left_(nullptr), top_right_(nullptr), bottom_left_(nullptr), bottom_right_(nullptr){};
   QuadTree(const QuadTree&) = delete;
   QuadTree& operator=(const QuadTree&) = delete;
   QuadTree(QuadTree&&) = delete;
@@ -211,9 +205,8 @@ class QuadTree {
           split();
         } else {
           vec_.push_back(e);
-          CX_WARNING(false,
-                     "|QuadTree.h| Reached max depth | large insertions now will slow "
-                     "down the tree");
+          CX_WARNING(false, "|QuadTree.h| Reached max depth | large insertions now will slow "
+                            "down the tree");
           return;
         }
       }
@@ -310,7 +303,7 @@ class QuadTree {
   inline void set_bounds(const Rect& new_bound) noexcept { bounds_ = new_bound; }
   [[nodiscard]] inline const Rect& get_bounds() const noexcept { return bounds_; }
   class Iterator {};
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -347,7 +340,7 @@ class QuadTree {
       CX_ASSERT(*ptr == Point(2, 2), "");
     }
   }
-#endif
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_QUADTREE_H_

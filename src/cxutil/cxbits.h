@@ -19,12 +19,12 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXBITS_H_
-#define CXSTRUCTS_SRC_CXUTIL_CXBITS_H_
+#  define CXSTRUCTS_SRC_CXUTIL_CXBITS_H_
 
-#include "../cxconfig.h"
-#include <cstdlib>
-#include <print>
-#include <type_traits>  //For type traits
+#  include "../cxconfig.h"
+#  include <cstdlib>
+#  include <print>
+#  include <type_traits>  //For type traits
 
 //Assumes little endian for all operations
 
@@ -200,7 +200,7 @@ constexpr auto bits_get(T num, uint8_t off = 0) -> R {
   return static_cast<R>(num >> off);
 }
 
-#ifdef CX_INCLUDE_TESTS
+#  ifdef CX_INCLUDE_TESTS
 static void TEST_BITS() {
   CX_ASSERT(bits_concat(0x1, 0x01) == 4294967297, "");
   CX_ASSERT(bits_concat(0x0, 0x01) == 4294967296, "");
@@ -222,8 +222,8 @@ static void TEST_BITS() {
   //CX_ASSERT(concat(static_cast<int8_t>(-1), static_cast<int8_t>(-1)) == static_cast<int16_t>(-1), "Concatenation of max int8_t failed.");
 
   bits_print(bits_concat(0b0001, 0b0001));
-  CX_ASSERT(bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 0) ==
-                bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 32),
+  CX_ASSERT(bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 0)
+                == bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 32),
             "");
   uint16_t bla = 1;
   uint16_t a = 257;
@@ -234,7 +234,7 @@ static void TEST_BITS() {
   auto res = bits_concat_ex<uint16_t, uint16_t, 4>(1, 1);
   bits_print(res);
 }
-#endif
+#  endif
 
 }  // namespace cxstructs
 

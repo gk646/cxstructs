@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
-#define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
+#  define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 
-#include "../cxconfig.h"
+#  include "../cxconfig.h"
 
-#ifndef CX_LOOP_FNN
+#  ifndef CX_LOOP_FNN
 
-#pragma message("|FNN.h| Using Matrices for calculations. '#define CX_LOOP_FNN' to switch")
+#    pragma message("|FNN.h| Using Matrices for calculations. '#define CX_LOOP_FNN' to switch")
 
 namespace cxhelper {
 using namespace cxstructs;
@@ -44,14 +44,8 @@ struct Layer {
 
  public:
   Layer()
-      : weights_(),
-        bias_(),
-        w_sums_(),
-        in_(0),
-        out_(0),
-        a_func(cxstructs::relu),
-        d_func(cxstructs::d_relu),
-        learnR_(0.5) {}
+      : weights_(), bias_(), w_sums_(), in_(0), out_(0), a_func(cxstructs::relu),
+        d_func(cxstructs::d_relu), learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), learnR_(learnR), inputs_(1, in), a_func(a_func) {
     if (a_func == cxstructs::relu) {
@@ -183,8 +177,8 @@ class FNN {
   }
   vec<float> get_weights(int layer, int row) { return layers_[layer].weights_.get_row(row); }
 
-#ifdef CX_INCLUDE_TESTS
-#include "../cxutil/cxtime.h"
+#    ifdef CX_INCLUDE_TESTS
+#      include "../cxutil/cxtime.h"
   static void TEST() {
     std::cout << "TESTING FNN" << std::endl;
 
@@ -202,12 +196,12 @@ class FNN {
       }
     }
   }
-#endif
+#    endif
 };
 }  // namespace cxstructs
 
-#else
-#pragma message("|FNN.h| Using FNN.h without matrices, calculations are loop based.")
+#  else
+#    pragma message("|FNN.h| Using FNN.h without matrices, calculations are loop based.")
 namespace cxhelper {
 struct Layer {
   float* weights_;
@@ -222,14 +216,8 @@ struct Layer {
 
  public:
   Layer()
-      : weights_(nullptr),
-        bias_(nullptr),
-        w_sums_(nullptr),
-        in_(0),
-        out_(0),
-        a_func(cxstructs::relu),
-        d_func(cxstructs::d_relu),
-        learnR_(0.5) {}
+      : weights_(nullptr), bias_(nullptr), w_sums_(nullptr), in_(0), out_(0),
+        a_func(cxstructs::relu), d_func(cxstructs::d_relu), learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), a_func(a_func), learnR_(learnR), inputs_(in) {
     if (a_func == cxstructs::relu) {
@@ -257,10 +245,7 @@ struct Layer {
     }
   }
   Layer(const Layer& other)
-      : in_(other.in_),
-        out_(other.out_),
-        a_func(other.a_func),
-        learnR_(other.learnR_),
+      : in_(other.in_), out_(other.out_), a_func(other.a_func), learnR_(other.learnR_),
         inputs_(other.inputs_) {
     weights_ = new float[in_ * out_];
     bias_ = new float[out_];
@@ -393,8 +378,8 @@ cxstructs {
       }
     }
 
-#ifdef CX_INCLUDE_TESTS
-#include "../cxutil/cxtime.h"
+#    ifdef CX_INCLUDE_TESTS
+#      include "../cxutil/cxtime.h"
     static void TEST() {
       std::cout << "TESING FNN" << std::endl;
 
@@ -413,10 +398,10 @@ cxstructs {
         }
       }
     }
-#endif
+#    endif
   };
 }  // cxstructs
 
-#endif  // CX_LOOP_FNN
-#undef CX_MATRIX
+#  endif  // CX_LOOP_FNN
+#  undef CX_MATRIX
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
