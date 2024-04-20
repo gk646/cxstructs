@@ -127,6 +127,15 @@ constexpr auto clamp(T val, T low, T high) -> T
   return val;
 }
 
+template <typename T, typename U>
+T lerp(T value, T minOld, T maxOld, U minNew, U maxNew) {
+  return (static_cast<double>(value - minOld) /
+          static_cast<double>(maxOld - minOld)) *
+             (maxNew - minNew) +
+         minNew;
+}
+
+
 //-----------DISTANCE-----------//
 inline auto euclidean(float p1x, float p1y, float p2x, float p2y) noexcept -> float {
   return fast_sqrt((p2x - p1x) * (p2x - p1x) + (p2y - p1y) * (p2y - p1y));
