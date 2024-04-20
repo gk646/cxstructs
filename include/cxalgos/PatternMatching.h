@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_ALGORITHMS_PATTERNMATCHING_H_
-#define CXSTRUCTS_SRC_ALGORITHMS_PATTERNMATCHING_H_
+#  define CXSTRUCTS_SRC_ALGORITHMS_PATTERNMATCHING_H_
 
-#include <algorithm>
-#include <string>
-#include "../cxconfig.h"
+#  include <algorithm>
+#  include <string>
+#  include "../cxconfig.h"
 
 namespace cxhelper {
 
@@ -148,8 +148,8 @@ inline int findString_Boyer_Moore(const std::string& text, const std::string& pa
   //produce bad character table
   for (uint_32_cx i = 0; i < len; i++) {
     bad_char[static_cast<uint8_t>(pattern[i]) & 0x7F] =
-        len - 1 -
-        i;  //cast number to 0-256 and bitwise and with 01111111 to zero the first bit / from my Trie implementation
+        len - 1
+        - i;  //cast number to 0-256 and bitwise and with 01111111 to zero the first bit / from my Trie implementation
   }
 
   auto* good_suffix = new int[len];  //dynamic array

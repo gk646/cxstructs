@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
-#define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
+#  define CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_
 
-#include "../cxconfig.h"
+#  include "../cxconfig.h"
 
-#ifndef CX_LOOP_FNN
+#  ifndef CX_LOOP_FNN
 
-#pragma message("|FNN.h| Using Matrices for calculations. '#define CX_LOOP_FNN' to switch")
+#    pragma message("|FNN.h| Using Matrices for calculations. '#define CX_LOOP_FNN' to switch")
 
 namespace cxhelper {
 using namespace cxstructs;
@@ -44,14 +44,8 @@ struct Layer {
 
  public:
   Layer()
-      : weights_(),
-        bias_(),
-        w_sums_(),
-        in_(0),
-        out_(0),
-        a_func(cxstructs::relu),
-        d_func(cxstructs::d_relu),
-        learnR_(0.5) {}
+      : weights_(), bias_(), w_sums_(), in_(0), out_(0), a_func(cxstructs::relu),
+        d_func(cxstructs::d_relu), learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), learnR_(learnR), inputs_(1, in), a_func(a_func) {
     if (a_func == cxstructs::relu) {
@@ -183,11 +177,31 @@ class FNN {
   }
   vec<float> get_weights(int layer, int row) { return layers_[layer].weights_.get_row(row); }
 
+#    ifdef CX_INCLUDE_TESTS
+#      include "../cxutil/cxtime.h"
+  static void TEST() {
+    std::cout << "TESTING FNN" << std::endl;
+
+    mat inputs = {{1, 0}, {1, 1}, {0, 1}, {0, 0}};
+    std::vector<std::vector<float>> init_vec = {{1}, {0}, {1}, {0}};
+    cxstructs::mat expected_outputs(init_vec);
+
+    for (int i = 0; i < 5; ++i) {
+      FNN fnn({2, 2, 1}, cxstructs::sig, 0.1);
+      fnn.train(inputs, expected_outputs, 50000);
+      mat output = fnn.forward(inputs);
+      output -= expected_outputs;
+      for (size_t j = 0; j < inputs.n_rows(); ++j) {
+        CX_ASSERT(output(0, j) < 0.1, "");
+      }
+    }
+  }
+#    endif
 };
 }  // namespace cxstructs
 
-#else
-#pragma message("|FNN.h| Using FNN.h without matrices, calculations are loop based.")
+#  else
+#    pragma message("|FNN.h| Using FNN.h without matrices, calculations are loop based.")
 namespace cxhelper {
 struct Layer {
   float* weights_;
@@ -202,14 +216,8 @@ struct Layer {
 
  public:
   Layer()
-      : weights_(nullptr),
-        bias_(nullptr),
-        w_sums_(nullptr),
-        in_(0),
-        out_(0),
-        a_func(cxstructs::relu),
-        d_func(cxstructs::d_relu),
-        learnR_(0.5) {}
+      : weights_(nullptr), bias_(nullptr), w_sums_(nullptr), in_(0), out_(0),
+        a_func(cxstructs::relu), d_func(cxstructs::d_relu), learnR_(0.5) {}
   Layer(uint_16_cx in, uint_16_cx out, func a_func, float learnR)
       : in_(in), out_(out), a_func(a_func), learnR_(learnR), inputs_(in) {
     if (a_func == cxstructs::relu) {
@@ -237,10 +245,7 @@ struct Layer {
     }
   }
   Layer(const Layer& other)
-      : in_(other.in_),
-        out_(other.out_),
-        a_func(other.a_func),
-        learnR_(other.learnR_),
+      : in_(other.in_), out_(other.out_), a_func(other.a_func), learnR_(other.learnR_),
         inputs_(other.inputs_) {
     weights_ = new float[in_ * out_];
     bias_ = new float[out_];
@@ -373,9 +378,30 @@ cxstructs {
       }
     }
 
+#    ifdef CX_INCLUDE_TESTS
+#      include "../cxutil/cxtime.h"
+    static void TEST() {
+      std::cout << "TESING FNN" << std::endl;
+
+      const std::vector<std::vector<float>> inputs = {{1, 0}, {1, 1}, {0, 1}, {0, 0}};
+      const std::vector<std::vector<float>> expected_outputs = {{1}, {0}, {1}, {0}};
+
+      for (int i = 0; i < 10; ++i) {
+        FNN fnn({2, 2, 1}, cxstructs::sig, 0.16);
+        cxstructs::now();
+        fnn.train(inputs, expected_outputs, 50000);
+        cxstructs::printTime();
+        for (size_t j = 0; j < inputs.size(); ++j) {
+          double output = fnn.forward(inputs[j])[0];
+          double expected = expected_outputs[j][0];
+          CX_ASSERT(output - expected < 0.1, "");
+        }
+      }
+    }
+#    endif
   };
 }  // cxstructs
 
-#endif  // CX_LOOP_FNN
-#undef CX_MATRIX
+#  endif  // CX_LOOP_FNN
+#  undef CX_MATRIX
 #endif  //CXSTRUCTS_SRC_MACHINELEARNING_FNN_H_

@@ -19,41 +19,67 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
-#define CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
+#  define CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
 
 //Links provided without warranty of function, implied ownership or support of the linked website
 
 //Extensive ranking of header compile times
 //https://artificial-mind.net/projects/compile-health/
 
+// -----------------------------------------------------------------------------
+// Coding Guidelines
+// -----------------------------------------------------------------------------
+
+// === Explicit is better than implicit ========================================
+
+// === Use 'const' and 'constexpr' =============================================
+// Use `const` and `constexpr` where possible to enforce immutability and
+// compile-time evaluation.
+
+// === Use extra variables  ===============================
+// Try to keep each code line without line breaks for readability
+// Introduce variables if necessary
+// Example:
+//   const auto dx = 5;
+//   const auto dy = 10;
+//   DrawText(dx, dy, "Text");
+
+// === Use constexpr for constants =============================================
+// Avoid magic numbers by using `constexpr` for constants within functions (and classes).
+// Example:
+//   constexpr int Threshold = 42;
+//   if (value > Threshold) { ... }
+
+// === Use anonymous namespaces for internal linkage ===========================
+// Hide functions not meant to be used outside this file within anonymous namespaces.
+// Example:
+//   namespace {
+//       inline void DoSomething() {}
+//   }
+//   void MyFunction() {
+//       DoSomething();
+//   }
+
+// === Modern C++ features =====================================================
+// Try to use modern C++ features for safer and more readable code.
+// Example:
+//   std::print({}, 3.0F);  // instead of printf("%.f", 3.0F);
+
+// === Naming Conventions ======================================================
+// - Lower-level code: Use snake_case.
+// vector::push_back();       // STL-like API
 //
-// Tips:
-//
-/// 1. Explicit is better than implicit (constructors)
-//
-/// 2. Use const when you can
-//
-/// 3. Use extra variables to keep every code line without line breaks
-// const auto dx = 5;
-// const auto dy = 10;
-// DrawText(dx,dy,"Text");
-//
-/// 4. Use constexpr for inside function constants
-//  constexpr int threshHold = 42;
-//  if(val > threshHold){}
-//
-/// 5. Use anonymous namespace for internal linked function
-//
-// namespace{
-// inline DoSomething(Foo bar){}
-// }
-//
-// DoSomething(myBar)
-//
-///6. Use modern C++ features (generally)
-//
-// std::print({},3.0F); //instead of printf(%.f,3.0F);
-//
+// - Application-level code: Use camelCase.
+//   class MyClass{
+//      float myMember;
+//      std::string anotherMember;
+//   }
+//   MyClass myObject;
+//   myObject.myFunction();
+
+// === Prefer formatting that reduces line count ===============================
+// Use formatting plugins like .clang-format
+// Less lines means less to read
 //
 
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_

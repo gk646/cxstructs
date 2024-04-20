@@ -19,10 +19,10 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_BINARYSEARCH_H
-#define CXSTRUCTS_BINARYSEARCH_H
+#  define CXSTRUCTS_BINARYSEARCH_H
 
-#include <cstdint>
-#include "../cxconfig.h"
+#  include <cstdint>
+#  include "../cxconfig.h"
 
 namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
@@ -121,4 +121,23 @@ int binary_search_index(T* arr, T target, int_32_cx len, bool ascending) {
 }
 
 }  // namespace cxstructs
+#  ifdef CX_INCLUDE_TESTS
+namespace cxtests {
+using namespace cxstructs;
+static void TEST_SEARCH() {
+  std::cout << "TESTING BINARY SEARCH" << std::endl;
+  int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CX_ASSERT(binary_search(arr, 5, 9) == true, "");
+  CX_ASSERT(binary_search(arr, -1, 9) == false, "");
+
+  std::cout << "TESTING BINARY SEARCH RECURSIVE" << std::endl;
+  CX_ASSERT(binary_search_recursive(arr, 5, 9) == true, "");
+  CX_ASSERT(binary_search_recursive(arr, -1, 9) == false, "");
+
+  std::cout << "TESTING BINARY SEARCH INDEX" << std::endl;
+  CX_ASSERT(binary_search_index(arr, 7, 9, true) == 6, "");
+  CX_ASSERT(binary_search_index(arr, 2, 9, true) == 1, "");
+}
+}  // namespace cxtests
+#  endif
 #endif  // CXSTRUCTS_BINARYSEARCH_H

@@ -19,20 +19,20 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_TRIE_H
-#define CXSTRUCTS_TRIE_H
+#  define CXSTRUCTS_TRIE_H
 
-#pragma message( \
-    "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!")
+#  pragma message(                                                                                 \
+      "|Trie.h| Using non ASCII characters won't throw an error but result in unintentional behavior!")
 
-#include <algorithm>
-#include <array>
-#include <cstring>
-#include <deque>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
-#include "../cxconfig.h"
+#  include <algorithm>
+#  include <array>
+#  include <cstring>
+#  include <deque>
+#  include <iostream>
+#  include <memory>
+#  include <string>
+#  include <vector>
+#  include "../cxconfig.h"
 
 namespace cxhelper {
 struct TrieNode {
@@ -196,6 +196,22 @@ class Trie {
    * Removes the given word from the trie
    */
   void remove(const std::string& s) { size_--; }
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::cout << "TESTING TRIE" << std::endl;
+
+    std::cout << "   Testing insertion..." << std::endl;
+
+    Trie trie;
+    trie.insert("hello");
+
+    std::cout << "   Testing contained..." << std::endl;
+    CX_ASSERT(trie.contains("hello") == true, "");
+    CX_ASSERT(trie.contains("helloh") == false, "");
+    std::cout << "   Testing startsWith..." << std::endl;
+    CX_ASSERT(trie.startsWith("he")[0] == "hello", "");
+  }
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_TRIE_H

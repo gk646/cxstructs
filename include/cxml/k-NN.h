@@ -19,15 +19,15 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
-#define CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
+#  define CXSTRUCTS_SRC_MACHINELEARNING_K_NN_H_
 
-#include <exception>
-#include <vector>
-#include "../cxconfig.h"
-#include "../cxstructs/Geometry.h"
-#include "../cxstructs/HashMap.h"
-#include "../cxstructs/QuadTree.h"
-#include "../cxstructs/row.h"
+#  include <exception>
+#  include <vector>
+#  include "../cxconfig.h"
+#  include "../cxstructs/Geometry.h"
+#  include "../cxstructs/HashMap.h"
+#  include "../cxstructs/QuadTree.h"
+#  include "../cxstructs/row.h"
 /**
  * <h2>k-Nearest Neighbour</h2>
  *
@@ -229,6 +229,62 @@ class kNN_2D {
 
     return Category(index);
   }
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    enum Category { A, B, C };
+    struct DataPoint : public DataPoint_<Category> {
+      Category category;
+      float x_;
+      float y_;
+      float weight = 1;
+      DataPoint() {}
+      DataPoint(float x, float y, Category category) : x_(x), y_(y), category(category) {}
+      float x() const final { return x_; }
+      float y() const final { return y_; }
+      Category getCategory() final { return category; }
+      float getWeight() const final { return weight; }
+    };
+
+    std::cout << "TESTING k-NN" << std::endl;
+
+    std::vector<DataPoint> data{};
+    data.emplace_back(1, 2, Category::A);
+    data.emplace_back(2, 3, Category::A);
+    data.emplace_back(3, 4, Category::A);
+    data.emplace_back(4, 5, Category::B);
+    data.emplace_back(5, 6, Category::B);
+    data.emplace_back(6, 7, Category::B);
+    data.emplace_back(7, 8, Category::C);
+    data.emplace_back(8, 9, Category::C);
+    data.emplace_back(9, 10, Category::C);
+    Category cat1;
+    kNN_2D<DataPoint> knn(data, DISTANCE_FUNCTION_2D::EUCLIDEAN);
+
+    std::cout << "   Testing absolute classification" << std::endl;
+    cat1 = knn.classify_by_category_count(0, 0, 4);
+    CX_ASSERT((int)cat1 == 0, "");
+    cat1 = knn.classify_by_category_count(5, 5, 4);
+    CX_ASSERT((int)cat1 == 1, "");
+
+    std::cout << "   Testing distance weighted classification" << std::endl;
+    cat1 = knn.classify_by_sum_distance(0, 0, 4);
+    CX_ASSERT((int)cat1 == 0, "");
+    cat1 = knn.classify_by_sum_distance(5, 5, 4);
+    CX_ASSERT((int)cat1 == 1, "");
+
+    std::cout << "   Testing weight classification" << std::endl;
+    cat1 = knn.classify_by_sum_weight(0, 0, 4);
+    CX_ASSERT((int)cat1 == 0, "");
+    cat1 = knn.classify_by_sum_weight(5, 5, 4);
+    CX_ASSERT((int)cat1 == 1, "");
+
+    std::cout << "   Testing weighted * dist classification" << std::endl;
+    cat1 = knn.classify_by_sum_weighted_distance(0, 0, 4);
+    CX_ASSERT((int)cat1 == 0, "");
+    cat1 = knn.classify_by_sum_weighted_distance(5, 5, 4);
+    CX_ASSERT((int)cat1 == 1, "");
+  }
+#  endif
 };
 
 class kNN_XD {

@@ -19,17 +19,17 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXGRAPHICS_H_
-#define CXSTRUCTS_SRC_CXUTIL_CXGRAPHICS_H_
+#  define CXSTRUCTS_SRC_CXUTIL_CXGRAPHICS_H_
 
-#include "../cxconfig.h"
-#include "../cxstructs/Geometry.h"
-#include "../cxstructs/QuadTree.h"
+#  include "../cxconfig.h"
+#  include "../cxstructs/Geometry.h"
+#  include "../cxstructs/QuadTree.h"
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <functional>
-#include <utility>
+#  ifdef _WIN32
+#    define WIN32_LEAN_AND_MEAN
+#    include <windows.h>
+#    include <functional>
+#    include <utility>
 
 namespace cxstructs {
 class GraphicsWindow {
@@ -231,12 +231,21 @@ class GraphicsWindow {
     ReleaseDC(hwnd_, hdc);
   }
 };
-#undef max
-#undef min
-#else
-#pragma("Graphics support only for Windows")
+#    undef max
+#    undef min
+#  else
+#    pragma("Graphics support only for Windows")
 //#include <X11/Xlib.h>
-#endif
+#  endif
 
+#  ifdef CX_INCLUDE_TESTS
+static void TEST() {
+  std::vector<Point> p{{2, 2}, {40, 40}, {2, 3}, {5, 6}, {10, 15}, {25, 25}};
+  GraphicsWindow win(800, 800, [&p](GraphicsWindow& win) {
+    win.clear();
+    win.drawPointsWithAxis(p);
+  });
+}
+#  endif
 }
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXGRAPHICS_H_
