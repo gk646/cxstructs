@@ -34,7 +34,7 @@ inline chrono::time_point<chrono::high_resolution_clock> checkpoints[MAX_CHECKPO
  * Sets the activeTimeStamp or alternatively the time of a checkpoint
  * @param checkpoint (optional, max=2) the checkpoint to set the current time
  */
-inline void now(int checkpoint = 0) {
+inline void now(const int checkpoint = 0) {
   checkpoints[checkpoint] = std::chrono::high_resolution_clock::now();
 }
 
@@ -62,7 +62,7 @@ inline auto get_duration_unit<std::chrono::duration<double>>() -> const char* {
 }
 
 template <typename DurationType = std::chrono::duration<double>>
-inline void printTime(const char* prefix = nullptr, int checkpoint = 0) {
+void printTime(const char* prefix = nullptr, const int checkpoint = 0) {
   const auto diff = std::chrono::high_resolution_clock::now() - checkpoints[checkpoint];
   const auto diffInDesiredUnits = std::chrono::duration_cast<DurationType>(diff);
 
@@ -80,7 +80,7 @@ inline void printTime(const char* prefix = nullptr, int checkpoint = 0) {
 #  endif
 }
 template <typename DurationType = std::chrono::duration<double>>
-inline long long getTime(int checkpoint = 0) {
+auto getTime(const int checkpoint = 0) -> long long {
   const auto diff = std::chrono::high_resolution_clock::now() - checkpoints[checkpoint];
   auto diffInDesiredUnits = std::chrono::duration_cast<DurationType>(diff);
   return diffInDesiredUnits.count();

@@ -26,6 +26,9 @@
 //Extensive ranking of header compile times
 //https://artificial-mind.net/projects/compile-health/
 
+//Very good resources and presentations
+//https://www.gameenginebook.com/coursemat.html
+
 // -----------------------------------------------------------------------------
 // Coding Guidelines
 // -----------------------------------------------------------------------------
@@ -66,10 +69,10 @@
 //   std::print({}, 3.0F);  // instead of printf("%.f", 3.0F);
 
 // === Naming Conventions ======================================================
-// - Lower-level code: Use snake_case.
-// vector::push_back();       // STL-like API
+// Lower-level code: Use snake_case.
+//    vector::push_back();       // STL-like API
 //
-// - Application-level code: Use camelCase.
+// Application-level code: Use camelCase.
 //   class MyClass{
 //      float myMember;
 //      std::string anotherMember;
@@ -81,5 +84,20 @@
 // Use formatting plugins like .clang-format
 // Less lines means less to read
 //
+
+// === Always group logically =====================================
+// Keep the same order of arguments inside an interface
+// This include Types
+//    MyAPI::DoWork(Context& c, int myArg);
+//    MyAPI::DoWork2(Context& c, float myArg);
+//
+// but could extend to:
+//    - complex types first
+//    - ...
+//
+// Also sort variable declarations logically where applicable (inside functions)
+//
+
+
 
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_

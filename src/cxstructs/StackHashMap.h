@@ -23,6 +23,7 @@
 
 #  include "../cxconfig.h"
 #  include <bitset>  //For std::bitset<N> and std::hash<K>
+#  include <initializer_list>
 
 //Memory footprint is still quite big
 //Using std::bitset<> saves memory but is a bit slower
@@ -152,6 +153,12 @@ class StackHashMap {
 
  public:
   StackHashMap() = default;
+
+  StackHashMap(std::initializer_list<std::pair<K, V>> list) {
+    for (const auto& elem : list) {
+      insert(elem.first, elem.second);
+    }
+  }
 
   StackHashMap(const StackHashMap& other) {
     if constexpr (std::is_trivial_v<K> && std::is_trivial_v<V>) {
