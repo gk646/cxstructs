@@ -36,9 +36,40 @@ class StackVector {
 
   explicit StackVector(size_type elems) : size_(elems) {}
 
-  StackVector(const StackVector&) = delete;
+  StackVector(const StackVector& other) : size_(other.size_) {
+    if constexpr (std::is_trivially_copyable_v<T>) {
+      std::memcpy(data_, other.data_, other.size_ * sizeof(T));
+    } else {
+      for (size_type i = 0; i < other.size_; ++i) {
+        new (data_ + i) T(other.data_[i]);  // Copy construct T
+      }
+    }
+  }
 
-  StackVector& operator=(const StackVector&) = delete;
+  StackVector& operator=(const StackVector& other) {
+    if (this != &other) {
+      if constexpr (std::is_trivially_copyable_v<T> && std::is_trivially_destructible_v<T>) {
+        std::memcpy(data_, other.data_, other.size_ * sizeof(T));
+        size_ = other.size_;
+      } else {
+        // Properly handle existing elements
+        if (other.size_ < size_) {
+          // Destroy extra elements
+          for (size_type i = other.size_; i < size_; ++i) {
+            data_[i].~T();
+          }
+        }
+        for (size_type i = 0; i < other.size_ && i < size_; ++i) {
+          data_[i] = other.data_[i];  // Copy assignment of T
+        }
+        for (size_type i = size_; i < other.size_; ++i) {
+          new (data_ + i) T(other.data_[i]);  // Copy construct T
+        }
+        size_ = other.size_;
+      }
+    }
+    return *this;
+  }
 
   StackVector(StackVector&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
       : size_(other.size_) {
@@ -127,6 +158,8 @@ class StackVector {
 
   [[nodiscard]] auto size() const -> size_type { return size_; }
 
+  [[nodiscard]] constexpr auto capacity() const -> size_type { return N; }
+
   [[nodiscard]] auto empty() const -> bool { return size_ == 0; }
 
   [[nodiscard]] auto full() const -> bool { return size_ == N; }
@@ -203,6 +236,21 @@ class StackVector {
 
   using Iterator = IteratorTemplate<T>;
   using ConstIterator = IteratorTemplate<const T>;
+
+  Iterator erase(Iterator pos) {
+    auto posPtr = &(*pos);
+    size_type index = posPtr - &(*begin());
+
+    std::move(posPtr + 1, &(*end()), posPtr);
+
+    if constexpr (!std::is_trivially_destructible_v<T>) {
+      data_[size_ - 1].~T();
+    }
+
+    --size_;
+
+    return Iterator(data_ + index);
+  }
 
   auto begin() const -> ConstIterator { return ConstIterator(&data_[0]); }
 

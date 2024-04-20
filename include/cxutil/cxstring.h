@@ -28,7 +28,7 @@
 namespace cxstructs {
 
 template <typename T>
-inline auto str_parse_token(char** context, char delim) {
+auto str_parse_token(char** context, const char delim) {
   const char* start = *context;
   while (**context != '\0' && **context != delim) {
     (*context)++;
