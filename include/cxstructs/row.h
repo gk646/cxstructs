@@ -19,12 +19,12 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_ROW_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_ROW_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_ROW_H_
 
-#include <algorithm>
-#include <cstdint>
-#include <type_traits>
-#include "../cxconfig.h"
+#  include <algorithm>
+#  include <cstdint>
+#  include <type_traits>
+#  include "../cxconfig.h"
 
 namespace cxstructs {
 

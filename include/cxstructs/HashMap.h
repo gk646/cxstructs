@@ -19,16 +19,16 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_HASHMAP_H
-#define CXSTRUCTS_HASHMAP_H
+#  define CXSTRUCTS_HASHMAP_H
 
-#include <cstdint>
-#include <deque>
-#include <functional>
-#include <stdexcept>
-#include <string>
-#include "../cxalgos/MathFunctions.h"
-#include "../cxconfig.h"
-#include "Pair.h"
+#  include <cstdint>
+#  include <deque>
+#  include <functional>
+#  include <stdexcept>
+#  include <string>
+#  include "../cxalgos/MathFunctions.h"
+#  include "../cxconfig.h"
+#  include "Pair.h"
 
 // HashMap implementation using constant stack arrays as buffer and linked lists
 //already medium well optimized, should perform faster than the std:unordered_map in a lot of scenarios
@@ -295,11 +295,9 @@ class HashMap {
  public:
   explicit HashMap(uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
-        initialCapacity_(next_power_of_2(initialCapacity)),
-        size_(0),
+        initialCapacity_(next_power_of_2(initialCapacity)), size_(0),
         arr_(new HList[next_power_of_2(initialCapacity)]),
-        maxSize(next_power_of_2(initialCapacity) * loadFactor),
-        hash_func_(std::hash<K>()),
+        maxSize(next_power_of_2(initialCapacity) * loadFactor), hash_func_(std::hash<K>()),
         load_factor_(loadFactor) {}
   /**
    * This constructor allows the user to supply their own hash function for the key type
@@ -310,31 +308,21 @@ class HashMap {
 
   explicit HashMap(Hash hash_function, uint_32_cx initialCapacity = 64, float loadFactor = 0.9)
       : buckets_(next_power_of_2(initialCapacity)),
-        initialCapacity_(next_power_of_2(initialCapacity)),
-        size_(0),
+        initialCapacity_(next_power_of_2(initialCapacity)), size_(0),
         arr_(new HList[next_power_of_2(initialCapacity)]),
-        maxSize(next_power_of_2(initialCapacity) * loadFactor),
-        hash_func_(hash_function),
+        maxSize(next_power_of_2(initialCapacity) * loadFactor), hash_func_(hash_function),
         load_factor_(loadFactor) {}
   HashMap(const HashMap<K, V>& o)
-      : initialCapacity_(o.initialCapacity_),
-        size_(o.size_),
-        buckets_(o.buckets_),
-        hash_func_(o.hash_func_),
-        maxSize(o.maxSize),
-        load_factor_(o.load_factor_) {
+      : initialCapacity_(o.initialCapacity_), size_(o.size_), buckets_(o.buckets_),
+        hash_func_(o.hash_func_), maxSize(o.maxSize), load_factor_(o.load_factor_) {
     arr_ = new HList[buckets_];
     for (uint_32_cx i = 0; i < buckets_; i++) {
       arr_[i] = o.arr_[i];
     }
   }
   HashMap(HashMap<K, V>&& o) noexcept
-      : initialCapacity_(o.initialCapacity_),
-        size_(o.size_),
-        buckets_(o.buckets_),
-        hash_func_(std::move(o.hash_func_)),
-        maxSize(o.maxSize),
-        load_factor_(o.load_factor_),
+      : initialCapacity_(o.initialCapacity_), size_(o.size_), buckets_(o.buckets_),
+        hash_func_(std::move(o.hash_func_)), maxSize(o.maxSize), load_factor_(o.load_factor_),
         arr_(o.arr_) {
     o.arr_ = nullptr;
     o.size_ = 0;
@@ -452,6 +440,130 @@ class HashMap {
 
           };
   };
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::cout << "HASHMAP TESTS" << std::endl;
+    // Test insert and operator[key]
+    std::cout << "  Testing insertion and operator[key]..." << std::endl;
+    HashMap<int, std::string> map1;
+    map1.insert(1, "One");
+    map1.insert(2, "Two");
+    CX_ASSERT(map1[1] == "One", "");
+    CX_ASSERT(map1[2] == "Two", "");
+
+    // Test replace value
+    std::cout << "  Testing replacement of values..." << std::endl;
+    map1.insert(1, "One_Updated");
+    CX_ASSERT(map1[1] == "One_Updated", "");
+
+    // Test erase
+    std::cout << "  Testing erase method..." << std::endl;
+    map1.erase(1);
+    try {
+      std::string nodiscard = map1.at(1);
+      CX_ASSERT(false, "");
+    } catch (const std::exception& e) {
+      CX_ASSERT(true, "");
+    }
+
+    // Test copy constructor
+    std::cout << "  Testing copy constructor..." << std::endl;
+    HashMap<int, std::string> map2(map1);
+    CX_ASSERT(map2[2] == "Two", "");
+
+    // Test assignment operator
+    std::cout << "  Testing assignment operator..." << std::endl;
+    HashMap<int, std::string> map3;
+    map3 = map1;
+    CX_ASSERT(map3[2] == "Two", "");
+    // Test n_elem
+    std::cout << "  Testing size()..." << std::endl;
+    CX_ASSERT(map1.size() == 1, "");
+    CX_ASSERT(map2.size() == 1, "");
+    CX_ASSERT(map3.size() == 1, "");
+
+    // Test at
+    std::cout << "  Testing at method..." << std::endl;
+    CX_ASSERT(map1.at(2) == "Two", "");
+    // Test clear
+    std::cout << "  Testing clear method..." << std::endl;
+    map1.clear();
+    CX_ASSERT(map1.size() == 0, "");
+
+    // Test large additions
+    std::cout << "  Testing large additions..." << std::endl;
+    HashMap<int, double> map4;
+    for (int i = 0; i < 10000; i++) {
+      map4.insert(i, i * 2);
+    }
+    for (int i = 0; i < 10000; i++) {
+      CX_ASSERT(map4[i] == i * 2, "");
+    }
+    std::cout << "  Testing contained method..." << std::endl;
+    HashMap<int, std::string> map5;
+    map5.insert(1, "One");
+    map5.insert(2, "Two");
+    CX_ASSERT(map5.contains(1), "");
+    CX_ASSERT(map5.contains(2), "");
+    CX_ASSERT(!map5.contains(3), "");
+
+    // Test shrink_to_fit
+    std::cout << "  Testing shrink_to_fit method..." << std::endl;
+    map5.shrink_to_fit();
+    CX_ASSERT(map5.capacity() == map5.size() * 1.5, "");
+    HashMap<int, int> map6;
+    for (int i = 0; i < 10000; i++) {
+      map6.insert(i, i * 2);
+    }
+    for (int i = 0; i < 10000; i++) {
+      CX_ASSERT(map6[i] == i * 2, "");
+    }
+    map6.shrink_to_fit();
+    CX_ASSERT(map6.capacity() == map6.size() * 1.5, "");
+
+    // Test move constructor
+    std::cout << "  Testing move constructor..." << std::endl;
+    HashMap<int, std::string> map7(std::move(map3));
+    CX_ASSERT(map7[2] == "Two", "");
+    CX_ASSERT(map3.size() == 0, "");
+
+    // Test move assignment operator
+    std::cout << "  Testing move assignment operator..." << std::endl;
+    HashMap<int, std::string> map8;
+    map8 = std::move(map2);
+    CX_ASSERT(map8[2] == "Two", "");
+    CX_ASSERT(map2.size() == 0, "");
+
+    // Test destructor
+    std::cout << "  Testing destructor indirectly..." << std::endl;
+    {
+      HashMap<int, std::string> map9;
+      map9.insert(1, "One");
+    }  // map9 goes out of scope here, its destructor should be called.
+
+    // Stress test
+    std::cout << "  Stress testing..." << std::endl;
+    HashMap<int, int> map10;
+    for (int i = 0; i < 1000000; i++) {
+      map10.insert(i, i);
+    }
+    for (int i = 0; i < 1000000; i += 2) {
+      map10.erase(i);
+    }
+    for (int i = 1; i < 1000000; i += 2) {
+      CX_ASSERT(map10[i] == i, "");
+    }
+    HashMap<int, std::string> map11;
+    // Test at with non-existent key
+    std::cout << "  Testing at with non-existent key..." << std::endl;
+    try {
+      std::string nodiscard = map11.at(3);
+      CX_ASSERT(false, "");
+    } catch (const std::exception& e) {
+      CX_ASSERT(true, "");
+    }
+  }
+#  endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_HASHMAP_H

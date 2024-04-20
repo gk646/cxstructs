@@ -19,9 +19,9 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXIO_H_
-#define CXSTRUCTS_SRC_CXIO_H_
+#  define CXSTRUCTS_SRC_CXIO_H_
 
-#include "../cxconfig.h"
+#  include "../cxconfig.h"
 
 //Simple, readable and fast *symmetric* serialization structure with loading and saving
 //Each line is a concatenated list of values and delimiter '|' (might be changeable in the future)
@@ -30,6 +30,24 @@
 //Using the CXX23 std::print() is about 10% slower
 namespace cxstructs {
 //inline static constexpr char DELIMITER = '|'; //Not used yet
+
+//-----------SHARED-----------//
+// true if end of file // don't call this more than once per line
+inline auto io_check_eof(FILE* file) -> bool {
+  // Remember the current position
+  long currentPos = ftell(file);
+  if (currentPos == -1) return true;  // Error in ftell
+
+  // Try to read a byte
+  char ch;
+  if (fread(&ch, 1, 1, file) != 1) {
+    return true;  // EOF reached or read error
+  }
+
+  // Seek back to the original position
+  fseek(file, currentPos, SEEK_SET);
+  return false;  // Not EOF
+}
 
 //-----------SAVING-----------//
 // Writes a new line to file
@@ -50,15 +68,16 @@ inline void io_save(FILE* file, float value) {
 }
 
 //-----------LOADING-----------//
-//Attempts to skip a new line until the next delimiter
-inline void io_load_newline(FILE* file) {
+//Searches for the next new line but stops at the delimiter if not forced
+inline void io_load_newline(FILE* file, bool force = false) {
   char ch;
-  while (fread(&ch, 1, 1, file) == 1 && ch != '|') {
+  while (fread(&ch, 1, 1, file) == 1) {
+    if (!force && ch == '|') return;
     if (ch == '\n') return;
   }
 }
-//include <string> to use or define _STRING_
-#ifdef _STRING_
+//include <string> to use
+#  ifdef _STRING_
 inline void io_load(FILE* file, std::string& s, int reserve_amount = 50) {
   s.reserve(reserve_amount);
   char ch;
@@ -66,7 +85,7 @@ inline void io_load(FILE* file, std::string& s, int reserve_amount = 50) {
     s.push_back(ch);
   }
 }
-#endif
+#  endif
 // Load a string property into a user-supplied buffer
 inline void io_load(FILE* file, char* buffer, size_t buffer_size) {
   size_t count = 0;
@@ -87,4 +106,178 @@ inline void io_load(FILE* file, float& f) {
 
 }  // namespace cxstructs
 
+#  ifdef CX_INCLUDE_TESTS
+#    include <chrono>
+namespace cxtests {
+using namespace cxstructs;
+using namespace std::chrono;
+static void benchMark() {
+  FILE* file;
+  const char* filename = "hello.txt";
+  constexpr int num = 100;
+  int val = 5;
+  auto start_write = high_resolution_clock::now();
+  fopen_s(&file, filename, "w");
+  if (file != nullptr) {
+    for (int i = 0; i < num; i++) {
+      for (int j = 0; j < num; j++) {
+        io_save(file, j);
+      }
+      io_save_newline(file);
+    }
+    fclose(file);
+  }
+  auto end_write = high_resolution_clock::now();
+  auto start_read = high_resolution_clock::now();
+
+  fopen_s(&file, filename, "r");
+  if (file != nullptr) {
+    for (int i = 0; i < num; i++) {
+      for (int j = 0; j < num; j++) {
+        io_load(file, val);
+      }
+    }
+    fclose(file);
+  }
+  auto end_read = high_resolution_clock::now();
+  auto duration_write = duration_cast<milliseconds>(end_write - start_write).count();
+  auto duration_read = duration_cast<milliseconds>(end_read - start_read).count();
+  printf("Write time: %lld ms\n", duration_write);
+  printf("Read time: %lld ms\n", duration_read);
+}
+void test_save_load_string() {
+  const char* test_filename = "test_string.txt";
+  const char* original_string = "Hello, world!";
+  char buffer[256];
+
+  // Save
+  FILE* file = std::fopen(test_filename, "w");
+  cxstructs::io_save(file, original_string);
+  cxstructs::io_save_newline(file);
+  std::fclose(file);
+
+  // Load
+  file = std::fopen(test_filename, "r");
+  cxstructs::io_load(file, buffer, sizeof(buffer));
+  std::fclose(file);
+
+  // Assert
+  CX_ASSERT(std::strcmp(original_string, buffer) == 0, "String save/load failed");
+}
+void test_save_load_int() {
+  const char* test_filename = "test_int.txt";
+  const int original_int = 42;
+  int loaded_int;
+
+  // Save
+  FILE* file = std::fopen(test_filename, "w");
+  cxstructs::io_save(file, original_int);
+  cxstructs::io_save_newline(file);
+  std::fclose(file);
+
+  // Load
+  file = std::fopen(test_filename, "r");
+  cxstructs::io_load(file, loaded_int);
+  std::fclose(file);
+
+  // Assert
+  CX_ASSERT(original_int == loaded_int, "Int save/load failed");
+}
+void test_save_load_float() {
+  const char* test_filename = "test_float.txt";
+  constexpr float original_float = 3.141;
+  float loaded_float;
+
+  // Save
+  FILE* file;
+  fopen_s(&file, test_filename, "w");
+  cxstructs::io_save(file, original_float);
+  cxstructs::io_save_newline(file);
+  std::fclose(file);
+
+  // Load
+  fopen_s(&file, test_filename, "r");
+  cxstructs::io_load(file, loaded_float);
+  std::fclose(file);
+
+  // Assert
+  CX_ASSERT(original_float == loaded_float, "Float save/load failed");
+}
+void delete_test_files() {
+  // List of test files to delete
+  const char* files[] = {"test_string.txt", "test_int.txt", "test_float.txt", "test_complex.txt",
+                         "hello.txt"};
+
+  // Iterate over the array and delete each file
+  for (const char* filename : files) {
+    if (std::remove(filename) != 0) {
+      perror("Error deleting file");
+    } else {
+      printf("%s deleted successfully.\n", filename);
+    }
+  }
+}
+void test_complex_save_load() {
+  const char* test_filename = "test_complex.txt";
+  const char* original_str1 = "TestString1";
+  const int original_int = 123;
+  const float original_float = 456.789f;
+  const char* original_str2 = "TestString2";
+
+  char buffer_str1[256];
+  int loaded_int = -1;
+  float loaded_float = -1;
+  std::string buffer_str2;
+  std::string hello;
+  std::string bye;
+  std::string hello2;
+
+  // Save complex data
+  FILE* file;
+  fopen_s(&file, test_filename, "w");
+  if (file) {
+    cxstructs::io_save(file, original_str1);
+    cxstructs::io_save(file, original_int);
+    cxstructs::io_save(file, original_float);
+    cxstructs::io_save(file, original_str2);
+    cxstructs::io_save_newline(file);
+    io_save(file, "hello");
+    io_save(file, "bye");
+    io_save(file, "hello");
+    std::fclose(file);
+  }
+
+  // Load complex data
+  file = std::fopen(test_filename, "r");
+  if (file) {
+    cxstructs::io_load(file, buffer_str1, sizeof(buffer_str1));
+    cxstructs::io_load(file, loaded_int);
+    cxstructs::io_load(file, loaded_float);
+    cxstructs::io_load(file, buffer_str2);
+    io_load_newline(file);
+    io_load(file, hello);
+    io_load(file, bye);
+    io_load(file, hello2);
+    std::fclose(file);
+  }
+
+  // Assert all loaded data matches original
+  CX_ASSERT(std::strcmp(original_str1, buffer_str1) == 0, "String1 save/load failed");
+  CX_ASSERT(original_int == loaded_int, "Int save/load failed");
+  CX_ASSERT(std::fabs(original_float - loaded_float) < 0.001,
+            "Float save/load failed");  // Allow for slight floating-point inaccuracies
+  CX_ASSERT(std::strcmp(original_str2, buffer_str2.c_str()) == 0, "String2 save/load failed");
+  CX_ASSERT(hello == hello2, "");
+  CX_ASSERT(bye == "bye", "");
+}
+static void TEST_IO() {
+  benchMark();
+  test_save_load_float();
+  test_save_load_int();
+  test_save_load_string();
+  test_complex_save_load();
+  delete_test_files();
+}
+}  // namespace cxtests
+#  endif
 #endif  //CXSTRUCTS_SRC_CXIO_H_

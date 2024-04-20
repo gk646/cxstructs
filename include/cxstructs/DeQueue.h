@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_
 
-#include <algorithm>
+#  include <algorithm>
 
-#include <cstdint>
-#include <iostream>
-#include "../cxconfig.h"
+#  include <cstdint>
+#  include <iostream>
+#  include "../cxconfig.h"
 
 namespace cxstructs {
 /**
@@ -340,6 +340,193 @@ class DeQueue {
   };
   inline Iterator begin() { return Iterator(arr_, front_, len_); }
   inline Iterator end() { return Iterator(arr_, (back_ + 1) % len_, len_); }
+#  ifdef CX_INCLUDE_TESTS
+#    include <deque>
+  static void TEST() {
+    std::cout << "TESTING DEQUEUE" << std::endl;
+
+    // Testing push_front and front
+    std::cout << "   Testing push_front and front..." << std::endl;
+    DeQueue<int> de_queue;
+    for (uint_32_cx i = 0; i < 100; i++) {
+      de_queue.push_front(i);
+      CX_ASSERT(de_queue.front() == i, "");
+      CX_ASSERT(de_queue.size() == i + 1, "");
+    }
+
+    // Testing push_back and back
+    std::cout << "   Testing push_back and back..." << std::endl;
+    for (uint_32_cx i = 100; i < 200; i++) {
+      de_queue.push_back(i);
+      CX_ASSERT(de_queue.back() == i, "");
+      CX_ASSERT(de_queue.size() == i + 1, "");
+    }
+
+    // Testing pop_front
+    std::cout << "   Testing pop_front..." << std::endl;
+    for (int i = 99; i >= 0; i--) {
+      CX_ASSERT(de_queue.front() == i, "");
+      de_queue.pop_front();
+      CX_ASSERT(de_queue.size() == i + 100, "");
+    }
+
+    // Testing pop_back
+    std::cout << "   Testing pop_back..." << std::endl;
+    for (uint_32_cx i = 199; i >= 100; i--) {
+      CX_ASSERT(de_queue.back() == i, "");
+      de_queue.pop_back();
+      CX_ASSERT(de_queue.size() == i - 100, "");
+    }
+
+    // Testing edge case: adding and removing a large number of elements
+    std::cout << "   Testing edge case: adding and removing a large number of elements..."
+              << std::endl;
+    for (uint_32_cx i = 0; i < 100000; i++) {
+      de_queue.push_back(i);
+    }
+    for (uint_32_cx i = 0; i < 100000; i++) {
+      CX_ASSERT(de_queue.size() == 100000 - i, "");
+
+      CX_ASSERT(de_queue.front() == i, "");
+
+      de_queue.pop_front();
+    }
+    CX_ASSERT(de_queue.size() == 0, "");
+
+    // Testing clear
+    std::cout << "   Testing clear..." << std::endl;
+    for (int i = 0; i < 1000; i++) {
+      de_queue.push_back(i);
+    }
+    de_queue.clear();
+    CX_ASSERT(de_queue.size() == 0, "");
+
+    // Testing back and pop_back
+    std::cout << "   Testing back and pop_back..." << std::endl;
+    for (int i = 0; i < 1000; i++) {
+      de_queue.push_back(i);
+    }
+    for (int i = 999; i >= 0; i--) {
+      CX_ASSERT(de_queue.back() == i, "");
+
+      de_queue.pop_back();
+    }
+    CX_ASSERT(de_queue.size() == 0, "");
+
+    // Testing copy constructor and assignment
+    std::cout << "   Testing copy constructor and assignment..." << std::endl;
+    for (int i = 0; i < 1000; i++) {
+      de_queue.push_back(i);
+    }
+    DeQueue<int> de_queue_copy = de_queue;
+    DeQueue<int> de_queue_assign;
+    de_queue_assign = de_queue;
+    CX_ASSERT(de_queue.size() == de_queue_copy.size(), "");
+
+    CX_ASSERT(de_queue.size() == de_queue_assign.size(), "");
+
+    // Test constructors and assignment operators
+    std::cout << "   Testing constructors and assignment operators..." << std::endl;
+    DeQueue<int> dq1;
+    for (uint_32_cx i = 0; i < 100; i++) {
+      dq1.push_back(i);
+    }
+    // Copy constructor
+    DeQueue<int> dq2(dq1);
+    CX_ASSERT(dq2.size() == dq1.size(), "");
+
+    for (uint_32_cx i = 0; i < 50; i++) {
+      CX_ASSERT(dq2.front() == dq1.front(), "");
+
+      dq2.pop_front();
+      dq1.pop_front();
+    }
+    // Copy assignment operator
+    dq1 = dq2;
+    CX_ASSERT(dq2.size() == dq1.size(), "");
+
+    for (uint_32_cx i = 0; i < 25; i++) {
+      CX_ASSERT(dq2.front() == dq1.front(), "");
+
+      dq2.pop_front();
+      dq1.pop_front();
+    }
+    // Move constructor
+    DeQueue<int> dq3(std::move(dq2));
+    CX_ASSERT(dq3.size() == 25, "");
+
+    CX_ASSERT(dq2.size() == 0, "");
+
+    for (uint_32_cx i = 75; i < 100; i++) {
+      CX_ASSERT(dq3.front() == i, "");
+
+      dq3.pop_front();
+    }
+    for (uint_fast32_t i = 0; i < 10; i++) {
+      dq3.push_back(i);
+    }
+    // Move assignment operator
+    dq1 = std::move(dq3);
+    CX_ASSERT(dq1.size() == 10, "");
+
+    CX_ASSERT(dq3.size() == 0, "");
+
+    for (uint_32_cx i = 0; i < 10; i++) {
+      CX_ASSERT(dq1.front() == i, "");
+
+      dq1.pop_front();
+    }
+
+    de_queue.clear();
+    std::cout
+        << "   Testing edge case: adding and removing a large number of elements with iterator..."
+        << std::endl;
+    for (uint_32_cx i = 0; i < 100000; i++) {
+      de_queue.push_back(i);
+    }
+
+    uint_32_cx i = 0;
+    for (auto it = de_queue.begin(); it != de_queue.end(); ++it, ++i) {
+      CX_ASSERT(*it == i, "");
+    }
+    de_queue.clear();
+    CX_ASSERT(de_queue.size() == 0, "");
+
+    std::cout << "   Testing clear with iterator..." << std::endl;
+    for (int i = 0; i < 1000; i++) {
+      de_queue.push_back(i);
+    }
+    de_queue.clear();
+    CX_ASSERT(de_queue.size() == 0, "");
+
+    CX_ASSERT(de_queue.begin() == de_queue.end(), "");
+
+    std::cout << "   Testing wrapping around with iterator..." << std::endl;
+    DeQueue<int> qq;
+    std::deque<int> stdqq;
+    for (uint_fast32_t j = 0; j < 10; j++) {
+      qq.push_back(j);
+      stdqq.push_back(j);
+    }
+    for (uint_fast32_t j = 0; j < 5; j++) {
+      qq.pop_front();
+      stdqq.pop_front();
+    }
+    for (uint_fast32_t j = 0; j < 25; j++) {
+      qq.push_back(j + 20);
+      stdqq.push_back(j + 20);
+    }
+    CX_ASSERT(qq.front() == stdqq.front(), "");
+
+    for (uint_fast32_t j = 0; j < 5; j++) {
+      qq.pop_front();
+    }
+    int b = 20;
+    for (auto val : qq) {
+      CX_ASSERT(b++ == val, "");
+    }
+  }
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_DEQUEUE_H_

@@ -19,18 +19,18 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTURES_STACK_H
-#define CXSTRUCTURES_STACK_H
+#  define CXSTRUCTURES_STACK_H
 
-#include <algorithm>
+#  include <algorithm>
 
-#include <cstdint>
-#include <initializer_list>
-#include <iostream>
-#include <memory>
-#include <stdexcept>
-#include "../cxconfig.h"
-#include "../cxstructs/mat.h"
-#include "CXAllocator.h"
+#  include <cstdint>
+#  include <initializer_list>
+#  include <iostream>
+#  include <memory>
+#  include <stdexcept>
+#  include "../cxconfig.h"
+#  include "../cxstructs/mat.h"
+#  include "CXAllocator.h"
 
 //this stack is very fast and implemented natively (std::stack is using the std::vector)
 //can be up to 1.6 times faster and should be faster in any use case
@@ -123,8 +123,7 @@ class Stack {
    * @param init_list init list elements
    */
   Stack(std::initializer_list<T> init_list)
-      : size_(init_list.size()),
-        len_(init_list.size() * 10),
+      : size_(init_list.size()), len_(init_list.size() * 10),
         arr_(alloc.allocate(init_list.size() * 10)) {
     if (is_trivial_destr) {
       std::copy(init_list.begin(), init_list.end(), arr_);
@@ -292,6 +291,90 @@ class Stack {
   };
   Iterator begin() { return Iterator(arr_); }
   Iterator end() { return Iterator(arr_ + size_); }
+#  ifdef CX_INCLUDE_TESTS
+#    include "mat.h"
+  static void TEST() {
+    std::cout << "STACK TESTS" << std::endl;
+
+    std::cout << "  Testing default constructor..." << std::endl;
+    Stack<int> defaultStack;
+    CX_ASSERT(defaultStack.size() == 0, "");
+
+    std::cout << "  Testing fill constructor..." << std::endl;
+    Stack<int> fillStack(5, 1);
+    CX_ASSERT(fillStack.size() == 5, "");
+    for (int i = 0; i < 5; i++) {
+      CX_ASSERT(fillStack.top() == 1, "");
+      fillStack.pop();
+    }
+
+    std::cout << "  Testing copy constructor..." << std::endl;
+    Stack<int> copyStack(fillStack);
+    CX_ASSERT(copyStack.size() == fillStack.size(), "");
+
+    std::cout << "  Testing move constructor..." << std::endl;
+    Stack<int> moveStack(std::move(fillStack));
+    CX_ASSERT(moveStack.size() == copyStack.size(), "");
+    CX_ASSERT(fillStack.empty(), "");
+
+    std::cout << "  Testing initializer list constructor..." << std::endl;
+    Stack<int> initListStack({1, 2, 3, 4, 5});
+    CX_ASSERT(initListStack.size() == 5, "");
+    for (int i = 5; i > 0; i--) {
+      CX_ASSERT(initListStack.top() == i, "");
+      initListStack.pop();
+    }
+
+    std::cout << "  Testing assignment operator..." << std::endl;
+    Stack<int> assignStack;
+    assignStack = copyStack;
+    CX_ASSERT(assignStack.size() == copyStack.size(), "");
+
+    std::cout << "  Testing move assignment operator..." << std::endl;
+    Stack<int> moveAssignStack;
+    moveAssignStack = std::move(copyStack);
+    CX_ASSERT(moveAssignStack.size() == assignStack.size(), "");
+    CX_ASSERT(copyStack.empty(), "");
+
+    std::cout << "  Testing push_back method..." << std::endl;
+    defaultStack.push(1);
+    CX_ASSERT(defaultStack.top() == 1, "");
+    CX_ASSERT(defaultStack.size() == 1, "");
+
+    std::cout << "  Testing emplace method..." << std::endl;
+    defaultStack.emplace(2);
+    CX_ASSERT(defaultStack.top() == 2, "");
+    CX_ASSERT(defaultStack.size() == 2, "");
+
+    std::cout << "  Testing pop_back method..." << std::endl;
+    defaultStack.pop();
+    CX_ASSERT(defaultStack.top() == 1, "");
+    CX_ASSERT(defaultStack.size() == 1, "");
+
+    std::cout << "  Testing iterator..." << std::endl;
+    for (auto it = assignStack.begin(); it != assignStack.end(); ++it) {
+      CX_ASSERT(*it == 1, "");  // Assuming all elements are 1
+    }
+
+    for (auto it : defaultStack) {
+      CX_ASSERT(it == 1, "");
+    }
+
+    std::cout << "  Testing memory leak..." << std::endl;
+    for (int i = 0; i < 100000; i++) {
+      defaultStack.push(i);
+    }
+
+    std::cout << "  Testing non-trivial Datatype" << std::endl;
+    Stack<mat> mat_stack;
+    mat_stack.push(mat(5, 5));
+    mat_stack.push(mat(5, 5));
+    mat_stack.push(mat(5, 5));
+
+    Stack<mat> mat_stack01(15, mat(10, 10));
+    Stack<mat> mat_stack02{mat(5, 5), mat(10, 10)};
+  }
+#  endif
 };
 }  // namespace cxstructs
 

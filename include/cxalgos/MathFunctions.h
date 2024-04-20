@@ -19,13 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
-#define CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
+#  define CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_
 
-#include <cmath>
-#include <cstdint>
-#include <type_traits>
-#include "../cxconfig.h"
-#include "../cxutil/cxmath.h"
+#  include <cmath>
+#  include <cstdint>
+#  include <type_traits>
+#  include "../cxconfig.h"
+#  include "../cxutil/cxmath.h"
 
 namespace cxstructs {
 
@@ -95,4 +95,25 @@ double integral_arc_length(Function fx, double a, double b, uint_32_cx steps = 1
   return arc_length;
 }
 }  // namespace cxstructs
+#  ifdef CX_INCLUDE_TESTS
+namespace cxtests {
+using namespace cxstructs;
+static void TEST_MATH() {
+  std::cout << "TESTING MATH FUNCTIONS" << std::endl;
+  auto integral = integral_aprox([](double x) { return x * x; }, 0, 5, 100000);
+  CX_ASSERT(integral - std::pow(5, 3) / 3 < 0.0001, "");
+  auto volume = integral_volume_solids_of_revolution([](double x) { return std::sqrt(x); }, 0, 4);
+
+  CX_ASSERT(volume - CX_PI * 8 < 0.001, "");
+  auto length =
+      integral_arc_length([](double x) { return (1.0 / 3.0) * std::pow((x * x + 2), 3.0 / 2.0); },
+                          0, std::sqrt(8), 100000);
+
+  CX_ASSERT(cxstructs::next_power_of_2(3) == 4, "");
+  CX_ASSERT(cxstructs::next_power_of_2(3) != 3, "");
+  CX_ASSERT(cxstructs::next_power_of_2(10) == 16, "");
+  CX_ASSERT(cxstructs::next_power_of_2(53) == 64, "");
+}
+}  // namespace cxtests
+#  endif
 #endif  //CXSTRUCTS_SRC_ALGORITHMS_MATHFUNCTIONS_H_

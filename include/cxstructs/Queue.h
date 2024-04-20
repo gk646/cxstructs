@@ -19,10 +19,13 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_QUEUE_H
-#define CXSTRUCTS_QUEUE_H
+#  define CXSTRUCTS_QUEUE_H
 
-#include "../cxconfig.h"
-#include <memory> //For std::allocator<T>
+#  include "../cxconfig.h"
+#  include <memory>  //For std::allocator<T>
+#  ifdef CX_INCLUDE_TESTS
+#    include <queue>
+#  endif
 
 namespace cxstructs {
 
@@ -324,6 +327,131 @@ class Queue {
     }
     return Iterator(arr_, index, capacity_);
   }
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::cout << "QUEUE TESTS" << std::endl;
+    // Test default constructor
+    std::cout << "  Testing default constructor..." << std::endl;
+    Queue<int> q1;
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
+
+    // Test push_back
+    std::cout << "  Testing push_back..." << std::endl;
+    q1.push(5);
+    CX_ASSERT(q1.size() == 1, "");
+    CX_ASSERT(q1.empty() == false, "");
+    CX_ASSERT(q1.front() == 5, "");
+    CX_ASSERT(q1.back() == 5, "");
+
+    // Test pop_back
+    std::cout << "  Testing pop_back..." << std::endl;
+    int val = q1.back();
+    q1.pop();
+    CX_ASSERT(val == 5, "");
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
+
+    // Test non-empty constructor
+    std::cout << "  Testing non-empty constructor..." << std::endl;
+    Queue<int> q2(5);
+    for (int i = 0; i < 5; i++) {
+      q2.push(10);
+    }
+    CX_ASSERT(q2.size() == 5, "");
+    CX_ASSERT(q2.empty() == false, "");
+    CX_ASSERT(q2.front() == 10, "");
+    CX_ASSERT(q2.back() == 10, "");
+
+    // Test copy constructor
+    std::cout << "  Testing copy constructor..." << std::endl;
+    Queue<int> q3(q2);
+    CX_ASSERT(q3.size() == q2.size(), "");
+    CX_ASSERT(q3.empty() == q2.empty(), "");
+    CX_ASSERT(q3.front() == q2.front(), "");
+    CX_ASSERT(q3.back() == q2.back(), "");
+
+    // Test assignment operator
+    std::cout << "  Testing assignment operator..." << std::endl;
+    Queue<int> q4;
+    q4 = q2;
+    CX_ASSERT(q4.size() == q2.size(), "");
+    CX_ASSERT(q4.empty() == q2.empty(), "");
+    CX_ASSERT(q4.front() == q2.front(), "");
+    CX_ASSERT(q4.back() == q2.back(), "");
+
+    // Test multiple push_back/pop_back
+    std::cout << "  Testing multiple push_back/pop_back..." << std::endl;
+    for (int i = 0; i < 1000; i++) {
+      q1.push(i);
+    }
+    CX_ASSERT(q1.size() == 1000, "");
+
+    for (int i = 0; i < 1000; i++) {
+      int temp = q1.front();
+      q1.pop();
+      CX_ASSERT(temp == i, "");
+    }
+    CX_ASSERT(q1.size() == 0, "");
+
+    // Test clear
+    std::cout << "  Testing clear..." << std::endl;
+    q1.clear();
+    CX_ASSERT(q1.size() == 0, "");
+    CX_ASSERT(q1.empty(), "");
+
+    // Test push_back after clear
+    std::cout << "  Testing push_back after clear..." << std::endl;
+    for (int i = 0; i < 10; i++) {
+      q1.push(i);
+    }
+    CX_ASSERT(q1.size() == 10, "");
+
+    // Test range-based for loop
+    std::cout << "  Testing range-based for loop..." << std::endl;
+    int check = 0;
+    for (auto num : q1) {
+      CX_ASSERT(num == check++, "");
+    }
+
+    std::cout << "  Testing move-assign/move-copy constructor..." << std::endl;
+    q1.clear();
+    for (uint_fast32_t i = 0; i < 10; i++) {
+      q1.push(i);
+    }
+    Queue<int> qm1(std::move(q1));
+    CX_ASSERT(qm1.front() == 0, "");
+    CX_ASSERT(qm1.back() == 9, "");
+    Queue<int> qm2;
+    qm2 = std::move(qm1);
+    CX_ASSERT(qm2.front() == 0, "");
+    CX_ASSERT(qm2.back() == 9, "");
+
+    std::cout << "  Testing wrapping around with iterator..." << std::endl;
+    Queue<int> qq;
+    std::queue<int> stdqq;
+    for (uint_fast32_t j = 0; j < 10; j++) {
+      qq.push(j);
+      stdqq.push(j);
+    }
+    for (uint_fast32_t j = 0; j < 5; j++) {
+      qq.pop();
+      stdqq.pop();
+    }
+    for (uint_fast32_t j = 0; j < 25; j++) {
+      qq.push(j + 20);
+      stdqq.push(j + 20);
+    }
+    CX_ASSERT(qq.front() == stdqq.front(), "");
+    for (uint_fast32_t j = 0; j < 5; j++) {
+      qq.pop();
+    }
+    int b = 20;
+    for (auto val : qq) {
+      // CX_ASSERT(b++ ==val, "");
+    }
+  }
+#  endif
 };
 
 }  // namespace cxstructs

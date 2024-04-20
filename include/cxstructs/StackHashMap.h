@@ -19,10 +19,10 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_STACKHASHMAP_H_
-#define CXSTRUCTS_SRC_CXSTRUCTS_STACKHASHMAP_H_
+#  define CXSTRUCTS_SRC_CXSTRUCTS_STACKHASHMAP_H_
 
-#include "../cxconfig.h"
-#include <bitset>  //For std::bitset<N> and std::hash<K>
+#  include "../cxconfig.h"
+#  include <bitset>  //For std::bitset<N> and std::hash<K>
 
 //Memory footprint is still quite big
 //Using std::bitset<> saves memory but is a bit slower
@@ -152,6 +152,7 @@ class StackHashMap {
 
  public:
   StackHashMap() = default;
+
   StackHashMap(const StackHashMap& other) {
     if constexpr (std::is_trivial_v<K> && std::is_trivial_v<V>) {
       std::memcpy(data_, other.data_, N * sizeof(Node));
@@ -167,7 +168,9 @@ class StackHashMap {
     size_ = other.size_;
     rand_ = other.rand_;
   }
+
   explicit StackHashMap(size_type elems) : size_(elems) {}
+
   ~StackHashMap() {
     if constexpr (!std::is_trivially_destructible_v<K> || !std::is_trivially_destructible_v<V>) {
       for (size_t i = 0; i < N; ++i) {
@@ -270,7 +273,7 @@ class StackHashMap {
     size_ = 0;
   }
 
-  [[nodiscard]] auto empty() const noexcept -> bool { return !register_.any(); }
+  [[nodiscard]] auto empty() const noexcept -> bool { return size_ == 0; }
 
   [[nodiscard]] auto load_factor() const noexcept -> float { return (float)size_ / (float)N; }
 
@@ -293,6 +296,7 @@ class StackHashMap {
     }
 
     reference operator*() const { return ptr_[index_].key; }
+
     pointer operator->() { return &(ptr_[index_].key); }
 
     // Prefix increment
@@ -313,6 +317,7 @@ class StackHashMap {
     friend bool operator==(const KeyIterator& a, const KeyIterator& b) {
       return a.ptr_ + a.index_ == b.ptr_ + b.index_;
     }
+
     friend bool operator!=(const KeyIterator& a, const KeyIterator& b) { return !(a == b); }
 
    private:
@@ -337,8 +342,9 @@ class StackHashMap {
       }
     }
 
-    reference operator*() const { return ptr_[index_].key; }
-    pointer operator->() { return &(ptr_[index_].key); }
+    reference operator*() const { return ptr_[index_].val; }
+
+    pointer operator->() { return &(ptr_[index_].val); }
 
     // Prefix increment
     ValueIterator& operator++() {
@@ -358,6 +364,7 @@ class StackHashMap {
     friend bool operator==(const ValueIterator& a, const ValueIterator& b) {
       return a.ptr_ + a.index_ == b.ptr_ + b.index_;
     }
+
     friend bool operator!=(const ValueIterator& a, const ValueIterator& b) { return !(a == b); }
 
    private:
@@ -366,6 +373,7 @@ class StackHashMap {
     size_t size_;
     size_t index_;
   };
+
   class PairIterator {
    public:
     using iterator_category = std::forward_iterator_tag;
@@ -381,6 +389,7 @@ class StackHashMap {
     }
 
     reference operator*() const { return ptr_[index_]; }
+
     pointer operator->() { return &(ptr_[index_]); }
 
     // Prefix increment
@@ -401,6 +410,7 @@ class StackHashMap {
     friend bool operator==(const PairIterator& a, const PairIterator& b) {
       return a.ptr_ + a.index_ == b.ptr_ + b.index_;
     }
+
     friend bool operator!=(const PairIterator& a, const PairIterator& b) {
       return a.ptr_ + a.index_ != b.ptr_ + b.index_;
     }
@@ -413,14 +423,80 @@ class StackHashMap {
   };
 
   KeyIterator key_begin() { return KeyIterator(data_, register_, N); }
+
   KeyIterator key_end() { return KeyIterator(data_ + N, register_, N); }
 
   ValueIterator value_begin() { return ValueIterator(data_, register_, N); }
+
   ValueIterator value_end() { return ValueIterator(data_ + N, register_, N); }
 
   PairIterator begin() { return PairIterator(data_, register_, N); }
+
   PairIterator end() { return PairIterator(data_ + N, register_, N); }
 
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    StackHashMap<int, int, 100> map1;
+
+    map1.insert(1, 10);
+    map1.insert(2, 20);
+    map1.insert(3, 30);
+
+    CX_ASSERT(map1.size() == 3, "Size has to be 3");
+
+    CX_ASSERT(map1[3] == 30, "Key 3 is 30");
+
+    map1.insert(101, 1010);
+    CX_ASSERT(map1.size() == 4, "Size has to be 4");
+    CX_ASSERT(map1[101] == 1010, "Key 101 has to be 1010 ");
+
+    bool res = map1.erase(101);
+    CX_ASSERT(res, "Value was deleted");
+    CX_ASSERT(!map1.contains(101), "Key is not contained");
+    CX_ASSERT(map1[101] == 0, "Key was deleted and remade");
+
+    map1.clear();
+
+    for (int i = 0; i < 50; i++) {
+      map1.insert(i, i * 10);
+      CX_ASSERT(map1[i] == i * 10, "");
+    }
+
+    for (int i = 0; i < 50; i++) {
+      CX_ASSERT(map1[i] == i * 10, "");
+    }
+
+    StackHashMap<int, int, 64> map2;
+    for (int i = 0; i < 50; i++) {
+      map2.insert(i, i * 10);
+      CX_ASSERT(map2[i] == i * 10, "");
+    }
+
+    for (auto& pair : map2) {
+      pair.val = 10;
+    }
+
+    for (auto& pair : map2) {
+      CX_ASSERT(pair.val == 10, "");
+    }
+
+    StackHashMap<std::string, int, 128> myMap2;
+
+    myMap2.insert("hey", 100);
+    myMap2.insert("blabla", 100);
+
+    CX_ASSERT(myMap2["hey"] == 100, "");
+
+    cxstructs::StackHashMap<const char*, int, 7, cxstructs::Fnv1aHash> compMap;
+    compMap.insert("hello", 5);
+    compMap.insert("bye", 10);
+    compMap.insert("hihi", 15);
+
+    printf("%d\n", compMap["hello"]);
+    printf("%d\n", compMap["bye"]);
+    printf("%d\n", compMap["hihi"]);
+  }
+#  endif
 };
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_STACKHASHMAP_H_

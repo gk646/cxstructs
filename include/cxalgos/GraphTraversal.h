@@ -19,16 +19,16 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_DFS_H
-#define CXSTRUCTS_DFS_H
+#  define CXSTRUCTS_DFS_H
 
-#include <iostream>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-#include "../cxconfig.h"
-#include "../cxstructs/HashSet.h"
-#include "../cxstructs/Pair.h"
-#include "../cxstructs/vec.h"
+#  include <iostream>
+#  include <unordered_map>
+#  include <utility>
+#  include <vector>
+#  include "../cxconfig.h"
+#  include "../cxstructs/HashSet.h"
+#  include "../cxstructs/Pair.h"
+#  include "../cxstructs/vec.h"
 
 namespace cxstructs {
 
@@ -55,8 +55,9 @@ int depth_first_search(std::vector<std::vector<T>>& mat, int nodeIndex,
   return count;
 }
 template <typename State, typename Action>
-vec<vec<std::pair<Action, State>>> shortest_path_search(
-    State start, std::unordered_map<State, Action> (*successors)(State), bool (*is_goal)(State)) {
+vec<vec<std::pair<Action, State>>>
+shortest_path_search(State start, std::unordered_map<State, Action> (*successors)(State),
+                     bool (*is_goal)(State)) {
   if (is_goal(start)) {
     return {{Action(), start}};
   }
@@ -68,5 +69,19 @@ vec<vec<std::pair<Action, State>>> shortest_path_search(
   }
 }
 }  // namespace cxstructs
+#  ifdef CX_INCLUDE_TESTS
+namespace cxtests {  // namespace cxtests
+static void TEST_DFS() {
+  std::cout << "TESTING DEPTH FIRST SEARCH" << std::endl;
+  std::vector<std::vector<int>> mat = {
+      {0, 1, 0, 1, 0}, {1, 0, 1, 0, 0}, {0, 1, 0, 0, 0}, {1, 0, 0, 0, 1}, {0, 0, 0, 1, 0}};
+
+  // Perform depth_first_search from node 0
+  int reachableNodes = depth_first_search(mat, 0);
+
+  CX_ASSERT(reachableNodes == 5, "");
+}
+}  // namespace cxtests
+#  endif
 
 #endif  // CXSTRUCTS_DFS_H

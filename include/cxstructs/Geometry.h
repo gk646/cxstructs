@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_
 
-#include "../cxconfig.h"
-#include "../cxutil/cxmath.h"
-#include <algorithm>
+#  include "../cxconfig.h"
+#  include "../cxutil/cxmath.h"
+#  include <algorithm>
 
 namespace cxstructs {
 
@@ -368,8 +368,8 @@ bool Rect::intersects(const Circle& c) const {
   const float closestX = std::clamp(c.x(), x_, x_ + w_);
   const float closestY = std::clamp(c.y(), y_, y_ + h_);
 
-  return ((closestX - c.x()) * (closestX - c.x()) + (closestY - c.y()) * (closestY - c.y())) <=
-         (c.radius() * c.radius());
+  return ((closestX - c.x()) * (closestX - c.x()) + (closestY - c.y()) * (closestY - c.y()))
+         <= (c.radius() * c.radius());
 }
 bool Rect::contains(const Point& p) const {
   return !(x_ > p.x() || y_ > p.y() || x_ + w_ < p.x() || y_ + h_ < p.y());
@@ -407,8 +407,8 @@ struct hash<cxstructs::PointT<int16_t>> {
 template <>
 struct hash<cxstructs::Rect> {
   std::size_t operator()(const cxstructs::Rect& r) const {
-    return static_cast<int>(r.x()) ^ (static_cast<int>(r.y()) << 1) ^ static_cast<int>(r.width()) ^
-           (static_cast<int>(r.height()) << 1);
+    return static_cast<int>(r.x()) ^ (static_cast<int>(r.y()) << 1) ^ static_cast<int>(r.width())
+           ^ (static_cast<int>(r.height()) << 1);
   }
 };
 template <>
@@ -417,5 +417,114 @@ struct hash<cxstructs::Circle> {
     return static_cast<int>(c.x()) ^ (static_cast<int>(c.y()) << 1) ^ static_cast<int>(c.radius());
   }
 };
+#  ifdef CX_INCLUDE_TESTS
+static void GEOMETRY_TEST() {
+  using namespace cxstructs;
+  std::cout << "RECTANGLE TESTS" << std::endl;
+  // Rectangles that are the same
+  std::cout << "  Testing rectangles that are the same..." << std::endl;
+  Rect r1(10, 10, 50, 50);
+  Rect r2(10, 10, 50, 50);
+  CX_ASSERT(r1.intersects(r2), "Same rectangles should intersect");
+  CX_ASSERT(r1.contains(r2), "");
+  // Rectangles that share an edge
+  std::cout << "  Testing rectangles that share an edge..." << std::endl;
+  Rect r3(10, 10, 50, 50);
+  Rect r4(60, 10, 50, 50);
+  CX_ASSERT(r3.intersects(r4), "Rectangles that share an edge should intersect");
+
+  // Rectangle inside another rectangle
+  std::cout << "  Testing rectangle inside another rectangle..." << std::endl;
+  Rect r5(10, 10, 50, 50);
+  Rect r6(20, 20, 10, 10);
+  CX_ASSERT(r5.intersects(r6), "Rectangle inside another rectangle should intersect");
+
+  // Rectangles with intersecting area
+  std::cout << "  Testing rectangles with intersecting area..." << std::endl;
+  Rect r7(10, 10, 50, 50);
+  Rect r8(40, 40, 50, 50);
+  CX_ASSERT(r7.intersects(r8), "Overlapping rectangles should intersect");
+
+  // Non-intersecting rectangles
+  std::cout << "  Testing non-intersecting rectangles..." << std::endl;
+  Rect r9(10, 10, 50, 50);
+  Rect r10(100, 100, 50, 50);
+  CX_ASSERT(!r9.intersects(r10), "Non-overlapping rectangles should not intersect");
+
+  std::cout << "  Testing circle and rectangle intersection...\n";
+
+  // Circle inside rectangle
+  Circle c1(5, 5, 1);
+  Rect r11(0, 0, 10, 10);
+  CX_ASSERT(r11.intersects(c1), "Circle inside rectangle should intersect");
+
+  // Circle intersecting rectangle at edge
+  Circle c2(10, 5, 5);
+  Rect r12(0, 0, 10, 10);
+  CX_ASSERT(r12.intersects(c2), "Circle intersecting rectangle at edge should intersect");
+
+  // Circle not intersecting rectangle
+  Circle c3(15, 15, 1);
+  Rect r13(0, 0, 10, 10);
+  CX_ASSERT(!r13.intersects(c3), "Circle not intersecting rectangle should not intersect");
+
+  // Circle intersecting rectangle at corner
+  Circle c4(10, 10, 5);
+  Rect r14(0, 0, 10, 10);
+  CX_ASSERT(r14.intersects(c4), "Circle intersecting rectangle at corner should intersect");
+
+  std::cout << "  Testing rectangle contained...\n";
+  Rect r16(1, 1, 8, 8);
+  Point p10(5, 5);
+  Point p11(9, 9);
+  CX_ASSERT(r14.contains(r16), "Rectangle should contain smaller rectangle");
+  CX_ASSERT(r14.contains(r14), "Rectangle should not contain itself");
+  CX_ASSERT(r16.contains(p10), "Rectangle should contain point inside it");
+  CX_ASSERT(r14.contains(p11), "Rectangle should contain point on its edge");
+  CX_ASSERT(r16.contains(p11), "");
+
+  std::cout << "  Testing circle contained circle...\n";
+  Circle c5(0.0, 0.0, 10.0);
+  Circle c6(8.0, 0.0, 5.0);   // Circle contained within c5
+  Circle c7(20.0, 0.0, 5.0);  // Circle outside c5
+  Circle c10(0.0, 0.0, 5.0);
+  Circle c11(0.0, 0.0, 10.0);
+
+  // Circle c6 contained within Circle c5
+  CX_ASSERT(c6.intersects(c5), "Circle contained within another circle should intersect");
+
+  // Circle c7 does not intersect with Circle c5
+  CX_ASSERT(!c7.intersects(c5), "Circle not intersecting another circle should not intersect");
+
+  // Circle c10 contained within Circle c5
+  CX_ASSERT(c5.contains(c10), "Circle c10 should be contained within Circle c5");
+
+  // Circle c7 not contained within Circle c5
+  CX_ASSERT(!c5.contains(c7), "Circle c7 should not be contained within Circle c5");
+
+  // Circle c11 not contained within Circle c5
+  CX_ASSERT(!c5.contains(c11), "Circle c11 should not be contained within Circle c5");
+
+  std::cout << "POINT TESTS:" << std::endl;
+
+  // Define some rectangles
+  Rect r15(0.0, 0.0, 10.0, 10.0);
+
+  // Define some points
+  Point p1(5.0, 5.0);
+  Point p2(15.0, 5.0);
+
+  // Point p1 is inside Rectangle r15
+
+  // Define some circles
+  Circle c8(0.0, 0.0, 10.0);
+
+  // Define some points
+  Point p3(5.0, 5.0);
+  Point p4(15.0, 5.0);
+
+  // Point p3 is inside Circle c8
+}
+#  endif
 }  // namespace std
 #endif  //CXSTRUCTS_SRC_DATASTRUCTURES_GEOMETRY_H_

@@ -19,12 +19,12 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXBITS_H_
-#define CXSTRUCTS_SRC_CXUTIL_CXBITS_H_
+#  define CXSTRUCTS_SRC_CXUTIL_CXBITS_H_
 
-#include "../cxconfig.h"
-#include <cstdlib>
-#include <print>
-#include <type_traits>  //For type traits
+#  include "../cxconfig.h"
+#  include <cstdlib>
+#  include <print>
+#  include <type_traits>  //For type traits
 
 //Assumes little endian for all operations
 
@@ -200,6 +200,41 @@ constexpr auto bits_get(T num, uint8_t off = 0) -> R {
   return static_cast<R>(num >> off);
 }
 
+#  ifdef CX_INCLUDE_TESTS
+static void TEST_BITS() {
+  CX_ASSERT(bits_concat(0x1, 0x01) == 4294967297, "");
+  CX_ASSERT(bits_concat(0x0, 0x01) == 4294967296, "");
+  CX_ASSERT(bits_concat(static_cast<uint8_t>(0x1), static_cast<uint8_t>(0x01)) == 0x101,
+            "Concatenation of uint8_t failed.");
+  CX_ASSERT(bits_concat(static_cast<uint16_t>(0x0), static_cast<uint16_t>(0x01)) == 0x10000,
+            "Concatenation of uint16_t failed.");
+  CX_ASSERT(bits_concat(static_cast<uint32_t>(0x1), static_cast<uint32_t>(0x2)) == 0x200000001,
+            "Concatenation of uint32_t failed.");
+  uint16_t num1 = 1;
+  uint16_t num2 = 2;
+  CX_ASSERT(bits_concat(num1, num2) == 0x20001,
+            "Concatenation of uint16_t with different values failed.");
+
+  CX_ASSERT(bits_concat(static_cast<uint8_t>(0xFF), static_cast<uint8_t>(0xFF)) == 0xFFFF,
+            "Concatenation of max uint8_t failed.");
+
+  // CX_ASSERT(concat(static_cast<int16_t>(-1), static_cast<int16_t>(-2)) == static_cast<int32_t>(0xFFFFFEFF), "Concatenation of int16_t failed.");
+  //CX_ASSERT(concat(static_cast<int8_t>(-1), static_cast<int8_t>(-1)) == static_cast<int16_t>(-1), "Concatenation of max int8_t failed.");
+
+  bits_print(bits_concat(0b0001, 0b0001));
+  CX_ASSERT(bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 0)
+                == bits_get<uint8_t>(bits_concat(0b0001, 0b0001), 32),
+            "");
+  uint16_t bla = 1;
+  uint16_t a = 257;
+
+  bits_print(bits_get<uint8_t>(513));
+  bits_print(a);
+
+  auto res = bits_concat_ex<uint16_t, uint16_t, 4>(1, 1);
+  bits_print(res);
+}
+#  endif
 
 }  // namespace cxstructs
 

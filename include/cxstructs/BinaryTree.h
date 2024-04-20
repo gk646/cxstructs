@@ -19,14 +19,14 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_BINARYTREE_H
-#define CXSTRUCTS_BINARYTREE_H
+#  define CXSTRUCTS_BINARYTREE_H
 
-#include <algorithm>
-#include <deque>
-#include <iostream>
-#include <stdexcept>
-#include <vector>
-#include "../cxconfig.h"
+#  include <algorithm>
+#  include <deque>
+#  include <iostream>
+#  include <stdexcept>
+#  include <vector>
+#  include "../cxconfig.h"
 
 namespace cxhelper {  // namespace to hide helper structs
 /**
@@ -78,13 +78,11 @@ class BinaryTree {
     if (val < node->data_) {
       if (!node->left_) {
         node->left_ = new TNode(val);
-      } else
-        insert(val, node->left_);
+      } else insert(val, node->left_);
     } else {
       if (!node->right_) {
         node->right_ = new TNode(val);
-      } else
-        insert(val, node->right_);
+      } else insert(val, node->right_);
     }
   }
   inline bool contains(const T& val, TNode* node) const {
@@ -297,6 +295,88 @@ class BinaryTree {
    */
   InOrderIterator end() { return InOrderIterator(nullptr); }
 
+#  ifdef CX_INCLUDE_TESTS
+  static void TEST() {
+    std::cout << "BINARY SEARCH TREE TESTS" << std::endl;
+
+    // Test insert and contained
+    std::cout << "  Testing insertion and contained method..." << std::endl;
+    BinaryTree<int> bt1;
+    bt1.insert(1);
+    bt1.insert(2);
+    CX_ASSERT(bt1.contains(1), "");
+
+    CX_ASSERT(bt1.contains(2), "");
+
+    // Test size
+    std::cout << "  Testing size method..." << std::endl;
+    CX_ASSERT(bt1.size() == 2, "");
+
+    // Test erase
+    std::cout << "  Testing erase method..." << std::endl;
+    bt1.erase(1);
+    CX_ASSERT(!bt1.contains(1), "");
+    CX_ASSERT(bt1.size() == 1, "");
+
+    // Test erase non-existing value
+    std::cout << "  Testing erase non-existing value..." << std::endl;
+    bool erased = bt1.erase(5);  // Should return false as 5 doesn't exist
+    CX_ASSERT(erased == false, "");
+
+    // Test newly created tree
+    std::cout << "  Testing newly created tree..." << std::endl;
+    BinaryTree<int> bt2;
+    CX_ASSERT(bt2.empty(), "");
+    CX_ASSERT(bt2.size() == 0, "");
+
+    // Test insert and contained
+    std::cout << "  Testing insertion and contained method..." << std::endl;
+    bt2.insert(10);
+    CX_ASSERT(bt2.contains(10), "");
+    CX_ASSERT(!bt2.empty(), "");
+    CX_ASSERT(bt2.size() == 1, "");
+
+    // Test insert multiple elements
+    std::cout << "  Testing insertion of multiple elements..." << std::endl;
+    bt2.insert(15);
+    CX_ASSERT(bt2.contains(15), "");
+    bt2.insert(5);
+    CX_ASSERT(bt2.contains(5), "");
+    CX_ASSERT(!bt2.contains(4), "");
+    CX_ASSERT(bt2.size() == 3, "");
+
+    // Test maxDepth method
+    std::cout << "  Testing maxDepth method..." << std::endl;
+    CX_ASSERT(bt2.maxDepth() == 2, "");  // Check if depth is correct after insertions
+    // Test invert method
+    std::cout << "  Testing invert method..." << std::endl;
+    std::vector<int> normalTraversal, invertedTraversal;
+    for (auto it = bt2.begin(); it != bt2.end(); ++it) {
+      normalTraversal.push_back(*it);
+    }
+
+    bt2.invert();
+
+    for (auto it = bt2.begin(); it != bt2.end(); ++it) {
+      invertedTraversal.push_back(*it);
+    }
+    CX_ASSERT(normalTraversal != invertedTraversal, "");
+
+    std::cout << "  Testing sorted traversal..." << std::endl;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distr(0, 100);
+    bt2.clear();
+    for (uint_fast32_t i = 0; i < 100; i++) {
+      bt2.insert(distr(gen));
+    }
+    int prev_num = 0;
+    for (const auto& num : bt2) {
+      CX_ASSERT(num >= prev_num, "sort check");
+      prev_num = num;
+    }
+  }
+#  endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_BINARYTREE_H

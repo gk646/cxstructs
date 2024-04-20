@@ -19,9 +19,9 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_DATASTRUCTURES_PAIR_H_
-#define CXSTRUCTS_SRC_DATASTRUCTURES_PAIR_H_
+#  define CXSTRUCTS_SRC_DATASTRUCTURES_PAIR_H_
 
-#include "../cxconfig.h"
+#  include "../cxconfig.h"
 
 //used in the HashLinkedList in the buffer array
 
