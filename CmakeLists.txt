@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.25.1)
-project(cxstructs  CXX)
+cmake_minimum_required(VERSION 3.14)
+project(cxstructs CXX)
 
 option(BUILD_TESTS "Build test executable" OFF)
 
@@ -10,10 +10,10 @@ add_library(cxstructs INTERFACE)
 
 target_include_directories(cxstructs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-if(BUILD_TESTS)
+if (BUILD_TESTS)
     file(GLOB_RECURSE SRC_FILES
             "src/*.cpp"
             "src/*.h"
             "src/*.hpp")
     add_executable(cxstructs_test ${SRC_FILES})
-endif()
+endif ()
