@@ -21,7 +21,6 @@
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_CONSTRAINT_H_
 #  define CXSTRUCTS_SRC_CXSTRUCTS_CONSTRAINT_H_
 
-#  include "../cxconfig.h"
 #  include <cstdlib>
 
 namespace cxstructs {
@@ -58,7 +57,7 @@ class Constraint {
 
   [[nodiscard]] auto holds() const -> bool { return currentVal; }
 
-  auto exitcode() -> int {
+  auto exitcode() const -> int  {
     if (currentVal == CONSTRAINT) {
       return EXIT_SUCCESS;
     }
