@@ -24,6 +24,14 @@
 #  include "../cxconfig.h"
 #  include <iterator>  // For std::forward_iterator_tag
 
+//StackVector is a compile-time sized container very similar to a std::array
+//However it differs in its interface being closer to a std::vector
+//When keeping track of the size you can avoid a lot of the ugly syntax that comes when checking
+//for empty slots in a std::array (or it might not even be possible)
+//Basically you trade 8 bytes of additional memory (the size type will always be padded to 8) for clean syntax and a nice interface
+
+// SUPPORTS non-trivial types!
+
 namespace cxstructs {
 template <typename T, size_t N, typename size_type = uint32_t>
 class StackVector {
@@ -183,16 +191,36 @@ class StackVector {
   void resize(size_type size) { size_ = size; }
 
   auto front() -> T& {
-    static T dummy;
-    return size_ > 0 ? data_[0] : dummy;
+    if (size_ > 0) {
+      return data_[0];
+    }
+    std::abort();
   }
 
   auto back() -> T& {
-    static T dummy;
-    return size_ > 0 ? data_[size_ - 1] : dummy;
+    if (size_ > 0) {
+      return data_[size_ - 1];
+    }
+    std::abort();
   }
 
-  auto data() -> const T* { return data_; }
+  auto front() const -> T {
+    if (size_ > 0) {
+      return data_[0];
+    }
+    std::abort();
+  }
+
+  auto back() const -> T {
+    if (size_ > 0) {
+      return data_[size_ - 1];
+    }
+    std::abort();
+  }
+
+  auto data() -> T* { return data_; }
+
+  auto cdata() -> const T* { return data_; }
 
   template <typename PtrType>
   class IteratorTemplate {

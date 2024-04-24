@@ -98,6 +98,30 @@
 // Also sort variable declarations logically where applicable (inside functions)
 //
 
+// === Includes ======================================================
+//
+// Use "" for project level includes and <> for libraries
+//
+//  #include "ui/components/Button.h"
+//  #include <raylib.h>
+//
+// Include from the src directory (include it in cmake) and use full path for all includes
+//
+//  #include "ui/components/Button.h"     //instead of #include "../components/Button.h"
+
+// === Structured Bindings ======================================================
+//
+// Use structure bindings when possible
+//    - if the variable can be split into 2-4 members
+//
+// Rectange hitBox = {0,0,50,50};
+// if(hitBox.x > 0 && hitBox.width == 50){}
+//
+// -> instead:
+//
+// auto& [x, y, width, height] = Rectangle{0,0,50,50};
+// if(x > 0 &&width == 50){}
+//
 
 
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
