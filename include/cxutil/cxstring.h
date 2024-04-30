@@ -78,6 +78,90 @@ inline bool str_cmp(const char* arg, const char* arg2) {
   }
   return *arg == *arg2;  // Both should be '\0' if strings are truly equal
 }
+// Parses the given string into a int on best effort basis
+inline int str_parse_int(const char* str, const int radix = 10) {
+  if (str == nullptr || *str == '\0') return 0;
+
+  int result = 0;
+  bool negative = false;
+  if (*str == '-') {
+    negative = true;
+    ++str;
+  }
+
+  while (*str) {
+    char digit = *str;
+    int value;
+    if (digit >= '0' && digit <= '9') value = digit - '0';
+    else if (digit >= 'a' && digit <= 'z') value = 10 + digit - 'a';
+    else if (digit >= 'A' && digit <= 'Z') value = 10 + digit - 'A';
+    else break;
+
+    if (value >= radix) break;
+
+    result = result * radix + value;
+    ++str;
+  }
+
+  return negative ? -result : result;
+}
+// Parses the given string into a int64 on best effort basis
+inline int64_t str_parse_long(const char* str, const int radix = 10) {
+  if (str == nullptr || *str == '\0') return 0;
+
+  int64_t result = 0;
+  bool negative = false;
+  if (*str == '-') {
+    negative = true;
+    ++str;
+  }
+
+  while (*str) {
+    char digit = *str;
+    int64_t value;
+    if (digit >= '0' && digit <= '9') value = digit - '0';
+    else if (digit >= 'a' && digit <= 'z') value = 10 + digit - 'a';
+    else if (digit >= 'A' && digit <= 'Z') value = 10 + digit - 'A';
+    else break;
+
+    if (value >= radix) break;
+
+    result = result * radix + value;
+    ++str;
+  }
+
+  return negative ? -result : result;
+}
+inline float str_parse_float(const char* str) {
+  if (str == nullptr || *str == '\0') return 0.0;
+
+  double result = 0.0;
+  bool negative = false;
+  if (*str == '-') {
+    negative = true;
+    ++str;
+  }
+
+  // Parse the integer part
+  while (*str && *str != '.') {
+    if (*str < '0' || *str > '9') break;
+    result = result * 10 + (*str - '0');
+    ++str;
+  }
+
+  // Parse the fractional part
+  if (*str == '.') {
+    ++str;
+    double factor = 0.1;
+    while (*str && *str >= '0' && *str <= '9') {
+      result += (*str - '0') * factor;
+      factor *= 0.1;
+      ++str;
+    }
+  }
+
+  return negative ? -result : result;
+}
 // string hash function
 constexpr auto fnv1a_32(char const* s) noexcept -> uint32_t {
   uint32_t hash = 2166136261U;
