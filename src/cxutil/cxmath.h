@@ -57,12 +57,7 @@ inline auto d_tanh(float x) noexcept -> float {
   return 1 - t * t;
 }
 
-//-----------UTILS-----------//
-/**
- * Finds the <b>next</b> closest power of two to the right of the given number
- * @param n the start number
- * @return the next power of two or n, if n is a power of 2
- */
+// Finds the closest power of two to the right of the given number
 inline auto next_power_of_2(uint32_t n) noexcept -> uint32_t {
   n--;
   n |= n >> 1;
@@ -73,11 +68,7 @@ inline auto next_power_of_2(uint32_t n) noexcept -> uint32_t {
   n++;
   return n;
 }
-/**
- * Fast inverse square root from quake (inversed)
- * @param n
- * @return the square root of n
- */
+// Fast inverse square root from quake (inversed)
 inline auto fast_sqrt(float n) noexcept -> float {
   long i;
   float x2, y;
@@ -91,14 +82,7 @@ inline auto fast_sqrt(float n) noexcept -> float {
   y = y * (threehalfs - (x2 * y * y));
   return 1.0F / y;
 }
-/**
- * Clamps the given value between the range
- * @tparam T
- * @param val value to check
- * @param low lowest possible value
- * @param high  highest possible value
- * @return low if val is smaller than low, val if val is between low and high, and high if val is bigger than high
- */
+// Clamps the given value between the ]range - low[ if val is smaller than low, val if val is between low and high, and high if val is bigger than high
 template <typename T>
 constexpr auto clamp(const T& val, const T& low, const T& high) -> T
   requires(!std::is_integral_v<T>)
@@ -112,7 +96,7 @@ constexpr auto clamp(const T& val, const T& low, const T& high) -> T
 
   return val;
 }
-
+// Clamps the given value between the ]range - low[ if val is smaller than low, val if val is between low and high, and high if val is bigger than high
 template <typename T>
 constexpr auto clamp(T val, T low, T high) -> T
   requires std::is_integral_v<T>
@@ -125,15 +109,16 @@ constexpr auto clamp(T val, T low, T high) -> T
   }
   return val;
 }
-
+// Linear interpolation - translates the given old value in the old scaling to the corresponding point in the new scale
 template <typename T, typename U>
-T lerp(T value, T minOld, T maxOld, U minNew, U maxNew) {
-  return (static_cast<double>(value - minOld) /
-          static_cast<double>(maxOld - minOld)) *
-             (maxNew - minNew) +
-         minNew;
+T lerp(T valueOld, T minOld, T maxOld, U minNew, U maxNew) {
+  return (static_cast<double>(valueOld - minOld) / static_cast<double>(maxOld - minOld)) * (maxNew - minNew) + minNew;
 }
-
+// True if the given "val" is within the specified range
+template <typename T>
+bool in_range(T val, T min, T max) {
+  return val > min && val < max;
+}
 
 //-----------DISTANCE-----------//
 inline auto euclidean(float p1x, float p1y, float p2x, float p2y) noexcept -> float {

@@ -494,14 +494,14 @@ class StackHashMap {
 
     CX_ASSERT(myMap2["hey"] == 100, "");
 
-    cxstructs::StackHashMap<const char*, int, 7, cxstructs::Fnv1aHash> compMap;
-    compMap.insert("hello", 5);
-    compMap.insert("bye", 10);
-    compMap.insert("hihi", 15);
+    //cxstructs::StackHashMap<const char*, int, 7, cxstructs::Fnv1aHash> compMap;
+    //compMap.insert("hello", 5);
+    //compMap.insert("bye", 10);
+    //compMap.insert("hihi", 15);
 
-    printf("%d\n", compMap["hello"]);
-    printf("%d\n", compMap["bye"]);
-    printf("%d\n", compMap["hihi"]);
+    //printf("%d\n", compMap["hello"]);
+    //printf("%d\n", compMap["bye"]);
+   // printf("%d\n", compMap["hihi"]);
   }
 #  endif
 };
