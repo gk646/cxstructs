@@ -21,7 +21,6 @@
 #ifndef CXSTRUCTS_SRC_CXUTIL_MATH_H_
 #  define CXSTRUCTS_SRC_CXUTIL_MATH_H_
 
-#  include "../cxconfig.h"
 #  include <cmath>
 
 namespace cxstructs {

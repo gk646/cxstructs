@@ -21,36 +21,64 @@
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
 #  define CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
 
-#  include "../cxconfig.h"
-#  include <cstdlib>
-#  include <type_traits>
+#  include <cstdint>
+#  include <cstdio>
+#  include <cstring>
 
 namespace cxstructs {
+// Pads the given string "arg" inside "buff" with the "padSymbol" - optional prefix and suffix
+inline void str_pad(char* buff, const int size, const char* arg, const char padSymbol,
+                    const char* prefix = nullptr, const char* suffix = nullptr) {
+  int currPos = 0;
+  std::memset(buff, 0, size);
 
-template <typename T>
-auto str_parse_token(char** context, const char delim) {
-  const char* start = *context;
-  while (**context != '\0' && **context != delim) {
-    (*context)++;
+  if (prefix) {
+    currPos += snprintf(buff, size, "%s", prefix);
+    currPos = currPos > size ? size : currPos;
+  }
+  if (currPos < size) {
+    currPos += snprintf(buff + currPos, size - currPos, "%s", arg);
+    currPos = currPos > size ? size : currPos;
+  }
+  if (suffix && currPos < size) {
+    snprintf(buff + currPos, size - currPos, "%s", suffix);
   }
 
-  if constexpr (std::is_same_v<T, float>) {
-    auto result = std::strtof(start, context);
-    if (**context == delim) (*context)++;
-    return result;
-  } else if constexpr (std::is_same_v<T, int>) {
-    auto result = (int)std::strtol(start, context, 10);
-    if (**context == delim) (*context)++;
-    return result;
-  } else if constexpr (std::is_same_v<T, const char*>) {
-    const char* result = start;
-    if (**context == delim) {
-      *(*context) = '\0';
-      (*context)++;  // Move past the delimiter for the next call
+  for (int i = currPos; i < size - 1; i++) {
+    if (buff[i] == '\0') {
+      buff[i] = padSymbol;
     }
-    return result;
   }
+  buff[size - 1] = '\0';
 }
+// Measure the length of the given string "arg" using a while loop
+inline int str_len(const char* arg) {
+  int len = 0;
+  while (*arg) {
+    arg++;
+    len++;
+  }
+  return len;
+}
+// Returns an allocated copy of the given string "arg" (with new[]);
+[[nodiscard("Allocates new string")]] inline char* str_dup(const char* arg) {
+  const int len = strlen(arg);
+  auto* newBuff = new char[len + 1];
+  for (int i = 0; i <= len; i++) {
+    newBuff[i] = arg[i];
+  }
+  return newBuff;
+}
+// Compares to string with a while loop
+inline bool str_cmp(const char* arg, const char* arg2) {
+  while (*arg && *arg2) {
+    if (*arg != *arg2) return false;
+    arg++;
+    arg2++;
+  }
+  return *arg == *arg2;  // Both should be '\0' if strings are truly equal
+}
+// string hash function
 constexpr auto fnv1a_32(char const* s) noexcept -> uint32_t {
   uint32_t hash = 2166136261U;
   while (*s != 0) {
@@ -59,6 +87,7 @@ constexpr auto fnv1a_32(char const* s) noexcept -> uint32_t {
   }
   return hash;
 }
+// Hash operator for a const char* for e.g. std::unordered_map
 struct Fnv1aHash {
   auto operator()(const char* s) const noexcept -> std::size_t {
     uint32_t hash = 2166136261U;
@@ -69,17 +98,43 @@ struct Fnv1aHash {
     return hash;
   }
 };
-#  ifdef CX_INCLUDE_TESTS
-static void TEST_STRING() {
-  char buff[64] = "ParseME|0.3|55|-55|";
-  char* ptr = buff;
-  printf("%s\n", cxstructs::str_parse_token<const char*>(&ptr, '|'));
-  printf("%f\n", cxstructs::str_parse_token<float>(&ptr, '|'));
-  printf("%d\n", cxstructs::str_parse_token<int>(&ptr, '|'));
-  printf("%d\n", cxstructs::str_parse_token<int>(&ptr, '|'));
-}
-#  endif
-
+// Equal operator for a const char* for e.g. std::unordered_map
+struct StrEqual {
+  bool operator()(const char* s1, const char* s2) const { return std::strcmp(s1, s2) == 0; }
+};
 }  // namespace cxstructs
+
+#  ifdef CX_INCLUDE_TESTS
+#    include <unordered_map>
+#    include <string>
+#    include "../cxconfig.h"
+
+namespace cxtests {
+static void TEST_STRING() {
+  std::unordered_map<const char*, int, cxstructs::Fnv1aHash, cxstructs::StrEqual> myMap;
+  auto* hey1 = "hey";
+  auto* hey2 = "hey";
+  auto s = std::string("hey");
+  auto* hey3 = s.c_str();
+
+  myMap.insert({"hey", 1});
+
+  CX_ASSERT(myMap.at(hey1) == 1, "");
+  CX_ASSERT(myMap.at(hey2) == 1, "");
+  CX_ASSERT(myMap.at(hey3) == 1, "");
+  CX_ASSERT(myMap.at("hey") == 1, "");
+  CX_ASSERT(myMap.at("hey") == 1, "");
+
+  auto it = myMap.find(hey3);
+  CX_ASSERT(it != myMap.end(), "");
+  it = myMap.find(hey1);
+  CX_ASSERT(it != myMap.end(), "");
+  it = myMap.find(hey2);
+  CX_ASSERT(it != myMap.end(), "");
+  it = myMap.find("hey");
+  CX_ASSERT(it != myMap.end(), "");
+}
+}  // namespace cxtests
+#  endif
 
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
