@@ -31,79 +31,58 @@
 //Basically you trade 8 bytes of additional memory (the size type will always be padded to 8) for clean syntax and a nice interface
 
 // SUPPORTS non-trivial types!
+// SUPPORTS Complex constructors!
 
 namespace cxstructs {
 template <typename T, size_t N, typename size_type = uint32_t>
 class StackVector {
-
-  T data_[N];           // Stack-allocated array
-  size_type size_ = 0;  // Current number of elements in the array
+  alignas(T) std::byte data_[sizeof(T) * N];  // Stack-allocated array
+  size_type size_ = 0;                        // Current number of elements in the array
 
  public:
   StackVector() : size_(0) {}
 
-  explicit StackVector(size_type elems) : size_(elems) {}
-
-  StackVector(const StackVector& other) : size_(other.size_) {
-    if constexpr (std::is_trivially_copyable_v<T>) {
-      std::memcpy(data_, other.data_, other.size_ * sizeof(T));
-    } else {
-      for (size_type i = 0; i < other.size_; ++i) {
-        new (data_ + i) T(other.data_[i]);  // Copy construct T
-      }
+  explicit StackVector(size_type count, const T& value = T()) : size_(count) {
+    CX_ASSERT(count <= N, "Initial size exceeds maximum capacity");
+    for (size_type i = 0; i < count; ++i) {
+      new (reinterpret_cast<T*>(data_) + i) T(value);
     }
   }
 
+  StackVector(const StackVector& other) : size_(other.size_) {
+    for (size_type i = 0; i < other.size_; ++i) {
+      new (reinterpret_cast<T*>(data_) + i) T(*(reinterpret_cast<const T*>(other.data_) + i));
+    }
+  }
+
+  // Copy assignment operator
   StackVector& operator=(const StackVector& other) {
     if (this != &other) {
-      if constexpr (std::is_trivially_copyable_v<T> && std::is_trivially_destructible_v<T>) {
-        std::memcpy(data_, other.data_, other.size_ * sizeof(T));
-        size_ = other.size_;
-      } else {
-        // Properly handle existing elements
-        if (other.size_ < size_) {
-          // Destroy extra elements
-          for (size_type i = other.size_; i < size_; ++i) {
-            data_[i].~T();
-          }
-        }
-        for (size_type i = 0; i < other.size_ && i < size_; ++i) {
-          data_[i] = other.data_[i];  // Copy assignment of T
-        }
-        for (size_type i = size_; i < other.size_; ++i) {
-          new (data_ + i) T(other.data_[i]);  // Copy construct T
-        }
-        size_ = other.size_;
+      clear();
+      for (size_type i = 0; i < other.size_; ++i) {
+        new (reinterpret_cast<T*>(data_) + i) T(*(reinterpret_cast<const T*>(other.data_) + i));
       }
+      size_ = other.size_;
     }
     return *this;
   }
 
-  StackVector(StackVector&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
-      : size_(other.size_) {
-    if constexpr (std::is_trivially_copyable_v<T>) {
-      std::memcpy(data_, other.data_, other.size_ * sizeof(T));
-    } else {
-      for (size_type i = 0; i < other.size_; ++i) {
-        new (data_ + i) T(std::move(other.data_[i]));
-        other.data_[i].~T();
-      }
+  // Move constructor
+  StackVector(StackVector&& other) noexcept(std::is_nothrow_move_constructible_v<T>) : size_(other.size_) {
+    for (size_type i = 0; i < other.size_; ++i) {
+      new (reinterpret_cast<T*>(data_) + i) T(std::move(*(reinterpret_cast<T*>(other.data_) + i)));
     }
     other.size_ = 0;
   }
 
+  // Move assignment operator
   StackVector& operator=(StackVector&& other) noexcept(std::is_nothrow_move_assignable_v<T>) {
     if (this != &other) {
       clear();
-      size_ = other.size_;
-      if constexpr (std::is_trivially_copyable_v<T>) {
-        std::memcpy(data_, other.data_, other.size_ * sizeof(T));
-      } else {
-        for (size_type i = 0; i < other.size_; ++i) {
-          new (data_ + i) T(std::move(other.data_[i]));
-          other.data_[i].~T();
-        }
+      for (size_type i = 0; i < other.size_; ++i) {
+        new (reinterpret_cast<T*>(data_) + i) T(std::move(*(reinterpret_cast<T*>(other.data_) + i)));
       }
+      size_ = other.size_;
       other.size_ = 0;
     }
     return *this;
@@ -115,23 +94,15 @@ class StackVector {
   void push_back(const T& value) {
     CX_ASSERT(size_ < N, "Attempt to add to a full StackArray");
     CX_STACK_ABORT_IMPL();
-    if constexpr (std::is_trivially_copyable_v<T>) {
-      data_[size_++] = value;
-    } else {
-      new (data_ + size_) T(value);
-      ++size_;
-    }
+    new (reinterpret_cast<T*>(data_) + size_) T(value);
+    ++size_;
   }
 
   void push_back(T&& value) {
     CX_ASSERT(size_ < N, "Attempt to add to a full StackArray");
     CX_STACK_ABORT_IMPL();
-    if constexpr (std::is_trivially_copyable_v<T>) {
-      data_[size_++] = std::move(value);
-    } else {
-      new (data_ + size_) T(std::move(value));
-      ++size_;
-    }
+    new (reinterpret_cast<T*>(data_) + size_) T(std::move(value));
+    ++size_;
   }
 
   // Call cannot fail | Overwrites first elements and resets size on loop
@@ -139,10 +110,10 @@ class StackVector {
     size_type index = size_ % N;
     if constexpr (!std::is_trivially_copyable_v<T>) {
       if (size_ >= N) {
-        data_[index].~T();
+        reinterpret_cast<T*>(data_ + index * sizeof(T))->~T();
       }
     }
-    new (data_ + index) T(value);
+    new (reinterpret_cast<T*>(data_) + size_) T(value);
     size_ = (size_ + 1) % N;
   }
 
@@ -150,18 +121,18 @@ class StackVector {
   void emplace_back(Args&&... args) {
     CX_ASSERT(size_ < N, "Attempt to add to a full StackArray");
     CX_STACK_ABORT_IMPL();
-    new (data_ + size_) T(std::forward<Args>(args)...);
+    new (reinterpret_cast<T*>(data_) + size_) T(std::forward<Args>(args)...);
     ++size_;
   }
 
   auto operator[](size_type index) -> T& {
     CX_ASSERT(index < size_, "Index out of range");
-    return data_[index];
+    return *reinterpret_cast<T*>(data_ + index * sizeof(T));
   }
 
   auto operator[](size_type index) const -> const T& {
     CX_ASSERT(index < size_, "Index out of range");
-    return data_[index];
+    return *reinterpret_cast<const T*>(data_ + index * sizeof(T));
   }
 
   [[nodiscard]] auto size() const -> size_type { return size_; }
@@ -180,83 +151,87 @@ class StackVector {
   }
 
   void clear() {
-    if constexpr (!std::is_trivially_destructible_v<T>) {
-      for (size_type i = 0; i < size_; ++i) {
-        data_[i].~T();  // Call destructor for each constructed element
-      }
+    for (size_type i = 0; i < size_; ++i) {
+      reinterpret_cast<T*>(data_ + i * sizeof(T))->~T();
     }
     size_ = 0;
   }
 
-  void resize(size_type size) { size_ = size; }
+  void resize(size_type new_size, const T& value = T()) {
+    if (new_size > size_) {
+      CX_ASSERT(new_size <= N, "Resize size exceeds maximum capacity");
+      for (size_type i = size_; i < new_size; ++i) {
+        new (reinterpret_cast<T*>(data_) + i) T(value);
+      }
+    } else {
+      for (size_type i = new_size; i < size_; ++i) {
+        reinterpret_cast<T*>(data_ + i * sizeof(T))->~T();
+      }
+    }
+    size_ = new_size;
+  }
 
   auto front() -> T& {
     if (size_ > 0) {
-      return data_[0];
+      return *reinterpret_cast<T*>(data_);
     }
     std::abort();
   }
 
-  auto back() -> T& {
+  auto back() noexcept -> T& {
     if (size_ > 0) {
-      return data_[size_ - 1];
+      return *reinterpret_cast<T*>(data_ + size_ * sizeof(T));
     }
     std::abort();
   }
 
   auto front() const -> T {
     if (size_ > 0) {
-      return data_[0];
+      return *reinterpret_cast<T*>(data_);
     }
     std::abort();
   }
 
   auto back() const -> T {
     if (size_ > 0) {
-      return data_[size_ - 1];
+      return *reinterpret_cast<T*>(data_ + size_ * sizeof(T));
     }
     std::abort();
   }
 
-  auto data() -> T* { return data_; }
+  auto data() -> T* { return reinterpret_cast<T*>(data_); }
 
-  auto cdata() -> const T* { return data_; }
+  auto cdata() -> const T* { return reinterpret_cast<const T*>(data_); }
 
   template <typename PtrType>
   class IteratorTemplate {
    public:
     using iterator_category = std::forward_iterator_tag;
-    using value_type = std::remove_const_t<PtrType>;  // Remove const for value_type
+    using value_type = std::remove_const_t<PtrType>;
     using difference_type = std::ptrdiff_t;
     using pointer = PtrType*;
     using reference = PtrType&;
 
     explicit IteratorTemplate(pointer ptr) : ptr_(ptr) {}
 
-    auto operator*() const -> reference { return *ptr_; }
+    reference operator*() const { return *ptr_; }
+    pointer operator->() const { return ptr_; }
 
-    auto operator->() const -> pointer { return ptr_; }
-
-    // Prefix increment
-    auto operator++() -> IteratorTemplate& {
-      ptr_++;
+    IteratorTemplate& operator++() {
+      ptr_ = reinterpret_cast<pointer>(
+          reinterpret_cast<std::conditional_t<std::is_const_v<PtrType>, const std::byte*, std::byte*>>(ptr_)
+          + sizeof(T));
       return *this;
     }
 
-    // Postfix increment
-    auto operator++(int) -> IteratorTemplate {
+    IteratorTemplate operator++(int) {
       IteratorTemplate tmp = *this;
       ++(*this);
       return tmp;
     }
 
-    friend auto operator==(const IteratorTemplate& a, const IteratorTemplate& b) -> bool {
-      return a.ptr_ == b.ptr_;
-    }
-
-    friend auto operator!=(const IteratorTemplate& a, const IteratorTemplate& b) -> bool {
-      return a.ptr_ != b.ptr_;
-    }
+    friend bool operator==(const IteratorTemplate& a, const IteratorTemplate& b) { return a.ptr_ == b.ptr_; }
+    friend bool operator!=(const IteratorTemplate& a, const IteratorTemplate& b) { return a.ptr_ != b.ptr_; }
 
    private:
     pointer ptr_;
@@ -277,29 +252,92 @@ class StackVector {
 
     --size_;
 
-    return Iterator(data_ + index);
+    return Iterator(reinterpret_cast<T*>(data_ + index * sizeof(T)));
   }
 
-  auto begin() const -> ConstIterator { return ConstIterator(&data_[0]); }
+  using Iterator = IteratorTemplate<T>;
+  using ConstIterator = IteratorTemplate<const T>;
 
-  auto end() const -> ConstIterator { return ConstIterator(&data_[size_]); }
+  Iterator begin() { return Iterator(reinterpret_cast<T*>(data_)); }
 
-  auto begin() -> Iterator { return Iterator(&data_[0]); }
+  Iterator end() { return Iterator(reinterpret_cast<T*>(data_ + size_ * sizeof(T))); }
 
-  auto end() -> Iterator { return Iterator(&data_[size_]); }
+  ConstIterator begin() const { return ConstIterator(reinterpret_cast<const T*>(data_)); }
 
-#  ifdef CX_INCLUDE_TESTS
-  static void TEST() {
-    StackVector<int, 100> arr;
-    for (int i = 0; i < 10; i++) {
-      arr.push_back(100);
-    }
-    CX_ASSERT(arr.size() == 10, "Size has to be 10");
-
-    arr.clear();
-    CX_ASSERT(arr.size() == 0, "Size has to be 0");
-  }
-#  endif
+  ConstIterator end() const { return ConstIterator(reinterpret_cast<const T*>(data_ + size_ * sizeof(T))); }
 };
 }  // namespace cxstructs
+
+#  ifdef CX_INCLUDE_TESTS
+#    include <string>
+#    include <iostream>
+namespace cxtests {
+struct ComplexType {
+  std::string name;
+  int value;
+
+  ComplexType(std::string n, int v) : name(std::move(n)), value(v) {
+    std::cout << "ComplexType created: " << name << std::endl;
+  }
+
+  ComplexType(const ComplexType& other) : name(other.name), value(other.value) {
+    std::cout << "ComplexType copied: " << name << std::endl;
+  }
+
+  ~ComplexType() { std::cout << "ComplexType destroyed: " << name << std::endl; }
+};
+
+// Test functions
+static void testBasicOperations() {
+  cxstructs::StackVector<int, 100> intVector;
+  for (int i = 0; i < 10; i++) {
+    intVector.push_back(i * 10);
+  }
+  CX_ASSERT(intVector.size() == 10, "Size should be 10 after adding 10 elements");
+
+  intVector.clear();
+  CX_ASSERT(intVector.size() == 0, "Size should be 0 after clear");
+}
+
+static void testComplexTypeOperations() {
+  cxstructs::StackVector<ComplexType, 10> complexVector;
+  complexVector.push_back(ComplexType("Item1", 100));
+  complexVector.push_back(ComplexType("Item2", 200));
+
+  CX_ASSERT(complexVector.size() == 2, "Size should be 2 after adding 2 complex elements");
+
+  // Checking destructor calls on clear by listening to console output
+  complexVector.clear();
+  CX_ASSERT(complexVector.size() == 0, "Size should be 0 after clear");
+}
+
+static void testCopyConstructor() {
+  cxstructs::StackVector<int, 5> original;
+  for (int i = 0; i < 5; i++) {
+    original.push_back(i);
+  }
+
+  cxstructs::StackVector<int, 5> copied = original;
+  CX_ASSERT(copied.size() == 5, "Copied vector should have size 5");
+  for (int i = 0; i < 5; i++) {
+    CX_ASSERT(copied[i] == i, "Copied vector elements should match original");
+  }
+}
+
+static void TEST_STACK_VECTOR() {
+  cxstructs::StackVector<int, 100> arr;
+  for (int i = 0; i < 10; i++) {
+    arr.push_back(100);
+  }
+  CX_ASSERT(arr.size() == 10, "Size has to be 10");
+
+  arr.clear();
+  CX_ASSERT(arr.size() == 0, "Size has to be 0");
+
+  testBasicOperations();
+  testComplexTypeOperations();
+  testCopyConstructor();
+}
+}  // namespace cxtests
+#  endif
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_STACKARRAY_H_
