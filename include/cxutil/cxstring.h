@@ -62,7 +62,7 @@ inline int str_len(const char* arg) {
 }
 // Returns an allocated copy of the given string "arg" (with new[]);
 [[nodiscard("Allocates new string")]] inline char* str_dup(const char* arg) {
-  const int len = strlen(arg);
+  const int len = str_len(arg);
   auto* newBuff = new char[len + 1];
   for (int i = 0; i <= len; i++) {
     newBuff[i] = arg[i];
@@ -78,7 +78,7 @@ inline bool str_cmp(const char* arg, const char* arg2) {
   }
   return *arg == *arg2;  // Both should be '\0' if strings are truly equal
 }
-// Parses the given string into a int on best effort basis
+// Parses the given string into a int on best effort basis - stops when encountering any non numeric characters
 inline int str_parse_int(const char* str, const int radix = 10) {
   if (str == nullptr || *str == '\0') return 0;
 
@@ -132,10 +132,11 @@ inline int64_t str_parse_long(const char* str, const int radix = 10) {
 
   return negative ? -result : result;
 }
+// Parses the given string into a float on best effort basis
 inline float str_parse_float(const char* str) {
   if (str == nullptr || *str == '\0') return 0.0;
 
-  double result = 0.0;
+  float result = 0.0;
   bool negative = false;
   if (*str == '-') {
     negative = true;
@@ -152,7 +153,7 @@ inline float str_parse_float(const char* str) {
   // Parse the fractional part
   if (*str == '.') {
     ++str;
-    double factor = 0.1;
+    float factor = 0.1;
     while (*str && *str >= '0' && *str <= '9') {
       result += (*str - '0') * factor;
       factor *= 0.1;
@@ -166,7 +167,7 @@ inline float str_parse_float(const char* str) {
 constexpr auto fnv1a_32(char const* s) noexcept -> uint32_t {
   uint32_t hash = 2166136261U;
   while (*s != 0) {
-    hash ^= (uint32_t)(*s++);
+    hash ^= (uint32_t)*s++;
     hash *= 16777619U;
   }
   return hash;
