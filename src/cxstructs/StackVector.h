@@ -28,7 +28,10 @@
 //However it differs in its interface being closer to a std::vector
 //When keeping track of the size you can avoid a lot of the ugly syntax that comes when checking
 //for empty slots in a std::array (or it might not even be possible)
-//Basically you trade 8 bytes of additional memory (the size type will always be padded to 8) for clean syntax and a nice interface
+
+//  [Basically you trade 8 bytes of additional memory (the size type will always be padded to 8) for clean syntax and a nice interface]
+//    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// -> With the redesigned std::byte reducing the size of size_type can matter
 
 // SUPPORTS non-trivial types!
 // SUPPORTS Complex constructors!
@@ -41,6 +44,12 @@ class StackVector {
 
  public:
   StackVector() : size_(0) {}
+
+  StackVector(const std::initializer_list<T>& elems) {
+    for (const auto& e : elems) {
+      push_back(e);
+    }
+  }
 
   explicit StackVector(size_type count, const T& value = T()) : size_(count) {
     CX_ASSERT(count <= N, "Initial size exceeds maximum capacity");
@@ -255,8 +264,6 @@ class StackVector {
     return Iterator(reinterpret_cast<T*>(data_ + index * sizeof(T)));
   }
 
-  using Iterator = IteratorTemplate<T>;
-  using ConstIterator = IteratorTemplate<const T>;
 
   Iterator begin() { return Iterator(reinterpret_cast<T*>(data_)); }
 
