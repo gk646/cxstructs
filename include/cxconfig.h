@@ -34,9 +34,7 @@
 #  define CX_INL inline
 #  define CX_NDISC [[nodiscard]]
 
-/**
- * namespace for exposed structs and functions
- */
+// namespace for exposed structs and functions
 namespace cxstructs {}
 
 
