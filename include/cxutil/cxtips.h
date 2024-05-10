@@ -33,6 +33,12 @@
 // Coding Guidelines
 // -----------------------------------------------------------------------------
 
+// === Core Rules ========================================
+// No RTTI
+// No Multiple inheritance
+// No Exceptions
+
+
 // === Explicit is better than implicit ========================================
 
 // === Use 'const' and 'constexpr' =============================================
