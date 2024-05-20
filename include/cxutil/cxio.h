@@ -31,7 +31,7 @@
 // Using the CXX23 std::print() is about 10% slower
 namespace cxstructs {
 // inline static constexpr char DELIMITER = '|'; //Not used yet
-static constexpr int MAX_SECTION_SIZE = 32;
+static constexpr int MAX_SECTION_SIZE = 16;
 
 //-----------SHARED-----------//
 namespace {
@@ -83,21 +83,32 @@ inline void io_save(FILE* file, const char* value) {
 inline void io_save(FILE* file, const int value) {
   fprintf(file, "%d|", value);
 }
-// Writes a float property to the file
+// Writes an boolean to the file
+inline void io_save(FILE* file, const bool value) {
+  fprintf(file, "%d|", value ? 1 : 0);
+}
+// Writes a float to the file
 inline void io_save(FILE* file, const float value) {
   fprintf(file, "%.3f|", value);
+}
+// Writes a three floats to the file
+inline void io_save(FILE* file, const float value, const float value2, const float value3) {
+  fprintf(file, "%.3f|%.3f|%.3F|", value, value2, value3);
 }
 // Buffers the given SaveFunc to memory so the file is only written if it
 // executes successfully. Returns false on error
 template <typename SaveFunc>  // SaveFunc(FILE* file)
 bool io_save_buffered_write(const char* fileName, const int memoryBufferBytes, SaveFunc func) {
-
   CX_ASSERT(memoryBufferBytes > 0, "Given buffer size invalid");
 
+#  ifdef _WIN32
   FILE* file;
-
+  fopen_s(&file,"NUL", "wb");
+#  else
+  FILE* file = fopen("/dev/null", "wb");
+#  endif
   // Write to in memory buffer
-  if (fopen_s(&file, "NUL", "w") != 0) {
+  if (file == nullptr) {
     return false;
   }
 
@@ -105,7 +116,7 @@ bool io_save_buffered_write(const char* fileName, const int memoryBufferBytes, S
   std::memset(buffer, 0, memoryBufferBytes);
 
   // _IOLBF is line buffering
-  if (setvbuf(file, buffer, _IOLBF, memoryBufferBytes) != 0) {
+  if (setvbuf(file, buffer, _IOFBF, memoryBufferBytes) != 0) {
     delete[] buffer;
     return false;
   }
@@ -120,7 +131,12 @@ bool io_save_buffered_write(const char* fileName, const int memoryBufferBytes, S
 
   // When successful, open the actual save file and save the data
   const int dataSize = (int)strlen(buffer);
-  if (fopen_s(&file, fileName, "w") != 0) {
+#  ifdef _WIN32
+  fopen_s(&file,fileName, "wb");
+#  else
+   file = fopen(fileName, "wb");
+#  endif
+  if (file == nullptr) {
     delete[] buffer;
     return false;
   }
@@ -166,7 +182,7 @@ inline bool io_load_inside_section(FILE* file, const char* section) {
       return true;  // Not a new section marker
     }
 
-    char buffer[MAX_SECTION_SIZE] = {0};
+    char buffer[MAX_SECTION_SIZE] = {};
     int count = 0;
     int sectionLength = manual_strlen(section);
     while (fread(&ch, 1, 1, file) == 1 && count < sectionLength && count < MAX_SECTION_SIZE - 1) {
@@ -186,8 +202,8 @@ inline bool io_load_inside_section(FILE* file, const char* section) {
   return true;  // Still inside same section
 }
 // include <string> to use
-#  ifdef _STRING_
-inline void io_load(FILE* file, std::string& s, int reserve_amount = 50) {
+#  if defined( _STRING_) || defined(_GLIBCXX_STRING)
+inline void io_load(FILE* file, std::string& s, int reserve_amount = 15) {
   s.reserve(reserve_amount);
   char ch;
   while (fread(&ch, 1, 1, file) == 1 && ch != '|') {
@@ -206,11 +222,21 @@ inline void io_load(FILE* file, char* buffer, size_t buffer_size) {
 }
 // Directly load an integer property from the file
 inline void io_load(FILE* file, int& i) {
-  fscanf_s(file, "%d|", &i);
+  fscanf(file, "%d|", &i);
 }
-// Directly load a float property from the file
+// Directly load a boolean to the file
+inline void io_load(FILE* file, bool& value) {
+  int num = 0;
+  fscanf(file, "%d|", &num);
+  value = num == 1;
+}
+// Directly load a float from the file
 inline void io_load(FILE* file, float& f) {
-  fscanf_s(file, "%f|", &f);
+  fscanf(file, "%f|", &f);
+}
+// Directly load a three floats from the file
+inline void io_load(FILE* file, float& f, float& f2, float& f3) {
+  fscanf(file, "%f|%f|%f|", &f, &f2, &f3);
 }
 
 }  // namespace cxstructs
@@ -223,10 +249,10 @@ using namespace std::chrono;
 static void benchMark() {
   FILE* file;
   const char* filename = "hello.txt";
-  constexpr int num = 100;
+  constexpr int num = 1000;
   int val = 5;
   auto start_write = high_resolution_clock::now();
-  fopen_s(&file, filename, "w");
+  fopen_s(&file, filename, "wb");
   if (file != nullptr) {
     for (int i = 0; i < num; i++) {
       for (int j = 0; j < num; j++) {
@@ -239,7 +265,7 @@ static void benchMark() {
   auto end_write = high_resolution_clock::now();
   auto start_read = high_resolution_clock::now();
 
-  fopen_s(&file, filename, "r");
+  fopen_s(&file, filename, "rb");
   if (file != nullptr) {
     for (int i = 0; i < num; i++) {
       for (int j = 0; j < num; j++) {
@@ -260,13 +286,13 @@ void test_save_load_string() {
   char buffer[256];
 
   // Save
-  FILE* file = std::fopen(test_filename, "w");
+  FILE* file = std::fopen(test_filename, "wb");
   cxstructs::io_save(file, original_string);
   cxstructs::io_save_newline(file);
   std::fclose(file);
 
   // Load
-  file = std::fopen(test_filename, "r");
+  file = std::fopen(test_filename, "rb");
   cxstructs::io_load(file, buffer, sizeof(buffer));
   std::fclose(file);
 
@@ -279,13 +305,13 @@ void test_save_load_int() {
   int loaded_int;
 
   // Save
-  FILE* file = std::fopen(test_filename, "w");
+  FILE* file = std::fopen(test_filename, "wb");
   cxstructs::io_save(file, original_int);
   cxstructs::io_save_newline(file);
   std::fclose(file);
 
   // Load
-  file = std::fopen(test_filename, "r");
+  file = std::fopen(test_filename, "rb");
   cxstructs::io_load(file, loaded_int);
   std::fclose(file);
 
@@ -299,13 +325,13 @@ void test_save_load_float() {
 
   // Save
   FILE* file;
-  fopen_s(&file, test_filename, "w");
+  fopen_s(&file, test_filename, "wb");
   cxstructs::io_save(file, original_float);
   cxstructs::io_save_newline(file);
   std::fclose(file);
 
   // Load
-  fopen_s(&file, test_filename, "r");
+  fopen_s(&file, test_filename, "rb");
   cxstructs::io_load(file, loaded_float);
   std::fclose(file);
 
@@ -314,8 +340,7 @@ void test_save_load_float() {
 }
 void delete_test_files() {
   // List of test files to delete
-  const char* files[] = {"test_string.txt", "test_int.txt", "test_float.txt", "test_complex.txt",
-                         "hello.txt"};
+  const char* files[] = {"test_string.txt", "test_int.txt", "test_float.txt", "test_complex.txt", "hello.txt"};
 
   // Iterate over the array and delete each file
   for (const char* filename : files) {
@@ -343,7 +368,7 @@ void test_complex_save_load() {
 
   // Save complex data
   FILE* file;
-  fopen_s(&file, test_filename, "w");
+  fopen_s(&file, test_filename, "wb");
   if (file) {
     cxstructs::io_save(file, original_str1);
     cxstructs::io_save(file, original_int);
@@ -357,7 +382,7 @@ void test_complex_save_load() {
   }
 
   // Load complex data
-  file = std::fopen(test_filename, "r");
+  file = std::fopen(test_filename, "rb");
   if (file) {
     cxstructs::io_load(file, buffer_str1, sizeof(buffer_str1));
     cxstructs::io_load(file, loaded_int);
