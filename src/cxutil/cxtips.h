@@ -38,8 +38,10 @@
 // No Multiple inheritance
 // No Exceptions
 
-
 // === Explicit is better than implicit ========================================
+
+// === Data Oriented Design ========================================
+// Reason about your data and computing method to write fitting code
 
 // === Use 'const' and 'constexpr' =============================================
 // Use `const` and `constexpr` where possible to enforce immutability and

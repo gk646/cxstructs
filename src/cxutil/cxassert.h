@@ -23,7 +23,8 @@
 
 #  include <cstdio>
 
-inline void CX_ASSERT_failed(const char* expr, const char* file, int line, const char* message) {
+namespace {
+void CX_ASSERT_failed(const char* expr, const char* file, int line, const char* message) {
   fprintf(stderr, "Assert failed: %s\nAt: %s:%d\nMessage: %s", expr, file, line, message);
 #  if defined(_MSC_VER)
   __debugbreak();
@@ -34,27 +35,20 @@ inline void CX_ASSERT_failed(const char* expr, const char* file, int line, const
 #  endif
 }
 
-inline void WARNING_failed(const char* expr, const char* file, int line, const char* message) {
+void WARNING_failed(const char* expr, const char* file, int line, const char* message) {
   fprintf(stderr, "Warning: %s\nAt: %s:%d\nMessage: %s", expr, file, line, message);
 }
+}  // namespace
 
-#  define CX_ASSERT(expr, message)                                                                 \
-    ((expr) ? (void)0 : CX_ASSERT_failed(#expr, __FILE__, __LINE__, message))
+#  define CX_ASSERT(expr, message) ((expr) ? (void)0 : CX_ASSERT_failed(#expr, __FILE__, __LINE__, message))
 
-#  define CX_WARNING(expr, message)                                                                \
-    ((expr) ? (void)0 : WARNING_failed(#expr, __FILE__, __LINE__, message))
+#  define CX_WARNING(expr, message) ((expr) ? (void)0 : WARNING_failed(#expr, __FILE__, __LINE__, message))
 
-#  if defined(_MSC_VER) && !defined(_DEBUG)
+#  if !defined(_DEBUG) || defined(NDEBUG)
 #    undef CX_ASSERT
+#    undef CX_WARNING
 #    define CX_ASSERT(expr, message) ((void)0)
-#  elif defined(NDEBUG)
-#    undef CX_ASSERT
-#    undef CX_ASSERT_1
-#    undef CX_ASSERT_2
-#    define CX_ASSERT_1(expr) ((void)0)
-#    define CX_ASSERT_2(expr, message) ((void)0)
-#    define GET_MACRO(_1, _2, NAME, ...) NAME
-#    define CX_ASSERT(...) GET_MACRO(__VA_ARGS__, CX_ASSERT_2, CX_ASSERT_1)(__VA_ARGS__)
+#    define CX_WARNING(expr, message) ((void)0)
 #  endif
 
 #endif  //CXSTRUCTS_SRC_CXASSERT_H_
