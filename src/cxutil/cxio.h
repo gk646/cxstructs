@@ -19,10 +19,10 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXIO_H_
-#  define CXSTRUCTS_SRC_CXIO_H_
+#define CXSTRUCTS_SRC_CXIO_H_
 
-#  include "../cxconfig.h"
-#  include <cstring>
+#include "../cxconfig.h"
+#include <cstring>
 
 // Simple, readable and fast *symmetric* serialization structure with loading
 // and saving. Each line is a concatenated list of values and a separator
@@ -34,7 +34,7 @@
 
 namespace cxstructs {
 static constexpr int MAX_SECTION_SIZE = 16;
-#  define NEW_LINE_SUB '\036'
+#define NEW_LINE_SUB '\036'
 
 //-----------SHARED-----------//
 namespace {
@@ -121,14 +121,16 @@ template <typename SaveFunc>  // SaveFunc(FILE* file)
 bool io_save_buffered_write(const char* fileName, const int memoryBufferBytes, SaveFunc func) {
   CX_ASSERT(memoryBufferBytes > 0, "Given buffer size invalid");
 
-#  ifdef _WIN32
+#ifdef _WIN32
   FILE* file;
   fopen_s(&file, "NUL", "wb");
-#  else
+#else
   FILE* file = fopen("/dev/null", "wb");
-#  endif
+#endif
   // Write to in memory buffer
-  if (file == nullptr) { return false; }
+  if (file == nullptr) {
+    return false;
+  }
 
   auto* buffer = new char[memoryBufferBytes];
   std::memset(buffer, 0, memoryBufferBytes);
@@ -149,11 +151,11 @@ bool io_save_buffered_write(const char* fileName, const int memoryBufferBytes, S
 
   // When successful, open the actual save file and save the data
   const int dataSize = (int)strlen(buffer);
-#  ifdef _WIN32
+#ifdef _WIN32
   fopen_s(&file, fileName, "wb");
-#  else
+#else
   file = fopen(fileName, "wb");
-#  endif
+#endif
   if (file == nullptr) {
     delete[] buffer;
     return false;
@@ -169,7 +171,9 @@ bool io_save_buffered_write(const char* fileName, const int memoryBufferBytes, S
 
   delete[] buffer;
 
-  if (fclose(file) != 0) { return false; }
+  if (fclose(file) != 0) {
+    return false;
+  }
 
   return true;
 }
@@ -224,23 +228,27 @@ inline bool io_load_inside_section(FILE* file, const char* section) {
   return true;  // Still inside same section
 }
 // include <string> to use
-#  if defined(_STRING_) || defined(_GLIBCXX_STRING)
+#if defined(_STRING_) || defined(_GLIBCXX_STRING)
 inline void io_load(FILE* file, std::string& s) {
   //s.reserve(reserve_amount); // Dont need to reserve - string shouldnt allocate below 15 characters
   char ch;
   while (fread(&ch, 1, 1, file) == 1 && ch != '\037') {
-    if (ch == NEW_LINE_SUB) [[unlikely]] { ch = '\n'; }
+    if (ch == NEW_LINE_SUB) [[unlikely]] {
+      ch = '\n';
+    }
     s.push_back(ch);
   }
   while (ch != '\37' && fread(&ch, 1, 1, file) == 1) {}
 }
-#  endif
+#endif
 // Load a string property into a user-supplied buffer - return bytes written - reads until linesep is found
 inline int io_load(FILE* file, char* buffer, size_t buffer_size) {
   int count = 0;
   char ch;
   while (count < buffer_size - 1 && fread(&ch, 1, 1, file) == 1 && ch != '\037') {
-    if (ch == NEW_LINE_SUB) [[unlikely]] { ch = '\n'; }
+    if (ch == NEW_LINE_SUB) [[unlikely]] {
+      ch = '\n';
+    }
     buffer[count++] = ch;
   }
   buffer[count] = '\0';
@@ -272,10 +280,10 @@ inline void io_load(FILE* file, float& f, float& f2, float& f3) {
 inline void io_load(FILE* file, float& f, float& f2) {
   fscanf(file, "%f;%f\037", &f, &f2);
 }
-}
+}  // namespace cxstructs
 
-#  ifdef CX_INCLUDE_TESTS
-#    include <chrono>
+#ifdef CX_INCLUDE_TESTS
+#include <chrono>
 namespace cxtests {
 using namespace cxstructs;
 using namespace std::chrono;
@@ -446,5 +454,5 @@ static void TEST_IO() {
   delete_test_files();
 }
 }  // namespace cxtests
-#  endif
+#endif
 #endif  // CXSTRUCTS_SRC_CXIO_H_

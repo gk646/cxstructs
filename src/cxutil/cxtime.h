@@ -19,11 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CX_TIME_H
-#  define CX_TIME_H
+#define CX_TIME_H
 
-#  include "../cxconfig.h"
-#  include <chrono>
-#  include <print>
+#include "../cxconfig.h"
+#include <chrono>
+#include <print>
 
 namespace cxstructs {
 using namespace std;  //std:: makes this code unreadable
@@ -67,17 +67,10 @@ void printTime(const char* prefix = nullptr, const int checkpoint = 0) {
   const auto diffInDesiredUnits = std::chrono::duration_cast<DurationType>(diff);
 
   if (prefix) {
-#  if _HAS_CXX23
-    std::print("{} ", prefix);
-#  else
     printf("%s", prefix);
-#  endif
   }
-#  if _HAS_CXX23
-  std::print("{} {}\n", diffInDesiredUnits.count(), get_duration_unit<DurationType>());
-#  else
+
   printf("%lld %s\n", diffInDesiredUnits.count(), get_duration_unit<DurationType>());
-#  endif
 }
 template <typename DurationType = std::chrono::duration<double>>
 auto getTime(const int checkpoint = 0) -> long long {

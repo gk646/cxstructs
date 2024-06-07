@@ -10,8 +10,7 @@ efficiency and interface.
 
 The general namespace is `cxstructs`.
 
-*Note: Currently the old datastructures are modernized with focus on better includes for compile times and correctness.*  
-*Non-Stack datastructure might not be usable for now*
+*Note: Some datastructures are outdated*
 
 **1.** [Contents](#contents)   
 **2.** [Usage Guide](#usage-guide)   
@@ -22,7 +21,7 @@ The general namespace is `cxstructs`.
 
 ### Speed Comparison
 
-*Relative to the fastest / with CXPoolAllocator (if applicable)*
+ Note: *These are old benchmarks*
 
 |                 |  vector  |  Stack   | HashMap  | StackHashMap | HashSet | LinkedList |  Queue   | DeQueue  |
 |:----------------|:--------:|:--------:|:--------:|:------------:|:-------:|:----------:|:--------:|:--------:|
@@ -57,26 +56,30 @@ The general namespace is `cxstructs`.
 
 #### Data Structures
 
-- **Vector**(*vec*):
-- **Matrix**(*mat*): *flattened float array, lots of methods*
-- **Row**(*row*): *compile-time sized, non-mutable container*
-- **Pair**: *static container for two types*
-- **Trie**: *limited to ASCII (128)*
-- **Stack**:
-- **HashMap**: *using separate chaining with LinkedLists with static buffer*
-- **HashSet**: *using separate chaining with LinkedLists with static buffer*
-- **HashGrid**: *uses STL containers / 2D spatial lookups*
-- **Linked List**:
+- **HashGrid**: *Very fast cache friendly implementation*
+- **SmallVector**: *Vector with configurable stack based storage buffer*
+- **BitMask**: *various bit mask container*
 - **StackVector**: *stack container with std::vector interface*
 - **StackHashMap**: *(yes :) stack container with std::unordered map interface*
-- **Double Linked List**:
-- **Queue**: *using circular array*
-- **DeQueue**: *using circular array*
 - **PriorityQueue**: *using binary heap*
-- **Binary Tree**:
-- **QuadTree**: *allows custom Types with x() and y() getters*
-- **BitMask**: *various bit mask container*
-- **Geometry**(*Rect,Circle,Point*): *standard efficient 2D shapes*
+
+
+- **Outdated** 
+  - **Vector**(*vec*):
+  - **Matrix**(*mat*): *flattened float array, lots of methods*
+  - **Row**(*row*): *compile-time sized, non-mutable container*
+  - **Pair**: *static container for two types*
+  - **Trie**: *limited to ASCII (128)*
+  - **Stack**:
+  - **HashMap**: *using separate chaining with LinkedLists with static buffer*
+  - **HashSet**: *using separate chaining with LinkedLists with static buffer*
+  - **Linked List**:
+  - **Double Linked List**:
+  - **Queue**: *using circular array*
+  - **DeQueue**: *using circular array*
+  - **Binary Tree**:
+  - **QuadTree**: *allows custom Types with x() and y() getters*
+  - **Geometry**(*Rect,Circle,Point*): *standard efficient 2D shapes*
 
 #### Machine Learning
 
@@ -97,12 +100,16 @@ The general namespace is `cxstructs`.
 
 - **cxassert**: *custom assertions with optional text*
 - **cxbits**: *bit operations on numbers for embedding and retrieving information*
-- **cxgraphics**: *simple native windowing and graphics output header*
 - **cxio**: *simple, readable and symmetric file io format*
 - **cxmath**: *activation functions,distance functions, next_power_of_2, square root*
 - **cxstring**: *operations on strings*
 - **cxtime**: *simple time measurements with multiple time points and formats*
 - **cxtips**: *collection of helpful resources and personal guidelines with examples*
+
+
+- **Outdated**:
+  - **cxgraphics**: *simple native windowing and graphics output header*
+
 
 ---
 
@@ -220,4 +227,3 @@ for PriorityQueue)
 - The CX_ASSERT macro is inspired by the
   video ["How I use C++;a line-by-line code review"](https://www.youtube.com/watch?v=W8-G_PL6p-0&pp=ygUYbXkgYysrIGlzIGluc2FuZSBzdHJhZ2Vy)
   by Strager
-

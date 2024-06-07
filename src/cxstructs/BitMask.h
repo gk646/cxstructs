@@ -19,13 +19,104 @@
 // SOFTWARE.
 #define FINISHED
 #ifndef CXSTRUCTS_SRC_CXSTRUCTS_BITFLAG_H_
-#  define CXSTRUCTS_SRC_CXSTRUCTS_BITFLAG_H_
+#define CXSTRUCTS_SRC_CXSTRUCTS_BITFLAG_H_
 
-#  include "../cxconfig.h"
-#  include <type_traits>
-#  include <initializer_list>
+#include "../cxconfig.h"
+#include <initializer_list>
 
 namespace cxstructs {
+
+template <size_t N>
+struct SuitableStorageType {
+  // Default to uint64_t for N <= 64
+  using type =
+      std::conditional_t<N <= 8, uint8_t,
+                         std::conditional_t<N <= 16, uint16_t, std::conditional_t<N <= 32, uint32_t, uint64_t>>>;
+};
+
+/**
+ * BitMask for a given enum type
+ *
+ * Enum constant have to be power of 2:
+ * enum Test { ONE = 1, TWO = 2, THREE = 4 };
+ * @tparam E the enum
+ * @tparam MAX_FLAGS maximum amount of expected flags (can be different from enum type)
+ */
+template <class E>
+class EnumMask {
+  E data_ = 0;
+
+ public:
+  void set(E flag) noexcept { data_ |= static_cast<E>(flag); }
+
+  void unset(E flag) noexcept { data_ &= ~static_cast<E>(flag); }
+
+  void toggle(E flag) noexcept { data_ ^= static_cast<E>(flag); }
+
+  [[nodiscard]] bool isSet(E flag) const noexcept { return (data_ & static_cast<E>(flag)) != 0; }
+
+  void clear() noexcept { data_ = 0; }
+
+  [[nodiscard]] bool any() const noexcept { return data_ != 0x0; }
+
+  //Compile time check(unfolding)
+  template <E... Flags>
+  [[nodiscard]] constexpr bool any_of() const noexcept {
+    E compositeFlag = (0 | ... | static_cast<E>(Flags));
+    return (data_ & compositeFlag) != 0;
+  }
+
+  //Compile time check(unfolding)
+  template <E... Flags>
+  [[nodiscard]] constexpr bool all_of() const noexcept {
+    E compositeFlag = (0 | ... | static_cast<E>(Flags));
+    return (data_ & compositeFlag) == compositeFlag;
+  }
+
+  //Runtime check
+  [[nodiscard]] bool any_of(std::initializer_list<E> flags) const noexcept {
+    for (auto flag : flags) {
+      if ((data_ & static_cast<E>(flag)) != 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  //Runtime check
+  [[nodiscard]] bool all_of(std::initializer_list<E> flags) const noexcept {
+    for (auto flag : flags) {
+      if ((data_ & static_cast<E>(flag)) == 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+};
+
+#ifdef CX_INCLUDE_TESTS
+static void TEST_FLAG_CONTAINERS() {
+
+  enum Test { ONE = 1, TWO = 2, THREE = 4 };
+  EnumMask<Test, 1> flag;
+  flag.set(ONE);
+  CX_ASSERT(flag.isSet(ONE), "");
+  flag.clear();
+  CX_ASSERT(!flag.isSet(ONE), "");
+
+  auto res = !flag.any_of<ONE, TWO>();
+  CX_ASSERT(res, "");
+
+  flag.set(THREE);
+  CX_ASSERT(flag.any(), "");
+  res = flag.any_of<THREE, TWO>();
+  CX_ASSERT(res, "");
+
+  flag.set(TWO);
+  res = flag.all_of<THREE, TWO>();
+  CX_ASSERT(res, "");
+}
+#endif
 
 //-----------BLUEPRINT-----------//
 /*
@@ -64,102 +155,5 @@ Flag31 = 1 << 30,
 Flag32 = 1U << 31,
 };
  */
-
-template <size_t N>
-struct SuitableStorageType {
-  // Default to uint64_t for N <= 64
-  using type = std::conditional_t<
-      N <= 8, uint8_t,
-      std::conditional_t<N <= 16, uint16_t, std::conditional_t<N <= 32, uint32_t, uint64_t>>>;
-};
-
-/**
- * BitMask for a given enum type
- *
- * Enum constant have to be power of 2:
- * enum Test { ONE = 1, TWO = 2, THREE = 4 };
- * @tparam E the enum
- * @tparam MAX_FLAGS maximum amount of expected flags (can be different from enum type)
- */
-template <class E, size_t MAX_FLAGS>
-class EnumMask {
- private:
-  using StorageType = typename SuitableStorageType<MAX_FLAGS>::type;
-  StorageType data_ = 0;
-
- public:
-  inline void set(E flag) noexcept { data_ |= static_cast<StorageType>(flag); }
-
-  inline void unset(E flag) noexcept { data_ &= ~static_cast<StorageType>(flag); }
-
-  inline void toggle(E flag) noexcept { data_ ^= static_cast<StorageType>(flag); }
-
-  [[nodiscard]] inline bool isSet(E flag) const noexcept {
-    return (data_ & static_cast<StorageType>(flag)) != 0;
-  }
-
-  inline void clear() noexcept { data_ = 0; }
-
-  [[nodiscard]] inline bool any() const noexcept { return data_ != 0x0; }
-
-  //Compile time check(unfolding)
-  template <E... Flags>
-  [[nodiscard]] constexpr bool any_of() const noexcept {
-    StorageType compositeFlag = (0 | ... | static_cast<StorageType>(Flags));
-    return (data_ & compositeFlag) != 0;
-  }
-
-  //Compile time check(unfolding)
-  template <E... Flags>
-  [[nodiscard]] constexpr bool all_of() const noexcept {
-    StorageType compositeFlag = (0 | ... | static_cast<StorageType>(Flags));
-    return (data_ & compositeFlag) == compositeFlag;
-  }
-
-  //Runtime check
-  [[nodiscard]] inline bool any_of(std::initializer_list<E> flags) const noexcept {
-    for (auto flag : flags) {
-      if ((data_ & static_cast<StorageType>(flag)) != 0) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  //Runtime check
-  [[nodiscard]] inline bool all_of(std::initializer_list<E> flags) const noexcept {
-    for (auto flag : flags) {
-      if ((data_ & static_cast<StorageType>(flag)) == 0) {
-        return false;
-      }
-    }
-    return true;
-  }
-};
-
-#  ifdef CX_INCLUDE_TESTS
-static void TEST_FLAG_CONTAINERS() {
-
-  enum Test { ONE = 1, TWO = 2, THREE = 4 };
-  EnumMask<Test, 1> flag;
-  flag.set(ONE);
-  CX_ASSERT(flag.isSet(ONE), "");
-  flag.clear();
-  CX_ASSERT(!flag.isSet(ONE), "");
-
-  auto res = !flag.any_of<ONE, TWO>();
-  CX_ASSERT(res, "");
-
-  flag.set(THREE);
-  CX_ASSERT(flag.any(), "");
-  res = flag.any_of<THREE, TWO>();
-  CX_ASSERT(res, "");
-
-  flag.set(TWO);
-  res = flag.all_of<THREE, TWO>();
-  CX_ASSERT(res, "");
-}
-#  endif
-
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_SRC_CXSTRUCTS_BITFLAG_H_
