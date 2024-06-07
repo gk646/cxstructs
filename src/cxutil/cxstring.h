@@ -19,13 +19,12 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
-#  define CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
+#define CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_
 
-
-#  include <cstdint>
-#  include <cstdio>
-#  include <cstring>
-#  include <cctype>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <cctype>
 
 namespace cxstructs {
 // Pads the given string "arg" inside "buff" with the "padSymbol" - optional prefix and suffix
@@ -42,10 +41,14 @@ inline void str_pad(char* buff, const int size, const char* arg, const char padS
     currPos += snprintf(buff + currPos, size - currPos, "%s", arg);
     currPos = currPos > size ? size : currPos;
   }
-  if (suffix && currPos < size) { snprintf(buff + currPos, size - currPos, "%s", suffix); }
+  if (suffix && currPos < size) {
+    snprintf(buff + currPos, size - currPos, "%s", suffix);
+  }
 
   for (int i = currPos; i < size - 1; i++) {
-    if (buff[i] == '\0') { buff[i] = padSymbol; }
+    if (buff[i] == '\0') {
+      buff[i] = padSymbol;
+    }
   }
   buff[size - 1] = '\0';
 }
@@ -309,7 +312,7 @@ struct Fnv1aHash {
 struct StrEqual {
   bool operator()(const char* s1, const char* s2) const { return std::strcmp(s1, s2) == 0; }
 };
-#  if defined(_STRING_) || defined(_GLIBCXX_STRING)
+#if defined(_STRING_) || defined(_GLIBCXX_STRING)
 // Replaces the string with the string representation of the given number
 inline void str_embed_num(std::string& s, float num) {
   s.clear();
@@ -317,13 +320,13 @@ inline void str_embed_num(std::string& s, float num) {
   snprintf(buff, sizeof(buff), "%.6f", num);
   s.append(buff);
 }
-#  endif
+#endif
 }  // namespace cxstructs
 
-#  ifdef CX_INCLUDE_TESTS
-#    include <unordered_map>
-#    include <string>
-#    include "../cxconfig.h"
+#ifdef CX_INCLUDE_TESTS
+#include <unordered_map>
+#include <string>
+#include "../cxconfig.h"
 
 namespace cxtests {
 static void TEST_STRING() {
@@ -351,6 +354,6 @@ static void TEST_STRING() {
   CX_ASSERT(it != myMap.end(), "");
 }
 }  // namespace cxtests
-#  endif
+#endif
 
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXSTRING_H_

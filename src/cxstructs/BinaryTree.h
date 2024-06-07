@@ -19,16 +19,11 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_BINARYTREE_H
-#  define CXSTRUCTS_BINARYTREE_H
+#define CXSTRUCTS_BINARYTREE_H
 
-#  include <algorithm>
-#  include <deque>
-#  include <iostream>
-#  include <stdexcept>
-#  include <vector>
-#  include "../cxconfig.h"
+#include "../cxconfig.h"
 
-namespace cxhelper {  // namespace to hide helper structs
+namespace cxhelper {
 /**
  * Helper struct for the BinaryTree
  * @tparam T type
@@ -38,10 +33,9 @@ struct TreeNode {
   TreeNode* left_;
   TreeNode* right_;
   T data_;
-  inline explicit TreeNode(const T& val) : data_(val), left_(nullptr), right_(nullptr) {}
+   explicit TreeNode(const T& val) : data_(val), left_(nullptr), right_(nullptr) {}
 
-  inline TreeNode(const T& val, TreeNode* left, TreeNode* right)
-      : data_(val), left_(left), right_(right) {}
+   TreeNode(const T& val, TreeNode* left, TreeNode* right) : data_(val), left_(left), right_(right) {}
 };
 }  // namespace cxhelper
 namespace cxstructs {
@@ -65,7 +59,7 @@ class BinaryTree {
   TNode* root_;
   uint_32_cx size_;
 
-  inline int subTreeDepth(TNode* node) {
+  int subTreeDepth(TNode* node) {
     if (!node) {
       return 0;
     } else {
@@ -74,7 +68,7 @@ class BinaryTree {
       return std::max(left, right) + 1;
     }
   }
-  inline void insert(const T& val, TNode* node) {
+  void insert(const T& val, TNode* node) {
     if (val < node->data_) {
       if (!node->left_) {
         node->left_ = new TNode(val);
@@ -85,7 +79,7 @@ class BinaryTree {
       } else insert(val, node->right_);
     }
   }
-  inline bool contains(const T& val, TNode* node) const {
+  bool contains(const T& val, TNode* node) const {
     if (node) {
       if (val < node->data_) {
         if (node->left_) {
@@ -103,7 +97,7 @@ class BinaryTree {
     }
     return false;
   }
-  inline TNode* erase(const T& val, TNode* node) {
+  TNode* erase(const T& val, TNode* node) {
     if (!node) {
       return node;
     }
@@ -131,7 +125,7 @@ class BinaryTree {
     }
     return node;
   }
-  inline TNode* minValueNode(TNode* node) {
+  TNode* minValueNode(TNode* node) {
     TNode* current = node;
 
     while (current && current->left_ != nullptr) {
@@ -142,7 +136,6 @@ class BinaryTree {
 
  public:
   BinaryTree() : root_(nullptr), size_(0){};
-  //no moving around yet
   BinaryTree(const BinaryTree&) = delete;
   BinaryTree& operator=(const BinaryTree&) = delete;
   BinaryTree(BinaryTree&&) = delete;
@@ -174,7 +167,7 @@ class BinaryTree {
   /**
    * Inverts this BinaryTree starting from the given node
    */
-  inline void invert(TNode* node) {
+  void invert(TNode* node) {
     if (node == nullptr) {
       return;
     }
@@ -186,13 +179,13 @@ class BinaryTree {
   /**
    * Inverts this BinaryTree starting from the root
    */
-  inline void invert() { invert(root_); }
+  void invert() { invert(root_); }
 
   /**
    * Inserts the given element into the tree at the right position
    * @param val - the inserted value
    */
-  inline void insert(const T& val) {
+  void insert(const T& val) {
     if (root_) {
       insert(val, root_);
       size_++;
@@ -207,14 +200,14 @@ class BinaryTree {
    * @param val - the value to search for
    * @return - true if the tree contained the given value, false otherwise
    */
-  [[nodiscard]] inline bool contains(const T& val) const { return contains(val, root_); }
+  [[nodiscard]] bool contains(const T& val) const { return contains(val, root_); }
 
   /**
    * Erases the first occurrence of a node with this value
    * @param val - the node-value to search for
    * @return true if a deletion happened
    */
-  inline bool erase(const T& val) {
+  bool erase(const T& val) {
     auto temp = size_;
     root_ = erase(val, root_);
     return (temp - 1 == size_);
@@ -223,7 +216,7 @@ class BinaryTree {
   @brief Removes all nodes from the binary tree<p>
    After the operation, the tree becomes empty and its size is 0
    **/
-  inline void clear() {
+  void clear() {
     std::deque<TNode*> nodesToDelete;
     nodesToDelete.push_back(root_);
 
@@ -252,7 +245,7 @@ class BinaryTree {
      *
      * @return true if the BinaryTree is empty, false otherwise.
      */
-  [[nodiscard]] inline bool empty() const { return size_ == 0; }
+  [[nodiscard]] bool empty() const { return size_ == 0; }
   /**
    *
    * @return the maximum depth of the tree
@@ -295,7 +288,7 @@ class BinaryTree {
    */
   InOrderIterator end() { return InOrderIterator(nullptr); }
 
-#  ifdef CX_INCLUDE_TESTS
+#ifdef CX_INCLUDE_TESTS
   static void TEST() {
     std::cout << "BINARY SEARCH TREE TESTS" << std::endl;
 
@@ -376,7 +369,7 @@ class BinaryTree {
       prev_num = num;
     }
   }
-#  endif
+#endif
 };
 }  // namespace cxstructs
 #endif  // CXSTRUCTS_BINARYTREE_H
