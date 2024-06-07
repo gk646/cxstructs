@@ -19,7 +19,7 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
-#  define CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
+#define CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
 
 //Links provided without warranty of function, implied ownership or support of the linked website
 
@@ -130,6 +130,5 @@
 // auto& [x, y, width, height] = Rectangle{0,0,50,50};
 // if(x > 0 &&width == 50){}
 //
-
 
 #endif  //CXSTRUCTS_SRC_CXUTIL_CXTIPS_H_
