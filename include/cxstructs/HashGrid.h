@@ -18,129 +18,194 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #define CX_FINISHED
-#ifndef CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
-#  define CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
+#ifndef CXSTRUCTS_MULTIRESOLUTIONGRID_H
+#define CXSTRUCTS_MULTIRESOLUTIONGRID_H
 
-#  include <unordered_map>
-#  include <vector>
-#  include "../cxconfig.h"
+#include <cassert>
+#include <vector>
+#include <unordered_map>
 
+// IMPORTANT: Use a custom hashmap here (dense map optimally) and possibly a custom vector
+// You can then remove the includes
+template <typename Key, typename Value>
+using HashMapType = std::unordered_map<Key, Value>;  // Insert custom type here
+
+template <typename Value>
+using VectorType = std::vector<Value>;  // Inset custom type here
+
+// This is a cache friendly "top-level" data structure
+// https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
+// Originally inspired by the above post to just move all the data of the structure to the top level
+// This simplifies memory management and layout, it uses just a single vector for data
+// This is achieve by mapping between dimensions, here between a cell and a memory block
+// Now its still not perfect but definitely very fast
+// Also the problem of multiple insertions is efficiently solved by accumulating with a hashmap
+// Its almost mandatory to use a memory consistent map like a dense map thats a vector internally aswell
+// This simplifies memory and thus cache friendlyness even more
+// With this setup you have 0 (zero) allocations in game ticks which involves completely clearing and refilling grid
 namespace cxstructs {
+using CellID = uint64_t;
+// This creates a unique value - both values are unqiue themselves so their concatenated version is aswell
+// We still use a hash function on it to get more byte range (all bits flipped)
+inline CellID GetCellID(const int cellX, const int cellY) {
+  return static_cast<uint64_t>(cellX) << 32 | cellY;
+}
 
-/**
- * HashGrid for a square space
- * A HashGrid divides the space into cells of uniform size, and entities are assigned to these cells based on their spatial coordinates. <br>
- * This spatial partitioning allows for efficient querying and management of entities based on their locations.
- *
- */
-template <typename EntityID = uint32_t>
-struct HashGrid {
-  using size_type = uint_32_cx;
-  using GridID = size_type;
+template <typename T, int size>
+struct DataBlock final {
+  static constexpr int NO_NEXT_BLOCK = UINT16_MAX;
+  T data[size];                   // Fixed size data block
+  uint16_t count = 0;             // Current number of elements
+  uint16_t next = NO_NEXT_BLOCK;  // Index of the next block or -1 if if its the end
 
- private:
-  float cellSize = 0;
-  float totalSpaceSize = 0;
-  size_type gridSize = 0;
-  std::unordered_map<GridID, std::vector<EntityID>> cells;
+  [[nodiscard]] bool isFull() const { return count == size; }
+  // Can happen that its full but no next one is inserted yet
+  [[nodiscard]] bool hasNext() const { return next != NO_NEXT_BLOCK; }
 
- public:
-  explicit HashGrid(float cellSize, float spaceSize)
-      : cellSize(cellSize), totalSpaceSize(spaceSize),
-        gridSize(static_cast<size_type>(spaceSize / cellSize)) {
-    cells.reserve(gridSize * gridSize);
-    cells.max_load_factor(1.0F);
-  };
-  HashGrid() = default;
-  HashGrid(const HashGrid&) = delete;
-  HashGrid& operator=(const HashGrid&) = delete;
-  HashGrid(HashGrid&&) = delete;
-  HashGrid& operator=(HashGrid&& other) noexcept {
-    if (this == &other) {
-      return *this;
+  void add(T val) {
+    assert(count < size);
+    data[count++] = val;
+  }
+  template <typename Container>
+  void append(Container& elems) const {
+    for (int i = 0; i < count; ++i) {
+      elems.insert(data[i]);
     }
-
-    cells = std::move(other.cells);
-    cellSize = other.cellSize;
-    totalSpaceSize = other.totalSpaceSize;
-    gridSize = other.gridSize;
-
-    other.cellSize = 0;
-    other.totalSpaceSize = 0;
-    other.gridSize = 0;
-
-    return *this;
   }
-  inline const std::vector<EntityID>& operator[](GridID g) noexcept { return cells[g]; }
-  [[nodiscard]] inline GridID getGridID(float x, float y) const noexcept {
-    return static_cast<int>(x / cellSize) + static_cast<int>(y / cellSize) * gridSize;
-  }
-  inline void getGridIDs(int32_t (&gridIDs)[4], float x, float y, float width,
-                         float height) const noexcept {
-    int topLeftGridX = static_cast<int>(x / cellSize);
-    int topLeftGridY = static_cast<int>(y / cellSize);
-    int bottomRightGridX = static_cast<int>((x + width) / cellSize);
-    int bottomRightGridY = static_cast<int>((y + height) / cellSize);
+};
 
-    std::fill(std::begin(gridIDs), std::end(gridIDs), -1);
+template <typename V, int blockSize = 16>
+struct SingleResolutionHashGrid final {
+  HashMapType<CellID, int> cellMap{};
+  VectorType<DataBlock<V, blockSize>> dataBlocks{};
+  int cellSize;
 
-    gridIDs[0] = topLeftGridX + topLeftGridY * gridSize;
-    gridIDs[1] = (topLeftGridX != bottomRightGridX) ? bottomRightGridX + topLeftGridY * gridSize
-                                                    : -1;  // Top-right
-    gridIDs[2] = (topLeftGridY != bottomRightGridY) ? topLeftGridX + bottomRightGridY * gridSize
-                                                    : -1;  // Bottom-left
-    gridIDs[3] = (topLeftGridX != bottomRightGridX && topLeftGridY != bottomRightGridY)
-                     ? bottomRightGridX + bottomRightGridY * gridSize
-                     : -1;  // Bottom-right
-  }
-  inline void clear() {
-    for (auto& pair : cells) {
-      pair.second.clear();
-    }
-  };
-  inline void setupNew(float newCellSize, uint_16_cx newSpaceSize, bool optimized = true) {
-    if (optimized) {
-      float value = cellSize / totalSpaceSize;
-      cellSize = newSpaceSize * value;
-      cells.reserve(std::pow(totalSpaceSize / cellSize, 2));
-    } else {
-      cellSize = newCellSize;
-      totalSpaceSize = newSpaceSize;
-    }
-    cells.clear();
-  }
-  inline void insert(float x, float y, EntityID entityID) {
-    CX_ASSERT(x < totalSpaceSize && y < totalSpaceSize, "x or y is larger than spaceSize");
-    cells[getGridID(x, y)].emplace_back(entityID);
-  }
+  explicit SingleResolutionHashGrid(const int cellSize) : cellSize(cellSize) {}
 
-#  ifdef CX_INCLUDE_TESTS
-  static void TEST() {
-    float spaceSize = 100;
-    float cellSize = 5;
+  void insert(V val, const float x, const float y, const int w, const int h) {
+    int x1 = static_cast<int>(x) / cellSize;
+    int y1 = static_cast<int>(y) / cellSize;
+    int x2 = (static_cast<int>(x) + w) / cellSize;
+    int y2 = (static_cast<int>(y) + h) / cellSize;
 
-    HashGrid hashGrid{cellSize, spaceSize};
+    CellID cellID = GetCellID(x1, y1);
+    insertElement(cellID, val);
 
-    for (uint_fast32_t i = 0; i < spaceSize; i++) {
-      for (uint_fast32_t j = 0; j < spaceSize; j++) {
-        hashGrid.insert(i, j, i);
+    if (x1 != x2) [[unlikely]] {
+      cellID = GetCellID(x2, y1);
+      insertElement(cellID, val);
+
+      if (y1 != y2) [[unlikely]] {
+        cellID = GetCellID(x1, y2);
+        insertElement(cellID, val);
+
+        cellID = GetCellID(x2, y2);
+        insertElement(cellID, val);
+        return;
       }
     }
 
-    hashGrid.insert(99, 99, 1);
-    hashGrid.insert(1, 1, 2);
-
-    std::vector<uint32_t> coll;
-    coll.reserve(60);
-
-    now();
-    hashGrid.containedInRectCollect(0, 0, 99, 99, coll);
-    printTime<std::chrono::nanoseconds>("lookup");
-    std::cout << coll.size() << std::endl;
+    if (y1 != y2) [[unlikely]] {
+      cellID = GetCellID(x1, y2);
+      insertElement(cellID, val);
+    }
   }
-#  endif
+
+  template <typename Container>
+  void query(Container& elems, const float x, const float y, const int w, const int h) {
+    const int x1 = static_cast<int>(x) / cellSize;
+    const int y1 = static_cast<int>(y) / cellSize;
+    const int x2 = (static_cast<int>(x) + w) / cellSize;
+    const int y2 = (static_cast<int>(y) + h) / cellSize;
+
+    CellID cellID = GetCellID(x1, y1);
+    queryElements(cellID, elems);
+
+    if (x1 != x2) [[unlikely]] {
+      cellID = GetCellID(x2, y1);
+      queryElements(cellID, elems);
+
+      if (y1 != y2) [[unlikely]] {
+        cellID = GetCellID(x1, y2);
+        queryElements(cellID, elems);
+
+        cellID = GetCellID(x2, y2);
+        queryElements(cellID, elems);
+        return;
+      }
+    }
+
+    if (y1 != y2) [[unlikely]] {
+      cellID = GetCellID(x1, y2);
+      queryElements(cellID, elems);
+    }
+  }
+
+  void clear() {
+    cellMap.clear();
+    dataBlocks.clear();
+  }
+
+  void reserve(const int cells, const int expectedTotalEntites) {
+    cellMap.reserve(cells);
+    dataBlocks.reserve(expectedTotalEntites / blockSize);
+  }
+
+ private:
+  void insertElement(const CellID id, V val) {
+    const auto it = cellMap.find(id);
+    int blockIdx;
+    if (it == cellMap.end()) [[unlikely]]  // Most elements should be together
+    {
+      blockIdx = static_cast<int>(dataBlocks.size());
+      cellMap.insert({id, blockIdx});
+      dataBlocks.push_back({});
+    } else {
+      blockIdx = it->second;
+    }
+
+    auto* block = &dataBlocks[blockIdx];
+
+    while (block->hasNext()) {
+      block = &dataBlocks[block->next];
+    }
+
+    if (block->isFull()) [[unlikely]]  // Only happens once each block
+    {
+      const auto nextIdx = static_cast<uint16_t>(dataBlocks.size());
+      block->next = nextIdx;
+      dataBlocks.push_back({});
+      // Re allocation can invalidate the reference !!!!
+      block = &dataBlocks[nextIdx];
+    }
+
+    block->add(val);
+  }
+
+  template <typename Container>
+  void queryElements(const CellID id, Container& elems) {
+    const auto it = cellMap.find(id);
+    if (it == cellMap.end()) [[unlikely]]  // Most elements should be together
+    {
+      return;
+    }
+    const int blockIdx = it->second;
+    DataBlock<V, blockSize>* startBlock = nullptr;
+    startBlock = &dataBlocks[blockIdx];
+
+    startBlock->append(elems);
+    while (startBlock->hasNext()) {
+      assert(startBlock->isFull());
+      startBlock = &dataBlocks[startBlock->next];
+      startBlock->append(elems);
+    }
+  }
+
+  static_assert(std::is_trivially_constructible_v<V> && std::is_trivially_destructible_v<V>);
+  static_assert(sizeof(V) <= 8, "You should only use small id types");
 };
 
+template <typename Value, int blockSize = 16>
+using HashGrid = SingleResolutionHashGrid<Value, blockSize>;
 }  // namespace cxstructs
-
-#endif  //CXSTRUCTS_SRC_CXSTRUCTS_HASHGRID_H_
+#endif  //CXSTRUCTS_MULTIRESOLUTIONGRID_H
