@@ -23,12 +23,6 @@
 
 #include <cassert>
 #include <vector>
-#include <unordered_map>
-
-// IMPORTANT: Use a custom hashmap here (dense map optimally) and possibly a custom vector
-// You can then remove the includes
-template <typename Key, typename Value>
-using HashMapType = std::unordered_map<Key, Value>;  // Insert custom type here
 
 template <typename Value>
 using VectorType = std::vector<Value>;  // Inset custom type here
@@ -37,12 +31,13 @@ using VectorType = std::vector<Value>;  // Inset custom type here
 // https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
 // Originally inspired by the above post to just move all the data of the structure to the top level
 // This simplifies memory management and layout, it uses just a single vector for data
-// This is achieve by mapping between dimensions, here between a cell and a memory block
+// This is achieved by mapping between dimensions, here between a cell and a memory block
 // Now its still not perfect but definitely very fast
 // Also the problem of multiple insertions is efficiently solved by accumulating with a hashmap
 // Its almost mandatory to use a memory consistent map like a dense map thats a vector internally aswell
 // This simplifies memory and thus cache friendlyness even more
 // With this setup you have 0 (zero) allocations in game ticks which involves completely clearing and refilling grid
+
 namespace cxstructs {
 using CellID = uint64_t;
 // This creates a unique value - both values are unqiue themselves so their concatenated version is aswell
@@ -74,9 +69,10 @@ struct DataBlock final {
   }
 };
 
-template <typename V, int blockSize = 16>
+// IMPORTANT: Use a custom hashmap here (dense map optimally) and possibly a custom vector
+template <typename V, class HashMapType, int blockSize = 16>
 struct SingleResolutionHashGrid final {
-  HashMapType<CellID, int> cellMap{};
+  HashMapType cellMap{};
   VectorType<DataBlock<V, blockSize>> dataBlocks{};
   int cellSize;
 
@@ -205,7 +201,8 @@ struct SingleResolutionHashGrid final {
   static_assert(sizeof(V) <= 8, "You should only use small id types");
 };
 
-template <typename Value, int blockSize = 16>
-using HashGrid = SingleResolutionHashGrid<Value, blockSize>;
+template <typename Value, template<typename, typename> class HashMaptype, int blockSize = 16>
+using HashGrid = SingleResolutionHashGrid<Value, HashMaptype<CellID, int>, blockSize>;
+
 }  // namespace cxstructs
 #endif  //CXSTRUCTS_MULTIRESOLUTIONGRID_H

@@ -90,6 +90,35 @@ inline int str_cmpn_case(const char* s1, const char* s2, int maxCount) {
   }
   return tolower(*s1) - tolower(*s2);
 }
+// Compares the given strings from behind until either string ends or a mismatch occurs
+inline int str_cmp_rev(const char* str1, const char* str2) {
+  if (str1 == nullptr || str2 == nullptr) {
+    return (str1 == nullptr) - (str2 == nullptr);
+  }
+
+  const char* ptr1 = str1;
+  const char* ptr2 = str2;
+
+  // Move the pointers to the end of the strings
+  while (*ptr1) {
+    ptr1++;
+  }
+  while (*ptr2) {
+    ptr2++;
+  }
+
+  // Compare from the end
+  while (ptr1 != str1 && ptr2 != str2) {
+    ptr1--;
+    ptr2--;
+
+    if (*ptr1 != *ptr2) {
+      return *ptr1 - *ptr2;
+    }
+  }
+
+  return (ptr1 - str1) - (ptr2 - str2);
+}
 // Case insensitive! - Tries to find and return the first occurrence of sequence in string
 inline const char* str_substr_case(const char* string, const char* sequence) {
   if (!*sequence) return string;
@@ -108,7 +137,8 @@ inline const char* str_substr_case(const char* string, const char* sequence) {
 }
 // Parses the given string into a int on best effort basis - stops when encountering any non numeric characters
 inline int str_parse_int(const char* str, const int radix = 10) {
-  if (str == nullptr || *str == '\0') return 0;
+  if (str == nullptr || *str == '\0') [[unlikely]]
+    return 0;
 
   int result = 0;
   bool negative = false;
@@ -118,7 +148,7 @@ inline int str_parse_int(const char* str, const int radix = 10) {
   }
 
   while (*str) {
-    char digit = *str;
+    const char digit = *str;
     int value;
     if (digit >= '0' && digit <= '9') value = digit - '0';
     else if (digit >= 'a' && digit <= 'z') value = 10 + digit - 'a';
@@ -222,23 +252,46 @@ inline double str_parse_double(const char* str) {
 
   return negative ? -result : result;
 }
+inline int str_count_chars_until(const char* data, char stop, int maxCount) {
+  int count = 0;
+  while (count < maxCount && data[count] != '\0') {
+    if (data[count] == stop) {
+      break;
+    }
+    count++;
+  }
+  return count;
+}
+inline void str_read_into_until(const char* data, char* buffer, size_t buffer_size, char stop) {
+  size_t count = 0;
+  while (count < buffer_size - 1 && data[count] != stop && data[count] != '\0') {
+    buffer[count] = data[count];
+    count++;
+  }
+  buffer[count] = '\0';
+}
+// Advances the given string pointer until the given amount of the given character is found
+inline void str_skip_char(char*& ptr, const char c, int count) noexcept {
+  while (*ptr != '\0' && count > 0) {
+    if (*ptr == c) {
+      --count;
+    }
+    ++ptr;
+  }
+}
 // Returns the Levenshtein distance for the two given strings
 // This penalizes differences in length
 // Failure: returns -1
 template <int MAX_LEN>
-int str_sort_levenshtein(const char* s1, const char* s2) {
-  if (s1 == nullptr || s2 == nullptr) {
-    return -1;  // Error: string length exceeds maximum allowed length
-  }
+int str_sort_levenshtein_case(const char* s1, const char* s2, const bool caseSensitive = false) {
+  size_t len1 = strlen(s1);
+  size_t len2 = strlen(s2);
 
-  const size_t len1 = strlen(s1);
-  const size_t len2 = strlen(s2);
+  // Soft cap: Adjust lengths to be no more than MAX_LEN
+  len1 = std::min(len1, static_cast<size_t>(MAX_LEN));
+  len2 = std::min(len2, static_cast<size_t>(MAX_LEN));
 
-  if (len1 > MAX_LEN || len2 > MAX_LEN) {
-    return -1;  // Error: string length exceeds maximum allowed length
-  }
-
-  unsigned int d[MAX_LEN + 1][MAX_LEN + 1] = {0};
+  unsigned int d[MAX_LEN + 1][MAX_LEN + 1];
 
   for (unsigned int i = 0; i <= len1; ++i)
     d[i][0] = i;
@@ -247,42 +300,18 @@ int str_sort_levenshtein(const char* s1, const char* s2) {
 
   for (unsigned int i = 1; i <= len1; ++i) {
     for (unsigned int j = 1; j <= len2; ++j) {
-      unsigned int cost = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
+      unsigned int cost;
+      if (caseSensitive) {
+        cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
+      } else {
+        cost = tolower(s1[i - 1]) == tolower(s2[j - 1]) ? 0 : 1;
+      }
+
       unsigned int above = d[i - 1][j] + 1;
       unsigned int left = d[i][j - 1] + 1;
       unsigned int diag = d[i - 1][j - 1] + cost;
 
-      d[i][j] = above < left ? above : left < diag ? left : diag;
-    }
-  }
-
-  return d[len1][len2];
-}
-// Case insensitive! - Levenshtein distance
-template <int MAX_LEN>
-int str_sort_levenshtein_case(const char* s1, const char* s2) {
-  const size_t len1 = strlen(s1);
-  const size_t len2 = strlen(s2);
-
-  if (len1 > MAX_LEN || len2 > MAX_LEN) {
-    return -1;  // Error: string length exceeds maximum allowed length
-  }
-
-  unsigned int d[MAX_LEN + 1][MAX_LEN + 1] = {0};
-
-  for (unsigned int i = 0; i <= len1; ++i)
-    d[i][0] = i;
-  for (unsigned int j = 0; j <= len2; ++j)
-    d[0][j] = j;
-
-  for (unsigned int i = 1; i <= len1; ++i) {
-    for (unsigned int j = 1; j <= len2; ++j) {
-      unsigned int cost = (tolower(s1[i - 1]) == tolower(s2[j - 1])) ? 0 : 1;
-      unsigned int above = d[i - 1][j] + 1;
-      unsigned int left = d[i][j - 1] + 1;
-      unsigned int diag = d[i - 1][j - 1] + cost;
-
-      d[i][j] = above < left ? above : left < diag ? left : diag;
+      d[i][j] = std::min({above, left, diag});
     }
   }
 

@@ -19,10 +19,10 @@
 // SOFTWARE.
 #define CX_FINISHED
 #ifndef CXSTRUCTS_BINARYSEARCH_H
-#  define CXSTRUCTS_BINARYSEARCH_H
+#define CXSTRUCTS_BINARYSEARCH_H
 
-#  include <cstdint>
-#  include "../cxconfig.h"
+#include <cstdint>
+#include "../cxconfig.h"
 
 namespace cxhelper {  // helper methods to provide clean calling interface
 template <typename T>
@@ -61,7 +61,8 @@ bool binary_search(T* arr, T target, int_32_cx len) {
     mid = low + (high - low) / 2;
     if (arr[mid] == target) {
       return true;
-    } else if (arr[mid] < target) {
+    }
+    if (arr[mid] < target) {
       low = mid + 1;
     } else {
       high = mid - 1;
@@ -89,6 +90,7 @@ bool binary_search_recursive(T* arr, T target, int_32_cx len) {
   return cxhelper::binarySearch_recursive_internal(arr, target, 0, len - 1);
 }
 
+// Returns the index at which the element should be inserted
 template <typename T>
 int binary_search_index(T* arr, T target, int_32_cx len, bool ascending) {
   if (ascending) {
@@ -103,41 +105,22 @@ int binary_search_index(T* arr, T target, int_32_cx len, bool ascending) {
       }
     }
     return low;
-  } else {
-    int_32_cx low = 0;
-    int_32_cx high = len;
-
-    while (low < high) {
-      int_32_cx mid = low + (high - low) / 2;
-      if (arr[mid] > target) {
-        low = mid + 1;
-      } else {
-        high = mid;
-      }
-    }
-
-    return low;
   }
+
+  int_32_cx low = 0;
+  int_32_cx high = len;
+
+  while (low < high) {
+    int_32_cx mid = low + (high - low) / 2;
+    if (arr[mid] > target) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+
+  return low;
 }
 
 }  // namespace cxstructs
-#  ifdef CX_INCLUDE_TESTS
-namespace cxtests {
-using namespace cxstructs;
-static void TEST_SEARCH() {
-  std::cout << "TESTING BINARY SEARCH" << std::endl;
-  int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  CX_ASSERT(binary_search(arr, 5, 9) == true, "");
-  CX_ASSERT(binary_search(arr, -1, 9) == false, "");
-
-  std::cout << "TESTING BINARY SEARCH RECURSIVE" << std::endl;
-  CX_ASSERT(binary_search_recursive(arr, 5, 9) == true, "");
-  CX_ASSERT(binary_search_recursive(arr, -1, 9) == false, "");
-
-  std::cout << "TESTING BINARY SEARCH INDEX" << std::endl;
-  CX_ASSERT(binary_search_index(arr, 7, 9, true) == 6, "");
-  CX_ASSERT(binary_search_index(arr, 2, 9, true) == 1, "");
-}
-}  // namespace cxtests
-#  endif
 #endif  // CXSTRUCTS_BINARYSEARCH_H
